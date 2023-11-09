@@ -10,13 +10,8 @@ import "../System.sol";
 contract ValidatorSet is IValidatorSet, ERC20SnapshotUpgradeable, System {
     using WithdrawalQueueLib for WithdrawalQueue;
 
-    bytes32 private constant _STAKE_SIG = keccak256("STAKE");
-    bytes32 private constant _UNSTAKE_SIG = keccak256("UNSTAKE");
     uint256 public constant WITHDRAWAL_WAIT_PERIOD = 1;
 
-    IStateSender private _stateSender;
-    address private _stateReceiver;
-    address private _rootChainManager;
     // slither-disable-next-line naming-convention
     uint256 public EPOCH_SIZE;
 
@@ -26,21 +21,8 @@ contract ValidatorSet is IValidatorSet, ERC20SnapshotUpgradeable, System {
     uint256[] public epochEndBlocks;
     mapping(address => WithdrawalQueue) private _withdrawals;
 
-    function initialize(
-        address newStateSender,
-        address newStateReceiver,
-        address newRootChainManager,
-        uint256 newEpochSize,
-        ValidatorInit[] memory initialValidators
-    ) public initializer {
-        require(
-            newStateSender != address(0) && newStateReceiver != address(0) && newRootChainManager != address(0),
-            "INVALID_INPUT"
-        );
+    function initialize(uint256 newEpochSize, ValidatorInit[] memory initialValidators) public initializer {
         __ERC20_init("ValidatorSet", "VSET");
-        _stateSender = IStateSender(newStateSender);
-        _stateReceiver = newStateReceiver;
-        _rootChainManager = newRootChainManager;
         EPOCH_SIZE = newEpochSize;
         for (uint256 i = 0; i < initialValidators.length; ) {
             _stake(initialValidators[i].addr, initialValidators[i].stake);
@@ -66,14 +48,6 @@ contract ValidatorSet is IValidatorSet, ERC20SnapshotUpgradeable, System {
         emit NewEpoch(id, epoch.startBlock, epoch.endBlock, epoch.epochRoot);
     }
 
-    function onStateReceive(uint256 /*counter*/, address sender, bytes calldata data) external override {
-        require(msg.sender == _stateReceiver && sender == _rootChainManager, "INVALID_SENDER");
-        if (bytes32(data[:32]) == _STAKE_SIG) {
-            (address validator, uint256 amount) = abi.decode(data[32:], (address, uint256));
-            _stake(validator, amount);
-        }
-    }
-
     /**
      * @inheritdoc IValidatorSet
      */
@@ -90,7 +64,6 @@ contract ValidatorSet is IValidatorSet, ERC20SnapshotUpgradeable, System {
         (uint256 amount, uint256 newHead) = queue.withdrawable(currentEpochId);
         queue.head = newHead;
         emit Withdrawal(msg.sender, amount);
-        _stateSender.syncState(_rootChainManager, abi.encode(_UNSTAKE_SIG, msg.sender, amount));
     }
 
     /**

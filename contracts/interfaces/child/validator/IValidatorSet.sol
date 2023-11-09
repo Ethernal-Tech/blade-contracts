@@ -20,7 +20,7 @@ struct Epoch {
     @notice Manages voting power for validators and commits epochs for child chains
     @dev Voting power is synced between the stake manager on root on stake and unstake actions
  */
-interface IValidatorSet is IStateReceiver {
+interface IValidatorSet {
     event NewEpoch(uint256 indexed id, uint256 indexed startBlock, uint256 indexed endBlock, bytes32 epochRoot);
     event WithdrawalRegistered(address indexed account, uint256 amount);
     event Withdrawal(address indexed account, uint256 amount);

@@ -10,13 +10,13 @@ Manages stakes for all child chains
 
 ## Methods
 
-### idFor
+### getValidator
 
 ```solidity
-function idFor(address manager) external view returns (uint256 id)
+function getValidator(address validator_) external view returns (struct Validator)
 ```
 
-returns the child id for a child chain manager contract
+
 
 
 
@@ -24,21 +24,21 @@ returns the child id for a child chain manager contract
 
 | Name | Type | Description |
 |---|---|---|
-| manager | address | undefined |
+| validator_ | address | undefined |
 
 #### Returns
 
 | Name | Type | Description |
 |---|---|---|
-| id | uint256 | undefined |
+| _0 | Validator | undefined |
 
-### managerOf
+### register
 
 ```solidity
-function managerOf(uint256 id) external view returns (contract ISupernetManager manager)
+function register(uint256[2] signature, uint256[4] pubkey) external nonpayable
 ```
 
-returns the child chain manager contract for a child chain
+
 
 
 
@@ -46,57 +46,13 @@ returns the child chain manager contract for a child chain
 
 | Name | Type | Description |
 |---|---|---|
-| id | uint256 | undefined |
+| signature | uint256[2] | undefined |
+| pubkey | uint256[4] | undefined |
 
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| manager | contract ISupernetManager | undefined |
-
-### registerChildChain
+### stake
 
 ```solidity
-function registerChildChain(address manager) external nonpayable returns (uint256 id)
-```
-
-registers a new child chain with the staking contract
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| manager | address | undefined |
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| id | uint256 | of the child chain |
-
-### releaseStakeOf
-
-```solidity
-function releaseStakeOf(address validator, uint256 amount) external nonpayable
-```
-
-called by child manager contract to release a validator&#39;s stake
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| validator | address | undefined |
-| amount | uint256 | undefined |
-
-### stakeFor
-
-```solidity
-function stakeFor(uint256 id, uint256 amount) external nonpayable
+function stake(uint256 amount) external nonpayable
 ```
 
 called by a validator to stake for a child chain
@@ -107,13 +63,12 @@ called by a validator to stake for a child chain
 
 | Name | Type | Description |
 |---|---|---|
-| id | uint256 | undefined |
 | amount | uint256 | undefined |
 
 ### stakeOf
 
 ```solidity
-function stakeOf(address validator, uint256 id) external view returns (uint256 amount)
+function stakeOf(address validator) external view returns (uint256 amount)
 ```
 
 returns the amount staked by a validator for a child chain
@@ -125,7 +80,6 @@ returns the amount staked by a validator for a child chain
 | Name | Type | Description |
 |---|---|---|
 | validator | address | undefined |
-| id | uint256 | undefined |
 
 #### Returns
 
@@ -150,13 +104,13 @@ returns the total amount staked for all child chains
 |---|---|---|
 | amount | uint256 | undefined |
 
-### totalStakeOf
+### whitelistValidators
 
 ```solidity
-function totalStakeOf(address validator) external view returns (uint256 amount)
+function whitelistValidators(address[] validators_) external nonpayable
 ```
 
-returns the total amount staked of a validator for all child chains
+
 
 
 
@@ -164,35 +118,7 @@ returns the total amount staked of a validator for all child chains
 
 | Name | Type | Description |
 |---|---|---|
-| validator | address | undefined |
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| amount | uint256 | undefined |
-
-### totalStakeOfChild
-
-```solidity
-function totalStakeOfChild(uint256 id) external view returns (uint256 amount)
-```
-
-returns the total amount staked for a child chain
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| id | uint256 | undefined |
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| amount | uint256 | undefined |
+| validators_ | address[] | undefined |
 
 ### withdrawStake
 
@@ -237,6 +163,22 @@ returns the amount of stake a validator can withdraw
 
 ## Events
 
+### AddedToWhitelist
+
+```solidity
+event AddedToWhitelist(address indexed validator)
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| validator `indexed` | address | undefined |
+
 ### ChildManagerRegistered
 
 ```solidity
@@ -254,10 +196,10 @@ event ChildManagerRegistered(uint256 indexed id, address indexed manager)
 | id `indexed` | uint256 | undefined |
 | manager `indexed` | address | undefined |
 
-### StakeAdded
+### RemovedFromWhitelist
 
 ```solidity
-event StakeAdded(uint256 indexed id, address indexed validator, uint256 amount)
+event RemovedFromWhitelist(address indexed validator)
 ```
 
 
@@ -268,14 +210,29 @@ event StakeAdded(uint256 indexed id, address indexed validator, uint256 amount)
 
 | Name | Type | Description |
 |---|---|---|
-| id `indexed` | uint256 | undefined |
+| validator `indexed` | address | undefined |
+
+### StakeAdded
+
+```solidity
+event StakeAdded(address indexed validator, uint256 amount)
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
 | validator `indexed` | address | undefined |
 | amount  | uint256 | undefined |
 
 ### StakeRemoved
 
 ```solidity
-event StakeRemoved(uint256 indexed id, address indexed validator, uint256 amount)
+event StakeRemoved(address indexed validator, uint256 amount)
 ```
 
 
@@ -286,7 +243,6 @@ event StakeRemoved(uint256 indexed id, address indexed validator, uint256 amount
 
 | Name | Type | Description |
 |---|---|---|
-| id `indexed` | uint256 | undefined |
 | validator `indexed` | address | undefined |
 | amount  | uint256 | undefined |
 
@@ -308,5 +264,73 @@ event StakeWithdrawn(address indexed validator, address indexed recipient, uint2
 | recipient `indexed` | address | undefined |
 | amount  | uint256 | undefined |
 
+### ValidatorDeactivated
+
+```solidity
+event ValidatorDeactivated(address indexed validator)
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| validator `indexed` | address | undefined |
+
+### ValidatorRegistered
+
+```solidity
+event ValidatorRegistered(address indexed validator, uint256[4] blsKey)
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| validator `indexed` | address | undefined |
+| blsKey  | uint256[4] | undefined |
+
+
+
+## Errors
+
+### InvalidSignature
+
+```solidity
+error InvalidSignature(address validator)
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| validator | address | undefined |
+
+### Unauthorized
+
+```solidity
+error Unauthorized(string message)
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| message | string | undefined |
 
 

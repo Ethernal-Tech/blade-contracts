@@ -434,7 +434,7 @@ function increaseAllowance(address spender, uint256 addedValue) external nonpaya
 ### initialize
 
 ```solidity
-function initialize(address newStateSender, address newStateReceiver, address newRootChainManager, uint256 newEpochSize, ValidatorInit[] initialValidators) external nonpayable
+function initialize(uint256 newEpochSize, ValidatorInit[] initialValidators) external nonpayable
 ```
 
 
@@ -445,9 +445,6 @@ function initialize(address newStateSender, address newStateReceiver, address ne
 
 | Name | Type | Description |
 |---|---|---|
-| newStateSender | address | undefined |
-| newStateReceiver | address | undefined |
-| newRootChainManager | address | undefined |
 | newEpochSize | uint256 | undefined |
 | initialValidators | ValidatorInit[] | undefined |
 
@@ -467,24 +464,6 @@ function name() external view returns (string)
 | Name | Type | Description |
 |---|---|---|
 | _0 | string | undefined |
-
-### onStateReceive
-
-```solidity
-function onStateReceive(uint256, address sender, bytes data) external nonpayable
-```
-
-
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | uint256 | undefined |
-| sender | address | undefined |
-| data | bytes | undefined |
 
 ### pendingWithdrawals
 
