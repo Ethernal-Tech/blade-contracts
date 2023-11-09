@@ -6,7 +6,6 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "../../interfaces/root/staking/IStakeManager.sol";
 import "../../interfaces/IStateSender.sol";
-import "./StakeManagerStakingData.sol";
 import "../../interfaces/common/IBLS.sol";
 
 contract StakeManager is IStakeManager, Initializable {
