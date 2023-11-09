@@ -1,0 +1,2681 @@
+diff --git a/contracts/child/staking/README.md b/contracts/child/staking/README.md
+new file mode 100644
+index 0000000..116e73a
+--- /dev/null
++++ b/contracts/child/staking/README.md
+@@ -0,0 +1,7 @@
++# Staking
++
++This subdirectory contains contracts for staking.
++
++## StakeManager
++
++Manages validator stake.
+diff --git a/contracts/root/staking/CustomSupernetManager.sol b/contracts/child/staking/StakeManager.sol
+similarity index 55%
+rename from contracts/root/staking/CustomSupernetManager.sol
+rename to contracts/child/staking/StakeManager.sol
+index 402fb56..093282f 100644
+--- a/contracts/root/staking/CustomSupernetManager.sol
++++ b/contracts/child/staking/StakeManager.sol
+@@ -1,16 +1,15 @@
+ // SPDX-License-Identifier: MIT
+ pragma solidity 0.8.19;
+ 
+-import "@openzeppelin/contracts-upgradeable/access/Ownable2StepUpgradeable.sol";
++import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+ import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+-import "./SupernetManager.sol";
+-import "../../interfaces/common/IBLS.sol";
++import "../../interfaces/root/staking/IStakeManager.sol";
+ import "../../interfaces/IStateSender.sol";
+-import "../../interfaces/root/staking/ICustomSupernetManager.sol";
+-import "../../interfaces/root/IExitHelper.sol";
++import "./StakeManagerStakingData.sol";
++import "../../interfaces/common/IBLS.sol";
+ 
+-contract CustomSupernetManager is ICustomSupernetManager, Ownable2StepUpgradeable, SupernetManager {
++contract StakeManager is IStakeManager, Initializable, StakeManagerStakingData {
+     using SafeERC20 for IERC20;
+     using GenesisLib for GenesisSet;
+ 
+@@ -18,14 +17,10 @@ contract CustomSupernetManager is ICustomSupernetManager, Ownable2StepUpgradeabl
+     bytes32 private constant _UNSTAKE_SIG = keccak256("UNSTAKE");
+ 
+     IBLS private _bls;
+-    IStateSender private _stateSender;
+-    IERC20 private _matic;
+-    address private _childValidatorSet;
+-    address private _exitHelper;
++    IERC20 private _stakingToken;
+ 
+     bytes32 public domain;
+ 
+-    GenesisSet private _genesis;
+     mapping(address => Validator) public validators;
+ 
+     modifier onlyValidator(address validator) {
+@@ -34,115 +29,110 @@ contract CustomSupernetManager is ICustomSupernetManager, Ownable2StepUpgradeabl
+     }
+ 
+     function initialize(
+-        address newStakeManager,
++        address newStakingToken,
+         address newBls,
+-        address newStateSender,
+-        address newMatic,
+-        address newChildValidatorSet,
+-        address newExitHelper,
+-        string memory newDomain
++        string memory newDomain,
++        StartValidator[] memory genesisValidators
+     ) public initializer {
+-        require(
+-            newStakeManager != address(0) &&
+-                newBls != address(0) &&
+-                newStateSender != address(0) &&
+-                newMatic != address(0) &&
+-                newChildValidatorSet != address(0) &&
+-                newExitHelper != address(0) &&
+-                bytes(newDomain).length != 0,
+-            "INVALID_INPUT"
+-        );
+-        __SupernetManager_init(newStakeManager);
++        _stakingToken = IERC20(newStakingToken);
+         _bls = IBLS(newBls);
+-        _stateSender = IStateSender(newStateSender);
+-        _matic = IERC20(newMatic);
+-        _childValidatorSet = newChildValidatorSet;
+-        _exitHelper = newExitHelper;
+         domain = keccak256(abi.encodePacked(newDomain));
+-        __Ownable2Step_init();
++        for (uint i = 0; i < genesisValidators.length; i++) {
++            validators[genesisValidators[i].validator] = Validator(
++                genesisValidators[i].blsKey,
++                genesisValidators[i].stake,
++                true,
++                true
++            );
++        }
+     }
+ 
+     /**
+-     * @inheritdoc ICustomSupernetManager
++     * @inheritdoc IStakeManager
+      */
+-    function whitelistValidators(address[] calldata validators_) external onlyOwner {
+-        uint256 length = validators_.length;
+-        for (uint256 i = 0; i < length; i++) {
+-            _addToWhitelist(validators_[i]);
+-        }
++    function stake(uint256 amount) external {
++        // slither-disable-next-line reentrancy-benign,reentrancy-events
++        _stakingToken.safeTransferFrom(msg.sender, address(this), amount);
++        // calling the library directly once fixes the coverage issue
++        // https://github.com/foundry-rs/foundry/issues/4854#issuecomment-1528897219
++        _addStake(msg.sender, amount);
++        // slither-disable-next-line reentrancy-events
++        emit StakeAdded(msg.sender, amount);
+     }
+ 
+     /**
+-     * @inheritdoc ICustomSupernetManager
++     * @inheritdoc IStakeManager
+      */
+-    function register(uint256[2] calldata signature, uint256[4] calldata pubkey) external {
+-        Validator storage validator = validators[msg.sender];
+-        if (!validator.isWhitelisted) revert Unauthorized("WHITELIST");
+-        _verifyValidatorRegistration(msg.sender, signature, pubkey);
+-        validator.blsKey = pubkey;
+-        validator.isActive = true;
+-        _removeFromWhitelist(msg.sender);
+-        emit ValidatorRegistered(msg.sender, pubkey);
++    function withdrawStake(address to, uint256 amount) external {
++        _withdrawStake(msg.sender, to, amount);
+     }
+ 
+     /**
+-     * @inheritdoc ICustomSupernetManager
++     * @inheritdoc IStakeManager
+      */
+-    function finalizeGenesis() external onlyOwner {
+-        // calling the library directly once fixes the coverage issue
+-        // https://github.com/foundry-rs/foundry/issues/4854#issuecomment-1528897219
+-        GenesisLib.finalize(_genesis);
+-        emit GenesisFinalized(_genesis.set().length);
++    function withdrawableStake(address validator) external view returns (uint256 amount) {
++        amount = _withdrawableStakeOf(validator);
++    }
++
++    /**
++     * @inheritdoc IStakeManager
++     */
++    function totalStake() external view returns (uint256 amount) {
++        amount = _totalStake;
+     }
+ 
+     /**
+-     * @inheritdoc ICustomSupernetManager
++     * @inheritdoc IStakeManager
+      */
+-    function enableStaking() external onlyOwner {
+-        _genesis.enableStaking();
+-        emit StakingEnabled();
++    function stakeOf(address validator) external view returns (uint256 amount) {
++        amount = _stakeOf(validator);
+     }
+ 
+     /**
+-     * @inheritdoc ICustomSupernetManager
++     * @inheritdoc IStakeManager
+      */
+-    function onL2StateReceive(uint256 /*id*/, address sender, bytes calldata data) external {
+-        if (msg.sender != _exitHelper || sender != _childValidatorSet) revert Unauthorized("_exitHelper");
+-        if (bytes32(data[:32]) == _UNSTAKE_SIG) {
+-            (address validator, uint256 amount) = abi.decode(data[32:], (address, uint256));
+-            _unstake(validator, amount);
++    function whitelistValidators(address[] calldata validators_) external {
++        uint256 length = validators_.length;
++        for (uint256 i = 0; i < length; i++) {
++            _addToWhitelist(validators_[i]);
+         }
+     }
+ 
+     /**
+-     * @inheritdoc ICustomSupernetManager
++     * @inheritdoc IStakeManager
+      */
+-    function genesisSet() external view returns (GenesisValidator[] memory) {
+-        return _genesis.set();
++    function register(uint256[2] calldata signature, uint256[4] calldata pubkey) external {
++        Validator storage validator = validators[msg.sender];
++        if (!validator.isWhitelisted) revert Unauthorized("WHITELIST");
++        _verifyValidatorRegistration(msg.sender, signature, pubkey);
++        validator.blsKey = pubkey;
++        validator.isActive = true;
++        _removeFromWhitelist(msg.sender);
++        emit ValidatorRegistered(msg.sender, pubkey);
+     }
+ 
+     /**
+-     *
+-     * @inheritdoc ICustomSupernetManager
++     * @inheritdoc IStakeManager
+      */
+     function getValidator(address validator_) external view returns (Validator memory) {
+         return validators[validator_];
+     }
+ 
+-    function _onStake(address validator, uint256 amount) internal override onlyValidator(validator) {
+-        if (_genesis.gatheringGenesisValidators()) {
+-            _genesis.insert(validator, amount);
+-        } else if (_genesis.completed()) {
+-            _stateSender.syncState(_childValidatorSet, abi.encode(_STAKE_SIG, validator, amount));
+-        } else {
+-            revert Unauthorized("Wait for genesis");
+-        }
++    function _withdrawStake(address validator, address to, uint256 amount) private {
++        _withdrawStake(validator, amount);
++        // slither-disable-next-line reentrancy-events
++        _stakingToken.safeTransfer(to, amount);
++        emit StakeWithdrawn(validator, to, amount);
+     }
+ 
+-    function _unstake(address validator, uint256 amount) internal {
+-        // slither-disable-next-line reentrancy-benign,reentrancy-events
+-        _stakeManager.releaseStakeOf(validator, amount);
+-        _removeIfValidatorUnstaked(validator);
++    function _addToWhitelist(address validator) internal {
++        validators[validator].isWhitelisted = true;
++        emit AddedToWhitelist(validator);
++    }
++
++    function _removeFromWhitelist(address validator) internal {
++        validators[validator].isWhitelisted = false;
++        emit RemovedFromWhitelist(validator);
+     }
+ 
+     function _verifyValidatorRegistration(
+@@ -157,24 +147,26 @@ contract CustomSupernetManager is ICustomSupernetManager, Ownable2StepUpgradeabl
+         if (!callSuccess || !result) revert InvalidSignature(signer);
+     }
+ 
+-    /// @notice Message to sign for registration
+-    function _message(address signer) internal view returns (uint256[2] memory) {
+-        // slither-disable-next-line calls-loop
+-        return _bls.hashToPoint(domain, abi.encodePacked(signer, address(this), block.chainid));
++    function _unstake(address validator, uint256 amount) internal {
++        // slither-disable-next-line reentrancy-benign,reentrancy-events
++        releaseStakeOf(validator, amount);
++        _removeIfValidatorUnstaked(validator);
+     }
+ 
+-    function _addToWhitelist(address validator) internal {
+-        validators[validator].isWhitelisted = true;
+-        emit AddedToWhitelist(validator);
++    function releaseStakeOf(address validator, uint256 amount) internal {
++        _removeStake(validator, amount);
++        // slither-disable-next-line reentrancy-events
++        emit StakeRemoved(validator, amount);
+     }
+ 
+-    function _removeFromWhitelist(address validator) internal {
+-        validators[validator].isWhitelisted = false;
+-        emit RemovedFromWhitelist(validator);
++    /// @notice Message to sign for registration
++    function _message(address signer) internal view returns (uint256[2] memory) {
++        // slither-disable-next-line calls-loop
++        return _bls.hashToPoint(domain, abi.encodePacked(signer, address(this), block.chainid));
+     }
+ 
+     function _removeIfValidatorUnstaked(address validator) internal {
+-        if (_stakeManager.stakeOf(validator, id) == 0) {
++        if (_stakeOf(validator) == 0) {
+             validators[validator].isActive = false;
+             emit ValidatorDeactivated(validator);
+         }
+diff --git a/contracts/child/staking/StakeManagerStakingData.sol b/contracts/child/staking/StakeManagerStakingData.sol
+new file mode 100644
+index 0000000..a4497de
+--- /dev/null
++++ b/contracts/child/staking/StakeManagerStakingData.sol
+@@ -0,0 +1,43 @@
++// SPDX-License-Identifier: MIT
++pragma solidity 0.8.19;
++
++/**
++ * @title StakeManagerStakingData
++ * @notice Holds all staking related data.
++ * Note that this is contract is designed to be included in StakeManager. It is upgradeable.
++ */
++abstract contract StakeManagerStakingData {
++    // slither-disable-next-line naming-convention
++    uint256 internal _totalStake;
++    // validator => child => amount
++    mapping(address => uint256) private _stakes;
++    // validator address => withdrawable stake.
++    mapping(address => uint256) private _withdrawableStakes;
++
++    function _addStake(address validator, uint256 amount) internal {
++        _stakes[validator] += amount;
++        _totalStake += amount;
++    }
++
++    function _removeStake(address validator, uint256 amount) internal {
++        _stakes[validator] -= amount;
++        _totalStake -= amount;
++        _withdrawableStakes[validator] += amount;
++    }
++
++    function _withdrawStake(address validator, uint256 amount) internal {
++        _withdrawableStakes[validator] -= amount;
++    }
++
++    function _withdrawableStakeOf(address validator) internal view returns (uint256 amount) {
++        amount = _withdrawableStakes[validator];
++    }
++
++    function _stakeOf(address validator) internal view returns (uint256 amount) {
++        amount = _stakes[validator];
++    }
++
++    // Storage gap
++    // slither-disable-next-line unused-state,naming-convention
++    uint256[50] private __gap;
++}
+diff --git a/contracts/child/validator/ValidatorSet.sol b/contracts/child/validator/ValidatorSet.sol
+index 5b371bd..8f26f80 100644
+--- a/contracts/child/validator/ValidatorSet.sol
++++ b/contracts/child/validator/ValidatorSet.sol
+@@ -10,13 +10,8 @@ import "../System.sol";
+ contract ValidatorSet is IValidatorSet, ERC20SnapshotUpgradeable, System {
+     using WithdrawalQueueLib for WithdrawalQueue;
+ 
+-    bytes32 private constant _STAKE_SIG = keccak256("STAKE");
+-    bytes32 private constant _UNSTAKE_SIG = keccak256("UNSTAKE");
+     uint256 public constant WITHDRAWAL_WAIT_PERIOD = 1;
+ 
+-    IStateSender private _stateSender;
+-    address private _stateReceiver;
+-    address private _rootChainManager;
+     // slither-disable-next-line naming-convention
+     uint256 public EPOCH_SIZE;
+ 
+@@ -26,21 +21,8 @@ contract ValidatorSet is IValidatorSet, ERC20SnapshotUpgradeable, System {
+     uint256[] public epochEndBlocks;
+     mapping(address => WithdrawalQueue) private _withdrawals;
+ 
+-    function initialize(
+-        address newStateSender,
+-        address newStateReceiver,
+-        address newRootChainManager,
+-        uint256 newEpochSize,
+-        ValidatorInit[] memory initialValidators
+-    ) public initializer {
+-        require(
+-            newStateSender != address(0) && newStateReceiver != address(0) && newRootChainManager != address(0),
+-            "INVALID_INPUT"
+-        );
++    function initialize(uint256 newEpochSize, ValidatorInit[] memory initialValidators) public initializer {
+         __ERC20_init("ValidatorSet", "VSET");
+-        _stateSender = IStateSender(newStateSender);
+-        _stateReceiver = newStateReceiver;
+-        _rootChainManager = newRootChainManager;
+         EPOCH_SIZE = newEpochSize;
+         for (uint256 i = 0; i < initialValidators.length; ) {
+             _stake(initialValidators[i].addr, initialValidators[i].stake);
+@@ -66,14 +48,6 @@ contract ValidatorSet is IValidatorSet, ERC20SnapshotUpgradeable, System {
+         emit NewEpoch(id, epoch.startBlock, epoch.endBlock, epoch.epochRoot);
+     }
+ 
+-    function onStateReceive(uint256 /*counter*/, address sender, bytes calldata data) external override {
+-        require(msg.sender == _stateReceiver && sender == _rootChainManager, "INVALID_SENDER");
+-        if (bytes32(data[:32]) == _STAKE_SIG) {
+-            (address validator, uint256 amount) = abi.decode(data[32:], (address, uint256));
+-            _stake(validator, amount);
+-        }
+-    }
+-
+     /**
+      * @inheritdoc IValidatorSet
+      */
+@@ -90,7 +64,6 @@ contract ValidatorSet is IValidatorSet, ERC20SnapshotUpgradeable, System {
+         (uint256 amount, uint256 newHead) = queue.withdrawable(currentEpochId);
+         queue.head = newHead;
+         emit Withdrawal(msg.sender, amount);
+-        _stateSender.syncState(_rootChainManager, abi.encode(_UNSTAKE_SIG, msg.sender, amount));
+     }
+ 
+     /**
+diff --git a/contracts/interfaces/child/validator/IValidatorSet.sol b/contracts/interfaces/child/validator/IValidatorSet.sol
+index 135210b..821b33a 100644
+--- a/contracts/interfaces/child/validator/IValidatorSet.sol
++++ b/contracts/interfaces/child/validator/IValidatorSet.sol
+@@ -20,7 +20,7 @@ struct Epoch {
+     @notice Manages voting power for validators and commits epochs for child chains
+     @dev Voting power is synced between the stake manager on root on stake and unstake actions
+  */
+-interface IValidatorSet is IStateReceiver {
++interface IValidatorSet {
+     event NewEpoch(uint256 indexed id, uint256 indexed startBlock, uint256 indexed endBlock, bytes32 epochRoot);
+     event WithdrawalRegistered(address indexed account, uint256 amount);
+     event Withdrawal(address indexed account, uint256 amount);
+diff --git a/contracts/interfaces/root/staking/ICustomSupernetManager.sol b/contracts/interfaces/root/staking/ICustomSupernetManager.sol
+deleted file mode 100644
+index 4b0e35b..0000000
+--- a/contracts/interfaces/root/staking/ICustomSupernetManager.sol
++++ /dev/null
+@@ -1,54 +0,0 @@
+-// SPDX-License-Identifier: MIT
+-pragma solidity 0.8.19;
+-
+-import "../../../lib/GenesisLib.sol";
+-
+-struct Validator {
+-    uint256[4] blsKey;
+-    uint256 stake;
+-    bool isWhitelisted;
+-    bool isActive;
+-}
+-
+-/**
+-    @title ICustomSupernetManager
+-    @author Polygon Technology (@gretzke)
+-    @notice Manages validator access and syncs voting power between the stake manager and validator set on the child chain
+-    @dev Implements the base SupernetManager contract
+- */
+-interface ICustomSupernetManager {
+-    event AddedToWhitelist(address indexed validator);
+-    event RemovedFromWhitelist(address indexed validator);
+-    event ValidatorRegistered(address indexed validator, uint256[4] blsKey);
+-    event ValidatorDeactivated(address indexed validator);
+-    event GenesisFinalized(uint256 amountValidators);
+-    event StakingEnabled();
+-
+-    error Unauthorized(string message);
+-    error InvalidSignature(address validator);
+-
+-    /// @notice Allows to whitelist validators that are allowed to stake
+-    /// @dev only callable by owner
+-    function whitelistValidators(address[] calldata validators_) external;
+-
+-    /// @notice registers the public key of a validator
+-    function register(uint256[2] calldata signature, uint256[4] calldata pubkey) external;
+-
+-    /// @notice finalizes initial genesis validator set
+-    /// @dev only callable by owner
+-    function finalizeGenesis() external;
+-
+-    /// @notice enables staking after successful initialisation of the child chain
+-    /// @dev only callable by owner
+-    function enableStaking() external;
+-
+-    /// @notice called by the exit helpers to either release the stake of a validator or slash it
+-    /// @dev can only be synced from child after genesis
+-    function onL2StateReceive(uint256 /*id*/, address sender, bytes calldata data) external;
+-
+-    /// @notice returns the genesis validator set with their balances
+-    function genesisSet() external view returns (GenesisValidator[] memory);
+-
+-    /// @notice returns validator instance based on provided address
+-    function getValidator(address validator_) external view returns (Validator memory);
+-}
+diff --git a/contracts/interfaces/root/staking/IStakeManager.sol b/contracts/interfaces/root/staking/IStakeManager.sol
+index 69e7b18..16fc8b1 100644
+--- a/contracts/interfaces/root/staking/IStakeManager.sol
++++ b/contracts/interfaces/root/staking/IStakeManager.sol
+@@ -1,7 +1,20 @@
+ // SPDX-License-Identifier: MIT
+ pragma solidity 0.8.19;
+ 
+-import "../../../interfaces/root/staking/ISupernetManager.sol";
++import "../../../lib/GenesisLib.sol";
++
++struct Validator {
++    uint256[4] blsKey;
++    uint256 stake;
++    bool isWhitelisted;
++    bool isActive;
++}
++
++struct StartValidator {
++    address validator;
++    uint256 stake;
++    uint256[4] blsKey;
++}
+ 
+ /**
+     @title IStakeManager
+@@ -10,19 +23,19 @@ import "../../../interfaces/root/staking/ISupernetManager.sol";
+  */
+ interface IStakeManager {
+     event ChildManagerRegistered(uint256 indexed id, address indexed manager);
+-    event StakeAdded(uint256 indexed id, address indexed validator, uint256 amount);
+-    event StakeRemoved(uint256 indexed id, address indexed validator, uint256 amount);
++    event StakeAdded(address indexed validator, uint256 amount);
++    event StakeRemoved(address indexed validator, uint256 amount);
+     event StakeWithdrawn(address indexed validator, address indexed recipient, uint256 amount);
++    event AddedToWhitelist(address indexed validator);
++    event RemovedFromWhitelist(address indexed validator);
++    event ValidatorRegistered(address indexed validator, uint256[4] blsKey);
++    event ValidatorDeactivated(address indexed validator);
+ 
+-    /// @notice registers a new child chain with the staking contract
+-    /// @return id of the child chain
+-    function registerChildChain(address manager) external returns (uint256 id);
++    error Unauthorized(string message);
++    error InvalidSignature(address validator);
+ 
+     /// @notice called by a validator to stake for a child chain
+-    function stakeFor(uint256 id, uint256 amount) external;
+-
+-    /// @notice called by child manager contract to release a validator's stake
+-    function releaseStakeOf(address validator, uint256 amount) external;
++    function stake(uint256 amount) external;
+ 
+     /// @notice allows a validator to withdraw released stake
+     function withdrawStake(address to, uint256 amount) external;
+@@ -33,18 +46,12 @@ interface IStakeManager {
+     /// @notice returns the total amount staked for all child chains
+     function totalStake() external view returns (uint256 amount);
+ 
+-    /// @notice returns the total amount staked for a child chain
+-    function totalStakeOfChild(uint256 id) external view returns (uint256 amount);
+-
+-    /// @notice returns the total amount staked of a validator for all child chains
+-    function totalStakeOf(address validator) external view returns (uint256 amount);
+-
+     /// @notice returns the amount staked by a validator for a child chain
+-    function stakeOf(address validator, uint256 id) external view returns (uint256 amount);
++    function stakeOf(address validator) external view returns (uint256 amount);
++
++    function whitelistValidators(address[] calldata validators_) external;
+ 
+-    /// @notice returns the child chain manager contract for a child chain
+-    function managerOf(uint256 id) external view returns (ISupernetManager manager);
++    function register(uint256[2] calldata signature, uint256[4] calldata pubkey) external;
+ 
+-    /// @notice returns the child id for a child chain manager contract
+-    function idFor(address manager) external view returns (uint256 id);
++    function getValidator(address validator_) external view returns (Validator memory);
+ }
+diff --git a/contracts/interfaces/root/staking/ISupernetManager.sol b/contracts/interfaces/root/staking/ISupernetManager.sol
+deleted file mode 100644
+index 716977c..0000000
+--- a/contracts/interfaces/root/staking/ISupernetManager.sol
++++ /dev/null
+@@ -1,16 +0,0 @@
+-// SPDX-License-Identifier: MIT
+-pragma solidity 0.8.19;
+-
+-/**
+-    @title ISupernetManager
+-    @author Polygon Technology (@gretzke)
+-    @notice Abstract contract for managing supernets
+-    @dev Should be implemented with custom desired functionality
+- */
+-interface ISupernetManager {
+-    /// @notice called when a new child chain is registered
+-    function onInit(uint256 id) external;
+-
+-    /// @notice called when a validator stakes
+-    function onStake(address validator, uint256 amount) external;
+-}
+diff --git a/contracts/mocks/MockSupernetManager.sol b/contracts/mocks/MockSupernetManager.sol
+deleted file mode 100644
+index 576c48b..0000000
+--- a/contracts/mocks/MockSupernetManager.sol
++++ /dev/null
+@@ -1,12 +0,0 @@
+-// SPDX-License-Identifier: MIT
+-pragma solidity 0.8.19;
+-
+-import "../root/staking/SupernetManager.sol";
+-
+-contract MockSupernetManager is SupernetManager {
+-    function initialize(address stakeManager) public initializer {
+-        __SupernetManager_init(stakeManager);
+-    }
+-
+-    function _onStake(address validator, uint256 amount) internal override {}
+-}
+diff --git a/contracts/root/staking/README.md b/contracts/root/staking/README.md
+deleted file mode 100644
+index a111bfd..0000000
+--- a/contracts/root/staking/README.md
++++ /dev/null
+@@ -1,17 +0,0 @@
+-# Staking
+-
+-##### Contracts for the SupernetManager
+-
+-This subdirectory contains contracts making up the Supernet Manager, which serves as a hub for validators to stake on all Supernets tied to a root chain.
+-
+-## CustomSupernetManager
+-
+-An implementation of the abstract `SupernetManager` contract.
+-
+-## StakeManager
+-
+-Manages validator stake across all Supernets.
+-
+-## SupernetManager
+-
+-Abstract contract meant to be customized as a Supernet Manager.
+diff --git a/contracts/root/staking/StakeManager.sol b/contracts/root/staking/StakeManager.sol
+deleted file mode 100644
+index 3c97612..0000000
+--- a/contracts/root/staking/StakeManager.sol
++++ /dev/null
+@@ -1,122 +0,0 @@
+-// SPDX-License-Identifier: MIT
+-pragma solidity 0.8.19;
+-
+-import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+-import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+-import "../../interfaces/root/staking/IStakeManager.sol";
+-import "./StakeManagerChildData.sol";
+-import "./StakeManagerStakingData.sol";
+-
+-contract StakeManager is IStakeManager, Initializable, StakeManagerChildData, StakeManagerStakingData {
+-    using SafeERC20 for IERC20;
+-
+-    IERC20 private _stakingToken;
+-
+-    function initialize(address newStakingToken) public initializer {
+-        _stakingToken = IERC20(newStakingToken);
+-    }
+-
+-    /**
+-     * @inheritdoc IStakeManager
+-     */
+-    function registerChildChain(address manager) external returns (uint256 id) {
+-        require(_ids[manager] == 0, "StakeManager: ID_ALREADY_SET");
+-        id = _registerChild(manager);
+-        ISupernetManager(manager).onInit(id);
+-        // slither-disable-next-line reentrancy-events
+-        emit ChildManagerRegistered(id, manager);
+-    }
+-
+-    /**
+-     * @inheritdoc IStakeManager
+-     */
+-    function stakeFor(uint256 id, uint256 amount) external {
+-        require(id != 0 && id <= _counter, "StakeManager: INVALID_ID");
+-        // slither-disable-next-line reentrancy-benign,reentrancy-events
+-        _stakingToken.safeTransferFrom(msg.sender, address(this), amount);
+-        // calling the library directly once fixes the coverage issue
+-        // https://github.com/foundry-rs/foundry/issues/4854#issuecomment-1528897219
+-        _addStake(msg.sender, id, amount);
+-        ISupernetManager manager = managerOf(id);
+-        manager.onStake(msg.sender, amount);
+-        // slither-disable-next-line reentrancy-events
+-        emit StakeAdded(id, msg.sender, amount);
+-    }
+-
+-    /**
+-     * @inheritdoc IStakeManager
+-     */
+-    function releaseStakeOf(address validator, uint256 amount) external {
+-        uint256 id = idFor(msg.sender);
+-        _removeStake(validator, id, amount);
+-        // slither-disable-next-line reentrancy-events
+-        emit StakeRemoved(id, validator, amount);
+-    }
+-
+-    /**
+-     * @inheritdoc IStakeManager
+-     */
+-    function withdrawStake(address to, uint256 amount) external {
+-        _withdrawStake(msg.sender, to, amount);
+-    }
+-
+-    /**
+-     * @inheritdoc IStakeManager
+-     */
+-    function withdrawableStake(address validator) external view returns (uint256 amount) {
+-        amount = _withdrawableStakeOf(validator);
+-    }
+-
+-    /**
+-     * @inheritdoc IStakeManager
+-     */
+-    function totalStake() external view returns (uint256 amount) {
+-        amount = _totalStake;
+-    }
+-
+-    /**
+-     * @inheritdoc IStakeManager
+-     */
+-    function totalStakeOfChild(uint256 id) external view returns (uint256 amount) {
+-        amount = _totalStakeOfChild(id);
+-    }
+-
+-    /**
+-     * @inheritdoc IStakeManager
+-     */
+-    function totalStakeOf(address validator) external view returns (uint256 amount) {
+-        amount = _totalStakeOf(validator);
+-    }
+-
+-    /**
+-     * @inheritdoc IStakeManager
+-     */
+-    function stakeOf(address validator, uint256 id) public view returns (uint256 amount) {
+-        amount = _stakeOf(validator, id);
+-    }
+-
+-    /**
+-     * @inheritdoc IStakeManager
+-     */
+-    function managerOf(uint256 id) public view returns (ISupernetManager manager) {
+-        manager = ISupernetManager(_managerOf(id));
+-    }
+-
+-    /**
+-     * @inheritdoc IStakeManager
+-     */
+-    function idFor(address manager) public view returns (uint256 id) {
+-        id = _idFor(manager);
+-    }
+-
+-    function _withdrawStake(address validator, address to, uint256 amount) private {
+-        _withdrawStake(validator, amount);
+-        // slither-disable-next-line reentrancy-events
+-        _stakingToken.safeTransfer(to, amount);
+-        emit StakeWithdrawn(validator, to, amount);
+-    }
+-
+-    // slither-disable-next-line unused-state,naming-convention
+-    uint256[50] private __gap;
+-}
+diff --git a/contracts/root/staking/StakeManagerChildData.sol b/contracts/root/staking/StakeManagerChildData.sol
+deleted file mode 100644
+index 2f3d9d2..0000000
+--- a/contracts/root/staking/StakeManagerChildData.sol
++++ /dev/null
+@@ -1,56 +0,0 @@
+-// SPDX-License-Identifier: MIT
+-pragma solidity 0.8.19;
+-
+-/**
+- * @title StakeManagerChildData
+- * @notice Holds data to allow look-up between child chain manager contract address and child chain id.
+- * Note that this is contract is designed to be included in StakeManager. It is upgradeable.
+- */
+-abstract contract StakeManagerChildData {
+-    // Highest child chain id allocated thus far. Child chain id 0x00 is an invalid id.
+-    // slither-disable-next-line naming-convention
+-    uint256 internal _counter;
+-    // child chain id to child chain manager contract address.
+-    mapping(uint256 => address) private _managers;
+-    // child chain manager contract address to child chain id.
+-    // slither-disable-next-line naming-convention
+-    mapping(address => uint256) internal _ids;
+-
+-    /**
+-     * @notice Register a child chain manager contract and allocate a child chain id.
+-     * @param manager Child chain manager contract address.
+-     * @return id Child chain id allocated for the child chain.
+-     */
+-    function _registerChild(address manager) internal returns (uint256 id) {
+-        require(manager != address(0), "StakeManagerChildData: INVALID_ADDRESS");
+-        unchecked {
+-            id = ++_counter;
+-        }
+-        _managers[id] = manager;
+-        _ids[manager] = id;
+-    }
+-
+-    /**
+-     * @notice Get the child chain manager contract that corresponds to a child chain id.
+-     * @param id Child chain id.
+-     * @return manager Child chain manager contract address.
+-     */
+-    function _managerOf(uint256 id) internal view returns (address manager) {
+-        manager = _managers[id];
+-        require(manager != address(0), "StakeManagerChildData: INVALID_ID");
+-    }
+-
+-    /**
+-     * @notice Get the child chain id that corresponds to a child chain manager contract.
+-     * @param manager Child chain manager contract address.
+-     * @return id Child chain id.
+-     */
+-    function _idFor(address manager) internal view returns (uint256 id) {
+-        id = _ids[manager];
+-        require(id != 0, "StakeManagerChildData: INVALID_MANAGER");
+-    }
+-
+-    // Storage gap
+-    // slither-disable-next-line unused-state,naming-convention
+-    uint256[50] private __gap;
+-}
+diff --git a/contracts/root/staking/StakeManagerStakingData.sol b/contracts/root/staking/StakeManagerStakingData.sol
+deleted file mode 100644
+index 9d1b904..0000000
+--- a/contracts/root/staking/StakeManagerStakingData.sol
++++ /dev/null
+@@ -1,59 +0,0 @@
+-// SPDX-License-Identifier: MIT
+-pragma solidity 0.8.19;
+-
+-/**
+- * @title StakeManagerStakingData
+- * @notice Holds all staking related data.
+- * Note that this is contract is designed to be included in StakeManager. It is upgradeable.
+- */
+-abstract contract StakeManagerStakingData {
+-    // slither-disable-next-line naming-convention
+-    uint256 internal _totalStake;
+-    // validator => child => amount
+-    mapping(address => mapping(uint256 => uint256)) private _stakes;
+-    // child chain id => total stake
+-    mapping(uint256 => uint256) private _totalStakePerChild;
+-    // validator address => stake across all child chains.
+-    mapping(address => uint256) private _totalStakes;
+-    // validator address => withdrawable stake.
+-    mapping(address => uint256) private _withdrawableStakes;
+-
+-    function _addStake(address validator, uint256 id, uint256 amount) internal {
+-        _stakes[validator][id] += amount;
+-        _totalStakePerChild[id] += amount;
+-        _totalStakes[validator] += amount;
+-        _totalStake += amount;
+-    }
+-
+-    function _removeStake(address validator, uint256 id, uint256 amount) internal {
+-        _stakes[validator][id] -= amount;
+-        _totalStakePerChild[id] -= amount;
+-        _totalStakes[validator] -= amount;
+-        _totalStake -= amount;
+-        _withdrawableStakes[validator] += amount;
+-    }
+-
+-    function _withdrawStake(address validator, uint256 amount) internal {
+-        _withdrawableStakes[validator] -= amount;
+-    }
+-
+-    function _withdrawableStakeOf(address validator) internal view returns (uint256 amount) {
+-        amount = _withdrawableStakes[validator];
+-    }
+-
+-    function _totalStakeOfChild(uint256 id) internal view returns (uint256 amount) {
+-        amount = _totalStakePerChild[id];
+-    }
+-
+-    function _stakeOf(address validator, uint256 id) internal view returns (uint256 amount) {
+-        amount = _stakes[validator][id];
+-    }
+-
+-    function _totalStakeOf(address validator) internal view returns (uint256 amount) {
+-        amount = _totalStakes[validator];
+-    }
+-
+-    // Storage gap
+-    // slither-disable-next-line unused-state,naming-convention
+-    uint256[50] private __gap;
+-}
+diff --git a/contracts/root/staking/SupernetManager.sol b/contracts/root/staking/SupernetManager.sol
+deleted file mode 100644
+index 052d4ac..0000000
+--- a/contracts/root/staking/SupernetManager.sol
++++ /dev/null
+@@ -1,37 +0,0 @@
+-// SPDX-License-Identifier: MIT
+-pragma solidity 0.8.19;
+-
+-import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+-import "../../interfaces/root/staking/IStakeManager.sol";
+-import "../../interfaces/root/staking/ISupernetManager.sol";
+-
+-abstract contract SupernetManager is ISupernetManager, Initializable {
+-    // slither-disable-next-line naming-convention
+-    IStakeManager internal _stakeManager;
+-    uint256 public id;
+-
+-    modifier onlyStakeManager() {
+-        require(msg.sender == address(_stakeManager), "SupernetManager: ONLY_STAKE_MANAGER");
+-        _;
+-    }
+-
+-    // slither-disable-next-line naming-convention
+-    function __SupernetManager_init(address newStakeManager) internal onlyInitializing {
+-        _stakeManager = IStakeManager(newStakeManager);
+-    }
+-
+-    function onInit(uint256 id_) external onlyStakeManager {
+-        require(id == 0, "SupernetManager: ID_ALREADY_SET");
+-        // slither-disable-next-line events-maths
+-        id = id_;
+-    }
+-
+-    function onStake(address validator, uint256 amount) external onlyStakeManager {
+-        _onStake(validator, amount);
+-    }
+-
+-    function _onStake(address validator, uint256 amount) internal virtual;
+-
+-    // slither-disable-next-line unused-state,naming-convention
+-    uint256[50] private __gap;
+-}
+diff --git a/docs/root/staking/StakeManager.md b/docs/child/staking/StakeManager.md
+similarity index 60%
+rename from docs/root/staking/StakeManager.md
+rename to docs/child/staking/StakeManager.md
+index 75556d6..8f314bb 100644
+--- a/docs/root/staking/StakeManager.md
++++ b/docs/child/staking/StakeManager.md
+@@ -10,32 +10,27 @@
+ 
+ ## Methods
+ 
+-### idFor
++### domain
+ 
+ ```solidity
+-function idFor(address manager) external view returns (uint256 id)
++function domain() external view returns (bytes32)
+ ```
+ 
+-returns the child id for a child chain manager contract
+ 
+ 
+ 
+-#### Parameters
+ 
+-| Name | Type | Description |
+-|---|---|---|
+-| manager | address | undefined |
+ 
+ #### Returns
+ 
+ | Name | Type | Description |
+ |---|---|---|
+-| id | uint256 | undefined |
++| _0 | bytes32 | undefined |
+ 
+-### initialize
++### getValidator
+ 
+ ```solidity
+-function initialize(address newStakingToken) external nonpayable
++function getValidator(address validator_) external view returns (struct Validator)
+ ```
+ 
+ 
+@@ -46,59 +41,40 @@ function initialize(address newStakingToken) external nonpayable
+ 
+ | Name | Type | Description |
+ |---|---|---|
+-| newStakingToken | address | undefined |
+-
+-### managerOf
+-
+-```solidity
+-function managerOf(uint256 id) external view returns (contract ISupernetManager manager)
+-```
+-
+-returns the child chain manager contract for a child chain
+-
+-
+-
+-#### Parameters
+-
+-| Name | Type | Description |
+-|---|---|---|
+-| id | uint256 | undefined |
++| validator_ | address | undefined |
+ 
+ #### Returns
+ 
+ | Name | Type | Description |
+ |---|---|---|
+-| manager | contract ISupernetManager | undefined |
++| _0 | Validator | undefined |
+ 
+-### registerChildChain
++### initialize
+ 
+ ```solidity
+-function registerChildChain(address manager) external nonpayable returns (uint256 id)
++function initialize(address newStakingToken, address newBls, string newDomain, StartValidator[] genesisValidators) external nonpayable
+ ```
+ 
+-registers a new child chain with the staking contract
+ 
+ 
+ 
+-#### Parameters
+-
+-| Name | Type | Description |
+-|---|---|---|
+-| manager | address | undefined |
+ 
+-#### Returns
++#### Parameters
+ 
+ | Name | Type | Description |
+ |---|---|---|
+-| id | uint256 | of the child chain |
++| newStakingToken | address | undefined |
++| newBls | address | undefined |
++| newDomain | string | undefined |
++| genesisValidators | StartValidator[] | undefined |
+ 
+-### releaseStakeOf
++### register
+ 
+ ```solidity
+-function releaseStakeOf(address validator, uint256 amount) external nonpayable
++function register(uint256[2] signature, uint256[4] pubkey) external nonpayable
+ ```
+ 
+-called by child manager contract to release a validator&#39;s stake
++
+ 
+ 
+ 
+@@ -106,13 +82,13 @@ called by child manager contract to release a validator&#39;s stake
+ 
+ | Name | Type | Description |
+ |---|---|---|
+-| validator | address | undefined |
+-| amount | uint256 | undefined |
++| signature | uint256[2] | undefined |
++| pubkey | uint256[4] | undefined |
+ 
+-### stakeFor
++### stake
+ 
+ ```solidity
+-function stakeFor(uint256 id, uint256 amount) external nonpayable
++function stake(uint256 amount) external nonpayable
+ ```
+ 
+ called by a validator to stake for a child chain
+@@ -123,13 +99,12 @@ called by a validator to stake for a child chain
+ 
+ | Name | Type | Description |
+ |---|---|---|
+-| id | uint256 | undefined |
+ | amount | uint256 | undefined |
+ 
+ ### stakeOf
+ 
+ ```solidity
+-function stakeOf(address validator, uint256 id) external view returns (uint256 amount)
++function stakeOf(address validator) external view returns (uint256 amount)
+ ```
+ 
+ returns the amount staked by a validator for a child chain
+@@ -141,7 +116,6 @@ returns the amount staked by a validator for a child chain
+ | Name | Type | Description |
+ |---|---|---|
+ | validator | address | undefined |
+-| id | uint256 | undefined |
+ 
+ #### Returns
+ 
+@@ -166,13 +140,13 @@ returns the total amount staked for all child chains
+ |---|---|---|
+ | amount | uint256 | undefined |
+ 
+-### totalStakeOf
++### validators
+ 
+ ```solidity
+-function totalStakeOf(address validator) external view returns (uint256 amount)
++function validators(address) external view returns (uint256 stake, bool isWhitelisted, bool isActive)
+ ```
+ 
+-returns the total amount staked of a validator for all child chains
++
+ 
+ 
+ 
+@@ -180,35 +154,31 @@ returns the total amount staked of a validator for all child chains
+ 
+ | Name | Type | Description |
+ |---|---|---|
+-| validator | address | undefined |
++| _0 | address | undefined |
+ 
+ #### Returns
+ 
+ | Name | Type | Description |
+ |---|---|---|
+-| amount | uint256 | undefined |
++| stake | uint256 | undefined |
++| isWhitelisted | bool | undefined |
++| isActive | bool | undefined |
+ 
+-### totalStakeOfChild
++### whitelistValidators
+ 
+ ```solidity
+-function totalStakeOfChild(uint256 id) external view returns (uint256 amount)
++function whitelistValidators(address[] validators_) external nonpayable
+ ```
+ 
+-returns the total amount staked for a child chain
+ 
+ 
+ 
+-#### Parameters
+ 
+-| Name | Type | Description |
+-|---|---|---|
+-| id | uint256 | undefined |
+-
+-#### Returns
++#### Parameters
+ 
+ | Name | Type | Description |
+ |---|---|---|
+-| amount | uint256 | undefined |
++| validators_ | address[] | undefined |
+ 
+ ### withdrawStake
+ 
+@@ -253,6 +223,22 @@ returns the amount of stake a validator can withdraw
+ 
+ ## Events
+ 
++### AddedToWhitelist
++
++```solidity
++event AddedToWhitelist(address indexed validator)
++```
++
++
++
++
++
++#### Parameters
++
++| Name | Type | Description |
++|---|---|---|
++| validator `indexed` | address | undefined |
++
+ ### ChildManagerRegistered
+ 
+ ```solidity
+@@ -286,10 +272,26 @@ event Initialized(uint8 version)
+ |---|---|---|
+ | version  | uint8 | undefined |
+ 
++### RemovedFromWhitelist
++
++```solidity
++event RemovedFromWhitelist(address indexed validator)
++```
++
++
++
++
++
++#### Parameters
++
++| Name | Type | Description |
++|---|---|---|
++| validator `indexed` | address | undefined |
++
+ ### StakeAdded
+ 
+ ```solidity
+-event StakeAdded(uint256 indexed id, address indexed validator, uint256 amount)
++event StakeAdded(address indexed validator, uint256 amount)
+ ```
+ 
+ 
+@@ -300,14 +302,13 @@ event StakeAdded(uint256 indexed id, address indexed validator, uint256 amount)
+ 
+ | Name | Type | Description |
+ |---|---|---|
+-| id `indexed` | uint256 | undefined |
+ | validator `indexed` | address | undefined |
+ | amount  | uint256 | undefined |
+ 
+ ### StakeRemoved
+ 
+ ```solidity
+-event StakeRemoved(uint256 indexed id, address indexed validator, uint256 amount)
++event StakeRemoved(address indexed validator, uint256 amount)
+ ```
+ 
+ 
+@@ -318,7 +319,6 @@ event StakeRemoved(uint256 indexed id, address indexed validator, uint256 amount
+ 
+ | Name | Type | Description |
+ |---|---|---|
+-| id `indexed` | uint256 | undefined |
+ | validator `indexed` | address | undefined |
+ | amount  | uint256 | undefined |
+ 
+@@ -340,5 +340,73 @@ event StakeWithdrawn(address indexed validator, address indexed recipient, uint2
+ | recipient `indexed` | address | undefined |
+ | amount  | uint256 | undefined |
+ 
++### ValidatorDeactivated
++
++```solidity
++event ValidatorDeactivated(address indexed validator)
++```
++
++
++
++
++
++#### Parameters
++
++| Name | Type | Description |
++|---|---|---|
++| validator `indexed` | address | undefined |
++
++### ValidatorRegistered
++
++```solidity
++event ValidatorRegistered(address indexed validator, uint256[4] blsKey)
++```
++
++
++
++
++
++#### Parameters
++
++| Name | Type | Description |
++|---|---|---|
++| validator `indexed` | address | undefined |
++| blsKey  | uint256[4] | undefined |
++
++
++
++## Errors
++
++### InvalidSignature
++
++```solidity
++error InvalidSignature(address validator)
++```
++
++
++
++
++
++#### Parameters
++
++| Name | Type | Description |
++|---|---|---|
++| validator | address | undefined |
++
++### Unauthorized
++
++```solidity
++error Unauthorized(string message)
++```
++
++
++
++
++
++#### Parameters
++
++| Name | Type | Description |
++|---|---|---|
++| message | string | undefined |
+ 
+ 
+diff --git a/docs/root/staking/StakeManagerStakingData.md b/docs/child/staking/StakeManagerStakingData.md
+similarity index 100%
+rename from docs/root/staking/StakeManagerStakingData.md
+rename to docs/child/staking/StakeManagerStakingData.md
+diff --git a/docs/child/validator/ValidatorSet.md b/docs/child/validator/ValidatorSet.md
+index c1f15ac..187b7b2 100644
+--- a/docs/child/validator/ValidatorSet.md
++++ b/docs/child/validator/ValidatorSet.md
+@@ -434,7 +434,7 @@ function increaseAllowance(address spender, uint256 addedValue) external nonpaya
+ ### initialize
+ 
+ ```solidity
+-function initialize(address newStateSender, address newStateReceiver, address newRootChainManager, uint256 newEpochSize, ValidatorInit[] initialValidators) external nonpayable
++function initialize(uint256 newEpochSize, ValidatorInit[] initialValidators) external nonpayable
+ ```
+ 
+ 
+@@ -445,9 +445,6 @@ function initialize(address newStateSender, address newStateReceiver, address ne
+ 
+ | Name | Type | Description |
+ |---|---|---|
+-| newStateSender | address | undefined |
+-| newStateReceiver | address | undefined |
+-| newRootChainManager | address | undefined |
+ | newEpochSize | uint256 | undefined |
+ | initialValidators | ValidatorInit[] | undefined |
+ 
+@@ -468,24 +465,6 @@ function name() external view returns (string)
+ |---|---|---|
+ | _0 | string | undefined |
+ 
+-### onStateReceive
+-
+-```solidity
+-function onStateReceive(uint256, address sender, bytes data) external nonpayable
+-```
+-
+-
+-
+-
+-
+-#### Parameters
+-
+-| Name | Type | Description |
+-|---|---|---|
+-| _0 | uint256 | undefined |
+-| sender | address | undefined |
+-| data | bytes | undefined |
+-
+ ### pendingWithdrawals
+ 
+ ```solidity
+diff --git a/docs/interfaces/child/validator/IValidatorSet.md b/docs/interfaces/child/validator/IValidatorSet.md
+index d526a46..48b5865 100644
+--- a/docs/interfaces/child/validator/IValidatorSet.md
++++ b/docs/interfaces/child/validator/IValidatorSet.md
+@@ -67,24 +67,6 @@ function commitEpoch(uint256 id, Epoch epoch) external nonpayable
+ | id | uint256 | undefined |
+ | epoch | Epoch | undefined |
+ 
+-### onStateReceive
+-
+-```solidity
+-function onStateReceive(uint256 counter, address sender, bytes data) external nonpayable
+-```
+-
+-
+-
+-
+-
+-#### Parameters
+-
+-| Name | Type | Description |
+-|---|---|---|
+-| counter | uint256 | undefined |
+-| sender | address | undefined |
+-| data | bytes | undefined |
+-
+ ### pendingWithdrawals
+ 
+ ```solidity
+diff --git a/docs/interfaces/root/staking/ICustomSupernetManager.md b/docs/interfaces/root/staking/ICustomSupernetManager.md
+deleted file mode 100644
+index beb2d3a..0000000
+--- a/docs/interfaces/root/staking/ICustomSupernetManager.md
++++ /dev/null
+@@ -1,257 +0,0 @@
+-# ICustomSupernetManager
+-
+-*Polygon Technology (@gretzke)*
+-
+-> ICustomSupernetManager
+-
+-Manages validator access and syncs voting power between the stake manager and validator set on the child chain
+-
+-*Implements the base SupernetManager contract*
+-
+-## Methods
+-
+-### enableStaking
+-
+-```solidity
+-function enableStaking() external nonpayable
+-```
+-
+-enables staking after successful initialisation of the child chain
+-
+-*only callable by owner*
+-
+-
+-### finalizeGenesis
+-
+-```solidity
+-function finalizeGenesis() external nonpayable
+-```
+-
+-finalizes initial genesis validator set
+-
+-*only callable by owner*
+-
+-
+-### genesisSet
+-
+-```solidity
+-function genesisSet() external view returns (struct GenesisValidator[])
+-```
+-
+-returns the genesis validator set with their balances
+-
+-
+-
+-
+-#### Returns
+-
+-| Name | Type | Description |
+-|---|---|---|
+-| _0 | GenesisValidator[] | undefined |
+-
+-### getValidator
+-
+-```solidity
+-function getValidator(address validator_) external view returns (struct Validator)
+-```
+-
+-returns validator instance based on provided address
+-
+-
+-
+-#### Parameters
+-
+-| Name | Type | Description |
+-|---|---|---|
+-| validator_ | address | undefined |
+-
+-#### Returns
+-
+-| Name | Type | Description |
+-|---|---|---|
+-| _0 | Validator | undefined |
+-
+-### onL2StateReceive
+-
+-```solidity
+-function onL2StateReceive(uint256, address sender, bytes data) external nonpayable
+-```
+-
+-called by the exit helpers to either release the stake of a validator or slash it
+-
+-*can only be synced from child after genesis*
+-
+-#### Parameters
+-
+-| Name | Type | Description |
+-|---|---|---|
+-| _0 | uint256 | undefined |
+-| sender | address | undefined |
+-| data | bytes | undefined |
+-
+-### register
+-
+-```solidity
+-function register(uint256[2] signature, uint256[4] pubkey) external nonpayable
+-```
+-
+-registers the public key of a validator
+-
+-
+-
+-#### Parameters
+-
+-| Name | Type | Description |
+-|---|---|---|
+-| signature | uint256[2] | undefined |
+-| pubkey | uint256[4] | undefined |
+-
+-### whitelistValidators
+-
+-```solidity
+-function whitelistValidators(address[] validators_) external nonpayable
+-```
+-
+-Allows to whitelist validators that are allowed to stake
+-
+-*only callable by owner*
+-
+-#### Parameters
+-
+-| Name | Type | Description |
+-|---|---|---|
+-| validators_ | address[] | undefined |
+-
+-
+-
+-## Events
+-
+-### AddedToWhitelist
+-
+-```solidity
+-event AddedToWhitelist(address indexed validator)
+-```
+-
+-
+-
+-
+-
+-#### Parameters
+-
+-| Name | Type | Description |
+-|---|---|---|
+-| validator `indexed` | address | undefined |
+-
+-### GenesisFinalized
+-
+-```solidity
+-event GenesisFinalized(uint256 amountValidators)
+-```
+-
+-
+-
+-
+-
+-#### Parameters
+-
+-| Name | Type | Description |
+-|---|---|---|
+-| amountValidators  | uint256 | undefined |
+-
+-### RemovedFromWhitelist
+-
+-```solidity
+-event RemovedFromWhitelist(address indexed validator)
+-```
+-
+-
+-
+-
+-
+-#### Parameters
+-
+-| Name | Type | Description |
+-|---|---|---|
+-| validator `indexed` | address | undefined |
+-
+-### StakingEnabled
+-
+-```solidity
+-event StakingEnabled()
+-```
+-
+-
+-
+-
+-
+-
+-### ValidatorDeactivated
+-
+-```solidity
+-event ValidatorDeactivated(address indexed validator)
+-```
+-
+-
+-
+-
+-
+-#### Parameters
+-
+-| Name | Type | Description |
+-|---|---|---|
+-| validator `indexed` | address | undefined |
+-
+-### ValidatorRegistered
+-
+-```solidity
+-event ValidatorRegistered(address indexed validator, uint256[4] blsKey)
+-```
+-
+-
+-
+-
+-
+-#### Parameters
+-
+-| Name | Type | Description |
+-|---|---|---|
+-| validator `indexed` | address | undefined |
+-| blsKey  | uint256[4] | undefined |
+-
+-
+-
+-## Errors
+-
+-### InvalidSignature
+-
+-```solidity
+-error InvalidSignature(address validator)
+-```
+-
+-
+-
+-
+-
+-#### Parameters
+-
+-| Name | Type | Description |
+-|---|---|---|
+-| validator | address | undefined |
+-
+-### Unauthorized
+-
+-```solidity
+-error Unauthorized(string message)
+-```
+-
+-
+-
+-
+-
+-#### Parameters
+-
+-| Name | Type | Description |
+-|---|---|---|
+-| message | string | undefined |
+-
+-
+diff --git a/docs/interfaces/root/staking/IStakeManager.md b/docs/interfaces/root/staking/IStakeManager.md
+index db340fd..631d7e7 100644
+--- a/docs/interfaces/root/staking/IStakeManager.md
++++ b/docs/interfaces/root/staking/IStakeManager.md
+@@ -10,13 +10,13 @@ Manages stakes for all child chains
+ 
+ ## Methods
+ 
+-### idFor
++### getValidator
+ 
+ ```solidity
+-function idFor(address manager) external view returns (uint256 id)
++function getValidator(address validator_) external view returns (struct Validator)
+ ```
+ 
+-returns the child id for a child chain manager contract
++
+ 
+ 
+ 
+@@ -24,21 +24,21 @@ returns the child id for a child chain manager contract
+ 
+ | Name | Type | Description |
+ |---|---|---|
+-| manager | address | undefined |
++| validator_ | address | undefined |
+ 
+ #### Returns
+ 
+ | Name | Type | Description |
+ |---|---|---|
+-| id | uint256 | undefined |
++| _0 | Validator | undefined |
+ 
+-### managerOf
++### register
+ 
+ ```solidity
+-function managerOf(uint256 id) external view returns (contract ISupernetManager manager)
++function register(uint256[2] signature, uint256[4] pubkey) external nonpayable
+ ```
+ 
+-returns the child chain manager contract for a child chain
++
+ 
+ 
+ 
+@@ -46,21 +46,32 @@ returns the child chain manager contract for a child chain
+ 
+ | Name | Type | Description |
+ |---|---|---|
+-| id | uint256 | undefined |
++| signature | uint256[2] | undefined |
++| pubkey | uint256[4] | undefined |
++
++### stake
++
++```solidity
++function stake(uint256 amount) external nonpayable
++```
++
++called by a validator to stake for a child chain
+ 
+-#### Returns
++
++
++#### Parameters
+ 
+ | Name | Type | Description |
+ |---|---|---|
+-| manager | contract ISupernetManager | undefined |
++| amount | uint256 | undefined |
+ 
+-### registerChildChain
++### stakeOf
+ 
+ ```solidity
+-function registerChildChain(address manager) external nonpayable returns (uint256 id)
++function stakeOf(address validator) external view returns (uint256 amount)
+ ```
+ 
+-registers a new child chain with the staking contract
++returns the amount staked by a validator for a child chain
+ 
+ 
+ 
+@@ -68,38 +79,54 @@ registers a new child chain with the staking contract
+ 
+ | Name | Type | Description |
+ |---|---|---|
+-| manager | address | undefined |
++| validator | address | undefined |
+ 
+ #### Returns
+ 
+ | Name | Type | Description |
+ |---|---|---|
+-| id | uint256 | of the child chain |
++| amount | uint256 | undefined |
+ 
+-### releaseStakeOf
++### totalStake
+ 
+ ```solidity
+-function releaseStakeOf(address validator, uint256 amount) external nonpayable
++function totalStake() external view returns (uint256 amount)
+ ```
+ 
+-called by child manager contract to release a validator&#39;s stake
++returns the total amount staked for all child chains
+ 
+ 
+ 
+-#### Parameters
++
++#### Returns
+ 
+ | Name | Type | Description |
+ |---|---|---|
+-| validator | address | undefined |
+ | amount | uint256 | undefined |
+ 
+-### stakeFor
++### whitelistValidators
+ 
+ ```solidity
+-function stakeFor(uint256 id, uint256 amount) external nonpayable
++function whitelistValidators(address[] validators_) external nonpayable
+ ```
+ 
+-called by a validator to stake for a child chain
++
++
++
++
++#### Parameters
++
++| Name | Type | Description |
++|---|---|---|
++| validators_ | address[] | undefined |
++
++### withdrawStake
++
++```solidity
++function withdrawStake(address to, uint256 amount) external nonpayable
++```
++
++allows a validator to withdraw released stake
+ 
+ 
+ 
+@@ -107,16 +134,16 @@ called by a validator to stake for a child chain
+ 
+ | Name | Type | Description |
+ |---|---|---|
+-| id | uint256 | undefined |
++| to | address | undefined |
+ | amount | uint256 | undefined |
+ 
+-### stakeOf
++### withdrawableStake
+ 
+ ```solidity
+-function stakeOf(address validator, uint256 id) external view returns (uint256 amount)
++function withdrawableStake(address validator) external view returns (uint256 amount)
+ ```
+ 
+-returns the amount staked by a validator for a child chain
++returns the amount of stake a validator can withdraw
+ 
+ 
+ 
+@@ -125,7 +152,6 @@ returns the amount staked by a validator for a child chain
+ | Name | Type | Description |
+ |---|---|---|
+ | validator | address | undefined |
+-| id | uint256 | undefined |
+ 
+ #### Returns
+ 
+@@ -133,74 +159,66 @@ returns the amount staked by a validator for a child chain
+ |---|---|---|
+ | amount | uint256 | undefined |
+ 
+-### totalStake
++
++
++## Events
++
++### AddedToWhitelist
+ 
+ ```solidity
+-function totalStake() external view returns (uint256 amount)
++event AddedToWhitelist(address indexed validator)
+ ```
+ 
+-returns the total amount staked for all child chains
+ 
+ 
+ 
+ 
+-#### Returns
++#### Parameters
+ 
+ | Name | Type | Description |
+ |---|---|---|
+-| amount | uint256 | undefined |
++| validator `indexed` | address | undefined |
+ 
+-### totalStakeOf
++### ChildManagerRegistered
+ 
+ ```solidity
+-function totalStakeOf(address validator) external view returns (uint256 amount)
++event ChildManagerRegistered(uint256 indexed id, address indexed manager)
+ ```
+ 
+-returns the total amount staked of a validator for all child chains
+ 
+ 
+ 
+-#### Parameters
+-
+-| Name | Type | Description |
+-|---|---|---|
+-| validator | address | undefined |
+ 
+-#### Returns
++#### Parameters
+ 
+ | Name | Type | Description |
+ |---|---|---|
+-| amount | uint256 | undefined |
++| id `indexed` | uint256 | undefined |
++| manager `indexed` | address | undefined |
+ 
+-### totalStakeOfChild
++### RemovedFromWhitelist
+ 
+ ```solidity
+-function totalStakeOfChild(uint256 id) external view returns (uint256 amount)
++event RemovedFromWhitelist(address indexed validator)
+ ```
+ 
+-returns the total amount staked for a child chain
+ 
+ 
+ 
+-#### Parameters
+ 
+-| Name | Type | Description |
+-|---|---|---|
+-| id | uint256 | undefined |
+-
+-#### Returns
++#### Parameters
+ 
+ | Name | Type | Description |
+ |---|---|---|
+-| amount | uint256 | undefined |
++| validator `indexed` | address | undefined |
+ 
+-### withdrawStake
++### StakeAdded
+ 
+ ```solidity
+-function withdrawStake(address to, uint256 amount) external nonpayable
++event StakeAdded(address indexed validator, uint256 amount)
+ ```
+ 
+-allows a validator to withdraw released stake
++
+ 
+ 
+ 
+@@ -208,16 +226,16 @@ allows a validator to withdraw released stake
+ 
+ | Name | Type | Description |
+ |---|---|---|
+-| to | address | undefined |
+-| amount | uint256 | undefined |
++| validator `indexed` | address | undefined |
++| amount  | uint256 | undefined |
+ 
+-### withdrawableStake
++### StakeRemoved
+ 
+ ```solidity
+-function withdrawableStake(address validator) external view returns (uint256 amount)
++event StakeRemoved(address indexed validator, uint256 amount)
+ ```
+ 
+-returns the amount of stake a validator can withdraw
++
+ 
+ 
+ 
+@@ -225,22 +243,31 @@ returns the amount of stake a validator can withdraw
+ 
+ | Name | Type | Description |
+ |---|---|---|
+-| validator | address | undefined |
++| validator `indexed` | address | undefined |
++| amount  | uint256 | undefined |
+ 
+-#### Returns
++### StakeWithdrawn
+ 
+-| Name | Type | Description |
+-|---|---|---|
+-| amount | uint256 | undefined |
++```solidity
++event StakeWithdrawn(address indexed validator, address indexed recipient, uint256 amount)
++```
+ 
+ 
+ 
+-## Events
+ 
+-### ChildManagerRegistered
++
++#### Parameters
++
++| Name | Type | Description |
++|---|---|---|
++| validator `indexed` | address | undefined |
++| recipient `indexed` | address | undefined |
++| amount  | uint256 | undefined |
++
++### ValidatorDeactivated
+ 
+ ```solidity
+-event ChildManagerRegistered(uint256 indexed id, address indexed manager)
++event ValidatorDeactivated(address indexed validator)
+ ```
+ 
+ 
+@@ -251,13 +278,12 @@ event ChildManagerRegistered(uint256 indexed id, address indexed manager)
+ 
+ | Name | Type | Description |
+ |---|---|---|
+-| id `indexed` | uint256 | undefined |
+-| manager `indexed` | address | undefined |
++| validator `indexed` | address | undefined |
+ 
+-### StakeAdded
++### ValidatorRegistered
+ 
+ ```solidity
+-event StakeAdded(uint256 indexed id, address indexed validator, uint256 amount)
++event ValidatorRegistered(address indexed validator, uint256[4] blsKey)
+ ```
+ 
+ 
+@@ -268,14 +294,17 @@ event StakeAdded(uint256 indexed id, address indexed validator, uint256 amount)
+ 
+ | Name | Type | Description |
+ |---|---|---|
+-| id `indexed` | uint256 | undefined |
+ | validator `indexed` | address | undefined |
+-| amount  | uint256 | undefined |
++| blsKey  | uint256[4] | undefined |
++
+ 
+-### StakeRemoved
++
++## Errors
++
++### InvalidSignature
+ 
+ ```solidity
+-event StakeRemoved(uint256 indexed id, address indexed validator, uint256 amount)
++error InvalidSignature(address validator)
+ ```
+ 
+ 
+@@ -286,14 +315,12 @@ event StakeRemoved(uint256 indexed id, address indexed validator, uint256 amount
+ 
+ | Name | Type | Description |
+ |---|---|---|
+-| id `indexed` | uint256 | undefined |
+-| validator `indexed` | address | undefined |
+-| amount  | uint256 | undefined |
++| validator | address | undefined |
+ 
+-### StakeWithdrawn
++### Unauthorized
+ 
+ ```solidity
+-event StakeWithdrawn(address indexed validator, address indexed recipient, uint256 amount)
++error Unauthorized(string message)
+ ```
+ 
+ 
+@@ -304,9 +331,6 @@ event StakeWithdrawn(address indexed validator, address indexed recipient, uint2
+ 
+ | Name | Type | Description |
+ |---|---|---|
+-| validator `indexed` | address | undefined |
+-| recipient `indexed` | address | undefined |
+-| amount  | uint256 | undefined |
+-
++| message | string | undefined |
+ 
+ 
+diff --git a/docs/interfaces/root/staking/ISupernetManager.md b/docs/interfaces/root/staking/ISupernetManager.md
+deleted file mode 100644
+index af53398..0000000
+--- a/docs/interfaces/root/staking/ISupernetManager.md
++++ /dev/null
+@@ -1,48 +0,0 @@
+-# ISupernetManager
+-
+-*Polygon Technology (@gretzke)*
+-
+-> ISupernetManager
+-
+-Abstract contract for managing supernets
+-
+-*Should be implemented with custom desired functionality*
+-
+-## Methods
+-
+-### onInit
+-
+-```solidity
+-function onInit(uint256 id) external nonpayable
+-```
+-
+-called when a new child chain is registered
+-
+-
+-
+-#### Parameters
+-
+-| Name | Type | Description |
+-|---|---|---|
+-| id | uint256 | undefined |
+-
+-### onStake
+-
+-```solidity
+-function onStake(address validator, uint256 amount) external nonpayable
+-```
+-
+-called when a validator stakes
+-
+-
+-
+-#### Parameters
+-
+-| Name | Type | Description |
+-|---|---|---|
+-| validator | address | undefined |
+-| amount | uint256 | undefined |
+-
+-
+-
+-
+diff --git a/docs/root/staking/CustomSupernetManager.md b/docs/root/staking/CustomSupernetManager.md
+deleted file mode 100644
+index 3490284..0000000
+--- a/docs/root/staking/CustomSupernetManager.md
++++ /dev/null
+@@ -1,492 +0,0 @@
+-# CustomSupernetManager
+-
+-
+-
+-
+-
+-
+-
+-
+-
+-## Methods
+-
+-### acceptOwnership
+-
+-```solidity
+-function acceptOwnership() external nonpayable
+-```
+-
+-
+-
+-*The new owner accepts the ownership transfer.*
+-
+-
+-### domain
+-
+-```solidity
+-function domain() external view returns (bytes32)
+-```
+-
+-
+-
+-
+-
+-
+-#### Returns
+-
+-| Name | Type | Description |
+-|---|---|---|
+-| _0 | bytes32 | undefined |
+-
+-### enableStaking
+-
+-```solidity
+-function enableStaking() external nonpayable
+-```
+-
+-enables staking after successful initialisation of the child chain
+-
+-*only callable by owner*
+-
+-
+-### finalizeGenesis
+-
+-```solidity
+-function finalizeGenesis() external nonpayable
+-```
+-
+-finalizes initial genesis validator set
+-
+-*only callable by owner*
+-
+-
+-### genesisSet
+-
+-```solidity
+-function genesisSet() external view returns (struct GenesisValidator[])
+-```
+-
+-returns the genesis validator set with their balances
+-
+-
+-
+-
+-#### Returns
+-
+-| Name | Type | Description |
+-|---|---|---|
+-| _0 | GenesisValidator[] | undefined |
+-
+-### getValidator
+-
+-```solidity
+-function getValidator(address validator_) external view returns (struct Validator)
+-```
+-
+-returns validator instance based on provided address
+-
+-
+-
+-#### Parameters
+-
+-| Name | Type | Description |
+-|---|---|---|
+-| validator_ | address | undefined |
+-
+-#### Returns
+-
+-| Name | Type | Description |
+-|---|---|---|
+-| _0 | Validator | undefined |
+-
+-### id
+-
+-```solidity
+-function id() external view returns (uint256)
+-```
+-
+-
+-
+-
+-
+-
+-#### Returns
+-
+-| Name | Type | Description |
+-|---|---|---|
+-| _0 | uint256 | undefined |
+-
+-### initialize
+-
+-```solidity
+-function initialize(address newStakeManager, address newBls, address newStateSender, address newMatic, address newChildValidatorSet, address newExitHelper, string newDomain) external nonpayable
+-```
+-
+-
+-
+-
+-
+-#### Parameters
+-
+-| Name | Type | Description |
+-|---|---|---|
+-| newStakeManager | address | undefined |
+-| newBls | address | undefined |
+-| newStateSender | address | undefined |
+-| newMatic | address | undefined |
+-| newChildValidatorSet | address | undefined |
+-| newExitHelper | address | undefined |
+-| newDomain | string | undefined |
+-
+-### onInit
+-
+-```solidity
+-function onInit(uint256 id_) external nonpayable
+-```
+-
+-
+-
+-
+-
+-#### Parameters
+-
+-| Name | Type | Description |
+-|---|---|---|
+-| id_ | uint256 | undefined |
+-
+-### onL2StateReceive
+-
+-```solidity
+-function onL2StateReceive(uint256, address sender, bytes data) external nonpayable
+-```
+-
+-called by the exit helpers to either release the stake of a validator or slash it
+-
+-*can only be synced from child after genesis*
+-
+-#### Parameters
+-
+-| Name | Type | Description |
+-|---|---|---|
+-| _0 | uint256 | undefined |
+-| sender | address | undefined |
+-| data | bytes | undefined |
+-
+-### onStake
+-
+-```solidity
+-function onStake(address validator, uint256 amount) external nonpayable
+-```
+-
+-called when a validator stakes
+-
+-
+-
+-#### Parameters
+-
+-| Name | Type | Description |
+-|---|---|---|
+-| validator | address | undefined |
+-| amount | uint256 | undefined |
+-
+-### owner
+-
+-```solidity
+-function owner() external view returns (address)
+-```
+-
+-
+-
+-*Returns the address of the current owner.*
+-
+-
+-#### Returns
+-
+-| Name | Type | Description |
+-|---|---|---|
+-| _0 | address | undefined |
+-
+-### pendingOwner
+-
+-```solidity
+-function pendingOwner() external view returns (address)
+-```
+-
+-
+-
+-*Returns the address of the pending owner.*
+-
+-
+-#### Returns
+-
+-| Name | Type | Description |
+-|---|---|---|
+-| _0 | address | undefined |
+-
+-### register
+-
+-```solidity
+-function register(uint256[2] signature, uint256[4] pubkey) external nonpayable
+-```
+-
+-registers the public key of a validator
+-
+-
+-
+-#### Parameters
+-
+-| Name | Type | Description |
+-|---|---|---|
+-| signature | uint256[2] | undefined |
+-| pubkey | uint256[4] | undefined |
+-
+-### renounceOwnership
+-
+-```solidity
+-function renounceOwnership() external nonpayable
+-```
+-
+-
+-
+-*Leaves the contract without owner. It will not be possible to call `onlyOwner` functions. Can only be called by the current owner. NOTE: Renouncing ownership will leave the contract without an owner, thereby disabling any functionality that is only available to the owner.*
+-
+-
+-### transferOwnership
+-
+-```solidity
+-function transferOwnership(address newOwner) external nonpayable
+-```
+-
+-
+-
+-*Starts the ownership transfer of the contract to a new account. Replaces the pending transfer if there is one. Can only be called by the current owner.*
+-
+-#### Parameters
+-
+-| Name | Type | Description |
+-|---|---|---|
+-| newOwner | address | undefined |
+-
+-### validators
+-
+-```solidity
+-function validators(address) external view returns (uint256 stake, bool isWhitelisted, bool isActive)
+-```
+-
+-
+-
+-
+-
+-#### Parameters
+-
+-| Name | Type | Description |
+-|---|---|---|
+-| _0 | address | undefined |
+-
+-#### Returns
+-
+-| Name | Type | Description |
+-|---|---|---|
+-| stake | uint256 | undefined |
+-| isWhitelisted | bool | undefined |
+-| isActive | bool | undefined |
+-
+-### whitelistValidators
+-
+-```solidity
+-function whitelistValidators(address[] validators_) external nonpayable
+-```
+-
+-Allows to whitelist validators that are allowed to stake
+-
+-*only callable by owner*
+-
+-#### Parameters
+-
+-| Name | Type | Description |
+-|---|---|---|
+-| validators_ | address[] | undefined |
+-
+-
+-
+-## Events
+-
+-### AddedToWhitelist
+-
+-```solidity
+-event AddedToWhitelist(address indexed validator)
+-```
+-
+-
+-
+-
+-
+-#### Parameters
+-
+-| Name | Type | Description |
+-|---|---|---|
+-| validator `indexed` | address | undefined |
+-
+-### GenesisFinalized
+-
+-```solidity
+-event GenesisFinalized(uint256 amountValidators)
+-```
+-
+-
+-
+-
+-
+-#### Parameters
+-
+-| Name | Type | Description |
+-|---|---|---|
+-| amountValidators  | uint256 | undefined |
+-
+-### Initialized
+-
+-```solidity
+-event Initialized(uint8 version)
+-```
+-
+-
+-
+-*Triggered when the contract has been initialized or reinitialized.*
+-
+-#### Parameters
+-
+-| Name | Type | Description |
+-|---|---|---|
+-| version  | uint8 | undefined |
+-
+-### OwnershipTransferStarted
+-
+-```solidity
+-event OwnershipTransferStarted(address indexed previousOwner, address indexed newOwner)
+-```
+-
+-
+-
+-
+-
+-#### Parameters
+-
+-| Name | Type | Description |
+-|---|---|---|
+-| previousOwner `indexed` | address | undefined |
+-| newOwner `indexed` | address | undefined |
+-
+-### OwnershipTransferred
+-
+-```solidity
+-event OwnershipTransferred(address indexed previousOwner, address indexed newOwner)
+-```
+-
+-
+-
+-
+-
+-#### Parameters
+-
+-| Name | Type | Description |
+-|---|---|---|
+-| previousOwner `indexed` | address | undefined |
+-| newOwner `indexed` | address | undefined |
+-
+-### RemovedFromWhitelist
+-
+-```solidity
+-event RemovedFromWhitelist(address indexed validator)
+-```
+-
+-
+-
+-
+-
+-#### Parameters
+-
+-| Name | Type | Description |
+-|---|---|---|
+-| validator `indexed` | address | undefined |
+-
+-### StakingEnabled
+-
+-```solidity
+-event StakingEnabled()
+-```
+-
+-
+-
+-
+-
+-
+-### ValidatorDeactivated
+-
+-```solidity
+-event ValidatorDeactivated(address indexed validator)
+-```
+-
+-
+-
+-
+-
+-#### Parameters
+-
+-| Name | Type | Description |
+-|---|---|---|
+-| validator `indexed` | address | undefined |
+-
+-### ValidatorRegistered
+-
+-```solidity
+-event ValidatorRegistered(address indexed validator, uint256[4] blsKey)
+-```
+-
+-
+-
+-
+-
+-#### Parameters
+-
+-| Name | Type | Description |
+-|---|---|---|
+-| validator `indexed` | address | undefined |
+-| blsKey  | uint256[4] | undefined |
+-
+-
+-
+-## Errors
+-
+-### InvalidSignature
+-
+-```solidity
+-error InvalidSignature(address validator)
+-```
+-
+-
+-
+-
+-
+-#### Parameters
+-
+-| Name | Type | Description |
+-|---|---|---|
+-| validator | address | undefined |
+-
+-### Unauthorized
+-
+-```solidity
+-error Unauthorized(string message)
+-```
+-
+-
+-
+-
+-
+-#### Parameters
+-
+-| Name | Type | Description |
+-|---|---|---|
+-| message | string | undefined |
+-
+-
+diff --git a/docs/root/staking/StakeManagerChildData.md b/docs/root/staking/StakeManagerChildData.md
+deleted file mode 100644
+index 283b810..0000000
+--- a/docs/root/staking/StakeManagerChildData.md
++++ /dev/null
+@@ -1,12 +0,0 @@
+-# StakeManagerChildData
+-
+-
+-
+-> StakeManagerChildData
+-
+-Holds data to allow look-up between child chain manager contract address and child chain id. Note that this is contract is designed to be included in StakeManager. It is upgradeable.
+-
+-
+-
+-
+-
+diff --git a/docs/root/staking/SupernetManager.md b/docs/root/staking/SupernetManager.md
+deleted file mode 100644
+index 3a0ac45..0000000
+--- a/docs/root/staking/SupernetManager.md
++++ /dev/null
+@@ -1,84 +0,0 @@
+-# SupernetManager
+-
+-
+-
+-
+-
+-
+-
+-
+-
+-## Methods
+-
+-### id
+-
+-```solidity
+-function id() external view returns (uint256)
+-```
+-
+-
+-
+-
+-
+-
+-#### Returns
+-
+-| Name | Type | Description |
+-|---|---|---|
+-| _0 | uint256 | undefined |
+-
+-### onInit
+-
+-```solidity
+-function onInit(uint256 id_) external nonpayable
+-```
+-
+-
+-
+-
+-
+-#### Parameters
+-
+-| Name | Type | Description |
+-|---|---|---|
+-| id_ | uint256 | undefined |
+-
+-### onStake
+-
+-```solidity
+-function onStake(address validator, uint256 amount) external nonpayable
+-```
+-
+-called when a validator stakes
+-
+-
+-
+-#### Parameters
+-
+-| Name | Type | Description |
+-|---|---|---|
+-| validator | address | undefined |
+-| amount | uint256 | undefined |
+-
+-
+-
+-## Events
+-
+-### Initialized
+-
+-```solidity
+-event Initialized(uint8 version)
+-```
+-
+-
+-
+-*Triggered when the contract has been initialized or reinitialized.*
+-
+-#### Parameters
+-
+-| Name | Type | Description |
+-|---|---|---|
+-| version  | uint8 | undefined |
+-
+-
+-

@@ -9,12 +9,17 @@ import "../../interfaces/IStateSender.sol";
 import "./StakeManagerStakingData.sol";
 import "../../interfaces/common/IBLS.sol";
 
-contract StakeManager is IStakeManager, Initializable, StakeManagerStakingData {
+contract StakeManager is IStakeManager, Initializable {
     using SafeERC20 for IERC20;
     using GenesisLib for GenesisSet;
 
     bytes32 private constant _STAKE_SIG = keccak256("STAKE");
     bytes32 private constant _UNSTAKE_SIG = keccak256("UNSTAKE");
+
+    // slither-disable-next-line naming-convention
+    uint256 internal _totalStake;
+    // validator address => withdrawable stake.
+    mapping(address => uint256) private _withdrawableStakes;
 
     IBLS private _bls;
     IERC20 private _stakingToken;
@@ -170,6 +175,29 @@ contract StakeManager is IStakeManager, Initializable, StakeManagerStakingData {
             validators[validator].isActive = false;
             emit ValidatorDeactivated(validator);
         }
+    }
+
+    function _addStake(address validator, uint256 amount) internal {
+        validators[validator].stake += amount;
+        _totalStake += amount;
+    }
+
+    function _removeStake(address validator, uint256 amount) internal {
+        validators[validator].stake -= amount;
+        _totalStake -= amount;
+        _withdrawableStakes[validator] += amount;
+    }
+
+    function _stakeOf(address validator) internal view returns (uint256 amount) {
+        amount = validators[validator].stake;
+    }
+
+    function _withdrawStake(address validator, uint256 amount) internal {
+        _withdrawableStakes[validator] -= amount;
+    }
+
+    function _withdrawableStakeOf(address validator) internal view returns (uint256 amount) {
+        amount = _withdrawableStakes[validator];
     }
 
     // slither-disable-next-line unused-state,naming-convention
