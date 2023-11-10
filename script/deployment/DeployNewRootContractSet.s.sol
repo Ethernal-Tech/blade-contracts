@@ -9,14 +9,8 @@ import {ProxyAdmin} from "@openzeppelin/contracts/proxy/transparent/ProxyAdmin.s
 import "script/deployment/root/DeployStateSender.s.sol";
 import "script/deployment/root/DeployCheckpointManager.s.sol";
 import "script/deployment/root/DeployExitHelper.s.sol";
-import "script/deployment/root/staking/DeployCustomSupernetManager.s.sol";
 
-contract DeployNewRootContractSet is
-    StateSenderDeployer,
-    CheckpointManagerDeployer,
-    ExitHelperDeployer,
-    CustomSupernetManagerDeployer
-{
+contract DeployNewRootContractSet is StateSenderDeployer, CheckpointManagerDeployer, ExitHelperDeployer {
     using stdJson for string;
 
     function run()
@@ -52,17 +46,5 @@ contract DeployNewRootContractSet is
         );
 
         (exitHelperLogic, exitHelperProxy) = deployExitHelper(proxyAdmin, ICheckpointManager(checkpointManagerProxy));
-
-        (customSupernetManagerLogic, customSupernetManagerProxy) = deployCustomSupernetManager(
-            proxyAdmin,
-            config.readAddress('["CustomSupernetManager"].newStakeManager'),
-            config.readAddress('["CustomSupernetManager"].newBls'),
-            stateSender,
-            config.readAddress('["CustomSupernetManager"].newMatic'),
-            config.readAddress('["CustomSupernetManager"].newChildValidatorSet'),
-            exitHelperProxy,
-            config.readAddress('["CustomSupernetManager"].newRootERC20Predicate'),
-            config.readString('["CustomSupernetManager"].newDomain')
-        );
     }
 }
