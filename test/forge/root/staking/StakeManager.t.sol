@@ -2,7 +2,7 @@
 pragma solidity 0.8.19;
 
 import "@utils/Test.sol";
-import {StakeManager} from "contracts/root/staking/StakeManager.sol";
+import {StakeManager} from "contracts/child/staking/StakeManager.sol";
 import {MockSupernetManager} from "contracts/mocks/MockSupernetManager.sol";
 import {MockERC20} from "contracts/mocks/MockERC20.sol";
 

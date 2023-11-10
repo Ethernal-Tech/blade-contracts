@@ -6,7 +6,7 @@ import "forge-std/Test.sol";
 
 import {DeployStakeManager} from "script/deployment/root/staking/DeployStakeManager.s.sol";
 
-import {StakeManager} from "contracts/root/staking/StakeManager.sol";
+import {StakeManager} from "contracts/child/staking/StakeManager.sol";
 import {ITransparentUpgradeableProxy} from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 
 contract DeployStakeManagerTest is Test {
