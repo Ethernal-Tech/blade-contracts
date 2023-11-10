@@ -10,8 +10,10 @@ import "../System.sol";
 contract ValidatorSet is IValidatorSet, ERC20SnapshotUpgradeable, System {
     using WithdrawalQueueLib for WithdrawalQueue;
 
+    // TODO: @Stefan-Ethernal Move to the StakeManager?
     uint256 public constant WITHDRAWAL_WAIT_PERIOD = 1;
 
+    // TODO: @Stefan-Ethernal These fields go into RewardPool
     // slither-disable-next-line naming-convention
     uint256 public EPOCH_SIZE;
 
@@ -19,8 +21,10 @@ contract ValidatorSet is IValidatorSet, ERC20SnapshotUpgradeable, System {
 
     mapping(uint256 => Epoch) public epochs;
     uint256[] public epochEndBlocks;
+    // TODO: @Stefan-Ethernal Move to the StakeManager?
     mapping(address => WithdrawalQueue) private _withdrawals;
 
+    // TODO: @Stefan-Ethernal move to RewardPool initialize should have only newEpochSize
     function initialize(uint256 newEpochSize, ValidatorInit[] memory initialValidators) public initializer {
         __ERC20_init("ValidatorSet", "VSET");
         EPOCH_SIZE = newEpochSize;
@@ -34,6 +38,7 @@ contract ValidatorSet is IValidatorSet, ERC20SnapshotUpgradeable, System {
         currentEpochId = 1;
     }
 
+    // TODO: @Stefan-Ethernal move commitEpoch to RewardPool (aka EpochManager)
     /**
      * @inheritdoc IValidatorSet
      */
@@ -48,6 +53,7 @@ contract ValidatorSet is IValidatorSet, ERC20SnapshotUpgradeable, System {
         emit NewEpoch(id, epoch.startBlock, epoch.endBlock, epoch.epochRoot);
     }
 
+    // TODO: @Stefan-Ethernal REMOVE
     /**
      * @inheritdoc IValidatorSet
      */
@@ -56,6 +62,7 @@ contract ValidatorSet is IValidatorSet, ERC20SnapshotUpgradeable, System {
         _registerWithdrawal(msg.sender, amount);
     }
 
+    // TODO: @Stefan-Ethernal Move to the StakeManager?
     /**
      * @inheritdoc IValidatorSet
      */
@@ -66,6 +73,7 @@ contract ValidatorSet is IValidatorSet, ERC20SnapshotUpgradeable, System {
         emit Withdrawal(msg.sender, amount);
     }
 
+    // TODO: @Stefan-Ethernal Move to the StakeManager?
     /**
      * @inheritdoc IValidatorSet
      */
@@ -74,6 +82,7 @@ contract ValidatorSet is IValidatorSet, ERC20SnapshotUpgradeable, System {
         (amount, ) = _withdrawals[account].withdrawable(currentEpochId);
     }
 
+    // TODO: @Stefan-Ethernal Move to the StakeManager?
     /**
      * @inheritdoc IValidatorSet
      */
@@ -81,6 +90,7 @@ contract ValidatorSet is IValidatorSet, ERC20SnapshotUpgradeable, System {
         return _withdrawals[account].pending(currentEpochId);
     }
 
+    // TODO: @Stefan-Ethernal REMOVE FOR NOW (this is going to be needed for the on-chain governance)
     /**
      * @inheritdoc IValidatorSet
      */
@@ -89,25 +99,30 @@ contract ValidatorSet is IValidatorSet, ERC20SnapshotUpgradeable, System {
         length = endBlock == 0 ? 0 : endBlock - epochs[epochId].startBlock + 1;
     }
 
+    // TODO: @Stefan-Ethernal REMOVE (probably will be needed in the StakeManager)
     function _registerWithdrawal(address account, uint256 amount) internal {
         _withdrawals[account].append(amount, currentEpochId + WITHDRAWAL_WAIT_PERIOD);
         emit WithdrawalRegistered(account, amount);
     }
 
+    // TODO: @Stefan-Ethernal REMOVE
     function _stake(address validator, uint256 amount) internal {
         _mint(validator, amount);
     }
 
+    // TODO: @Stefan-Ethernal REMOVE FOR NOW (this is going to be needed for the on-chain governance)
     /// @dev the epoch number is also the snapshot id
     function _getCurrentSnapshotId() internal view override returns (uint256) {
         return currentEpochId;
     }
 
+    // TODO: @Stefan-Ethernal REMOVE FOR NOW (this is going to be needed for the on-chain governance)
     function _beforeTokenTransfer(address from, address to, uint256 amount) internal override {
         require(from == address(0) || to == address(0), "TRANSFER_FORBIDDEN");
         super._beforeTokenTransfer(from, to, amount);
     }
 
+    // TODO: @Stefan-Ethernal REMOVE FOR NOW (this is going to be needed for the on-chain governance)
     function balanceOfAt(
         address account,
         uint256 epochNumber
@@ -115,6 +130,7 @@ contract ValidatorSet is IValidatorSet, ERC20SnapshotUpgradeable, System {
         return super.balanceOfAt(account, epochNumber);
     }
 
+    // TODO: @Stefan-Ethernal REMOVE FOR NOW (this is going to be needed for the on-chain)
     function totalSupplyAt(
         uint256 epochNumber
     ) public view override(ERC20SnapshotUpgradeable, IValidatorSet) returns (uint256) {
