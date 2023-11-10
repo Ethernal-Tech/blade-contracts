@@ -12,9 +12,6 @@ contract StakeManager is IStakeManager, Initializable {
     using SafeERC20 for IERC20;
     using GenesisLib for GenesisSet;
 
-    bytes32 private constant _STAKE_SIG = keccak256("STAKE");
-    bytes32 private constant _UNSTAKE_SIG = keccak256("UNSTAKE");
-
     // slither-disable-next-line naming-convention
     uint256 internal _totalStake;
     // validator address => withdrawable stake.
