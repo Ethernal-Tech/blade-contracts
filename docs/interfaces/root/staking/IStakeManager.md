@@ -104,6 +104,22 @@ returns the total amount staked for all child chains
 |---|---|---|
 | amount | uint256 | undefined |
 
+### unstake
+
+```solidity
+function unstake(uint256 amount) external nonpayable
+```
+
+called by a validator to unstake
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| amount | uint256 | undefined |
+
 ### whitelistValidators
 
 ```solidity

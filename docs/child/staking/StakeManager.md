@@ -52,7 +52,7 @@ function getValidator(address validator_) external view returns (struct Validato
 ### initialize
 
 ```solidity
-function initialize(address newStakingToken, address newBls, string newDomain, StartValidator[] genesisValidators) external nonpayable
+function initialize(address newStakingToken, address newBls, string newDomain, GenesisValidator[] genesisValidators) external nonpayable
 ```
 
 
@@ -66,7 +66,7 @@ function initialize(address newStakingToken, address newBls, string newDomain, S
 | newStakingToken | address | undefined |
 | newBls | address | undefined |
 | newDomain | string | undefined |
-| genesisValidators | StartValidator[] | undefined |
+| genesisValidators | GenesisValidator[] | undefined |
 
 ### register
 
@@ -135,6 +135,22 @@ returns the total amount staked for all child chains
 
 
 #### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| amount | uint256 | undefined |
+
+### unstake
+
+```solidity
+function unstake(uint256 amount) external nonpayable
+```
+
+called by a validator to unstake
+
+
+
+#### Parameters
 
 | Name | Type | Description |
 |---|---|---|

@@ -1,8 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.19;
 
-import "../../../lib/GenesisLib.sol";
-
 struct Validator {
     uint256[4] blsKey;
     uint256 stake;
@@ -10,7 +8,7 @@ struct Validator {
     bool isActive;
 }
 
-struct StartValidator {
+struct GenesisValidator {
     address validator;
     uint256 stake;
     uint256[4] blsKey;
@@ -36,6 +34,9 @@ interface IStakeManager {
 
     /// @notice called by a validator to stake for a child chain
     function stake(uint256 amount) external;
+
+    /// @notice called by a validator to unstake
+    function unstake(uint256 amount) external;
 
     /// @notice allows a validator to withdraw released stake
     function withdrawStake(address to, uint256 amount) external;

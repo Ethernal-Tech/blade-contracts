@@ -10,7 +10,6 @@ import "../../interfaces/common/IBLS.sol";
 
 contract StakeManager is IStakeManager, Initializable {
     using SafeERC20 for IERC20;
-    using GenesisLib for GenesisSet;
 
     // slither-disable-next-line naming-convention
     uint256 internal _totalStake;
@@ -33,7 +32,7 @@ contract StakeManager is IStakeManager, Initializable {
         address newStakingToken,
         address newBls,
         string memory newDomain,
-        StartValidator[] memory genesisValidators
+        GenesisValidator[] memory genesisValidators
     ) public initializer {
         _stakingToken = IERC20(newStakingToken);
         _bls = IBLS(newBls);
@@ -59,6 +58,13 @@ contract StakeManager is IStakeManager, Initializable {
         _addStake(msg.sender, amount);
         // slither-disable-next-line reentrancy-events
         emit StakeAdded(msg.sender, amount);
+    }
+
+    /**
+     * @inheritdoc IStakeManager
+     */
+    function unstake(uint256 amount) external {
+        _unstake(msg.sender, amount);
     }
 
     /**
