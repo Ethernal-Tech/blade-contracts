@@ -10,6 +10,23 @@
 
 ## Methods
 
+### WITHDRAWAL_WAIT_PERIOD
+
+```solidity
+function WITHDRAWAL_WAIT_PERIOD() external view returns (uint256)
+```
+
+
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | undefined |
+
 ### domain
 
 ```solidity
@@ -52,7 +69,7 @@ function getValidator(address validator_) external view returns (struct Validato
 ### initialize
 
 ```solidity
-function initialize(address newStakingToken, address newBls, string newDomain, GenesisValidator[] genesisValidators) external nonpayable
+function initialize(address newStakingToken, address newBls, address epochManager, string newDomain, GenesisValidator[] genesisValidators) external nonpayable
 ```
 
 
@@ -65,8 +82,31 @@ function initialize(address newStakingToken, address newBls, string newDomain, G
 |---|---|---|
 | newStakingToken | address | undefined |
 | newBls | address | undefined |
+| epochManager | address | undefined |
 | newDomain | string | undefined |
 | genesisValidators | GenesisValidator[] | undefined |
+
+### pendingWithdrawals
+
+```solidity
+function pendingWithdrawals(address account) external view returns (uint256)
+```
+
+Calculates how much is yet to become withdrawable for account.
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| account | address | The account to calculate amount for |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | Amount not yet withdrawable (in MATIC wei) |
 
 ### register
 
@@ -196,6 +236,17 @@ function whitelistValidators(address[] validators_) external nonpayable
 |---|---|---|
 | validators_ | address[] | undefined |
 
+### withdraw
+
+```solidity
+function withdraw() external nonpayable
+```
+
+allows a validator to complete a withdrawal
+
+*calls the bridge to release the funds on root*
+
+
 ### withdrawStake
 
 ```solidity
@@ -212,6 +263,28 @@ allows a validator to withdraw released stake
 |---|---|---|
 | to | address | undefined |
 | amount | uint256 | undefined |
+
+### withdrawable
+
+```solidity
+function withdrawable(address account) external view returns (uint256 amount)
+```
+
+Calculates how much can be withdrawn for account in this epoch.
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| account | address | The account to calculate amount for |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| amount | uint256 | Amount withdrawable (in MATIC wei) |
 
 ### withdrawableStake
 
@@ -388,6 +461,23 @@ event ValidatorRegistered(address indexed validator, uint256[4] blsKey)
 |---|---|---|
 | validator `indexed` | address | undefined |
 | blsKey  | uint256[4] | undefined |
+
+### Withdrawal
+
+```solidity
+event Withdrawal(address indexed account, uint256 amount)
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| account `indexed` | address | undefined |
+| amount  | uint256 | undefined |
 
 
 

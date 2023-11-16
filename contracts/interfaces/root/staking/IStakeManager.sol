@@ -28,6 +28,7 @@ interface IStakeManager {
     event RemovedFromWhitelist(address indexed validator);
     event ValidatorRegistered(address indexed validator, uint256[4] blsKey);
     event ValidatorDeactivated(address indexed validator);
+    event Withdrawal(address indexed account, uint256 amount);
 
     error Unauthorized(string message);
     error InvalidSignature(address validator);
@@ -55,4 +56,22 @@ interface IStakeManager {
     function register(uint256[2] calldata signature, uint256[4] calldata pubkey) external;
 
     function getValidator(address validator_) external view returns (Validator memory);
+
+    /// @notice allows a validator to complete a withdrawal
+    /// @dev calls the bridge to release the funds on root
+    function withdraw() external;
+
+    /**
+     * @notice Calculates how much can be withdrawn for account in this epoch.
+     * @param account The account to calculate amount for
+     * @return Amount withdrawable (in MATIC wei)
+     */
+    function withdrawable(address account) external view returns (uint256);
+
+    /**
+     * @notice Calculates how much is yet to become withdrawable for account.
+     * @param account The account to calculate amount for
+     * @return Amount not yet withdrawable (in MATIC wei)
+     */
+    function pendingWithdrawals(address account) external view returns (uint256);
 }

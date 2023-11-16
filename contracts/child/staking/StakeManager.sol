@@ -7,9 +7,14 @@ import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "../../interfaces/root/staking/IStakeManager.sol";
 import "../../interfaces/IStateSender.sol";
 import "../../interfaces/common/IBLS.sol";
+import "../../interfaces/child/validator/IEpochManager.sol";
+import "../../lib/WithdrawalQueue.sol";
 
 contract StakeManager is IStakeManager, Initializable {
     using SafeERC20 for IERC20;
+    using WithdrawalQueueLib for WithdrawalQueue;
+
+    uint256 public constant WITHDRAWAL_WAIT_PERIOD = 1;
 
     // slither-disable-next-line naming-convention
     uint256 internal _totalStake;
@@ -18,10 +23,13 @@ contract StakeManager is IStakeManager, Initializable {
 
     IBLS private _bls;
     IERC20 private _stakingToken;
+    IEpochManager private _epochManager;
 
     bytes32 public domain;
 
     mapping(address => Validator) public validators;
+
+    mapping(address => WithdrawalQueue) private _withdrawals;
 
     modifier onlyValidator(address validator) {
         if (!validators[validator].isActive) revert Unauthorized("VALIDATOR");
@@ -31,11 +39,13 @@ contract StakeManager is IStakeManager, Initializable {
     function initialize(
         address newStakingToken,
         address newBls,
+        address epochManager,
         string memory newDomain,
         GenesisValidator[] memory genesisValidators
     ) public initializer {
         _stakingToken = IERC20(newStakingToken);
         _bls = IBLS(newBls);
+        _epochManager = IEpochManager(epochManager);
         domain = keccak256(abi.encodePacked(newDomain));
         for (uint i = 0; i < genesisValidators.length; i++) {
             validators[genesisValidators[i].validator] = Validator(
@@ -123,6 +133,31 @@ contract StakeManager is IStakeManager, Initializable {
      */
     function getValidator(address validator_) external view returns (Validator memory) {
         return validators[validator_];
+    }
+
+    /**
+     * @inheritdoc IStakeManager
+     */
+    function withdraw() external {
+        WithdrawalQueue storage queue = _withdrawals[msg.sender];
+        (uint256 amount, uint256 newHead) = queue.withdrawable(_epochManager.getCurrentEpochId());
+        queue.head = newHead;
+        emit Withdrawal(msg.sender, amount);
+    }
+
+    /**
+     * @inheritdoc IStakeManager
+     */
+    // slither-disable-next-line unused-return
+    function withdrawable(address account) external view returns (uint256 amount) {
+        (amount, ) = _withdrawals[account].withdrawable(_epochManager.getCurrentEpochId());
+    }
+
+    /**
+     * @inheritdoc IStakeManager
+     */
+    function pendingWithdrawals(address account) external view returns (uint256) {
+        return _withdrawals[account].pending(_epochManager.getCurrentEpochId());
     }
 
     function _withdrawStake(address validator, address to, uint256 amount) private {

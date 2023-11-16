@@ -4,10 +4,10 @@ pragma solidity 0.8.19;
 
 import "forge-std/Script.sol";
 
-import {RewardPool} from "contracts/child/validator/RewardPool.sol";
+import {EpochManager} from "contracts/child/validator/EpochManager.sol";
 import {TransparentUpgradeableProxy} from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 
-abstract contract RewardPoolDeployer is Script {
+abstract contract EpochManagerDeployer is Script {
     function deployRewardPool(
         address proxyAdmin,
         address newRewardToken,
