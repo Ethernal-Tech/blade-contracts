@@ -26,16 +26,8 @@ contract EpochManager is IEpochManager, System, Initializable, ERC20SnapshotUpgr
     mapping(uint256 => uint256) public paidRewardPerEpoch;
     mapping(address => uint256) public pendingRewards;
 
-    function initialize(
-        address newRewardToken,
-        address newRewardWallet,
-        address newValidatorSet,
-        uint256 newBaseReward
-    ) public initializer {
-        require(
-            newRewardToken != address(0) && newRewardWallet != address(0) && newValidatorSet != address(0),
-            "ZERO_ADDRESS"
-        );
+    function initialize(address newRewardToken, address newRewardWallet, uint256 newBaseReward) public initializer {
+        require(newRewardToken != address(0) && newRewardWallet != address(0), "ZERO_ADDRESS");
 
         rewardToken = IERC20Upgradeable(newRewardToken);
         rewardWallet = newRewardWallet;
