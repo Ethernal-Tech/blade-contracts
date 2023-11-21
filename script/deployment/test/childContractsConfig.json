@@ -79,24 +79,11 @@
     "newOwner": ""
   },
 
-  "EIP1559Burn": {
-    "newBurnDestination": ""
-  },
-
   "ForkParams": {
     "newOwner": ""
   },
 
   "NativeERC20": {
-    "predicate_": "",
-    "rootToken_": "",
-    "name_": "",
-    "symbol_": "",
-    "decimals_": "",
-    "tokenSupply_": ""
-  },
-
-  "NativeERC20Mintable": {
     "predicate_": "",
     "owner_": "",
     "rootToken_": "",

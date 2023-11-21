@@ -2,7 +2,7 @@
 pragma solidity 0.8.19;
 
 import "@utils/Test.sol";
-import {ValidatorSet, ValidatorInit, Epoch} from "contracts/child/validator/ValidatorSet.sol";
+import {ValidatorSet, ValidatorInit, Epoch} from "contracts/child/validator/EpochManager.sol";
 import {L2StateSender} from "contracts/child/L2StateSender.sol";
 import "contracts/interfaces/Errors.sol";
 
@@ -203,9 +203,4 @@ contract ValidatorSet_WithdrawStake is Committed {
         validatorSet.withdraw();
         assertEq(validatorSet.withdrawable(address(this)), 0);
     }
-}
-
-contract ValidatorSet_Slash is Committed {
-    bytes32 private constant SLASH_SIG = keccak256("SLASH");
-    event L2StateSynced(uint256 indexed id, address indexed sender, address indexed receiver, bytes data);
 }

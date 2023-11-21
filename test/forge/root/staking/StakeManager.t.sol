@@ -40,7 +40,7 @@ abstract contract Registered is Initialized {
 abstract contract Staked is Registered {
     function setUp() public virtual override {
         super.setUp();
-        stakeManager.stakeFor(id, maxAmount);
+        stakeManager.stake(maxAmount);
     }
 }
 
@@ -61,17 +61,7 @@ contract StakeManager_Initialize is Uninitialized {
 }
 
 contract StakeManager_StakeFor is Registered, StakeManager {
-    function test_RevertIdZero() public {
-        vm.expectRevert("StakeManager: INVALID_ID");
-        stakeManager.stakeFor(0, 1);
-    }
-
-    function test_RevertChainDoesNotExist() public {
-        vm.expectRevert("StakeManager: INVALID_ID");
-        stakeManager.stakeFor(id2 + 1, 1);
-    }
-
-    function test_StakeFor(uint256 amount) public {
+    function test_Stake(uint256 amount) public {
         vm.assume(amount <= maxAmount);
         vm.expectEmit(true, true, true, true);
         emit StakeAdded(id, address(this), amount);
@@ -81,7 +71,7 @@ contract StakeManager_StakeFor is Registered, StakeManager {
         assertEq(token.balanceOf(address(stakeManager)), amount, "token balance mismatch");
     }
 
-    function test_StakeForMultiple(uint256 amount1, uint256 amount2, uint256 amount3) public {
+    function test_StakeMultiple(uint256 amount1, uint256 amount2, uint256 amount3) public {
         vm.assume(amount1 <= maxAmount && amount2 <= maxAmount && amount3 <= maxAmount);
         stakeManager.stake(amount1);
         stakeManager.stake(amount2);

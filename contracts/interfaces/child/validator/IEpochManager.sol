@@ -15,9 +15,8 @@ struct Epoch {
 }
 
 /**
-    @title IRewardPool
-    @author Polygon Technology (@gretzke)
-    @notice Distributes rewards to validators for committed epochs
+    @title IEpochManager
+    @notice Tracks epochs and distributes rewards to validators for committed epochs
  */
 interface IEpochManager {
     event RewardDistributed(uint256 indexed epochId, uint256 totalReward);

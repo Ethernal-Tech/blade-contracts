@@ -6,8 +6,6 @@ import "forge-std/Script.sol";
 
 import {ProxyAdmin} from "@openzeppelin/contracts/proxy/transparent/ProxyAdmin.sol";
 
-import "script/deployment/test/child/validator/DeployRewardPool.s.sol";
-import "script/deployment/test/child/validator/DeployValidatorSet.s.sol";
 import "script/deployment/test/child/DeployChildERC20.s.sol";
 import "script/deployment/test/child/DeployChildERC20Predicate.s.sol";
 import "script/deployment/test/child/DeployChildERC20PredicateAccessList.s.sol";
@@ -17,10 +15,8 @@ import "script/deployment/test/child/DeployChildERC721PredicateAccessList.s.sol"
 import "script/deployment/test/child/DeployChildERC1155.s.sol";
 import "script/deployment/test/child/DeployChildERC1155Predicate.s.sol";
 import "script/deployment/test/child/DeployChildERC1155PredicateAccessList.s.sol";
-import "script/deployment/test/child/DeployEIP1559Burn.s.sol";
 import "script/deployment/test/child/DeployL2StateSender.s.sol";
 import "script/deployment/test/child/DeployNativeERC20.s.sol";
-import "script/deployment/test/child/DeployNativeERC20Mintable.s.sol";
 import "script/deployment/test/child/DeployRootMintableERC20Predicate.s.sol";
 import "script/deployment/test/child/DeployRootMintableERC20PredicateAccessList.s.sol";
 import "script/deployment/test/child/DeployRootMintableERC721Predicate.s.sol";
@@ -42,10 +38,8 @@ contract DeployChildContracts is
     ChildERC1155Deployer,
     ChildERC1155PredicateDeployer,
     ChildERC1155PredicateAccessListDeployer,
-    EIP1559BurnDeployer,
     L2StateSenderDeployer,
     NativeERC20Deployer,
-    NativeERC20MintableDeployer,
     RootMintableERC20PredicateDeployer,
     RootMintableERC20PredicateAccessListDeployer,
     RootMintableERC721PredicateDeployer,
@@ -80,13 +74,9 @@ contract DeployChildContracts is
     address public childERC1155PredicateProxy;
     address public childERC1155PredicateAccessListLogic;
     address public childERC1155PredicateAccessListProxy;
-    address public eip1559BurnLogic;
-    address public eip1559BurnProxy;
     address public l2StateSender;
     address public nativeERC20Logic;
     address public nativeERC20Proxy;
-    address public nativeERC20MintableLogic;
-    address public nativeERC20MintableProxy;
     address public rootMintableERC20PredicateLogic;
     address public rootMintableERC20PredicateProxy;
     address public rootMintableERC20PredicateAccessListLogic;
@@ -221,31 +211,15 @@ contract DeployChildContracts is
             config.readAddress('["ChildERC1155PredicateAccessList"].newOwner')
         );
 
-        (eip1559BurnLogic, eip1559BurnProxy) = deployEIP1559Burn(
-            proxyAdmin,
-            IChildERC20Predicate(childERC20PredicateProxy),
-            config.readAddress('["EIP1559Burn"].newBurnDestination')
-        );
-
         (nativeERC20Logic, nativeERC20Proxy) = deployNativeERC20(
             proxyAdmin,
             config.readAddress('["NativeERC20"].predicate_'),
+            config.readAddress('["NativeERC20"].owner_'),
             config.readAddress('["NativeERC20"].rootToken_'),
             config.readString('["NativeERC20"].name_'),
             config.readString('["NativeERC20"].symbol_'),
             uint8(config.readUint('["NativeERC20"].decimals_')),
             config.readUint('["NativeERC20"].tokenSupply_')
-        );
-
-        (nativeERC20MintableLogic, nativeERC20MintableProxy) = deployNativeERC20Mintable(
-            proxyAdmin,
-            config.readAddress('["NativeERC20Mintable"].predicate_'),
-            config.readAddress('["NativeERC20Mintable"].owner_'),
-            config.readAddress('["NativeERC20Mintable"].rootToken_'),
-            config.readString('["NativeERC20Mintable"].name_'),
-            config.readString('["NativeERC20Mintable"].symbol_'),
-            uint8(config.readUint('["NativeERC20Mintable"].decimals_')),
-            config.readUint('["NativeERC20Mintable"].tokenSupply_')
         );
 
         (rootMintableERC20PredicateLogic, rootMintableERC20PredicateProxy) = deployRootMintableERC20Predicate(

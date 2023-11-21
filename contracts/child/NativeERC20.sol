@@ -9,9 +9,8 @@ import "../interfaces/child/IStateReceiver.sol";
 import "./System.sol";
 
 /**
-    @title NativeERC20Mintable
-    @author Polygon Technology
-    @notice Native (mintable) token contract on Polygon V3 / supernet chains
+    @title NativeERC20
+    @notice Native token contract on Blade chains
     @dev The contract exposes ERC20-like functions that are compatible with the native token
  */
 // solhint-disable reason-string

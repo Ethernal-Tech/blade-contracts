@@ -1,8 +1,8 @@
 # IEpochManager
 
-*Polygon Technology (@gretzke)*
 
-> IRewardPool
+
+> IEpochManager
 
 Distributes rewards to validators for committed epochs
 

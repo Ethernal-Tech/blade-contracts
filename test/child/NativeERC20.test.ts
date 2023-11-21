@@ -3,8 +3,8 @@ import { BigNumber } from "ethers";
 import * as hre from "hardhat";
 import { ethers } from "hardhat";
 import {
-  NativeERC20Mintable,
-  NativeERC20Mintable__factory,
+  NativeERC20,
+  NativeERC20__factory,
   ChildERC20Predicate,
   ChildERC20Predicate__factory,
   MockNativeERC20Transfer,
@@ -13,11 +13,11 @@ import {
 import { alwaysFalseBytecode, alwaysRevertBytecode, alwaysTrueBytecode } from "../constants";
 
 describe("NativeERC20", () => {
-  let nativeERC20: NativeERC20Mintable,
-    systemNativeERC20: NativeERC20Mintable,
-    predicateNativeERC20: NativeERC20Mintable,
-    minterNativeERC20: NativeERC20Mintable,
-    zeroAddressNativeERC20: NativeERC20Mintable,
+  let nativeERC20: NativeERC20,
+    systemNativeERC20: NativeERC20,
+    predicateNativeERC20: NativeERC20,
+    minterNativeERC20: NativeERC20,
+    zeroAddressNativeERC20: NativeERC20,
     childERC20Predicate: ChildERC20Predicate,
     mockNativeERC20Transfer: MockNativeERC20Transfer,
     balance: BigNumber,
@@ -33,7 +33,7 @@ describe("NativeERC20", () => {
 
     await childERC20Predicate.deployed();
 
-    const NativeERC20: NativeERC20Mintable__factory = await ethers.getContractFactory("NativeERC20Mintable");
+    const NativeERC20: NativeERC20__factory = await ethers.getContractFactory("NativeERC20");
     nativeERC20 = await NativeERC20.deploy();
 
     await nativeERC20.deployed();

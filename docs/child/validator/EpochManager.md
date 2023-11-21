@@ -468,7 +468,7 @@ function increaseAllowance(address spender, uint256 addedValue) external nonpaya
 ### initialize
 
 ```solidity
-function initialize(address newRewardToken, address newRewardWallet, address newValidatorSet, uint256 newBaseReward) external nonpayable
+function initialize(address newRewardToken, address newRewardWallet, uint256 newBaseReward) external nonpayable
 ```
 
 
@@ -481,7 +481,6 @@ function initialize(address newRewardToken, address newRewardWallet, address new
 |---|---|---|
 | newRewardToken | address | undefined |
 | newRewardWallet | address | undefined |
-| newValidatorSet | address | undefined |
 | newBaseReward | uint256 | undefined |
 
 ### name
