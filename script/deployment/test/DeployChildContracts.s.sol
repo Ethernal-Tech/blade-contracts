@@ -27,7 +27,7 @@ import "script/deployment/test/child/DeployStateReceiver.s.sol";
 import "script/deployment/test/child/DeploySystem.s.sol";
 
 contract DeployChildContracts is
-    RewardPoolDeployer,
+    EpochManagerDeployer,
     ValidatorSetDeployer,
     ChildERC20Deployer,
     ChildERC20PredicateDeployer,
@@ -52,10 +52,8 @@ contract DeployChildContracts is
     using stdJson for string;
 
     address public proxyAdmin;
-    address public rewardPoolLogic;
-    address public rewardPoolProxy;
-    address public validatorSetLogic;
-    address public validatorSetProxy;
+    address public epochManagerLogic;
+    address public epochManagerProxy;
     address public childERC20Logic;
     address public childERC20Proxy;
     address public childERC20PredicateLogic;
@@ -106,21 +104,12 @@ contract DeployChildContracts is
 
         stateReceiver = deployStateReceiver();
 
-        (validatorSetLogic, validatorSetProxy) = deployValidatorSet(
+        (epochManagerLogic, epochManagerProxy) = deployEpochManager(
             proxyAdmin,
-            config.readAddress('["ValidatorSet"].newStateSender'),
-            stateReceiver,
-            config.readAddress('["ValidatorSet"].newRootChainManager'),
-            config.readUint('["ValidatorSet"].newEpochSize'),
-            abi.decode(config.readBytes('["ValidatorSet"].initialValidators'), (ValidatorInit[]))
-        );
-
-        (rewardPoolLogic, rewardPoolProxy) = deployRewardPool(
-            proxyAdmin,
-            config.readAddress('["RewardPool"].newRewardToken'),
-            config.readAddress('["RewardPool"].newRewardWallet'),
-            validatorSetProxy,
-            config.readUint('["RewardPool"].newBaseReward')
+            config.readAddress('["EpochManager"].newRewardToken'),
+            config.readAddress('["EpochManager"].newRewardWallet'),
+            config.readUint('["EpochManager"].newBaseReward'),
+            config.readUint('["EpochManager"].newEpochSize')
         );
 
         (childERC20Logic, childERC20Proxy) = deployChildERC20(

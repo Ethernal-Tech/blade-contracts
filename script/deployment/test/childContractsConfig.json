@@ -7,17 +7,11 @@
     "initParams": ""
   },
 
-  "ValidatorSet": {
-    "newStateSender": "",
-    "newRootChainManager": "",
-    "newEpochSize": "",
-    "initialValidators": ""
-  },
-
-  "RewardPool": {
+  "EpochManager": {
     "newRewardToken": "",
     "newRewardWallet": "",
-    "newBaseReward": ""
+    "newBaseReward": "",
+    "newEpochSize": ""
   },
 
   "ChildERC20": {

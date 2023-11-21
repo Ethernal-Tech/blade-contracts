@@ -50,6 +50,23 @@ function commitEpoch(uint256 id, Epoch epoch) external nonpayable
 | id | uint256 | undefined |
 | epoch | Epoch | undefined |
 
+### currentEpochId
+
+```solidity
+function currentEpochId() external view returns (uint256)
+```
+
+returns currentEpochId
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | undefined |
+
 ### distributeRewardFor
 
 ```solidity
@@ -66,23 +83,6 @@ function distributeRewardFor(uint256 epochId, Uptime[] uptime) external nonpayab
 |---|---|---|
 | epochId | uint256 | undefined |
 | uptime | Uptime[] | undefined |
-
-### getCurrentEpochId
-
-```solidity
-function getCurrentEpochId() external view returns (uint256)
-```
-
-return currentEpochId
-
-
-
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | uint256 | undefined |
 
 ### paidRewardPerEpoch
 

@@ -44,23 +44,6 @@ function BLOCKLIST_PRECOMPILE() external view returns (address)
 |---|---|---|
 | _0 | address | undefined |
 
-### EPOCH_SIZE
-
-```solidity
-function EPOCH_SIZE() external view returns (uint256)
-```
-
-
-
-
-
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | uint256 | undefined |
-
 ### NATIVE_TOKEN_CONTRACT
 
 ```solidity
@@ -311,7 +294,7 @@ function commitEpoch(uint256 id, Epoch epoch) external nonpayable
 function currentEpochId() external view returns (uint256)
 ```
 
-
+returns currentEpochId
 
 
 
@@ -401,6 +384,23 @@ function epochEndBlocks(uint256) external view returns (uint256)
 |---|---|---|
 | _0 | uint256 | undefined |
 
+### epochSize
+
+```solidity
+function epochSize() external view returns (uint256)
+```
+
+
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | undefined |
+
 ### epochs
 
 ```solidity
@@ -424,23 +424,6 @@ function epochs(uint256) external view returns (uint256 startBlock, uint256 endB
 | startBlock | uint256 | undefined |
 | endBlock | uint256 | undefined |
 | epochRoot | bytes32 | undefined |
-
-### getCurrentEpochId
-
-```solidity
-function getCurrentEpochId() external view returns (uint256)
-```
-
-return currentEpochId
-
-
-
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | uint256 | undefined |
 
 ### increaseAllowance
 
@@ -468,7 +451,7 @@ function increaseAllowance(address spender, uint256 addedValue) external nonpaya
 ### initialize
 
 ```solidity
-function initialize(address newRewardToken, address newRewardWallet, uint256 newBaseReward) external nonpayable
+function initialize(address newRewardToken, address newRewardWallet, uint256 newBaseReward, uint256 newEpochSize) external nonpayable
 ```
 
 
@@ -482,6 +465,7 @@ function initialize(address newRewardToken, address newRewardWallet, uint256 new
 | newRewardToken | address | undefined |
 | newRewardWallet | address | undefined |
 | newBaseReward | uint256 | undefined |
+| newEpochSize | uint256 | undefined |
 
 ### name
 

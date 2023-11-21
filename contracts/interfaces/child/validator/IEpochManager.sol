@@ -40,8 +40,8 @@ interface IEpochManager {
     /// @dev system call
     function commitEpoch(uint256 id, Epoch calldata epoch) external;
 
-    /// @notice return currentEpochId
-    function getCurrentEpochId() external view returns (uint256);
+    /// @notice returns currentEpochId
+    function currentEpochId() external view returns (uint256);
 
     /// @notice returns the total supply for a given epoch
     function totalSupplyAt(uint256 epochNumber) external view returns (uint256);

@@ -29,6 +29,7 @@ contract StakeManager is IStakeManager, Initializable {
 
     mapping(address => Validator) public validators;
 
+    // TODO: Figure out the unstake and stake withdrawal workflow (unlock period etc.)
     mapping(address => WithdrawalQueue) private _withdrawals;
 
     modifier onlyValidator(address validator) {
@@ -140,7 +141,7 @@ contract StakeManager is IStakeManager, Initializable {
      */
     function withdraw() external {
         WithdrawalQueue storage queue = _withdrawals[msg.sender];
-        (uint256 amount, uint256 newHead) = queue.withdrawable(_epochManager.getCurrentEpochId());
+        (uint256 amount, uint256 newHead) = queue.withdrawable(_epochManager.currentEpochId());
         queue.head = newHead;
         emit Withdrawal(msg.sender, amount);
     }
@@ -150,18 +151,18 @@ contract StakeManager is IStakeManager, Initializable {
      */
     // slither-disable-next-line unused-return
     function withdrawable(address account) external view returns (uint256 amount) {
-        (amount, ) = _withdrawals[account].withdrawable(_epochManager.getCurrentEpochId());
+        (amount, ) = _withdrawals[account].withdrawable(_epochManager.currentEpochId());
     }
 
     /**
      * @inheritdoc IStakeManager
      */
     function pendingWithdrawals(address account) external view returns (uint256) {
-        return _withdrawals[account].pending(_epochManager.getCurrentEpochId());
+        return _withdrawals[account].pending(_epochManager.currentEpochId());
     }
 
     function _withdrawStake(address validator, address to, uint256 amount) private {
-        _withdrawStake(validator, amount);
+        _withdrawableStakes[validator] -= amount;
         // slither-disable-next-line reentrancy-events
         _stakingToken.safeTransfer(to, amount);
         emit StakeWithdrawn(validator, to, amount);
@@ -223,14 +224,11 @@ contract StakeManager is IStakeManager, Initializable {
         validators[validator].stake -= amount;
         _totalStake -= amount;
         _withdrawableStakes[validator] += amount;
+        _withdrawals[validator].append(amount, _epochManager.currentEpochId() + WITHDRAWAL_WAIT_PERIOD);
     }
 
     function _stakeOf(address validator) internal view returns (uint256 amount) {
         amount = validators[validator].stake;
-    }
-
-    function _withdrawStake(address validator, uint256 amount) internal {
-        _withdrawableStakes[validator] -= amount;
     }
 
     function _withdrawableStakeOf(address validator) internal view returns (uint256 amount) {

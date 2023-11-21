@@ -97,13 +97,6 @@ contract EpochManager is IEpochManager, System, Initializable, ERC20SnapshotUpgr
         rewardToken.safeTransferFrom(rewardWallet, address(this), amount);
     }
 
-    /**
-     *  @inheritdoc IEpochManager
-     */
-    function getCurrentEpochId() external view returns (uint256) {
-        return currentEpochId;
-    }
-
     function _totalBlocks(uint256 epochId) internal view returns (uint256 length) {
         uint256 endBlock = epochs[epochId].endBlock;
         length = endBlock == 0 ? 0 : endBlock - epochs[epochId].startBlock + 1;

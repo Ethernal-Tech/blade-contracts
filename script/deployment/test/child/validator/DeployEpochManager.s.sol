@@ -8,39 +8,43 @@ import {EpochManager} from "contracts/child/validator/EpochManager.sol";
 import {TransparentUpgradeableProxy} from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 
 abstract contract EpochManagerDeployer is Script {
-    function deployRewardPool(
+    function deployEpochManager(
         address proxyAdmin,
         address newRewardToken,
         address newRewardWallet,
-        address newValidatorSet,
-        uint256 newBaseReward
+        uint256 newBaseReward,
+        uint256 newEpochSize
     ) internal returns (address logicAddr, address proxyAddr) {
         bytes memory initData = abi.encodeCall(
-            RewardPool.initialize,
-            (newRewardToken, newRewardWallet, newValidatorSet, newBaseReward)
+            EpochManager.initialize,
+            (newRewardToken, newRewardWallet, newBaseReward, newEpochSize)
         );
 
         vm.startBroadcast();
 
-        RewardPool rewardPool = new RewardPool();
+        EpochManager epochManager = new EpochManager();
 
-        TransparentUpgradeableProxy proxy = new TransparentUpgradeableProxy(address(rewardPool), proxyAdmin, initData);
+        TransparentUpgradeableProxy proxy = new TransparentUpgradeableProxy(
+            address(epochManager),
+            proxyAdmin,
+            initData
+        );
 
         vm.stopBroadcast();
 
-        logicAddr = address(rewardPool);
+        logicAddr = address(epochManager);
         proxyAddr = address(proxy);
     }
 }
 
-contract DeployRewardPool is RewardPoolDeployer {
+contract DeployRewardPool is EpochManagerDeployer {
     function run(
         address proxyAdmin,
         address newRewardToken,
         address newRewardWallet,
-        address newValidatorSet,
-        uint256 newBaseReward
+        uint256 newBaseReward,
+        uint256 newEpochSize
     ) external returns (address logicAddr, address proxyAddr) {
-        return deployRewardPool(proxyAdmin, newRewardToken, newRewardWallet, newValidatorSet, newBaseReward);
+        return deployEpochManager(proxyAdmin, newRewardToken, newRewardWallet, newBaseReward, newEpochSize);
     }
 }
