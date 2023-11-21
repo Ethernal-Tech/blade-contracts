@@ -4,7 +4,7 @@
 
 > IEpochManager
 
-Distributes rewards to validators for committed epochs
+Tracks epochs and distributes rewards to validators for committed epochs
 
 
 
