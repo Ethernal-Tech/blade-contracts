@@ -29,7 +29,9 @@ contract EpochManager is IEpochManager, System, Initializable, ERC20SnapshotUpgr
         uint256 newBaseReward,
         uint256 newEpochSize
     ) public initializer {
-        require(newRewardToken != address(0) && newRewardWallet != address(0), "ZERO_ADDRESS");
+        require(newRewardToken != address(0), "EpochManager: INVALID_REWARD_TOKEN");
+        require(newRewardWallet != address(0), "EpochManager: ZERO_ADDRESS");
+        require(newEpochSize > 0, "EpochManager: INVALID_EPOCH_SIZE");
 
         rewardToken = IERC20Upgradeable(newRewardToken);
         rewardWallet = newRewardWallet;
