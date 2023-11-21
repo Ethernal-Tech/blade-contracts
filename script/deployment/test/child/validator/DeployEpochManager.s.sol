@@ -37,7 +37,7 @@ abstract contract EpochManagerDeployer is Script {
     }
 }
 
-contract DeployRewardPool is EpochManagerDeployer {
+contract DeployEpochManager is EpochManagerDeployer {
     function run(
         address proxyAdmin,
         address newRewardToken,

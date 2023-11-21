@@ -49,8 +49,8 @@ abstract contract Unstaked is Staked {
 
     function setUp() public virtual override {
         super.setUp();
-        vm.prank(address(supernetManager));
-        stakeManager.releaseStakeOf(address(this), maxAmount);
+        vm.prank(bob);
+        stakeManager.unstake(maxAmount);
     }
 }
 
@@ -64,7 +64,7 @@ contract StakeManager_StakeFor is Registered, StakeManager {
     function test_Stake(uint256 amount) public {
         vm.assume(amount <= maxAmount);
         vm.expectEmit(true, true, true, true);
-        emit StakeAdded(id, address(this), amount);
+        emit StakeAdded(address(this), amount);
         stakeManager.stake(amount);
         assertEq(stakeManager.totalStake(), amount, "total stake mismatch");
         assertEq(stakeManager.stakeOf(address(this)), amount, "stake of mismatch");
@@ -86,16 +86,11 @@ contract StakeManager_StakeFor is Registered, StakeManager {
 }
 
 contract StakeManager_ReleaseStake is Staked, StakeManager {
-    function test_RevertNotSupernetManager() public {
-        vm.expectRevert("StakeManagerChildData: INVALID_MANAGER");
-        stakeManager.releaseStakeOf(address(this), 1);
-    }
-
     function test_ReleaseStakeFor(uint256 amount) public {
         vm.assume(amount <= maxAmount);
         vm.expectEmit(true, true, true, true);
-        emit StakeRemoved(id, address(this), amount);
-        stakeManager.releaseStakeOf(address(this), amount);
+        emit StakeRemoved(address(this), amount);
+        stakeManager.unstake(amount);
         assertEq(stakeManager.totalStake(), maxAmount - amount, "total stake mismatch");
         assertEq(stakeManager.stakeOf(address(this)), maxAmount - amount, "stake of mismatch");
         assertEq(stakeManager.withdrawableStake(address(this)), amount, "withdrawable stake mismatch");

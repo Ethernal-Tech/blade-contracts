@@ -16,6 +16,7 @@ import "script/deployment/test/child/DeployChildERC1155.s.sol";
 import "script/deployment/test/child/DeployChildERC1155Predicate.s.sol";
 import "script/deployment/test/child/DeployChildERC1155PredicateAccessList.s.sol";
 import "script/deployment/test/child/DeployL2StateSender.s.sol";
+import "script/deployment/test/child/validator/DeployEpochManager.s.sol";
 import "script/deployment/test/child/DeployNativeERC20.s.sol";
 import "script/deployment/test/child/DeployRootMintableERC20Predicate.s.sol";
 import "script/deployment/test/child/DeployRootMintableERC20PredicateAccessList.s.sol";
@@ -28,7 +29,6 @@ import "script/deployment/test/child/DeploySystem.s.sol";
 
 contract DeployChildContracts is
     EpochManagerDeployer,
-    ValidatorSetDeployer,
     ChildERC20Deployer,
     ChildERC20PredicateDeployer,
     ChildERC20PredicateAccessListDeployer,
