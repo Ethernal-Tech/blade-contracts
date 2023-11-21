@@ -14,24 +14,27 @@ contract EpochManager is IEpochManager, System, Initializable, ERC20SnapshotUpgr
     IERC20Upgradeable public rewardToken;
     address public rewardWallet;
     uint256 public baseReward;
-
-    uint256 public EPOCH_SIZE;
+    uint256 public epochSize;
 
     uint256 public currentEpochId;
-
     mapping(uint256 => Epoch) public epochs;
-
     uint256[] public epochEndBlocks;
 
     mapping(uint256 => uint256) public paidRewardPerEpoch;
     mapping(address => uint256) public pendingRewards;
 
-    function initialize(address newRewardToken, address newRewardWallet, uint256 newBaseReward) public initializer {
+    function initialize(
+        address newRewardToken,
+        address newRewardWallet,
+        uint256 newBaseReward,
+        uint256 newEpochSize
+    ) public initializer {
         require(newRewardToken != address(0) && newRewardWallet != address(0), "ZERO_ADDRESS");
 
         rewardToken = IERC20Upgradeable(newRewardToken);
         rewardWallet = newRewardWallet;
         baseReward = newBaseReward;
+        epochSize = newEpochSize;
     }
 
     /**
@@ -41,7 +44,6 @@ contract EpochManager is IEpochManager, System, Initializable, ERC20SnapshotUpgr
         require(paidRewardPerEpoch[epochId] == 0, "REWARD_ALREADY_DISTRIBUTED");
         uint256 totalBlocks = _totalBlocks(epochId);
         require(totalBlocks != 0, "EPOCH_NOT_COMMITTED");
-        uint256 epochSize = EPOCH_SIZE;
         // slither-disable-next-line divide-before-multiply
         uint256 reward = (baseReward * totalBlocks) / epochSize;
         // TODO disincentivize long epoch times
@@ -71,7 +73,7 @@ contract EpochManager is IEpochManager, System, Initializable, ERC20SnapshotUpgr
         uint256 newEpochId = currentEpochId++;
         require(id == newEpochId, "UNEXPECTED_EPOCH_ID");
         require(epoch.endBlock > epoch.startBlock, "NO_BLOCKS_COMMITTED");
-        require((epoch.endBlock - epoch.startBlock + 1) % EPOCH_SIZE == 0, "EPOCH_MUST_BE_DIVISIBLE_BY_EPOCH_SIZE");
+        require((epoch.endBlock - epoch.startBlock + 1) % epochSize == 0, "EPOCH_MUST_BE_DIVISIBLE_BY_EPOCH_SIZE");
         require(epochs[newEpochId - 1].endBlock + 1 == epoch.startBlock, "INVALID_START_BLOCK");
         epochs[newEpochId] = epoch;
         epochEndBlocks.push(epoch.endBlock);
