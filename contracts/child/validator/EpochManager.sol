@@ -4,10 +4,11 @@ pragma solidity 0.8.19;
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20SnapshotUpgradeable.sol";
 import "../System.sol";
 import "../../interfaces/child/validator/IEpochManager.sol";
 
-contract EpochManager is IEpochManager, System, Initializable {
+contract EpochManager is IEpochManager, System, Initializable, ERC20SnapshotUpgradeable {
     using SafeERC20Upgradeable for IERC20Upgradeable;
 
     IERC20Upgradeable public rewardToken;
@@ -101,5 +102,18 @@ contract EpochManager is IEpochManager, System, Initializable {
     function _totalBlocks(uint256 epochId) internal view returns (uint256 length) {
         uint256 endBlock = epochs[epochId].endBlock;
         length = endBlock == 0 ? 0 : endBlock - epochs[epochId].startBlock + 1;
+    }
+
+    function totalSupplyAt(
+        uint256 epochNumber
+    ) public view override(ERC20SnapshotUpgradeable, IEpochManager) returns (uint256) {
+        return super.totalSupplyAt(epochNumber);
+    }
+
+    function balanceOfAt(
+        address account,
+        uint256 epochNumber
+    ) public view override(ERC20SnapshotUpgradeable, IEpochManager) returns (uint256) {
+        return super.balanceOfAt(account, epochNumber);
     }
 }
