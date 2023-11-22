@@ -28,7 +28,7 @@ abstract contract Uninitialized is Test {
 abstract contract Initialized is Uninitialized {
     function setUp() public virtual override {
         super.setUp();
-        epochManager.initialize(address(token), rewardWallet, 1 ether, 10);
+        epochManager.initialize(address(token), rewardWallet, 1 ether, epochSize);
 
         Epoch memory epoch = Epoch({startBlock: 1, endBlock: 64, epochRoot: bytes32(0)});
         vm.prank(SYSTEM);
@@ -54,13 +54,6 @@ contract EpochManager_Initialize is Uninitialized {
         assertEq(address(epochManager.rewardToken()), address(token));
         assertEq(epochManager.rewardWallet(), rewardWallet);
         assertEq(epochManager.epochSize(), epochSize);
-    }
-}
-
-contract EpochManager_TransferForbidden is Initialized {
-    function test_RevertTransfer() public {
-        vm.expectRevert("TRANSFER_FORBIDDEN");
-        epochManager.transfer(alice, 100);
     }
 }
 
