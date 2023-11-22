@@ -21,9 +21,7 @@ contract DeployNewRootContractSet is StateSenderDeployer, CheckpointManagerDeplo
             address checkpointManagerLogic,
             address checkpointManagerProxy,
             address exitHelperLogic,
-            address exitHelperProxy,
-            address customSupernetManagerLogic,
-            address customSupernetManagerProxy
+            address exitHelperProxy
         )
     {
         string memory config = vm.readFile("script/deployment/rootContractSetConfig.json");

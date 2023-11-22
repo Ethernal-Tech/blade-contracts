@@ -18,12 +18,7 @@ abstract contract Uninitialized is Test {
 
     function setUp() public virtual {
         token = new MockERC20();
-        Epoch memory epoch = Epoch({startBlock: 1, endBlock: 64, epochRoot: bytes32(0)});
-        vm.prank(SYSTEM);
-        vm.roll(block.number + 1);
         epochManager = new EpochManager();
-        // TODO: REMOVE?
-        // epochManager.commitEpoch(1, epoch);
         token.mint(rewardWallet, 1000 ether);
         vm.prank(rewardWallet);
         token.approve(address(epochManager), type(uint256).max);
@@ -34,6 +29,11 @@ abstract contract Initialized is Uninitialized {
     function setUp() public virtual override {
         super.setUp();
         epochManager.initialize(address(token), rewardWallet, 1 ether, 10);
+
+        Epoch memory epoch = Epoch({startBlock: 1, endBlock: 64, epochRoot: bytes32(0)});
+        vm.prank(SYSTEM);
+        vm.roll(block.number + 1);
+        epochManager.commitEpoch(1, epoch);
     }
 }
 
@@ -68,6 +68,7 @@ contract EpochManager_CommitEpoch is Initialized {
     event NewEpoch(uint256 indexed id, uint256 indexed startBlock, uint256 indexed endBlock, bytes32 epochRoot);
 
     function test_RevertOnlySystemCall() public {
+        vm.prank(alice);
         Epoch memory epoch = Epoch({startBlock: 1, endBlock: 64, epochRoot: bytes32(0)});
         vm.expectRevert(abi.encodeWithSelector(Unauthorized.selector, "SYSTEMCALL"));
         epochManager.commitEpoch(1, epoch);
