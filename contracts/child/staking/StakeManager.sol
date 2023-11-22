@@ -67,6 +67,7 @@ contract StakeManager is IStakeManager, Initializable, Ownable2StepUpgradeable, 
      */
     function stake(uint256 amount) external onlyValidator(msg.sender) {
         _stake(msg.sender, amount);
+        // slither-disable-next-line events-maths
         _totalStake += amount;
     }
 

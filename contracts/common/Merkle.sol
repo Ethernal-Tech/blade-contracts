@@ -21,8 +21,8 @@ library Merkle {
         bytes32 rootHash,
         bytes32[] calldata proof
     ) internal pure returns (bool isMember) {
-        // slither-disable-next-line assembly
         // solhint-disable-next-line no-inline-assembly
+        // slither-disable-next-line assembly
         assembly ("memory-safe") {
             // if proof is empty, check if the leaf is the root
             if proof.length {
@@ -38,7 +38,7 @@ library Merkle {
                     // store the leaf at the calculated slot
                     mstore(leafSlot, leaf)
                     // store proof element in whichever slot is not occupied by the leaf
-                    // slither-disable-next-line incorrect-exponentiation
+                    // slither-disable-next-line incorrect-exp
                     mstore(xor(leafSlot, 32), calldataload(i))
                     // hash the first 64 bytes in memory
                     leaf := keccak256(0, 64)
@@ -74,8 +74,8 @@ library Merkle {
         bytes32 rootHash,
         bytes32[] calldata proof
     ) internal pure returns (bool isMember) {
-        // slither-disable-next-line assembly
         // solhint-disable-next-line no-inline-assembly
+        // slither-disable-next-line assembly
         assembly ("memory-safe") {
             // if proof is empty, check if the leaf is the root
             if proof.length {
@@ -91,7 +91,7 @@ library Merkle {
                     // store the leaf at the calculated slot
                     mstore(leafSlot, leaf)
                     // store proof element in whichever slot is not occupied by the leaf
-                    // slither-disable-next-line incorrect-exponentiation
+                    // slither-disable-next-line incorrect-exp
                     mstore(xor(leafSlot, 32), calldataload(i))
                     // hash the first 64 bytes in memory
                     leaf := keccak256(0, 64)
