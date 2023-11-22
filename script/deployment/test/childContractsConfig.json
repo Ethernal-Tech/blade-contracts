@@ -8,6 +8,7 @@
   },
 
   "EpochManager": {
+    "newStakeManager": "",
     "newRewardToken": "",
     "newRewardWallet": "",
     "newBaseReward": "",

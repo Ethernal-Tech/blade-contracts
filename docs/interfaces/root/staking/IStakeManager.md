@@ -10,6 +10,29 @@ Manages stakes for all child chains
 
 ## Methods
 
+### balanceOfAt
+
+```solidity
+function balanceOfAt(address account, uint256 epochNumber) external view returns (uint256)
+```
+
+returns a validator balance for a given epoch
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| account | address | undefined |
+| epochNumber | uint256 | undefined |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | undefined |
+
 ### getValidator
 
 ```solidity
@@ -125,6 +148,28 @@ returns the total amount staked for all child chains
 | Name | Type | Description |
 |---|---|---|
 | amount | uint256 | undefined |
+
+### totalSupplyAt
+
+```solidity
+function totalSupplyAt(uint256 epochNumber) external view returns (uint256)
+```
+
+returns the total supply for a given epoch
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| epochNumber | uint256 | undefined |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | undefined |
 
 ### unstake
 

@@ -8,9 +8,10 @@ import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20Snapshot
 import "../System.sol";
 import "../../interfaces/child/validator/IEpochManager.sol";
 
-contract EpochManager is IEpochManager, System, Initializable, ERC20SnapshotUpgradeable {
+contract EpochManager is IEpochManager, System, Initializable {
     using SafeERC20Upgradeable for IERC20Upgradeable;
 
+    ERC20SnapshotUpgradeable public stakeManager;
     IERC20Upgradeable public rewardToken;
     address public rewardWallet;
     uint256 public baseReward;
@@ -24,15 +25,18 @@ contract EpochManager is IEpochManager, System, Initializable, ERC20SnapshotUpgr
     mapping(address => uint256) public pendingRewards;
 
     function initialize(
+        address newStakeManager,
         address newRewardToken,
         address newRewardWallet,
         uint256 newBaseReward,
         uint256 newEpochSize
     ) public initializer {
+        require(newStakeManager != address(0), "EpochManager: INVALID_STAKE_MANAGER");
         require(newRewardToken != address(0), "EpochManager: INVALID_REWARD_TOKEN");
         require(newRewardWallet != address(0), "EpochManager: ZERO_ADDRESS");
         require(newEpochSize > 0, "EpochManager: INVALID_EPOCH_SIZE");
 
+        stakeManager = ERC20SnapshotUpgradeable(newStakeManager);
         rewardToken = IERC20Upgradeable(newRewardToken);
         rewardWallet = newRewardWallet;
         baseReward = newBaseReward;
@@ -52,14 +56,14 @@ contract EpochManager is IEpochManager, System, Initializable, ERC20SnapshotUpgr
         uint256 reward = (baseReward * totalBlocks) / epochSize;
         // TODO disincentivize long epoch times
 
-        uint256 totalSupply = totalSupplyAt(epochId);
+        uint256 totalSupply = stakeManager.totalSupplyAt(epochId);
         uint256 length = uptime.length;
         uint256 totalReward = 0;
         for (uint256 i = 0; i < length; i++) {
             Uptime memory data = uptime[i];
             require(data.signedBlocks <= totalBlocks, "SIGNED_BLOCKS_EXCEEDS_TOTAL");
             // slither-disable-next-line calls-loop
-            uint256 balance = balanceOfAt(data.validator, epochId);
+            uint256 balance = stakeManager.balanceOfAt(data.validator, epochId);
             // slither-disable-next-line divide-before-multiply
             uint256 validatorReward = (reward * balance * data.signedBlocks) / (totalSupply * totalBlocks);
             pendingRewards[data.validator] += validatorReward;
@@ -102,18 +106,5 @@ contract EpochManager is IEpochManager, System, Initializable, ERC20SnapshotUpgr
     function _totalBlocks(uint256 epochId) internal view returns (uint256 length) {
         uint256 endBlock = epochs[epochId].endBlock;
         length = endBlock == 0 ? 0 : endBlock - epochs[epochId].startBlock + 1;
-    }
-
-    function totalSupplyAt(
-        uint256 epochNumber
-    ) public view override(ERC20SnapshotUpgradeable, IEpochManager) returns (uint256) {
-        return super.totalSupplyAt(epochNumber);
-    }
-
-    function balanceOfAt(
-        address account,
-        uint256 epochNumber
-    ) public view override(ERC20SnapshotUpgradeable, IEpochManager) returns (uint256) {
-        return super.balanceOfAt(account, epochNumber);
     }
 }

@@ -4,6 +4,8 @@ pragma solidity 0.8.19;
 import "@utils/Test.sol";
 import {MockERC20} from "contracts/mocks/MockERC20.sol";
 import {EpochManager} from "contracts/child/validator/EpochManager.sol";
+import {GenesisValidator} from "contracts/interfaces/root/staking/IStakeManager.sol";
+import {StakeManager} from "contracts/child/staking/StakeManager.sol";
 import {Epoch, Uptime} from "contracts/interfaces/child/validator/IEpochManager.sol";
 import "contracts/interfaces/Errors.sol";
 
@@ -11,24 +13,42 @@ abstract contract Uninitialized is Test {
     address public constant SYSTEM = 0xffffFFFfFFffffffffffffffFfFFFfffFFFfFFfE;
 
     MockERC20 token;
+    StakeManager stakeManager;
     EpochManager epochManager;
+    string testDomain = "DUMMY_DOMAIN";
     address rewardWallet = makeAddr("rewardWallet");
     address alice = makeAddr("alice");
+    address bob = makeAddr("bob");
+    address blsAddr = makeAddr("bls");
     uint256 epochSize = 64;
 
     function setUp() public virtual {
         token = new MockERC20();
-        epochManager = new EpochManager();
         token.mint(rewardWallet, 1000 ether);
+        token.mint(alice, 1000 ether);
+        token.mint(bob, 1000 ether);
+
+        stakeManager = new StakeManager();
+        epochManager = new EpochManager();
+
         vm.prank(rewardWallet);
         token.approve(address(epochManager), type(uint256).max);
+        vm.prank(alice);
+        token.approve(address(stakeManager), type(uint256).max);
+        vm.prank(bob);
+        token.approve(address(stakeManager), type(uint256).max);
+
+        GenesisValidator[] memory validators = new GenesisValidator[](2);
+        validators[0] = GenesisValidator({addr: bob, stake: 300});
+        validators[1] = GenesisValidator({addr: alice, stake: 100});
+        stakeManager.initialize(address(token), blsAddr, address(epochManager), testDomain, validators);
     }
 }
 
 abstract contract Initialized is Uninitialized {
     function setUp() public virtual override {
         super.setUp();
-        epochManager.initialize(address(token), rewardWallet, 1 ether, epochSize);
+        epochManager.initialize(address(stakeManager), address(token), rewardWallet, 1 ether, epochSize);
 
         Epoch memory epoch = Epoch({startBlock: 1, endBlock: 64, epochRoot: bytes32(0)});
         vm.prank(SYSTEM);
@@ -50,7 +70,7 @@ abstract contract Distributed is Initialized {
 
 contract EpochManager_Initialize is Uninitialized {
     function test_Initialize() public {
-        epochManager.initialize(address(token), rewardWallet, 1 ether, epochSize);
+        epochManager.initialize(address(stakeManager), address(token), rewardWallet, 1 ether, epochSize);
         assertEq(address(epochManager.rewardToken()), address(token));
         assertEq(epochManager.rewardWallet(), rewardWallet);
         assertEq(epochManager.epochSize(), epochSize);
@@ -142,7 +162,7 @@ contract EpochManager_Distribute is Initialized {
 
     function test_DistributeRewards() public {
         Uptime[] memory uptime = new Uptime[](2);
-        uptime[0] = Uptime({validator: address(this), signedBlocks: 60});
+        uptime[0] = Uptime({validator: bob, signedBlocks: 60});
         uptime[1] = Uptime({validator: alice, signedBlocks: 50});
         uint256 reward1 = (1 ether * 3 * 60) / (4 * 64);
         uint256 reward2 = (1 ether * 1 * 50) / (4 * 64);
@@ -151,7 +171,7 @@ contract EpochManager_Distribute is Initialized {
         vm.expectEmit(true, true, true, true);
         emit RewardDistributed(1, totalReward);
         epochManager.distributeRewardFor(1, uptime);
-        assertEq(epochManager.pendingRewards(address(this)), reward1);
+        assertEq(epochManager.pendingRewards(bob), reward1);
         assertEq(epochManager.pendingRewards(alice), reward2);
         assertEq(epochManager.paidRewardPerEpoch(1), totalReward);
     }

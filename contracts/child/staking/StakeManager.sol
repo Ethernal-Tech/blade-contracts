@@ -2,15 +2,17 @@
 pragma solidity 0.8.19;
 
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import "@openzeppelin/contracts-upgradeable/access/Ownable2StepUpgradeable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20SnapshotUpgradeable.sol";
 import "../../interfaces/root/staking/IStakeManager.sol";
 import "../../interfaces/IStateSender.sol";
 import "../../interfaces/common/IBLS.sol";
 import "../../interfaces/child/validator/IEpochManager.sol";
 import "../../lib/WithdrawalQueue.sol";
 
-contract StakeManager is IStakeManager, Initializable {
+contract StakeManager is IStakeManager, Initializable, Ownable2StepUpgradeable, ERC20SnapshotUpgradeable {
     using SafeERC20 for IERC20;
     using WithdrawalQueueLib for WithdrawalQueue;
 
@@ -44,6 +46,7 @@ contract StakeManager is IStakeManager, Initializable {
         string memory newDomain,
         GenesisValidator[] memory genesisValidators
     ) public initializer {
+        __ERC20_init("StakeManager", "STAKE");
         _stakingToken = IERC20(newStakingToken);
         _bls = IBLS(newBls);
         _epochManager = IEpochManager(epochManager);
@@ -55,26 +58,21 @@ contract StakeManager is IStakeManager, Initializable {
                 true,
                 true
             );
+            _stake(genesisValidators[i].addr, genesisValidators[i].stake);
         }
     }
 
     /**
      * @inheritdoc IStakeManager
      */
-    function stake(uint256 amount) external {
-        // slither-disable-next-line reentrancy-benign,reentrancy-events
-        _stakingToken.safeTransferFrom(msg.sender, address(this), amount);
-        // calling the library directly once fixes the coverage issue
-        // https://github.com/foundry-rs/foundry/issues/4854#issuecomment-1528897219
-        _addStake(msg.sender, amount);
-        // slither-disable-next-line reentrancy-events
-        emit StakeAdded(msg.sender, amount);
+    function stake(uint256 amount) external onlyValidator(msg.sender) {
+        _stake(msg.sender, amount);
     }
 
     /**
      * @inheritdoc IStakeManager
      */
-    function unstake(uint256 amount) external {
+    function unstake(uint256 amount) external onlyValidator(msg.sender) {
         _unstake(msg.sender, amount);
     }
 
@@ -109,7 +107,7 @@ contract StakeManager is IStakeManager, Initializable {
     /**
      * @inheritdoc IStakeManager
      */
-    function whitelistValidators(address[] calldata validators_) external {
+    function whitelistValidators(address[] calldata validators_) external onlyOwner {
         uint256 length = validators_.length;
         for (uint256 i = 0; i < length; i++) {
             _addToWhitelist(validators_[i]);
@@ -189,7 +187,19 @@ contract StakeManager is IStakeManager, Initializable {
         if (!callSuccess || !result) revert InvalidSignature(signer);
     }
 
+    function _stake(address validator, uint256 amount) internal {
+        _mint(validator, amount);
+        // slither-disable-next-line reentrancy-benign,reentrancy-events
+        _stakingToken.safeTransferFrom(validator, address(this), amount);
+        // calling the library directly once fixes the coverage issue
+        // https://github.com/foundry-rs/foundry/issues/4854#issuecomment-1528897219
+        _addStake(validator, amount);
+        // slither-disable-next-line reentrancy-events
+        emit StakeAdded(validator, amount);
+    }
+
     function _unstake(address validator, uint256 amount) internal {
+        _burn(validator, amount);
         // slither-disable-next-line reentrancy-benign,reentrancy-events
         releaseStakeOf(validator, amount);
         _removeIfValidatorUnstaked(validator);
@@ -232,6 +242,29 @@ contract StakeManager is IStakeManager, Initializable {
 
     function _withdrawableStakeOf(address validator) internal view returns (uint256 amount) {
         amount = _withdrawableStakes[validator];
+    }
+
+    /// @dev the epoch number is also the snapshot id
+    function _getCurrentSnapshotId() internal view override returns (uint256) {
+        return _epochManager.currentEpochId();
+    }
+
+    function _beforeTokenTransfer(address from, address to, uint256 amount) internal override {
+        require(from == address(0) || to == address(0), "TRANSFER_FORBIDDEN");
+        super._beforeTokenTransfer(from, to, amount);
+    }
+
+    function totalSupplyAt(
+        uint256 epochNumber
+    ) public view override(ERC20SnapshotUpgradeable, IStakeManager) returns (uint256) {
+        return super.totalSupplyAt(epochNumber);
+    }
+
+    function balanceOfAt(
+        address account,
+        uint256 epochNumber
+    ) public view override(ERC20SnapshotUpgradeable, IStakeManager) returns (uint256) {
+        return super.balanceOfAt(account, epochNumber);
     }
 
     // slither-disable-next-line unused-state,naming-convention

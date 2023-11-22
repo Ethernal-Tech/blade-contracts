@@ -73,4 +73,10 @@ interface IStakeManager {
      * @return Amount not yet withdrawable (in MATIC wei)
      */
     function pendingWithdrawals(address account) external view returns (uint256);
+
+    /// @notice returns the total supply for a given epoch
+    function totalSupplyAt(uint256 epochNumber) external view returns (uint256);
+
+    /// @notice returns a validator balance for a given epoch
+    function balanceOfAt(address account, uint256 epochNumber) external view returns (uint256);
 }

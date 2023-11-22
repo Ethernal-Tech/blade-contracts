@@ -106,6 +106,7 @@ contract DeployChildContracts is
 
         (epochManagerLogic, epochManagerProxy) = deployEpochManager(
             proxyAdmin,
+            config.readAddress('["EpochManager"].newStakeManager'),
             config.readAddress('["EpochManager"].newRewardToken'),
             config.readAddress('["EpochManager"].newRewardWallet'),
             config.readUint('["EpochManager"].newBaseReward'),

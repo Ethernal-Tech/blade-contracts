@@ -20,7 +20,19 @@ abstract contract Uninitialized is Test {
 
     function setUp() public virtual {
         token = new MockERC20();
+        token.mint(alice, 1000 ether);
+        token.mint(bob, 1000 ether);
+        token.mint(jim, 1000 ether);
+
         stakeManager = new StakeManager();
+
+        vm.prank(alice);
+        token.approve(address(stakeManager), type(uint256).max);
+        vm.prank(bob);
+        token.approve(address(stakeManager), type(uint256).max);
+        vm.prank(jim);
+        token.approve(address(stakeManager), type(uint256).max);
+
         blsAddr = makeAddr("bls");
         epochManagerAddr = makeAddr("epochManager");
     }

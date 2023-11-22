@@ -10,29 +10,6 @@ Tracks epochs and distributes rewards to validators for committed epochs
 
 ## Methods
 
-### balanceOfAt
-
-```solidity
-function balanceOfAt(address account, uint256 epochNumber) external view returns (uint256)
-```
-
-returns a validator balance for a given epoch
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| account | address | undefined |
-| epochNumber | uint256 | undefined |
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | uint256 | undefined |
-
 ### commitEpoch
 
 ```solidity
@@ -121,28 +98,6 @@ returns the pending reward for the given account
 | Name | Type | Description |
 |---|---|---|
 | account | address | undefined |
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | uint256 | undefined |
-
-### totalSupplyAt
-
-```solidity
-function totalSupplyAt(uint256 epochNumber) external view returns (uint256)
-```
-
-returns the total supply for a given epoch
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| epochNumber | uint256 | undefined |
 
 #### Returns
 

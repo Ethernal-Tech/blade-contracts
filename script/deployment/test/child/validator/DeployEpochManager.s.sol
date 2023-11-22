@@ -10,6 +10,7 @@ import {TransparentUpgradeableProxy} from "@openzeppelin/contracts/proxy/transpa
 abstract contract EpochManagerDeployer is Script {
     function deployEpochManager(
         address proxyAdmin,
+        address newStakeManager,
         address newRewardToken,
         address newRewardWallet,
         uint256 newBaseReward,
@@ -17,7 +18,7 @@ abstract contract EpochManagerDeployer is Script {
     ) internal returns (address logicAddr, address proxyAddr) {
         bytes memory initData = abi.encodeCall(
             EpochManager.initialize,
-            (newRewardToken, newRewardWallet, newBaseReward, newEpochSize)
+            (newStakeManager, newRewardToken, newRewardWallet, newBaseReward, newEpochSize)
         );
 
         vm.startBroadcast();
@@ -40,11 +41,20 @@ abstract contract EpochManagerDeployer is Script {
 contract DeployEpochManager is EpochManagerDeployer {
     function run(
         address proxyAdmin,
+        address newStakeManager,
         address newRewardToken,
         address newRewardWallet,
         uint256 newBaseReward,
         uint256 newEpochSize
     ) external returns (address logicAddr, address proxyAddr) {
-        return deployEpochManager(proxyAdmin, newRewardToken, newRewardWallet, newBaseReward, newEpochSize);
+        return
+            deployEpochManager(
+                proxyAdmin,
+                newStakeManager,
+                newRewardToken,
+                newRewardWallet,
+                newBaseReward,
+                newEpochSize
+            );
     }
 }
