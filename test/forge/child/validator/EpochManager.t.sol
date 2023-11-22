@@ -49,15 +49,26 @@ abstract contract Initialized is Uninitialized {
     function setUp() public virtual override {
         super.setUp();
         epochManager.initialize(address(stakeManager), address(token), rewardWallet, 1 ether, epochSize);
-
-        Epoch memory epoch = Epoch({startBlock: 1, endBlock: 64, epochRoot: bytes32(0)});
-        vm.prank(SYSTEM);
-        vm.roll(block.number + 1);
-        epochManager.commitEpoch(1, epoch);
     }
 }
 
-abstract contract Distributed is Initialized {
+abstract contract Committed is Initialized {
+    function setUp() public virtual override {
+        super.setUp();
+        _beforeCommit();
+        Epoch memory epoch = Epoch({startBlock: 1, endBlock: 64, epochRoot: bytes32(0)});
+        vm.prank(SYSTEM);
+        epochManager.commitEpoch(1, epoch);
+        vm.roll(block.number + 1);
+        _afterCommit();
+    }
+
+    function _beforeCommit() internal virtual {}
+
+    function _afterCommit() internal virtual {}
+}
+
+abstract contract Distributed is Committed {
     function setUp() public virtual override {
         super.setUp();
         Uptime[] memory uptime = new Uptime[](2);
@@ -130,7 +141,7 @@ contract EpochManager_CommitEpoch is Initialized {
     }
 }
 
-contract EpochManager_Distribute is Initialized {
+contract EpochManager_Distribute is Committed {
     event RewardDistributed(uint256 indexed epochId, uint256 totalReward);
 
     function test_RevertOnlySystem() public {
@@ -194,5 +205,3 @@ contract EpochManager_Withdrawal is Distributed {
         assertEq(token.balanceOf(address(this)), reward);
     }
 }
-
-

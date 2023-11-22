@@ -41,6 +41,7 @@ contract EpochManager is IEpochManager, System, Initializable {
         rewardWallet = newRewardWallet;
         baseReward = newBaseReward;
         epochSize = newEpochSize;
+        epochEndBlocks.push(0);
 
         currentEpochId = 1;
     }
