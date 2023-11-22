@@ -51,15 +51,15 @@ contract StakeManager is IStakeManager, Initializable, Ownable2StepUpgradeable, 
         _bls = IBLS(newBls);
         _epochManager = IEpochManager(epochManager);
         domain = keccak256(abi.encodePacked(newDomain));
+
+        uint256 localTotalStake = 0;
         for (uint i = 0; i < genesisValidators.length; i++) {
-            validators[genesisValidators[i].addr] = Validator(
-                genesisValidators[i].addr,
-                genesisValidators[i].stake,
-                true,
-                true
-            );
-            _stake(genesisValidators[i].addr, genesisValidators[i].stake);
+            GenesisValidator memory validator = genesisValidators[i];
+            validators[validator.addr] = Validator(validator.addr, validator.stake, true, true);
+            _stake(validator.addr, validator.stake);
+            localTotalStake += validator.stake;
         }
+        _totalStake = localTotalStake;
     }
 
     /**
@@ -67,6 +67,7 @@ contract StakeManager is IStakeManager, Initializable, Ownable2StepUpgradeable, 
      */
     function stake(uint256 amount) external onlyValidator(msg.sender) {
         _stake(msg.sender, amount);
+        _totalStake += amount;
     }
 
     /**
@@ -193,7 +194,7 @@ contract StakeManager is IStakeManager, Initializable, Ownable2StepUpgradeable, 
         _stakingToken.safeTransferFrom(validator, address(this), amount);
         // calling the library directly once fixes the coverage issue
         // https://github.com/foundry-rs/foundry/issues/4854#issuecomment-1528897219
-        _addStake(validator, amount);
+        validators[validator].stake += amount;
         // slither-disable-next-line reentrancy-events
         emit StakeAdded(validator, amount);
     }
@@ -222,11 +223,6 @@ contract StakeManager is IStakeManager, Initializable, Ownable2StepUpgradeable, 
             validators[validator].isActive = false;
             emit ValidatorDeactivated(validator);
         }
-    }
-
-    function _addStake(address validator, uint256 amount) internal {
-        validators[validator].stake += amount;
-        _totalStake += amount;
     }
 
     function _removeStake(address validator, uint256 amount) internal {
