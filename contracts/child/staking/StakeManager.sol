@@ -49,8 +49,8 @@ contract StakeManager is IStakeManager, Initializable {
         _epochManager = IEpochManager(epochManager);
         domain = keccak256(abi.encodePacked(newDomain));
         for (uint i = 0; i < genesisValidators.length; i++) {
-            validators[genesisValidators[i].validator] = Validator(
-                genesisValidators[i].blsKey,
+            validators[genesisValidators[i].addr] = Validator(
+                genesisValidators[i].addr,
                 genesisValidators[i].stake,
                 true,
                 true
@@ -123,7 +123,6 @@ contract StakeManager is IStakeManager, Initializable {
         Validator storage validator = validators[msg.sender];
         if (!validator.isWhitelisted) revert Unauthorized("WHITELIST");
         _verifyValidatorRegistration(msg.sender, signature, pubkey);
-        validator.blsKey = pubkey;
         validator.isActive = true;
         _removeFromWhitelist(msg.sender);
         emit ValidatorRegistered(msg.sender, pubkey);

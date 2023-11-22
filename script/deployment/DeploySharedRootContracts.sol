@@ -34,7 +34,11 @@ contract DeploySharedRootContracts is BLSDeployer, BN256G2Deployer, StakeManager
 
         (stakeManagerLogic, stakeManagerProxy) = deployStakeManager(
             proxyAdmin,
-            config.readAddress('["StakeManager"].newStakingToken')
+            config.readAddress('["StakeManager"].newStakingToken'),
+            config.readAddress('["StakeManager"].newBls'),
+            config.readAddress('["StakeManager"].newEpochManager'),
+            config.readString('["StakeManager"].newDomain'),
+            abi.decode(config.readBytes('["StakeManager"].newGenesisValidators'), (GenesisValidator[]))
         );
     }
 }

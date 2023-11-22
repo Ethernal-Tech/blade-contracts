@@ -4,6 +4,10 @@
   },
 
   "StakeManager": {
-    "newStakingToken": ""
+    "newStakingToken": "",
+    "newBls": "",
+    "newEpochManager": "",
+    "newDomain": "",
+    "newGenesisValidators": ""
   }
 }

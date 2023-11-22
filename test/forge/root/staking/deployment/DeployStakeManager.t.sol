@@ -5,7 +5,7 @@ pragma solidity 0.8.19;
 import "forge-std/Test.sol";
 
 import {DeployStakeManager} from "script/deployment/root/staking/DeployStakeManager.s.sol";
-
+import {GenesisValidator} from "contracts/interfaces/root/staking/IStakeManager.sol";
 import {StakeManager} from "contracts/child/staking/StakeManager.sol";
 import {ITransparentUpgradeableProxy} from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 
@@ -18,16 +18,34 @@ contract DeployStakeManagerTest is Test {
     StakeManager internal proxyAsStakeManager;
     ITransparentUpgradeableProxy internal proxy;
 
+    address bob = makeAddr("bob");
+    address alice = makeAddr("alice");
+
     address proxyAdmin;
-    address newStakingToken;
+    address stakingTokenAddr;
+    address blsAddr;
+    address epochManagerAddr;
+    string testDomain = "DUMMY_DOMAIN";
 
     function setUp() public {
         deployer = new DeployStakeManager();
 
         proxyAdmin = makeAddr("proxyAdmin");
-        newStakingToken = makeAddr("newStakingToken");
+        stakingTokenAddr = makeAddr("newStakingToken");
+        blsAddr = makeAddr("bls");
+        epochManagerAddr = makeAddr("epochManager");
+        GenesisValidator[] memory initValidators = new GenesisValidator[](2);
+        initValidators[0] = GenesisValidator({addr: bob, stake: 300});
+        initValidators[1] = GenesisValidator({addr: alice, stake: 100});
 
-        (logicAddr, proxyAddr) = deployer.run(proxyAdmin, newStakingToken);
+        (logicAddr, proxyAddr) = deployer.run(
+            proxyAdmin,
+            stakingTokenAddr,
+            blsAddr,
+            epochManagerAddr,
+            testDomain,
+            initValidators
+        );
         _recordProxy(proxyAddr);
     }
 
@@ -42,11 +60,14 @@ contract DeployStakeManagerTest is Test {
 
     function testInitialization() public {
         vm.expectRevert("Initializable: contract is already initialized");
-        proxyAsStakeManager.initialize(newStakingToken);
+        GenesisValidator[] memory initValidators = new GenesisValidator[](2);
+        initValidators[0] = GenesisValidator({addr: bob, stake: 300});
+        initValidators[1] = GenesisValidator({addr: alice, stake: 100});
+        proxyAsStakeManager.initialize(stakingTokenAddr, blsAddr, epochManagerAddr, testDomain, initValidators);
 
         assertEq(
             vm.load(address(proxyAsStakeManager), bytes32(uint(109))),
-            bytes32(bytes.concat(hex"000000000000000000000000", abi.encodePacked(newStakingToken)))
+            bytes32(bytes.concat(hex"000000000000000000000000", abi.encodePacked(stakingTokenAddr)))
         );
     }
 

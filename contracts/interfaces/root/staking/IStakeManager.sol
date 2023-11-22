@@ -2,16 +2,15 @@
 pragma solidity 0.8.19;
 
 struct Validator {
-    uint256[4] blsKey;
+    address addr;
     uint256 stake;
     bool isWhitelisted;
     bool isActive;
 }
 
 struct GenesisValidator {
-    address validator;
+    address addr;
     uint256 stake;
-    uint256[4] blsKey;
 }
 
 /**
