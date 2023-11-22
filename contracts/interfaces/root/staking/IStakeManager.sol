@@ -38,12 +38,6 @@ interface IStakeManager {
     /// @notice called by a validator to unstake
     function unstake(uint256 amount) external;
 
-    /// @notice allows a validator to withdraw released stake
-    function withdrawStake(address to, uint256 amount) external;
-
-    /// @notice returns the amount of stake a validator can withdraw
-    function withdrawableStake(address validator) external view returns (uint256 amount);
-
     /// @notice returns the total amount staked for all child chains
     function totalStake() external view returns (uint256 amount);
 

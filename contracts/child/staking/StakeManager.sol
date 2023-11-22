@@ -18,8 +18,6 @@ contract StakeManager is IStakeManager, Initializable, Ownable2StepUpgradeable, 
 
     uint256 public constant WITHDRAWAL_WAIT_PERIOD = 1;
 
-    // slither-disable-next-line naming-convention
-    uint256 internal _totalStake;
     // validator address => withdrawable stake.
     mapping(address => uint256) private _withdrawableStakes;
 
@@ -52,14 +50,11 @@ contract StakeManager is IStakeManager, Initializable, Ownable2StepUpgradeable, 
         _epochManager = IEpochManager(epochManager);
         domain = keccak256(abi.encodePacked(newDomain));
 
-        uint256 localTotalStake = 0;
         for (uint i = 0; i < genesisValidators.length; i++) {
             GenesisValidator memory validator = genesisValidators[i];
             validators[validator.addr] = Validator(validator.addr, validator.stake, true, true);
             _stake(validator.addr, validator.stake);
-            localTotalStake += validator.stake;
         }
-        _totalStake = localTotalStake;
     }
 
     /**
@@ -67,8 +62,6 @@ contract StakeManager is IStakeManager, Initializable, Ownable2StepUpgradeable, 
      */
     function stake(uint256 amount) external onlyValidator(msg.sender) {
         _stake(msg.sender, amount);
-        // slither-disable-next-line events-maths
-        _totalStake += amount;
     }
 
     /**
@@ -81,22 +74,8 @@ contract StakeManager is IStakeManager, Initializable, Ownable2StepUpgradeable, 
     /**
      * @inheritdoc IStakeManager
      */
-    function withdrawStake(address to, uint256 amount) external {
-        _withdrawStake(msg.sender, to, amount);
-    }
-
-    /**
-     * @inheritdoc IStakeManager
-     */
-    function withdrawableStake(address validator) external view returns (uint256 amount) {
-        amount = _withdrawableStakeOf(validator);
-    }
-
-    /**
-     * @inheritdoc IStakeManager
-     */
     function totalStake() external view returns (uint256 amount) {
-        amount = _totalStake;
+        amount = totalSupply();
     }
 
     /**
@@ -142,6 +121,9 @@ contract StakeManager is IStakeManager, Initializable, Ownable2StepUpgradeable, 
         WithdrawalQueue storage queue = _withdrawals[msg.sender];
         (uint256 amount, uint256 newHead) = queue.withdrawable(_epochManager.currentEpochId());
         queue.head = newHead;
+
+        _stakingToken.safeTransfer(msg.sender, amount);
+
         emit Withdrawal(msg.sender, amount);
     }
 
@@ -150,7 +132,8 @@ contract StakeManager is IStakeManager, Initializable, Ownable2StepUpgradeable, 
      */
     // slither-disable-next-line unused-return
     function withdrawable(address account) external view returns (uint256 amount) {
-        (amount, ) = _withdrawals[account].withdrawable(_epochManager.currentEpochId());
+        uint256 currentEpochId = _epochManager.currentEpochId();
+        (amount, ) = _withdrawals[account].withdrawable(currentEpochId);
     }
 
     /**
@@ -158,13 +141,6 @@ contract StakeManager is IStakeManager, Initializable, Ownable2StepUpgradeable, 
      */
     function pendingWithdrawals(address account) external view returns (uint256) {
         return _withdrawals[account].pending(_epochManager.currentEpochId());
-    }
-
-    function _withdrawStake(address validator, address to, uint256 amount) private {
-        _withdrawableStakes[validator] -= amount;
-        // slither-disable-next-line reentrancy-events
-        _stakingToken.safeTransfer(to, amount);
-        emit StakeWithdrawn(validator, to, amount);
     }
 
     function _addToWhitelist(address validator) internal {
@@ -193,24 +169,19 @@ contract StakeManager is IStakeManager, Initializable, Ownable2StepUpgradeable, 
         _mint(validator, amount);
         // slither-disable-next-line reentrancy-benign,reentrancy-events
         _stakingToken.safeTransferFrom(validator, address(this), amount);
-        // calling the library directly once fixes the coverage issue
-        // https://github.com/foundry-rs/foundry/issues/4854#issuecomment-1528897219
-        validators[validator].stake += amount;
         // slither-disable-next-line reentrancy-events
         emit StakeAdded(validator, amount);
     }
 
     function _unstake(address validator, uint256 amount) internal {
-        _burn(validator, amount);
-        // slither-disable-next-line reentrancy-benign,reentrancy-events
-        releaseStakeOf(validator, amount);
+        _burn(msg.sender, amount);
+        _registerWithdrawal(msg.sender, amount);
         _removeIfValidatorUnstaked(validator);
     }
 
-    function releaseStakeOf(address validator, uint256 amount) internal {
-        _removeStake(validator, amount);
-        // slither-disable-next-line reentrancy-events
-        emit StakeRemoved(validator, amount);
+    function _registerWithdrawal(address account, uint256 amount) internal {
+        _withdrawals[account].append(amount, _epochManager.currentEpochId() + WITHDRAWAL_WAIT_PERIOD);
+        // emit WithdrawalRegistered(account, amount); TODO - add this event
     }
 
     /// @notice Message to sign for registration
@@ -226,23 +197,13 @@ contract StakeManager is IStakeManager, Initializable, Ownable2StepUpgradeable, 
         }
     }
 
-    function _removeStake(address validator, uint256 amount) internal {
-        validators[validator].stake -= amount;
-        _totalStake -= amount;
-        _withdrawableStakes[validator] += amount;
-        _withdrawals[validator].append(amount, _epochManager.currentEpochId() + WITHDRAWAL_WAIT_PERIOD);
-    }
-
     function _stakeOf(address validator) internal view returns (uint256 amount) {
-        amount = validators[validator].stake;
-    }
-
-    function _withdrawableStakeOf(address validator) internal view returns (uint256 amount) {
-        amount = _withdrawableStakes[validator];
+        amount = balanceOf(validator);
     }
 
     /// @dev the epoch number is also the snapshot id
     function _getCurrentSnapshotId() internal view override returns (uint256) {
+        // slither-disable-next-line calls-loop
         return _epochManager.currentEpochId();
     }
 

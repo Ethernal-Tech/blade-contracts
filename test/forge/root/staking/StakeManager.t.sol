@@ -3,20 +3,31 @@ pragma solidity 0.8.19;
 
 import "@utils/Test.sol";
 import {StakeManager} from "contracts/child/staking/StakeManager.sol";
+import {EpochManager} from "contracts/child/validator/EpochManager.sol";
 import {GenesisValidator} from "contracts/interfaces/root/staking/IStakeManager.sol";
+import {Epoch} from "contracts/interfaces/child/validator/IEpochManager.sol";
 import {MockERC20} from "contracts/mocks/MockERC20.sol";
 
 abstract contract Uninitialized is Test {
+    address public constant SYSTEM = 0xffffFFFfFFffffffffffffffFfFFFfffFFFfFFfE;
+
     MockERC20 token;
     StakeManager stakeManager;
 
     address blsAddr;
-    address epochManagerAddr;
+    EpochManager epochManager;
     string testDomain = "DUMMY_DOMAIN";
 
     address bob = makeAddr("bob");
     address alice = makeAddr("alice");
     address jim = makeAddr("jim");
+    address rewardWallet = makeAddr("rewardWallet");
+
+    uint256 newStakeAmount = 100;
+    uint256 newUnstakeAmount = 150;
+    uint256 bobInitialStake = 400;
+    uint256 aliceInitialStake = 200;
+    uint256 jimInitialStake = 100;
 
     function setUp() public virtual {
         token = new MockERC20();
@@ -25,6 +36,7 @@ abstract contract Uninitialized is Test {
         token.mint(jim, 1000 ether);
 
         stakeManager = new StakeManager();
+        epochManager = new EpochManager();
 
         vm.prank(alice);
         token.approve(address(stakeManager), type(uint256).max);
@@ -34,7 +46,8 @@ abstract contract Uninitialized is Test {
         token.approve(address(stakeManager), type(uint256).max);
 
         blsAddr = makeAddr("bls");
-        epochManagerAddr = makeAddr("epochManager");
+
+        epochManager.initialize(address(stakeManager), address(token), rewardWallet, 1 ether, 64);
     }
 }
 
@@ -42,96 +55,62 @@ abstract contract Initialized is Uninitialized {
     function setUp() public virtual override {
         super.setUp();
         GenesisValidator[] memory validators = new GenesisValidator[](3);
-        validators[0] = GenesisValidator({addr: bob, stake: 400});
-        validators[1] = GenesisValidator({addr: alice, stake: 200});
-        validators[2] = GenesisValidator({addr: jim, stake: 100});
-        stakeManager.initialize(address(token), blsAddr, epochManagerAddr, testDomain, validators);
+        validators[0] = GenesisValidator({addr: bob, stake: bobInitialStake});
+        validators[1] = GenesisValidator({addr: alice, stake: aliceInitialStake});
+        validators[2] = GenesisValidator({addr: jim, stake: jimInitialStake});
+        stakeManager.initialize(address(token), blsAddr, address(epochManager), testDomain, validators);
     }
 }
 
-abstract contract Registered is Initialized {
-    uint256 maxAmount = 1000000 ether;
-    address john;
-
+abstract contract Unstaked is Initialized {
     function setUp() public virtual override {
         super.setUp();
-        john = makeAddr("john");
-        token.mint(address(this), maxAmount * 2);
-        token.mint(john, maxAmount);
-        token.approve(address(stakeManager), type(uint256).max);
-        vm.prank(john);
-        token.approve(address(stakeManager), type(uint256).max);
-    }
-}
+        vm.prank(alice);
+        stakeManager.unstake(newUnstakeAmount);
 
-abstract contract Staked is Registered {
-    function setUp() public virtual override {
-        super.setUp();
-        stakeManager.stake(maxAmount);
-    }
-}
+        vm.prank(SYSTEM);
+        Epoch memory epoch = Epoch({startBlock: 1, endBlock: 64, epochRoot: bytes32(0)});
+        epochManager.commitEpoch(1, epoch);
 
-abstract contract Unstaked is Staked {
-    function setUp() public virtual override {
-        super.setUp();
-        vm.prank(bob);
-        stakeManager.unstake(maxAmount);
+        vm.prank(address(stakeManager));
+        token.approve(alice, type(uint256).max);
     }
 }
 
 contract StakeManager_Initialize is Uninitialized {
     function testInititialize() public {
         GenesisValidator[] memory validators = new GenesisValidator[](3);
-        validators[0] = GenesisValidator({addr: bob, stake: 400});
-        validators[1] = GenesisValidator({addr: alice, stake: 200});
-        validators[2] = GenesisValidator({addr: jim, stake: 100});
-        stakeManager.initialize(address(token), blsAddr, epochManagerAddr, testDomain, validators);
+        validators[0] = GenesisValidator({addr: bob, stake: bobInitialStake});
+        validators[1] = GenesisValidator({addr: alice, stake: aliceInitialStake});
+        validators[2] = GenesisValidator({addr: jim, stake: jimInitialStake});
+        stakeManager.initialize(address(token), blsAddr, address(epochManager), testDomain, validators);
     }
 }
 
-contract StakeManager_StakeFor is Registered, StakeManager {
+contract StakeManager_Stake is Initialized, StakeManager {
     function test_Stake(uint256 amount) public {
-        vm.assume(amount <= maxAmount);
+        vm.assume(amount <= newStakeAmount);
         vm.expectEmit(true, true, true, true);
-        emit StakeAdded(address(this), amount);
+        emit StakeAdded(bob, amount);
+
+        vm.prank(bob);
         stakeManager.stake(amount);
-        assertEq(stakeManager.totalStake(), amount, "total stake mismatch");
-        assertEq(stakeManager.stakeOf(address(this)), amount, "stake of mismatch");
-        assertEq(token.balanceOf(address(stakeManager)), amount, "token balance mismatch");
-    }
-
-    function test_StakeMultiple(uint256 amount1, uint256 amount2, uint256 amount3) public {
-        vm.assume(amount1 <= maxAmount && amount2 <= maxAmount && amount3 <= maxAmount);
-        stakeManager.stake(amount1);
-        stakeManager.stake(amount2);
-        vm.prank(john);
-        stakeManager.stake(amount3);
-        assertEq(stakeManager.totalStake(), amount1 + amount2 + amount3, "total stake mismatch");
-        assertEq(stakeManager.stakeOf(address(this)), amount1, "stake of mismatch");
-        assertEq(stakeManager.stakeOf(address(this)), amount2, "stake of mismatch");
-        assertEq(stakeManager.stakeOf(john), amount3, "stake of mismatch");
-        assertEq(token.balanceOf(address(stakeManager)), amount1 + amount2 + amount3, "token balance mismatch");
-    }
-}
-
-contract StakeManager_ReleaseStake is Staked, StakeManager {
-    function test_ReleaseStakeFor(uint256 amount) public {
-        vm.assume(amount <= maxAmount);
-        vm.expectEmit(true, true, true, true);
-        emit StakeRemoved(address(this), amount);
-        stakeManager.unstake(amount);
-        assertEq(stakeManager.totalStake(), maxAmount - amount, "total stake mismatch");
-        assertEq(stakeManager.stakeOf(address(this)), maxAmount - amount, "stake of mismatch");
-        assertEq(stakeManager.withdrawableStake(address(this)), amount, "withdrawable stake mismatch");
+        uint256 totalStake = stakeManager.balanceOf(bob)+aliceInitialStake+jimInitialStake;
+        assertEq(stakeManager.totalStake(), totalStake, "total stake mismatch");
+        assertEq(stakeManager.stakeOf(bob), amount+bobInitialStake, "stake of mismatch");
+        assertEq(token.balanceOf(address(stakeManager)), totalStake, "token balance mismatch");
     }
 }
 
 contract StakeManager_WithdrawStake is Unstaked, StakeManager {
-    function test_WithdrawStake(uint256 amount) public {
-        vm.assume(amount <= maxAmount);
+    function test_WithdrawStake() public {
         vm.expectEmit(true, true, true, true);
-        emit StakeWithdrawn(address(this), bob, amount);
-        stakeManager.withdrawStake(bob, amount);
-        assertEq(stakeManager.withdrawableStake(address(this)), maxAmount - amount, "withdrawable stake mismatch");
+        emit Withdrawal(alice, newUnstakeAmount);
+        
+        assertEq(stakeManager.withdrawable(alice), newUnstakeAmount, "withdrawable stake mismatch");
+        assertEq(stakeManager.stakeOf(alice), aliceInitialStake-newUnstakeAmount, "expected stake missmatch");
+
+        vm.prank(alice);
+        stakeManager.withdraw();
     }
 }
