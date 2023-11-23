@@ -122,9 +122,8 @@ contract StakeManager is IStakeManager, Initializable, Ownable2StepUpgradeable, 
         (uint256 amount, uint256 newHead) = queue.withdrawable(_epochManager.currentEpochId());
         queue.head = newHead;
 
-        _stakingToken.safeTransfer(msg.sender, amount);
-
         emit Withdrawal(msg.sender, amount);
+        _stakingToken.safeTransfer(msg.sender, amount);
     }
 
     /**
