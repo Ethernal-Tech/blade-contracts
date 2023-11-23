@@ -18,9 +18,6 @@ contract StakeManager is IStakeManager, Initializable, Ownable2StepUpgradeable, 
 
     uint256 public constant WITHDRAWAL_WAIT_PERIOD = 1;
 
-    // validator address => withdrawable stake.
-    mapping(address => uint256) private _withdrawableStakes;
-
     IBLS private _bls;
     IERC20 private _stakingToken;
     IEpochManager private _epochManager;

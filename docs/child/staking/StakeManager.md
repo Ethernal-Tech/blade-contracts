@@ -594,23 +594,6 @@ allows a validator to complete a withdrawal
 *calls the bridge to release the funds on root*
 
 
-### withdrawStake
-
-```solidity
-function withdrawStake(address to, uint256 amount) external nonpayable
-```
-
-allows a validator to withdraw released stake
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| to | address | undefined |
-| amount | uint256 | undefined |
-
 ### withdrawable
 
 ```solidity
@@ -632,28 +615,6 @@ Calculates how much can be withdrawn for account in this epoch.
 | Name | Type | Description |
 |---|---|---|
 | amount | uint256 | Amount withdrawable (in MATIC wei) |
-
-### withdrawableStake
-
-```solidity
-function withdrawableStake(address validator) external view returns (uint256 amount)
-```
-
-returns the amount of stake a validator can withdraw
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| validator | address | undefined |
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| amount | uint256 | undefined |
 
 
 
