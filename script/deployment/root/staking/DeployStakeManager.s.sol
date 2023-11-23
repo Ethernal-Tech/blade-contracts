@@ -6,7 +6,7 @@ import "forge-std/Script.sol";
 
 import {StakeManager} from "contracts/child/staking/StakeManager.sol";
 import {TransparentUpgradeableProxy} from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
-import {GenesisValidator} from "contracts/interfaces/root/staking/IStakeManager.sol";
+import {GenesisValidator} from "contracts/interfaces/child/staking/IStakeManager.sol";
 
 abstract contract StakeManagerDeployer is Script {
     function deployStakeManager(

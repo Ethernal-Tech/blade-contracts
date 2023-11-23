@@ -545,7 +545,7 @@ called by a validator to unstake
 ### validators
 
 ```solidity
-function validators(address) external view returns (address addr, uint256 stake, bool isWhitelisted, bool isActive)
+function validators(address) external view returns (address addr, bool isWhitelisted, bool isActive)
 ```
 
 
@@ -563,7 +563,6 @@ function validators(address) external view returns (address addr, uint256 stake,
 | Name | Type | Description |
 |---|---|---|
 | addr | address | undefined |
-| stake | uint256 | undefined |
 | isWhitelisted | bool | undefined |
 | isActive | bool | undefined |
 
@@ -653,23 +652,6 @@ event Approval(address indexed owner, address indexed spender, uint256 value)
 | owner `indexed` | address | undefined |
 | spender `indexed` | address | undefined |
 | value  | uint256 | undefined |
-
-### ChildManagerRegistered
-
-```solidity
-event ChildManagerRegistered(uint256 indexed id, address indexed manager)
-```
-
-
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| id `indexed` | uint256 | undefined |
-| manager `indexed` | address | undefined |
 
 ### Initialized
 
@@ -790,7 +772,7 @@ event StakeRemoved(address indexed validator, uint256 amount)
 ### StakeWithdrawn
 
 ```solidity
-event StakeWithdrawn(address indexed validator, address indexed recipient, uint256 amount)
+event StakeWithdrawn(address indexed account, uint256 amount)
 ```
 
 
@@ -801,8 +783,7 @@ event StakeWithdrawn(address indexed validator, address indexed recipient, uint2
 
 | Name | Type | Description |
 |---|---|---|
-| validator `indexed` | address | undefined |
-| recipient `indexed` | address | undefined |
+| account `indexed` | address | undefined |
 | amount  | uint256 | undefined |
 
 ### Transfer
@@ -855,23 +836,6 @@ event ValidatorRegistered(address indexed validator, uint256[4] blsKey)
 |---|---|---|
 | validator `indexed` | address | undefined |
 | blsKey  | uint256[4] | undefined |
-
-### Withdrawal
-
-```solidity
-event Withdrawal(address indexed account, uint256 amount)
-```
-
-
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| account `indexed` | address | undefined |
-| amount  | uint256 | undefined |
 
 
 

@@ -231,28 +231,6 @@ function distributeRewardFor(uint256 epochId, Uptime[] uptime) external nonpayab
 | epochId | uint256 | undefined |
 | uptime | Uptime[] | undefined |
 
-### epochEndBlocks
-
-```solidity
-function epochEndBlocks(uint256) external view returns (uint256)
-```
-
-
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | uint256 | undefined |
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | uint256 | undefined |
-
 ### epochSize
 
 ```solidity

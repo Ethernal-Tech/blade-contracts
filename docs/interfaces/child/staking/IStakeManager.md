@@ -256,23 +256,6 @@ event AddedToWhitelist(address indexed validator)
 |---|---|---|
 | validator `indexed` | address | undefined |
 
-### ChildManagerRegistered
-
-```solidity
-event ChildManagerRegistered(uint256 indexed id, address indexed manager)
-```
-
-
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| id `indexed` | uint256 | undefined |
-| manager `indexed` | address | undefined |
-
 ### RemovedFromWhitelist
 
 ```solidity
@@ -326,7 +309,7 @@ event StakeRemoved(address indexed validator, uint256 amount)
 ### StakeWithdrawn
 
 ```solidity
-event StakeWithdrawn(address indexed validator, address indexed recipient, uint256 amount)
+event StakeWithdrawn(address indexed account, uint256 amount)
 ```
 
 
@@ -337,8 +320,7 @@ event StakeWithdrawn(address indexed validator, address indexed recipient, uint2
 
 | Name | Type | Description |
 |---|---|---|
-| validator `indexed` | address | undefined |
-| recipient `indexed` | address | undefined |
+| account `indexed` | address | undefined |
 | amount  | uint256 | undefined |
 
 ### ValidatorDeactivated
@@ -373,23 +355,6 @@ event ValidatorRegistered(address indexed validator, uint256[4] blsKey)
 |---|---|---|
 | validator `indexed` | address | undefined |
 | blsKey  | uint256[4] | undefined |
-
-### Withdrawal
-
-```solidity
-event Withdrawal(address indexed account, uint256 amount)
-```
-
-
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| account `indexed` | address | undefined |
-| amount  | uint256 | undefined |
 
 
 

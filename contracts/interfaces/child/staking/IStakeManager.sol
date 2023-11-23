@@ -3,7 +3,6 @@ pragma solidity 0.8.19;
 
 struct Validator {
     address addr;
-    uint256 stake;
     bool isWhitelisted;
     bool isActive;
 }
@@ -19,15 +18,13 @@ struct GenesisValidator {
     @notice Manages stakes for all child chains
  */
 interface IStakeManager {
-    event ChildManagerRegistered(uint256 indexed id, address indexed manager);
     event StakeAdded(address indexed validator, uint256 amount);
     event StakeRemoved(address indexed validator, uint256 amount);
-    event StakeWithdrawn(address indexed validator, address indexed recipient, uint256 amount);
     event AddedToWhitelist(address indexed validator);
     event RemovedFromWhitelist(address indexed validator);
     event ValidatorRegistered(address indexed validator, uint256[4] blsKey);
     event ValidatorDeactivated(address indexed validator);
-    event Withdrawal(address indexed account, uint256 amount);
+    event StakeWithdrawn(address indexed account, uint256 amount);
 
     error Unauthorized(string message);
     error InvalidSignature(address validator);

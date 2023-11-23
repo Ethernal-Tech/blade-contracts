@@ -4,7 +4,7 @@ pragma solidity 0.8.19;
 import "@utils/Test.sol";
 import {MockERC20} from "contracts/mocks/MockERC20.sol";
 import {EpochManager} from "contracts/child/validator/EpochManager.sol";
-import {GenesisValidator} from "contracts/interfaces/root/staking/IStakeManager.sol";
+import {GenesisValidator} from "contracts/interfaces/child/staking/IStakeManager.sol";
 import {StakeManager} from "contracts/child/staking/StakeManager.sol";
 import {Epoch, Uptime} from "contracts/interfaces/child/validator/IEpochManager.sol";
 import "contracts/interfaces/Errors.sol";
@@ -137,7 +137,6 @@ contract EpochManager_CommitEpoch is Initialized {
         emit NewEpoch(1, 1, 64, bytes32(0));
         epochManager.commitEpoch(1, epoch);
         assertEq(epochManager.currentEpochId(), 2);
-        assertEq(epochManager.epochEndBlocks(1), 64);
     }
 }
 

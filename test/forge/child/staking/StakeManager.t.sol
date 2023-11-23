@@ -4,7 +4,7 @@ pragma solidity 0.8.19;
 import "@utils/Test.sol";
 import {StakeManager} from "contracts/child/staking/StakeManager.sol";
 import {EpochManager} from "contracts/child/validator/EpochManager.sol";
-import {GenesisValidator} from "contracts/interfaces/root/staking/IStakeManager.sol";
+import {GenesisValidator} from "contracts/interfaces/child/staking/IStakeManager.sol";
 import {Epoch} from "contracts/interfaces/child/validator/IEpochManager.sol";
 import {MockERC20} from "contracts/mocks/MockERC20.sol";
 
@@ -105,7 +105,7 @@ contract StakeManager_Stake is Initialized, StakeManager {
 contract StakeManager_WithdrawStake is Unstaked, StakeManager {
     function test_WithdrawStake() public {
         vm.expectEmit(true, true, true, true);
-        emit Withdrawal(alice, newUnstakeAmount);
+        emit StakeWithdrawn(alice, newUnstakeAmount);
         
         assertEq(stakeManager.withdrawable(alice), newUnstakeAmount, "withdrawable stake mismatch");
         assertEq(stakeManager.stakeOf(alice), aliceInitialStake-newUnstakeAmount, "expected stake missmatch");

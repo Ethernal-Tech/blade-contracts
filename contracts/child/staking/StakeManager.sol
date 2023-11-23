@@ -6,7 +6,7 @@ import "@openzeppelin/contracts-upgradeable/access/Ownable2StepUpgradeable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20SnapshotUpgradeable.sol";
-import "../../interfaces/root/staking/IStakeManager.sol";
+import "../../interfaces/child/staking/IStakeManager.sol";
 import "../../interfaces/IStateSender.sol";
 import "../../interfaces/common/IBLS.sol";
 import "../../interfaces/child/validator/IEpochManager.sol";
@@ -49,7 +49,7 @@ contract StakeManager is IStakeManager, Initializable, Ownable2StepUpgradeable, 
 
         for (uint i = 0; i < genesisValidators.length; i++) {
             GenesisValidator memory validator = genesisValidators[i];
-            validators[validator.addr] = Validator(validator.addr, validator.stake, true, true);
+            validators[validator.addr] = Validator(validator.addr, true, true);
             _stake(validator.addr, validator.stake);
         }
     }
@@ -119,7 +119,7 @@ contract StakeManager is IStakeManager, Initializable, Ownable2StepUpgradeable, 
         (uint256 amount, uint256 newHead) = queue.withdrawable(_epochManager.currentEpochId());
         queue.head = newHead;
 
-        emit Withdrawal(msg.sender, amount);
+        emit StakeWithdrawn(msg.sender, amount);
         _stakingToken.safeTransfer(msg.sender, amount);
     }
 
@@ -171,13 +171,14 @@ contract StakeManager is IStakeManager, Initializable, Ownable2StepUpgradeable, 
 
     function _unstake(address validator, uint256 amount) internal {
         _burn(msg.sender, amount);
+        emit StakeRemoved(validator, amount);
+
         _registerWithdrawal(msg.sender, amount);
         _removeIfValidatorUnstaked(validator);
     }
 
     function _registerWithdrawal(address account, uint256 amount) internal {
         _withdrawals[account].append(amount, _epochManager.currentEpochId() + WITHDRAWAL_WAIT_PERIOD);
-        // emit WithdrawalRegistered(account, amount); TODO - add this event
     }
 
     /// @notice Message to sign for registration

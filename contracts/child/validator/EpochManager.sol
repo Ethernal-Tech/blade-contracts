@@ -19,7 +19,6 @@ contract EpochManager is IEpochManager, System, Initializable {
 
     uint256 public currentEpochId;
     mapping(uint256 => Epoch) public epochs;
-    uint256[] public epochEndBlocks;
 
     mapping(uint256 => uint256) public paidRewardPerEpoch;
     mapping(address => uint256) public pendingRewards;
@@ -41,7 +40,6 @@ contract EpochManager is IEpochManager, System, Initializable {
         rewardWallet = newRewardWallet;
         baseReward = newBaseReward;
         epochSize = newEpochSize;
-        epochEndBlocks.push(0);
 
         currentEpochId = 1;
     }
@@ -85,7 +83,6 @@ contract EpochManager is IEpochManager, System, Initializable {
         require((epoch.endBlock - epoch.startBlock + 1) % epochSize == 0, "EPOCH_MUST_BE_DIVISIBLE_BY_EPOCH_SIZE");
         require(epochs[newEpochId - 1].endBlock + 1 == epoch.startBlock, "INVALID_START_BLOCK");
         epochs[newEpochId] = epoch;
-        epochEndBlocks.push(epoch.endBlock);
         emit NewEpoch(id, epoch.startBlock, epoch.endBlock, epoch.epochRoot);
     }
 
