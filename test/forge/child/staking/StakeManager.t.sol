@@ -2,10 +2,10 @@
 pragma solidity 0.8.19;
 
 import "@utils/Test.sol";
-import {StakeManager} from "contracts/child/staking/StakeManager.sol";
-import {EpochManager} from "contracts/child/validator/EpochManager.sol";
-import {GenesisValidator} from "contracts/interfaces/child/staking/IStakeManager.sol";
-import {Epoch} from "contracts/interfaces/child/validator/IEpochManager.sol";
+import {StakeManager} from "contracts/blade/staking/StakeManager.sol";
+import {EpochManager} from "contracts/blade/validator/EpochManager.sol";
+import {GenesisValidator} from "contracts/interfaces/blade/staking/IStakeManager.sol";
+import {Epoch} from "contracts/interfaces/blade/validator/IEpochManager.sol";
 import {MockERC20} from "contracts/mocks/MockERC20.sol";
 
 abstract contract Uninitialized is Test {
