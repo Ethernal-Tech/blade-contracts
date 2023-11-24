@@ -55,9 +55,9 @@ abstract contract Initialized is Uninitialized {
     function setUp() public virtual override {
         super.setUp();
         GenesisValidator[] memory validators = new GenesisValidator[](3);
-        validators[0] = GenesisValidator({addr: bob, stake: bobInitialStake});
-        validators[1] = GenesisValidator({addr: alice, stake: aliceInitialStake});
-        validators[2] = GenesisValidator({addr: jim, stake: jimInitialStake});
+        validators[0] = GenesisValidator({addr: bob, stake: bobInitialStake, blsKey: [type(uint256).max, type(uint256).max, type(uint256).max, type(uint256).max]});
+        validators[1] = GenesisValidator({addr: alice, stake: aliceInitialStake, blsKey: [type(uint256).max, type(uint256).max, type(uint256).max, type(uint256).max]});
+        validators[2] = GenesisValidator({addr: jim, stake: jimInitialStake, blsKey: [type(uint256).max, type(uint256).max, type(uint256).max, type(uint256).max]});
         stakeManager.initialize(address(token), blsAddr, address(epochManager), testDomain, validators);
     }
 }
@@ -80,9 +80,9 @@ abstract contract Unstaked is Initialized {
 contract StakeManager_Initialize is Uninitialized {
     function testInititialize() public {
         GenesisValidator[] memory validators = new GenesisValidator[](3);
-        validators[0] = GenesisValidator({addr: bob, stake: bobInitialStake});
-        validators[1] = GenesisValidator({addr: alice, stake: aliceInitialStake});
-        validators[2] = GenesisValidator({addr: jim, stake: jimInitialStake});
+        validators[0] = GenesisValidator({addr: bob, stake: bobInitialStake, blsKey: [type(uint256).max, type(uint256).max, type(uint256).max, type(uint256).max]});
+        validators[1] = GenesisValidator({addr: alice, stake: aliceInitialStake, blsKey: [type(uint256).max, type(uint256).max, type(uint256).max, type(uint256).max]});
+        validators[2] = GenesisValidator({addr: jim, stake: jimInitialStake, blsKey: [type(uint256).max, type(uint256).max, type(uint256).max, type(uint256).max]});
         stakeManager.initialize(address(token), blsAddr, address(epochManager), testDomain, validators);
     }
 }

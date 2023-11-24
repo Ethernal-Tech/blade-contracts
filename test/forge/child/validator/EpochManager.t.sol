@@ -39,8 +39,8 @@ abstract contract Uninitialized is Test {
         token.approve(address(stakeManager), type(uint256).max);
 
         GenesisValidator[] memory validators = new GenesisValidator[](2);
-        validators[0] = GenesisValidator({addr: bob, stake: 300});
-        validators[1] = GenesisValidator({addr: alice, stake: 100});
+        validators[0] = GenesisValidator({addr: bob, stake: 300, blsKey: [type(uint256).max, type(uint256).max, type(uint256).max, type(uint256).max]});
+        validators[1] = GenesisValidator({addr: alice, stake: 100, blsKey: [type(uint256).max, type(uint256).max, type(uint256).max, type(uint256).max]});
         stakeManager.initialize(address(token), blsAddr, address(epochManager), testDomain, validators);
     }
 }

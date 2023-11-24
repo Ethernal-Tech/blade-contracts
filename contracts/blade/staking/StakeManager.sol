@@ -49,7 +49,7 @@ contract StakeManager is IStakeManager, Initializable, Ownable2StepUpgradeable, 
 
         for (uint i = 0; i < genesisValidators.length; i++) {
             GenesisValidator memory validator = genesisValidators[i];
-            validators[validator.addr] = Validator(validator.addr, true, true);
+            validators[validator.addr] = Validator(validator.addr, validator.blsKey, true, true);
             _stake(validator.addr, validator.stake);
         }
     }
@@ -100,6 +100,8 @@ contract StakeManager is IStakeManager, Initializable, Ownable2StepUpgradeable, 
         if (!validator.isWhitelisted) revert Unauthorized("WHITELIST");
         _verifyValidatorRegistration(msg.sender, signature, pubkey);
         validator.isActive = true;
+        validator.blsKey = pubkey;
+        validator.addr = msg.sender;
         _removeFromWhitelist(msg.sender);
         emit ValidatorRegistered(msg.sender, pubkey);
     }
