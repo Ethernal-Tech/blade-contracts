@@ -81,7 +81,6 @@
   "NativeERC20": {
     "predicate_": "",
     "owner_": "",
-    "rootToken_": "",
     "name_": "",
     "symbol_": "",
     "decimals_": "",

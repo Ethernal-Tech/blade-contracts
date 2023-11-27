@@ -209,7 +209,6 @@ contract DeployBladeContracts is
             proxyAdmin,
             config.readAddress('["NativeERC20"].predicate_'),
             config.readAddress('["NativeERC20"].owner_'),
-            config.readAddress('["NativeERC20"].rootToken_'),
             config.readString('["NativeERC20"].name_'),
             config.readString('["NativeERC20"].symbol_'),
             uint8(config.readUint('["NativeERC20"].decimals_')),
