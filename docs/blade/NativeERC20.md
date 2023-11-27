@@ -331,7 +331,7 @@ function increaseAllowance(address spender, uint256 addedValue) external nonpaya
 ### initialize
 
 ```solidity
-function initialize(address predicate_, address owner_, address rootToken_, string name_, string symbol_, uint8 decimals_, uint256 tokenSupply_) external nonpayable
+function initialize(address predicate_, address owner_, string name_, string symbol_, uint8 decimals_, uint256 tokenSupply_) external nonpayable
 ```
 
 
@@ -344,7 +344,6 @@ function initialize(address predicate_, address owner_, address rootToken_, stri
 |---|---|---|
 | predicate_ | address | undefined |
 | owner_ | address | undefined |
-| rootToken_ | address | undefined |
 | name_ | string | undefined |
 | symbol_ | string | undefined |
 | decimals_ | uint8 | undefined |
@@ -451,23 +450,6 @@ function renounceOwnership() external nonpayable
 
 *Leaves the contract without owner. It will not be possible to call `onlyOwner` functions. Can only be called by the current owner. NOTE: Renouncing ownership will leave the contract without an owner, thereby disabling any functionality that is only available to the owner.*
 
-
-### rootToken
-
-```solidity
-function rootToken() external view returns (address)
-```
-
-Returns corresponding root token address for the child native token
-
-
-
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | address | address Returns the root token address |
 
 ### symbol
 

@@ -74,15 +74,7 @@ describe("NativeERC20", () => {
 
   it("fail initialization: systemcall", async () => {
     await expect(
-      nativeERC20.initialize(
-        ethers.constants.AddressZero,
-        ethers.constants.AddressZero,
-        ethers.constants.AddressZero,
-        "TEST",
-        "TEST",
-        18,
-        0
-      )
+      nativeERC20.initialize(ethers.constants.AddressZero, ethers.constants.AddressZero, "TEST", "TEST", 18, 0)
     )
       .to.be.revertedWithCustomError(nativeERC20, "Unauthorized")
       .withArgs("SYSTEMCALL");
@@ -90,15 +82,7 @@ describe("NativeERC20", () => {
 
   it("fail initialization: systemcall", async () => {
     await expect(
-      nativeERC20.initialize(
-        ethers.constants.AddressZero,
-        ethers.constants.AddressZero,
-        ethers.constants.AddressZero,
-        "TEST",
-        "TEST",
-        18,
-        0
-      )
+      nativeERC20.initialize(ethers.constants.AddressZero, ethers.constants.AddressZero, "TEST", "TEST", 18, 0)
     )
       .to.be.revertedWithCustomError(nativeERC20, "Unauthorized")
       .withArgs("SYSTEMCALL");
@@ -106,15 +90,7 @@ describe("NativeERC20", () => {
 
   it("fail initialization: invalid owner", async () => {
     await expect(
-      systemNativeERC20.initialize(
-        ethers.constants.AddressZero,
-        ethers.constants.AddressZero,
-        ethers.constants.AddressZero,
-        "TEST",
-        "TEST",
-        18,
-        0
-      )
+      systemNativeERC20.initialize(ethers.constants.AddressZero, ethers.constants.AddressZero, "TEST", "TEST", 18, 0)
     ).to.be.revertedWith("NativeERC20: Invalid owner address");
   });
 
@@ -140,15 +116,7 @@ describe("NativeERC20", () => {
 
   it("reinitialization fail", async () => {
     await expect(
-      nativeERC20.initialize(
-        ethers.constants.AddressZero,
-        ethers.constants.AddressZero,
-        ethers.constants.AddressZero,
-        "",
-        "",
-        0,
-        0
-      )
+      nativeERC20.initialize(ethers.constants.AddressZero, ethers.constants.AddressZero, "", "", 0, 0)
     ).to.be.revertedWith("Initializable: contract is already initialized");
   });
 
