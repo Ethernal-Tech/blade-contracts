@@ -240,6 +240,14 @@ contract NativeERC20 is Context, Initializable, System, Ownable2Step, IERC20Meta
     }
 
     /**
+     * @notice Returns corresponding root token address for the child native token
+     * @return address Returns the root token address
+     */
+    function rootToken() public view virtual returns (address) {
+        return address(0);
+    }
+
+    /**
      * @dev Moves `amount` of tokens from `from` to `to`.
      *
      * This internal function is equivalent to {transfer}, and can be used to

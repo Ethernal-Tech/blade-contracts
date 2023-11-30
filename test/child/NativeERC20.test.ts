@@ -95,17 +95,8 @@ describe("NativeERC20", () => {
   });
 
   it("initialize and validate initialization", async () => {
-    await expect(
-      systemNativeERC20.initialize(
-        childERC20Predicate.address,
-        accounts[1].address,
-        ethers.constants.AddressZero,
-        "TEST",
-        "TEST",
-        18,
-        0
-      )
-    ).to.not.be.reverted;
+    await expect(systemNativeERC20.initialize(childERC20Predicate.address, accounts[1].address, "TEST", "TEST", 18, 0))
+      .to.not.be.reverted;
     expect(await nativeERC20.name()).to.equal("TEST");
     expect(await nativeERC20.symbol()).to.equal("TEST");
     expect(await nativeERC20.decimals()).to.equal(18);
