@@ -24,7 +24,7 @@ interface IStakeManager {
     event StakeRemoved(address indexed validator, uint256 amount);
     event AddedToWhitelist(address indexed validator);
     event RemovedFromWhitelist(address indexed validator);
-    event ValidatorRegistered(address indexed validator, uint256[4] blsKey);
+    event ValidatorRegistered(address indexed validator, uint256[4] blsKey, uint256 amount);
     event ValidatorDeactivated(address indexed validator);
     event StakeWithdrawn(address indexed account, uint256 amount);
 

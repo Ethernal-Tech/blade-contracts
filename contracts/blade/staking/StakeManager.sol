@@ -119,7 +119,7 @@ contract StakeManager is IStakeManager, Initializable, Ownable2StepUpgradeable, 
         if (amount > 0) {
             _stake(msg.sender, amount);
         }
-        emit ValidatorRegistered(msg.sender, pubkey);
+        emit ValidatorRegistered(msg.sender, pubkey, amount);
     }
 
     /**

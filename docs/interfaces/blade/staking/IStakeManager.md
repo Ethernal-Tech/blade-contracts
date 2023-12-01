@@ -343,7 +343,7 @@ event ValidatorDeactivated(address indexed validator)
 ### ValidatorRegistered
 
 ```solidity
-event ValidatorRegistered(address indexed validator, uint256[4] blsKey)
+event ValidatorRegistered(address indexed validator, uint256[4] blsKey, uint256 amount)
 ```
 
 
@@ -356,6 +356,7 @@ event ValidatorRegistered(address indexed validator, uint256[4] blsKey)
 |---|---|---|
 | validator `indexed` | address | undefined |
 | blsKey  | uint256[4] | undefined |
+| amount  | uint256 | undefined |
 
 
 
