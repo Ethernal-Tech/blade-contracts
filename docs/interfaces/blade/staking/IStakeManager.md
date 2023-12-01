@@ -80,7 +80,7 @@ Calculates how much is yet to become withdrawable for account.
 ### register
 
 ```solidity
-function register(uint256[2] signature, uint256[4] pubkey) external nonpayable
+function register(uint256[2] signature, uint256[4] pubkey, uint256 amont) external nonpayable
 ```
 
 
@@ -93,6 +93,7 @@ function register(uint256[2] signature, uint256[4] pubkey) external nonpayable
 |---|---|---|
 | signature | uint256[2] | undefined |
 | pubkey | uint256[4] | undefined |
+| amont | uint256 | undefined |
 
 ### stake
 
