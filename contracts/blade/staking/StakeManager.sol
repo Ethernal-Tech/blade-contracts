@@ -11,16 +11,16 @@ import "../../interfaces/IStateSender.sol";
 import "../../interfaces/common/IBLS.sol";
 import "../../interfaces/blade/validator/IEpochManager.sol";
 import "../../lib/WithdrawalQueue.sol";
+import "../../blade/NetworkParams.sol";
 
 contract StakeManager is IStakeManager, Initializable, Ownable2StepUpgradeable, ERC20SnapshotUpgradeable {
     using SafeERC20 for IERC20;
     using WithdrawalQueueLib for WithdrawalQueue;
 
-    uint256 public constant WITHDRAWAL_WAIT_PERIOD = 1;
-
     IBLS private _bls;
     IERC20 private _stakingToken;
     IEpochManager private _epochManager;
+    NetworkParams private _networkParams;
 
     bytes32 public domain;
 
@@ -38,6 +38,7 @@ contract StakeManager is IStakeManager, Initializable, Ownable2StepUpgradeable, 
         address newStakingToken,
         address newBls,
         address epochManager,
+        address networkParams,
         address owner,
         string memory newDomain,
         GenesisValidator[] memory genesisValidators
@@ -46,6 +47,7 @@ contract StakeManager is IStakeManager, Initializable, Ownable2StepUpgradeable, 
         _stakingToken = IERC20(newStakingToken);
         _bls = IBLS(newBls);
         _epochManager = IEpochManager(epochManager);
+        _networkParams = NetworkParams(networkParams);
         domain = keccak256(abi.encodePacked(newDomain));
 
         for (uint i = 0; i < genesisValidators.length; i++) {
@@ -182,7 +184,7 @@ contract StakeManager is IStakeManager, Initializable, Ownable2StepUpgradeable, 
     }
 
     function _registerWithdrawal(address account, uint256 amount) internal {
-        _withdrawals[account].append(amount, _epochManager.currentEpochId() + WITHDRAWAL_WAIT_PERIOD);
+        _withdrawals[account].append(amount, _epochManager.currentEpochId() + _networkParams.withdrawalWaitPeriod());
     }
 
     /// @notice Message to sign for registration

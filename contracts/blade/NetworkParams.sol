@@ -4,6 +4,23 @@ pragma solidity 0.8.19;
 import "@openzeppelin/contracts/access/Ownable2Step.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
+struct InitParams {
+    address newOwner;
+    uint256 newCheckpointBlockInterval; // in blocks
+    uint256 newEpochSize; // in blocks
+    uint256 newEpochReward; // in wei
+    uint256 newSprintSize; // in blocks
+    uint256 newMinValidatorSetSize;
+    uint256 newMaxValidatorSetSize;
+    uint256 newWithdrawalWaitPeriod; // in blocks
+    uint256 newBlockTime; // in seconds
+    uint256 newBlockTimeDrift; // in seconds
+    uint256 newVotingDelay; // in blocks
+    uint256 newVotingPeriod; // in blocks
+    uint256 newProposalThreshold; // in percent
+    uint256 newBaseFeeChangeDenom; // in wei
+}
+
 /**
     @title NetworkParams
     @author Polygon Technology (@QEDK)
@@ -11,23 +28,6 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
     @dev The contract allows for configurable network parameters without the need for a hardfork
  */
 contract NetworkParams is Ownable2Step, Initializable {
-    struct InitParams {
-        address newOwner;
-        uint256 newCheckpointBlockInterval; // in blocks
-        uint256 newEpochSize; // in blocks
-        uint256 newEpochReward; // in wei
-        uint256 newSprintSize; // in blocks
-        uint256 newMinValidatorSetSize;
-        uint256 newMaxValidatorSetSize;
-        uint256 newWithdrawalWaitPeriod; // in blocks
-        uint256 newBlockTime; // in seconds
-        uint256 newBlockTimeDrift; // in seconds
-        uint256 newVotingDelay; // in blocks
-        uint256 newVotingPeriod; // in blocks
-        uint256 newProposalThreshold; // in percent
-        uint256 newBaseFeeChangeDenom; // in wei
-    }
-
     uint256 public checkpointBlockInterval; // in blocks
     uint256 public epochSize; // in blocks
     uint256 public epochReward; // in wei

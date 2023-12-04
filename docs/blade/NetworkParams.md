@@ -126,7 +126,7 @@ function epochSize() external view returns (uint256)
 ### initialize
 
 ```solidity
-function initialize(NetworkParams.InitParams initParams) external nonpayable
+function initialize(InitParams initParams) external nonpayable
 ```
 
 
@@ -137,7 +137,7 @@ function initialize(NetworkParams.InitParams initParams) external nonpayable
 
 | Name | Type | Description |
 |---|---|---|
-| initParams | NetworkParams.InitParams | undefined |
+| initParams | InitParams | undefined |
 
 ### maxValidatorSetSize
 

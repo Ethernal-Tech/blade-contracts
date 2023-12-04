@@ -7,15 +7,15 @@ import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeab
 import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20SnapshotUpgradeable.sol";
 import "../System.sol";
 import "../../interfaces/blade/validator/IEpochManager.sol";
+import "../../blade/NetworkParams.sol";
 
 contract EpochManager is IEpochManager, System, Initializable {
     using SafeERC20Upgradeable for IERC20Upgradeable;
 
     ERC20SnapshotUpgradeable public stakeManager;
     IERC20Upgradeable public rewardToken;
+    NetworkParams public networkParams;
     address public rewardWallet;
-    uint256 public baseReward;
-    uint256 public epochSize;
 
     uint256 public currentEpochId;
     mapping(uint256 => Epoch) public epochs;
@@ -27,19 +27,17 @@ contract EpochManager is IEpochManager, System, Initializable {
         address newStakeManager,
         address newRewardToken,
         address newRewardWallet,
-        uint256 newBaseReward,
-        uint256 newEpochSize
+        address newNetworkParams
     ) public initializer {
         require(newStakeManager != address(0), "EpochManager: INVALID_STAKE_MANAGER");
         require(newRewardToken != address(0), "EpochManager: INVALID_REWARD_TOKEN");
-        require(newRewardWallet != address(0), "EpochManager: ZERO_ADDRESS");
-        require(newEpochSize > 0, "EpochManager: INVALID_EPOCH_SIZE");
+        require(newRewardWallet != address(0), "EpochManager: INVALID_REWARD_WALLET");
+        require(newNetworkParams != address(0), "EpochManager: INVALID_NETWORK_PARAMS");
 
         stakeManager = ERC20SnapshotUpgradeable(newStakeManager);
+        networkParams = NetworkParams(newNetworkParams);
         rewardToken = IERC20Upgradeable(newRewardToken);
         rewardWallet = newRewardWallet;
-        baseReward = newBaseReward;
-        epochSize = newEpochSize;
 
         currentEpochId = 1;
     }
@@ -47,12 +45,12 @@ contract EpochManager is IEpochManager, System, Initializable {
     /**
      * @inheritdoc IEpochManager
      */
-    function distributeRewardFor(uint256 epochId, Uptime[] calldata uptime) external onlySystemCall {
+    function distributeRewardFor(uint256 epochId, uint256 epochSize, Uptime[] calldata uptime) external onlySystemCall {
         require(paidRewardPerEpoch[epochId] == 0, "REWARD_ALREADY_DISTRIBUTED");
         uint256 totalBlocks = _totalBlocks(epochId);
         require(totalBlocks != 0, "EPOCH_NOT_COMMITTED");
         // slither-disable-next-line divide-before-multiply
-        uint256 reward = (baseReward * totalBlocks) / epochSize;
+        uint256 reward = (networkParams.epochReward() * totalBlocks) / epochSize;
         // TODO disincentivize long epoch times
 
         uint256 totalSupply = stakeManager.totalSupplyAt(epochId);
@@ -76,7 +74,7 @@ contract EpochManager is IEpochManager, System, Initializable {
     /**
      * @inheritdoc IEpochManager
      */
-    function commitEpoch(uint256 id, Epoch calldata epoch) external onlySystemCall {
+    function commitEpoch(uint256 id, uint256 epochSize, Epoch calldata epoch) external onlySystemCall {
         uint256 newEpochId = currentEpochId++;
         require(id == newEpochId, "UNEXPECTED_EPOCH_ID");
         require(epoch.endBlock > epoch.startBlock, "NO_BLOCKS_COMMITTED");

@@ -10,23 +10,6 @@
 
 ## Methods
 
-### WITHDRAWAL_WAIT_PERIOD
-
-```solidity
-function WITHDRAWAL_WAIT_PERIOD() external view returns (uint256)
-```
-
-
-
-
-
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | uint256 | undefined |
-
 ### acceptOwnership
 
 ```solidity
@@ -234,7 +217,7 @@ function increaseAllowance(address spender, uint256 addedValue) external nonpaya
 ### initialize
 
 ```solidity
-function initialize(address newStakingToken, address newBls, address epochManager, address owner, string newDomain, GenesisValidator[] genesisValidators) external nonpayable
+function initialize(address newStakingToken, address newBls, address epochManager, address networkParams, address owner, string newDomain, GenesisValidator[] genesisValidators) external nonpayable
 ```
 
 
@@ -248,6 +231,7 @@ function initialize(address newStakingToken, address newBls, address epochManage
 | newStakingToken | address | undefined |
 | newBls | address | undefined |
 | epochManager | address | undefined |
+| networkParams | address | undefined |
 | owner | address | undefined |
 | newDomain | string | undefined |
 | genesisValidators | GenesisValidator[] | undefined |
