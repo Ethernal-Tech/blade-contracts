@@ -63,6 +63,28 @@ function distributeRewardFor(uint256 epochId, uint256 epochSize, Uptime[] uptime
 | epochSize | uint256 | undefined |
 | uptime | Uptime[] | undefined |
 
+### epochEndingBlocks
+
+```solidity
+function epochEndingBlocks(uint256 epochId) external view returns (uint256)
+```
+
+returns the epoch ending block of given epoch
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| epochId | uint256 | undefined |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | undefined |
+
 ### paidRewardPerEpoch
 
 ```solidity

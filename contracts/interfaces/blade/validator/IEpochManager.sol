@@ -38,6 +38,9 @@ interface IEpochManager {
     /// @notice returns the pending reward for the given account
     function pendingRewards(address account) external view returns (uint256);
 
+    /// @notice returns the epoch ending block of given epoch
+    function epochEndingBlocks(uint256 epochId) external view returns (uint256);
+
     /// @notice commits a new epoch
     /// @dev system call
     /// @param id id of the epoch we are committing

@@ -22,6 +22,7 @@ contract EpochManager is IEpochManager, System, Initializable {
 
     mapping(uint256 => uint256) public paidRewardPerEpoch;
     mapping(address => uint256) public pendingRewards;
+    mapping(uint256 => uint256) public epochEndingBlocks;
 
     function initialize(
         address newStakeManager,
@@ -80,6 +81,7 @@ contract EpochManager is IEpochManager, System, Initializable {
         require(epoch.endBlock > epoch.startBlock, "NO_BLOCKS_COMMITTED");
         require((epoch.endBlock - epoch.startBlock + 1) % epochSize == 0, "EPOCH_MUST_BE_DIVISIBLE_BY_EPOCH_SIZE");
         require(epochs[newEpochId - 1].endBlock + 1 == epoch.startBlock, "INVALID_START_BLOCK");
+        epochEndingBlocks[newEpochId] = block.number;
         epochs[newEpochId] = epoch;
         emit NewEpoch(id, epoch.startBlock, epoch.endBlock, epoch.epochRoot);
     }
