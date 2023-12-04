@@ -108,7 +108,7 @@ contract StakeManager is IStakeManager, Initializable, Ownable2StepUpgradeable, 
     /**
      * @inheritdoc IStakeManager
      */
-    function register(uint256[2] calldata signature, uint256[4] calldata pubkey, uint256 stake) external {
+    function register(uint256[2] calldata signature, uint256[4] calldata pubkey, uint256 stakeAmount) external {
         Validator storage validator = validators[msg.sender];
         if (!validator.isWhitelisted) revert Unauthorized("WHITELIST");
         _verifyValidatorRegistration(msg.sender, signature, pubkey);
@@ -116,10 +116,10 @@ contract StakeManager is IStakeManager, Initializable, Ownable2StepUpgradeable, 
         validator.blsKey = pubkey;
         validator.addr = msg.sender;
         _removeFromWhitelist(msg.sender);
-        if (amount > 0) {
-            _stake(msg.sender, amount);
+        if (stakeAmount > 0) {
+            _stake(msg.sender, stakeAmount);
         }
-        emit ValidatorRegistered(msg.sender, pubkey, amount);
+        emit ValidatorRegistered(msg.sender, pubkey, stakeAmount);
     }
 
     /**
