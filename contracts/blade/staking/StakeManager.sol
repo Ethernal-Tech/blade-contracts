@@ -108,7 +108,7 @@ contract StakeManager is IStakeManager, Initializable, Ownable2StepUpgradeable, 
     /**
      * @inheritdoc IStakeManager
      */
-    function register(uint256[2] calldata signature, uint256[4] calldata pubkey, uint256 amount) external {
+    function register(uint256[2] calldata signature, uint256[4] calldata pubkey, uint256 stake) external {
         Validator storage validator = validators[msg.sender];
         if (!validator.isWhitelisted) revert Unauthorized("WHITELIST");
         _verifyValidatorRegistration(msg.sender, signature, pubkey);
