@@ -32,8 +32,6 @@ contract ChildGovernor is
         _networkParams = NetworkParams(networkParams);
     }
 
-    // TODO: adjust values for block time of child chain
-
     function votingDelay() public view override returns (uint256) {
         return _networkParams.votingDelay();
     }
@@ -41,8 +39,6 @@ contract ChildGovernor is
     function votingPeriod() public view override returns (uint256) {
         return _networkParams.votingPeriod();
     }
-
-    // END TODO
 
     function proposalThreshold() public view override returns (uint256) {
         return _networkParams.proposalThreshold();
