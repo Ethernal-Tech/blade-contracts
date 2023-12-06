@@ -8,6 +8,7 @@ import {GenesisValidator} from "contracts/interfaces/blade/staking/IStakeManager
 import {Epoch} from "contracts/interfaces/blade/validator/IEpochManager.sol";
 import {MockERC20} from "contracts/mocks/MockERC20.sol";
 import {NetworkParams} from "contracts/blade/NetworkParams.sol";
+import "contracts/interfaces/Errors.sol";
 
 abstract contract Uninitialized is Test {
     address public constant SYSTEM = 0xffffFFFfFFffffffffffffffFfFFFfffFFFfFFfE;
@@ -24,12 +25,14 @@ abstract contract Uninitialized is Test {
     address alice = makeAddr("alice");
     address jim = makeAddr("jim");
     address rewardWallet = makeAddr("rewardWallet");
+    bytes32 public constant DOMAIN = keccak256("DOMAIN_STAKE_MANAGER");
 
     uint256 newStakeAmount = 100;
     uint256 newUnstakeAmount = 150;
     uint256 bobInitialStake = 400;
     uint256 aliceInitialStake = 200;
     uint256 jimInitialStake = 100;
+    uint256[2][] public aggMessagePoints;
 
     function setUp() public virtual {
         token = new MockERC20();
@@ -117,3 +120,89 @@ contract StakeManager_WithdrawStake is Unstaked, StakeManager {
         stakeManager.withdraw();
     }
 }
+
+abstract contract Whitelisted is Initialized{
+    address kevin = makeAddr("kevin");
+    address mike = makeAddr("mike");
+    function setUp() public virtual override {
+        super.setUp();
+        token.mint(kevin, 1000 ether);
+        address[] memory validators = new address[](2);
+        validators[0] = address(this);
+        validators[1] = kevin;
+        vm.prank(bob);
+        stakeManager.whitelistValidators(validators);
+    }
+
+    function getSignatureAndPubKey(address addr) public returns (uint256[2] memory, uint256[4] memory) {
+        string[] memory cmd = new string[](5);
+        cmd[0] = "npx";
+        cmd[1] = "ts-node";
+        cmd[2] = "test/forge/child/generateMsg.ts";
+        cmd[3] = toHexString(addr);
+        cmd[4] = toHexString(address(stakeManager));
+        bytes memory out = vm.ffi(cmd);
+
+        (uint256[2] memory signature, uint256[4] memory pubkey) = abi.decode(out, (uint256[2], uint256[4]));
+
+        return (signature, pubkey);
+    }
+
+    function toHexString(address addr) public pure returns (string memory) {
+        bytes memory buffer = abi.encodePacked(addr);
+
+        // Fixed buffer size for hexadecimal conversion
+        bytes memory converted = new bytes(buffer.length * 2);
+
+        bytes memory _base = "0123456789abcdef";
+
+        for (uint256 i = 0; i < buffer.length; i++) {
+            converted[i * 2] = _base[uint8(buffer[i]) / _base.length];
+            converted[i * 2 + 1] = _base[uint8(buffer[i]) % _base.length];
+        }
+
+        return string(abi.encodePacked("0x", converted));
+    }
+}
+
+contract StakeManager_Registered is Whitelisted{
+    event ValidatorRegistered(address indexed validator, uint256[4] blsKey);
+    event RemovedFromWhitelist(address indexed validator);
+
+    function test_RevertValidatorNotWhitelisted() public {
+        vm.expectRevert(abi.encodeWithSelector(Unauthorized.selector, "WHITELIST"));
+        vm.prank(mike);
+        uint256[2] memory signature;
+        uint256[4] memory pubkey;
+        stakeManager.register(signature, pubkey, newStakeAmount);
+    }
+
+    function test_RevertEmptySignature() public {
+        uint256[2] memory signature = [uint256(0), uint256(0)];
+        uint256[4] memory pubkey = [uint256(0), uint256(0), uint256(0), uint256(0)];
+        vm.expectRevert(abi.encodeWithSelector(InvalidSignature.selector, kevin));
+        vm.prank(kevin);
+        stakeManager.register(signature, pubkey, newStakeAmount);
+    }
+
+    function test_RevertInvalidSignature() public {
+        (uint256[2] memory signature, uint256[4] memory pubkey) = getSignatureAndPubKey(kevin);
+        signature[0] = signature[0] + 1;
+        vm.expectRevert(abi.encodeWithSelector(InvalidSignature.selector, kevin));
+        vm.prank(kevin);
+        stakeManager.register(signature, pubkey, newStakeAmount);
+    }
+    function test_SuccessfulRegistration() public {
+        (uint256[2] memory signature, uint256[4] memory pubkey) = getSignatureAndPubKey(kevin);
+        vm.prank(kevin);
+        token.approve(address(stakeManager), type(uint256).max);
+        vm.prank(kevin);
+        stakeManager.register(signature, pubkey, newStakeAmount);
+        uint256 stake = stakeManager.stakeOf(address(this));
+
+        assertEq(stake, newStakeAmount, "expected same stake");
+    }
+
+}
+
+ 
