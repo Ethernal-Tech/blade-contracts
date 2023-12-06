@@ -138,7 +138,7 @@ abstract contract Whitelisted is Initialized{
         string[] memory cmd = new string[](5);
         cmd[0] = "npx";
         cmd[1] = "ts-node";
-        cmd[2] = "test/forge/child/generateMsg.ts";
+        cmd[2] = "test/forge/blade/generateMsg.ts";
         cmd[3] = toHexString(addr);
         cmd[4] = toHexString(address(stakeManager));
         bytes memory out = vm.ffi(cmd);
