@@ -210,8 +210,9 @@ contract StakeManager is IStakeManager, Initializable, Ownable2StepUpgradeable, 
 
     /// @notice Message to sign for registration
     function _message(address signer) internal view returns (uint256[2] memory) {
+        bytes memory hash = abi.encodePacked(signer, address(this), block.chainid);
         // slither-disable-next-line calls-loop
-        return _bls.hashToPoint(domain, abi.encodePacked(signer, address(this), block.chainid));
+        return _bls.hashToPoint(domain, hash);
     }
 
     function _removeIfValidatorUnstaked(address validator) internal {
