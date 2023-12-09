@@ -131,6 +131,12 @@ export function signStakeManagerMessage(
   contractAddress: string,
   secret: SecretKey
 ) {
+  // Check if signerAddress or contractAddress is undefined
+  if (signerAddress === undefined || contractAddress === undefined) {
+    // Return an empty array or handle it as needed
+    return { signature: [], messagePoint: [] };
+  }
+
   const message = ethers.utils.solidityPack(
     ["address", "address", "uint256"],
     [signerAddress.toLowerCase(), contractAddress.toLowerCase(), chainId]

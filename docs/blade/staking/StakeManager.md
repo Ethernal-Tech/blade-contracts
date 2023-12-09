@@ -601,7 +601,7 @@ function permit(address owner, address spender, uint256 value, uint256 deadline,
 ### register
 
 ```solidity
-function register(uint256[2] signature, uint256[4] pubkey, uint256 amount) external nonpayable
+function register(uint256[2] signature, uint256[4] pubkey, uint256 stakeAmount) external nonpayable
 ```
 
 
@@ -614,7 +614,7 @@ function register(uint256[2] signature, uint256[4] pubkey, uint256 amount) exter
 |---|---|---|
 | signature | uint256[2] | undefined |
 | pubkey | uint256[4] | undefined |
-| amount | uint256 | undefined |
+| stakeAmount | uint256 | undefined |
 
 ### renounceOwnership
 
