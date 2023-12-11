@@ -62,10 +62,6 @@ library GenesisLib {
         return self.genesisAccounts;
     }
 
-    function gatheringGenesisValidators(GenesisSet storage self) internal view returns (bool) {
-        return self.status == GenesisStatus.NOT_STARTED;
-    }
-
     function completed(GenesisSet storage self) internal view returns (bool) {
         return self.status == GenesisStatus.COMPLETED;
     }
