@@ -30,9 +30,9 @@ library GenesisLib {
      * @param account address of the account
      * @param nonStakedTokens amount of unstaked tokens
      * @param stakedTokens amount of staked tokens
-     * @param _isValidator indicates if account is a validator
+     * @param isVal indicates if account is a validator
      */
-    function insert(GenesisSet storage self, address account, uint256 nonStakedTokens, uint256 stakedTokens, bool _isValidator) internal {
+    function insert(GenesisSet storage self, address account, uint256 nonStakedTokens, uint256 stakedTokens, bool isVal) internal {
         assert(self.status == GenesisStatus.NOT_STARTED);
         uint256 index = self.indices[account];
         if (index == 0) {
@@ -40,7 +40,7 @@ library GenesisLib {
             // use index starting with 1, 0 is empty by default
             index = self.genesisAccounts.length + 1;
             self.indices[account] = index;
-            self.genesisAccounts.push(GenesisAccount(account, nonStakedTokens, stakedTokens, _isValidator));
+            self.genesisAccounts.push(GenesisAccount(account, nonStakedTokens, stakedTokens, isVal));
         } else {
             // update values
             uint256 idx = _indexOf(self, account);
