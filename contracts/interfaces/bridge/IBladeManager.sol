@@ -27,6 +27,7 @@ interface IBladeManager {
 
     /// @notice addGenesisBalance is used to specGenesisAccountnce information for genesis accounts on a  Blade chain.
     /// It is applicable only in case Blade native contract is mapped to a pre-existing rootchain ERC20 token.
-    /// @param amount represents the amount to be premined in the genesis.
-    function addGenesisBalance(uint256 amount) external;
+    /// @param nonStakeAmount represents the amount to be premined in the genesis which is not staked.
+    /// @param stakeAmount represents the amount to be premined in genesis which is going to be staked.
+    function addGenesisBalance(uint256 nonStakeAmount, uint256 stakeAmount) external;
 }

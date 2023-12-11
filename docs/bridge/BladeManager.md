@@ -24,7 +24,7 @@ function acceptOwnership() external nonpayable
 ### addGenesisBalance
 
 ```solidity
-function addGenesisBalance(uint256 amount) external nonpayable
+function addGenesisBalance(uint256 nonStakeAmount, uint256 stakeAmount) external nonpayable
 ```
 
 addGenesisBalance is used to specGenesisAccountnce information for genesis accounts on a  Blade chain. It is applicable only in case Blade native contract is mapped to a pre-existing rootchain ERC20 token.
@@ -35,7 +35,8 @@ addGenesisBalance is used to specGenesisAccountnce information for genesis accou
 
 | Name | Type | Description |
 |---|---|---|
-| amount | uint256 | represents the amount to be premined in the genesis. |
+| nonStakeAmount | uint256 | represents the amount to be premined in the genesis which is not staked. |
+| stakeAmount | uint256 | represents the amount to be premined in genesis which is going to be staked. |
 
 ### finalizeGenesis
 

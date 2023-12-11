@@ -40,15 +40,21 @@ contract DeployBladeManagerTest is Test {
         GenesisAccount[] memory validators = new GenesisAccount[](3);
         validators[0] = GenesisAccount({
             addr: bob,
-            amountOfTokens: 0
+            stakedTokens: 0,
+            nonStakedTokens: 0,
+            isValidator: true
         });
         validators[1] = GenesisAccount({
             addr: alice,
-            amountOfTokens: 0
+            stakedTokens: 0,
+            nonStakedTokens: 0,
+            isValidator: true
         });
         validators[2] = GenesisAccount({
             addr: jim,
-            amountOfTokens: 0
+            stakedTokens: 0,
+            nonStakedTokens: 0,
+            isValidator: true
         });
 
         (logicAddr, proxyAddr) = deployer.run(

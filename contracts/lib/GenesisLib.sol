@@ -12,7 +12,9 @@ enum GenesisStatus {
 
 struct GenesisAccount {
     address addr;
-    uint256 amountOfTokens;
+    uint256 nonStakedTokens;
+    uint256 stakedTokens;
+    bool isValidator;
 }
 
 struct GenesisSet {
@@ -26,9 +28,11 @@ library GenesisLib {
      * @notice inserts an account into the genesis set
      * @param self GenesisSet struct
      * @param account address of the account
-     * @param tokens amount to add to the accounts genesis balance
+     * @param nonStakedTokens amount of unstaked tokens
+     * @param stakedTokens amount of staked tokens
+     * @param _isValidator indicates if account is a validator
      */
-    function insert(GenesisSet storage self, address account, uint256 tokens) internal {
+    function insert(GenesisSet storage self, address account, uint256 nonStakedTokens, uint256 stakedTokens, bool _isValidator) internal {
         assert(self.status == GenesisStatus.NOT_STARTED);
         uint256 index = self.indices[account];
         if (index == 0) {
@@ -36,12 +40,13 @@ library GenesisLib {
             // use index starting with 1, 0 is empty by default
             index = self.genesisAccounts.length + 1;
             self.indices[account] = index;
-            self.genesisAccounts.push(GenesisAccount(account, tokens));
+            self.genesisAccounts.push(GenesisAccount(account, nonStakedTokens, stakedTokens, _isValidator));
         } else {
             // update values
             uint256 idx = _indexOf(self, account);
             GenesisAccount storage genesisValidator = self.genesisAccounts[idx];
-            genesisValidator.amountOfTokens += tokens;
+            genesisValidator.nonStakedTokens += nonStakedTokens;
+            genesisValidator.stakedTokens += stakedTokens;
         }
     }
 
@@ -66,15 +71,25 @@ library GenesisLib {
         return self.status == GenesisStatus.COMPLETED;
     }
 
+    function isValidator(GenesisSet storage self, address account) internal view returns(bool) {
+        uint256 index = self.indices[account];
+        if (index == 0) {
+            return false;
+        }
+
+        GenesisAccount storage genesisValidator = self.genesisAccounts[index];
+        return genesisValidator.isValidator;
+    }
+
     /**
      * @notice returns index of a specific validator
      * @dev indices returned from this function start from 0
      * @param self the GenesisSet struct
-     * @param validator address of the validator whose index is being queried
+     * @param account address of the account whose index is being queried
      * @return index the index of the validator in the set
      */
-    function _indexOf(GenesisSet storage self, address validator) private view returns (uint256 index) {
-        index = self.indices[validator];
+    function _indexOf(GenesisSet storage self, address account) private view returns (uint256 index) {
+        index = self.indices[account];
         assert(index != 0); // currently index == 0 is unreachable
         return index - 1;
     }

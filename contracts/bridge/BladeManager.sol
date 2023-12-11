@@ -22,7 +22,12 @@ contract BladeManager is IBladeManager, Ownable2StepUpgradeable {
 
         uint256 length = genesisValidators.length;
         for (uint256 i = 0; i < length; ++i) {
-            _genesis.insert(genesisValidators[i].addr, genesisValidators[i].amountOfTokens);
+            _genesis.insert(
+                genesisValidators[i].addr,
+                genesisValidators[i].nonStakedTokens,
+                genesisValidators[i].stakedTokens,
+                true
+            );
         }
 
         __Ownable2Step_init();
@@ -49,8 +54,8 @@ contract BladeManager is IBladeManager, Ownable2StepUpgradeable {
      *
      * @inheritdoc IBladeManager
      */
-    function addGenesisBalance(uint256 amount) external {
-        require(amount > 0, "BladeManager: INVALID_AMOUNT");
+    function addGenesisBalance(uint256 nonStakeAmount, uint256 stakeAmount) external {
+        require(nonStakeAmount > 0 || stakeAmount > 0, "BladeManager: INVALID_AMOUNT");
         if (address(_rootERC20Predicate) == address(0)) {
             revert Unauthorized("BladeManager: UNDEFINED_ROOT_ERC20_PREDICATE");
         }
@@ -61,14 +66,21 @@ contract BladeManager is IBladeManager, Ownable2StepUpgradeable {
         }
         require(!_genesis.completed(), "BladeManager: CHILD_CHAIN_IS_LIVE");
 
+        bool isValidator = _genesis.isValidator(msg.sender);
+        if (stakeAmount > 0 && !isValidator) {
+            revert Unauthorized("BladeManager: TRYING_TO_STAKE_WHEN_NOT_A_VALIDATOR");
+        }
+
         // we need to track EOAs as well in the genesis set, in order to be able to query genesisBalances mapping
-        _genesis.insert(msg.sender, amount);
+        _genesis.insert(msg.sender, nonStakeAmount, stakeAmount, isValidator);
+
+        uint256 totalPremineAmount = nonStakeAmount + stakeAmount;
 
         // lock native tokens on the root erc20 predicate
-        nativeTokenRoot.safeTransferFrom(msg.sender, address(_rootERC20Predicate), amount);
+        nativeTokenRoot.safeTransferFrom(msg.sender, address(_rootERC20Predicate), totalPremineAmount);
 
         // slither-disable-next-line reentrancy-events
-        emit GenesisBalanceAdded(msg.sender, amount);
+        emit GenesisBalanceAdded(msg.sender, totalPremineAmount);
     }
 
     // slither-disable-next-line unused-state,naming-convention

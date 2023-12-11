@@ -32,15 +32,21 @@ abstract contract Initialized is Uninitialized {
         GenesisAccount[] memory validators = new GenesisAccount[](3);
         validators[0] = GenesisAccount({
             addr: bob,
-            amountOfTokens: 0
+            stakedTokens: 0,
+            nonStakedTokens: 0,
+            isValidator: true
         });
         validators[1] = GenesisAccount({
             addr: alice,
-            amountOfTokens: 0
+            stakedTokens: 0,
+            nonStakedTokens: 0,
+            isValidator: true
         });
         validators[2] = GenesisAccount({
             addr: jim,
-            amountOfTokens: 0
+            stakedTokens: 0,
+            nonStakedTokens: 0,
+            isValidator: true
         });
 
         bladeManager.initialize(
@@ -76,24 +82,34 @@ contract BladeManager_PremineInitialized is Initialized {
         token.approve(address(bladeManager), balance);
         vm.expectEmit(true, true, true, true);
         emit GenesisBalanceAdded(bob, balance);
-        bladeManager.addGenesisBalance(balance);
+        bladeManager.addGenesisBalance(balance/2, balance/2);
 
         GenesisAccount[] memory genesisAccounts = bladeManager.genesisSet();
         assertEq(genesisAccounts.length, 3, "should set genesisSet");
         GenesisAccount memory account = genesisAccounts[0];
         assertEq(account.addr, bob, "should set validator address");
-        assertEq(account.amountOfTokens, balance, "should be equal to added balance");
+        assertEq(account.stakedTokens, balance/2, "should be equal to added staked amount");
+        assertEq(account.nonStakedTokens, balance/2, "should be equal to added staked amount");
     }
 
     function test_addGenesisBalance_genesisSetFinalizedRevert() public {
         bladeManager.finalizeGenesis();
         vm.expectRevert("BladeManager: CHILD_CHAIN_IS_LIVE");
-        bladeManager.addGenesisBalance(balance);
+        bladeManager.addGenesisBalance(balance/2, balance/2);
     }
 
     function test_addGenesisBalance_invalidAmountRevert() public {
         vm.expectRevert("BladeManager: INVALID_AMOUNT");
-        bladeManager.addGenesisBalance(0);
+        bladeManager.addGenesisBalance(0, 0);
+    }
+
+    function test_addGenesisBalance_notValidator() public {
+        address john = makeAddr("john");
+        vm.startPrank(john);
+        vm.expectRevert(
+            abi.encodeWithSelector(Unauthorized.selector, "BladeManager: TRYING_TO_STAKE_WHEN_NOT_A_VALIDATOR")
+        );
+        bladeManager.addGenesisBalance(0, 100 ether);
     }
 }
 
@@ -127,6 +143,6 @@ contract BladeManager_UndefinedRootERC20Predicate is Uninitialized {
         vm.expectRevert(
             abi.encodeWithSelector(Unauthorized.selector, "BladeManager: UNDEFINED_ROOT_ERC20_PREDICATE")
         );
-        bladeManager.addGenesisBalance(100 ether);
+        bladeManager.addGenesisBalance(100 ether, 100 ether);
     }
 }
