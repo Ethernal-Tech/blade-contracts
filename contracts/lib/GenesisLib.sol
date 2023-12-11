@@ -77,7 +77,7 @@ library GenesisLib {
             return false;
         }
 
-        GenesisAccount storage genesisValidator = self.genesisAccounts[index];
+        GenesisAccount storage genesisValidator = self.genesisAccounts[--index];
         return genesisValidator.isValidator;
     }
 
