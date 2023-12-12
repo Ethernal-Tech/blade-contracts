@@ -69,7 +69,7 @@ returns the genesis validator set with their balances
 ### initialize
 
 ```solidity
-function initialize(address newRootERC20Predicate, GenesisAccount[] genesisValidators) external nonpayable
+function initialize(address newRootERC20Predicate, GenesisAccount[] genesisAccounts) external nonpayable
 ```
 
 
@@ -81,7 +81,7 @@ function initialize(address newRootERC20Predicate, GenesisAccount[] genesisValid
 | Name | Type | Description |
 |---|---|---|
 | newRootERC20Predicate | address | undefined |
-| genesisValidators | GenesisAccount[] | undefined |
+| genesisAccounts | GenesisAccount[] | undefined |
 
 ### owner
 

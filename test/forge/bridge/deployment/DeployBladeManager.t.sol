@@ -41,19 +41,19 @@ contract DeployBladeManagerTest is Test {
         validators[0] = GenesisAccount({
             addr: bob,
             stakedTokens: 0,
-            nonStakedTokens: 0,
+            preminedTokens: 0,
             isValidator: true
         });
         validators[1] = GenesisAccount({
             addr: alice,
             stakedTokens: 0,
-            nonStakedTokens: 0,
+            preminedTokens: 0,
             isValidator: true
         });
         validators[2] = GenesisAccount({
             addr: jim,
             stakedTokens: 0,
-            nonStakedTokens: 0,
+            preminedTokens: 0,
             isValidator: true
         });
 

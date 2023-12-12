@@ -33,19 +33,19 @@ abstract contract Initialized is Uninitialized {
         validators[0] = GenesisAccount({
             addr: bob,
             stakedTokens: 0,
-            nonStakedTokens: 0,
+            preminedTokens: 0,
             isValidator: true
         });
         validators[1] = GenesisAccount({
             addr: alice,
             stakedTokens: 0,
-            nonStakedTokens: 0,
+            preminedTokens: 0,
             isValidator: true
         });
         validators[2] = GenesisAccount({
             addr: jim,
             stakedTokens: 0,
-            nonStakedTokens: 0,
+            preminedTokens: 0,
             isValidator: true
         });
 
@@ -89,7 +89,7 @@ contract BladeManager_PremineInitialized is Initialized {
         GenesisAccount memory account = genesisAccounts[0];
         assertEq(account.addr, bob, "should set validator address");
         assertEq(account.stakedTokens, balance/2, "should be equal to added staked amount");
-        assertEq(account.nonStakedTokens, balance/2, "should be equal to added staked amount");
+        assertEq(account.preminedTokens, balance/2, "should be equal to added staked amount");
     }
 
     function test_addGenesisBalance_genesisSetFinalizedRevert() public {

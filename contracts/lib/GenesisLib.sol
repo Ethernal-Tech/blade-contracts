@@ -12,7 +12,7 @@ enum GenesisStatus {
 
 struct GenesisAccount {
     address addr;
-    uint256 nonStakedTokens;
+    uint256 preminedTokens;
     uint256 stakedTokens;
     bool isValidator;
 }
@@ -28,11 +28,11 @@ library GenesisLib {
      * @notice inserts an account into the genesis set
      * @param self GenesisSet struct
      * @param account address of the account
-     * @param nonStakedTokens amount of unstaked tokens
+     * @param preminedTokens amount of unstaked premined tokens
      * @param stakedTokens amount of staked tokens
      * @param isVal indicates if account is a validator
      */
-    function insert(GenesisSet storage self, address account, uint256 nonStakedTokens, uint256 stakedTokens, bool isVal) internal {
+    function insert(GenesisSet storage self, address account, uint256 preminedTokens, uint256 stakedTokens, bool isVal) internal {
         assert(self.status == GenesisStatus.NOT_STARTED);
         uint256 index = self.indices[account];
         if (index == 0) {
@@ -40,12 +40,12 @@ library GenesisLib {
             // use index starting with 1, 0 is empty by default
             index = self.genesisAccounts.length + 1;
             self.indices[account] = index;
-            self.genesisAccounts.push(GenesisAccount(account, nonStakedTokens, stakedTokens, isVal));
+            self.genesisAccounts.push(GenesisAccount(account, preminedTokens, stakedTokens, isVal));
         } else {
             // update values
             uint256 idx = _indexOf(self, account);
             GenesisAccount storage genesisValidator = self.genesisAccounts[idx];
-            genesisValidator.nonStakedTokens += nonStakedTokens;
+            genesisValidator.preminedTokens += preminedTokens;
             genesisValidator.stakedTokens += stakedTokens;
         }
     }

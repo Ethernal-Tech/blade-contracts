@@ -15,18 +15,18 @@ contract BladeManager is IBladeManager, Ownable2StepUpgradeable {
     IRootERC20Predicate private _rootERC20Predicate;
     GenesisSet private _genesis;
 
-    function initialize(address newRootERC20Predicate, GenesisAccount[] calldata genesisValidators) public initializer {
+    function initialize(address newRootERC20Predicate, GenesisAccount[] calldata genesisAccounts) public initializer {
         require(newRootERC20Predicate != address(0), "INVALID_INPUT");
 
         _rootERC20Predicate = IRootERC20Predicate(newRootERC20Predicate);
 
-        uint256 length = genesisValidators.length;
+        uint256 length = genesisAccounts.length;
         for (uint256 i = 0; i < length; ++i) {
             _genesis.insert(
-                genesisValidators[i].addr,
-                genesisValidators[i].nonStakedTokens,
-                genesisValidators[i].stakedTokens,
-                true
+                genesisAccounts[i].addr,
+                genesisAccounts[i].preminedTokens,
+                genesisAccounts[i].stakedTokens,
+                genesisAccounts[i].isValidator
             );
         }
 
