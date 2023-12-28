@@ -1242,10 +1242,9 @@ describe("EntryPoint", function () {
         );
         const wrongSig = hexZeroPad("0x123456", 32);
         const aggAddress: string = aggregator.address;
+        const errorMessage: string = `SignatureValidationFailed(\\"` + aggAddress + '\\")';
 
-        await //TODO: fix this
-        //.to.rejectedWith(`SignatureValidationFailed("${aggAddress}")`)
-        expect(
+        await expect(
           entryPoint.handleAggregatedOps(
             [
               {
@@ -1256,7 +1255,9 @@ describe("EntryPoint", function () {
             ],
             beneficiaryAddress
           )
-        ).to.be.rejected;
+        ) //MS: Changed
+          //.to.revertedWith(`SignatureValidationFailed("${aggAddress}")`)
+          .to.be.rejectedWith(errorMessage);
       });
 
       it("should run with multiple aggregators (and non-aggregated-accounts)", async () => {
