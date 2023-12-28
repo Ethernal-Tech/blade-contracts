@@ -44,8 +44,9 @@ const config: HardhatUserConfig = {
     },
     hardhat: {
       // allow impersonation of smart contracts without modifying balance
-      gasPrice: 0,
-      hardfork: "berlin",
+      // gasPrice: 0,
+      gasPrice: 1000000000,
+      hardfork: "london",
     },
   },
   gasReporter: {
