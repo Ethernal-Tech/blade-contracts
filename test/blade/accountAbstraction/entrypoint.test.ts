@@ -474,11 +474,7 @@ describe("EntryPoint", function () {
         paymasterAndData: "0x",
       };
       try {
-        //TODO: fix this
-        //await expect(entryPoint.simulateValidation(userOp, { gasLimit: 1e6 })).to.be.rejectedWith("ValidationResult");
-        await expect(entryPoint.simulateValidation(userOp, { gasLimit: 1e6 })).to.be.rejectedWith(
-          "Revert after first validation"
-        );
+        await expect(entryPoint.simulateValidation(userOp, { gasLimit: 1e6 })).to.rejectedWith("ValidationResult");
         console.log("after first simulation");
         await ethers.provider.send("evm_mine", []);
         await expect(entryPoint.simulateValidation(userOp, { gasLimit: 1e6 })).to.rejectedWith(
@@ -486,10 +482,9 @@ describe("EntryPoint", function () {
         );
         // if we get here, it means the userOp passed first sim and reverted second
         expect.fail(null, null, "should fail on first simulation");
+        //} catch (e: any) {
       } catch (e: any) {
-        //TODO: fix this
-        //expect(e.message).to.include('Revert after first validation')
-        expect(e.message).to.include("should fail on first simulation");
+        expect(e.actual).to.include("Revert after first validation");
       }
     });
 
