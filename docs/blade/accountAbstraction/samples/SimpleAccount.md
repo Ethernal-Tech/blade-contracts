@@ -4,7 +4,7 @@
 
 
 
-minimal account.  this is sample minimal account.  has execute, eth handling methods  has a single signer that can send requests through the entryPoint.
+
 
 
 
@@ -16,7 +16,7 @@ minimal account.  this is sample minimal account.  has execute, eth handling met
 function addDeposit() external payable
 ```
 
-deposit more funds for this account in the entryPoint
+
 
 
 
@@ -27,7 +27,7 @@ deposit more funds for this account in the entryPoint
 function entryPoint() external view returns (contract IEntryPoint)
 ```
 
-return the entryPoint used by this account. subclass should return the current entryPoint used by this account.
+
 
 
 
@@ -44,7 +44,7 @@ return the entryPoint used by this account. subclass should return the current e
 function execute(address dest, uint256 value, bytes func) external nonpayable
 ```
 
-execute a transaction (called directly from owner, or by entryPoint)
+
 
 
 
@@ -62,7 +62,7 @@ execute a transaction (called directly from owner, or by entryPoint)
 function executeBatch(address[] dest, bytes[] func) external nonpayable
 ```
 
-execute a sequence of transactions
+
 
 
 
@@ -79,7 +79,7 @@ execute a sequence of transactions
 function getDeposit() external view returns (uint256)
 ```
 
-check current account deposit in the entryPoint
+
 
 
 
@@ -96,7 +96,7 @@ check current account deposit in the entryPoint
 function getNonce() external view returns (uint256)
 ```
 
-Return the account nonce. This method returns the next sequential nonce. For a nonce of a specific key, use `entrypoint.getNonce(account, key)`
+
 
 
 
@@ -115,7 +115,7 @@ function initialize(address anOwner) external nonpayable
 
 
 
-*The _entryPoint member is immutable, to reduce gas consumption.  To upgrade EntryPoint, a new implementation of SimpleAccount must be deployed with the new EntryPoint address, then upgrading the implementation by calling `upgradeTo()`*
+
 
 #### Parameters
 
@@ -225,7 +225,7 @@ function proxiableUUID() external view returns (bytes32)
 
 
 
-*Implementation of the ERC1822 {proxiableUUID} function. This returns the storage slot used by the implementation. It is used to validate the implementation&#39;s compatibility when performing an upgrade. IMPORTANT: A proxy pointing at a proxiable contract should not be considered proxiable itself, because this risks bricking a proxy that upgrades to it, by delegating to itself until out of gas. Thus it is critical that this function revert if invoked through a proxy. This is guaranteed by the `notDelegated` modifier.*
+
 
 
 #### Returns
@@ -242,7 +242,7 @@ function supportsInterface(bytes4 interfaceId) external view returns (bool)
 
 
 
-*Returns true if this contract implements the interface defined by `interfaceId`. See the corresponding https://eips.ethereum.org/EIPS/eip-165#how-interfaces-are-identified[EIP section] to learn more about how these ids are created. This function call must use less than 30 000 gas.*
+
 
 #### Parameters
 
@@ -285,7 +285,7 @@ function upgradeTo(address newImplementation) external nonpayable
 
 
 
-*Upgrade the implementation of the proxy to `newImplementation`. Calls {_authorizeUpgrade}. Emits an {Upgraded} event.*
+
 
 #### Parameters
 
@@ -301,7 +301,7 @@ function upgradeToAndCall(address newImplementation, bytes data) external payabl
 
 
 
-*Upgrade the implementation of the proxy to `newImplementation`, and subsequently execute the function call encoded in `data`. Calls {_authorizeUpgrade}. Emits an {Upgraded} event.*
+
 
 #### Parameters
 
@@ -340,7 +340,7 @@ function validateUserOp(UserOperation userOp, bytes32 userOpHash, uint256 missin
 function withdrawDepositTo(address payable withdrawAddress, uint256 amount) external nonpayable
 ```
 
-withdraw value from the account&#39;s deposit
+
 
 
 
@@ -348,8 +348,8 @@ withdraw value from the account&#39;s deposit
 
 | Name | Type | Description |
 |---|---|---|
-| withdrawAddress | address payable | target to send to |
-| amount | uint256 | to withdraw |
+| withdrawAddress | address payable | undefined |
+| amount | uint256 | undefined |
 
 
 
@@ -363,7 +363,7 @@ event AdminChanged(address previousAdmin, address newAdmin)
 
 
 
-*Emitted when the admin account has changed.*
+
 
 #### Parameters
 
@@ -380,7 +380,7 @@ event BeaconUpgraded(address indexed beacon)
 
 
 
-*Emitted when the beacon is changed.*
+
 
 #### Parameters
 
@@ -396,7 +396,7 @@ event Initialized(uint8 version)
 
 
 
-*Triggered when the contract has been initialized or reinitialized.*
+
 
 #### Parameters
 
@@ -429,7 +429,7 @@ event Upgraded(address indexed implementation)
 
 
 
-*Emitted when the implementation is upgraded.*
+
 
 #### Parameters
 

@@ -485,6 +485,7 @@ describe("EntryPoint", function () {
         //} catch (e: any) {
       } catch (e: any) {
         expect(e.actual).to.include("Revert after first validation");
+        //expect(e.message).to.include('Revert after first validation')
       }
     });
 

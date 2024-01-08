@@ -6,6 +6,15 @@ import { HardhatUserConfig } from "hardhat/config";
 
 dotenv.config();
 
+const optimizedComilerSettings = {
+  // version: '0.8.17',
+  version: "0.8.19",
+  settings: {
+    optimizer: { enabled: true, runs: 1000000 },
+    viaIR: true,
+  },
+};
+
 const config: HardhatUserConfig = {
   solidity: {
     compilers: [
@@ -24,6 +33,10 @@ const config: HardhatUserConfig = {
         },
       },
     ],
+    overrides: {
+      "contracts/blade/accountAbstraction/EntryPoint.sol": optimizedComilerSettings,
+      "contracts/blade/accountAbstraction/samples/SimpleAccount.sol": optimizedComilerSettings,
+    },
   },
   networks: {
     root: {
