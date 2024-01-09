@@ -10,11 +10,11 @@ pragma solidity ^0.8.12;
 /* solhint-disable reason-string */
 
 import "../lib/UserOperation.sol";
-import "./IStakeManager.sol";
+import "./IAAStakeManager.sol";
 import "./IAggregator.sol";
 import "./INonceManager.sol";
 
-interface IEntryPoint is IStakeManager, INonceManager {
+interface IEntryPoint is IAAStakeManager, INonceManager {
     /***
      * An event emitted after each successful request
      * @param userOpHash - unique identifier for the request (hash its entire content, except signature).

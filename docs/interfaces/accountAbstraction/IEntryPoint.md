@@ -67,7 +67,7 @@ add to the deposit of the given account
 ### getDepositInfo
 
 ```solidity
-function getDepositInfo(address account) external view returns (struct IStakeManager.DepositInfo info)
+function getDepositInfo(address account) external view returns (struct IAAStakeManager.DepositInfo info)
 ```
 
 
@@ -84,7 +84,7 @@ function getDepositInfo(address account) external view returns (struct IStakeMan
 
 | Name | Type | Description |
 |---|---|---|
-| info | IStakeManager.DepositInfo | - full deposit information of given account |
+| info | IAAStakeManager.DepositInfo | - full deposit information of given account |
 
 ### getNonce
 
@@ -531,7 +531,7 @@ error case when a signature aggregator fails to verify the aggregated signature 
 ### ValidationResult
 
 ```solidity
-error ValidationResult(IEntryPoint.ReturnInfo returnInfo, IStakeManager.StakeInfo senderInfo, IStakeManager.StakeInfo factoryInfo, IStakeManager.StakeInfo paymasterInfo)
+error ValidationResult(IEntryPoint.ReturnInfo returnInfo, IAAStakeManager.StakeInfo senderInfo, IAAStakeManager.StakeInfo factoryInfo, IAAStakeManager.StakeInfo paymasterInfo)
 ```
 
 Successful result from simulateValidation.
@@ -543,14 +543,14 @@ Successful result from simulateValidation.
 | Name | Type | Description |
 |---|---|---|
 | returnInfo | IEntryPoint.ReturnInfo | gas and time-range returned values |
-| senderInfo | IStakeManager.StakeInfo | stake information about the sender |
-| factoryInfo | IStakeManager.StakeInfo | stake information about the factory (if any) |
-| paymasterInfo | IStakeManager.StakeInfo | stake information about the paymaster (if any) |
+| senderInfo | IAAStakeManager.StakeInfo | stake information about the sender |
+| factoryInfo | IAAStakeManager.StakeInfo | stake information about the factory (if any) |
+| paymasterInfo | IAAStakeManager.StakeInfo | stake information about the paymaster (if any) |
 
 ### ValidationResultWithAggregation
 
 ```solidity
-error ValidationResultWithAggregation(IEntryPoint.ReturnInfo returnInfo, IStakeManager.StakeInfo senderInfo, IStakeManager.StakeInfo factoryInfo, IStakeManager.StakeInfo paymasterInfo, IEntryPoint.AggregatorStakeInfo aggregatorInfo)
+error ValidationResultWithAggregation(IEntryPoint.ReturnInfo returnInfo, IAAStakeManager.StakeInfo senderInfo, IAAStakeManager.StakeInfo factoryInfo, IAAStakeManager.StakeInfo paymasterInfo, IEntryPoint.AggregatorStakeInfo aggregatorInfo)
 ```
 
 Successful result from simulateValidation, if the account returns a signature aggregator
@@ -562,9 +562,9 @@ Successful result from simulateValidation, if the account returns a signature ag
 | Name | Type | Description |
 |---|---|---|
 | returnInfo | IEntryPoint.ReturnInfo | gas and time-range returned values |
-| senderInfo | IStakeManager.StakeInfo | stake information about the sender |
-| factoryInfo | IStakeManager.StakeInfo | stake information about the factory (if any) |
-| paymasterInfo | IStakeManager.StakeInfo | stake information about the paymaster (if any) |
+| senderInfo | IAAStakeManager.StakeInfo | stake information about the sender |
+| factoryInfo | IAAStakeManager.StakeInfo | stake information about the factory (if any) |
+| paymasterInfo | IAAStakeManager.StakeInfo | stake information about the paymaster (if any) |
 | aggregatorInfo | IEntryPoint.AggregatorStakeInfo | signature aggregation info (if the account requires signature aggregator)      bundler MUST use it to verify the signature, or reject the UserOperation |
 
 

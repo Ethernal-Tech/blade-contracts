@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 pragma solidity ^0.8.12;
 
-import "../../interfaces/accountAbstraction/IStakeManager.sol";
+import "../../interfaces/accountAbstraction/IAAStakeManager.sol";
 
 /* solhint-disable avoid-low-level-calls */
 /* solhint-disable not-rely-on-time */
@@ -10,11 +10,11 @@ import "../../interfaces/accountAbstraction/IStakeManager.sol";
  * deposit is just a balance used to pay for UserOperations (either by a paymaster or an account)
  * stake is value locked for at least "unstakeDelay" by a paymaster.
  */
-abstract contract StakeManager is IStakeManager {
+abstract contract AAStakeManager is IAAStakeManager {
     /// maps paymaster to their deposits and stakes
     mapping(address => DepositInfo) public deposits;
 
-    /// @inheritdoc IStakeManager
+    /// @inheritdoc IAAStakeManager
     function getDepositInfo(address account) public view returns (DepositInfo memory info) {
         return deposits[account];
     }

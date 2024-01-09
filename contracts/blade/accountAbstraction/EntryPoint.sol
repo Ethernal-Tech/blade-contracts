@@ -13,13 +13,13 @@ import "../../interfaces/accountAbstraction/IPaymaster.sol";
 import "../../interfaces/accountAbstraction/IEntryPoint.sol";
 
 import "../../interfaces/lib/Exec.sol";
-import "./StakeManager.sol";
+import "./AAStakeManager.sol";
 import "./SenderCreator.sol";
 import "./Helpers.sol";
 import "./NonceManager.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
-contract EntryPoint is IEntryPoint, StakeManager, NonceManager, ReentrancyGuard {
+contract EntryPoint is IEntryPoint, AAStakeManager, NonceManager, ReentrancyGuard {
     using UserOperationLib for UserOperation;
 
     SenderCreator private immutable senderCreator = new SenderCreator();

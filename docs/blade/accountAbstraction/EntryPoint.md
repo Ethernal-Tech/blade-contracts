@@ -128,7 +128,7 @@ function deposits(address) external view returns (uint112 deposit, bool staked, 
 ### getDepositInfo
 
 ```solidity
-function getDepositInfo(address account) external view returns (struct IStakeManager.DepositInfo info)
+function getDepositInfo(address account) external view returns (struct IAAStakeManager.DepositInfo info)
 ```
 
 
@@ -145,7 +145,7 @@ function getDepositInfo(address account) external view returns (struct IStakeMan
 
 | Name | Type | Description |
 |---|---|---|
-| info | IStakeManager.DepositInfo | undefined |
+| info | IAAStakeManager.DepositInfo | undefined |
 
 ### getNonce
 
@@ -639,7 +639,7 @@ error SignatureValidationFailed(address aggregator)
 ### ValidationResult
 
 ```solidity
-error ValidationResult(IEntryPoint.ReturnInfo returnInfo, IStakeManager.StakeInfo senderInfo, IStakeManager.StakeInfo factoryInfo, IStakeManager.StakeInfo paymasterInfo)
+error ValidationResult(IEntryPoint.ReturnInfo returnInfo, IAAStakeManager.StakeInfo senderInfo, IAAStakeManager.StakeInfo factoryInfo, IAAStakeManager.StakeInfo paymasterInfo)
 ```
 
 
@@ -651,14 +651,14 @@ error ValidationResult(IEntryPoint.ReturnInfo returnInfo, IStakeManager.StakeInf
 | Name | Type | Description |
 |---|---|---|
 | returnInfo | IEntryPoint.ReturnInfo | undefined |
-| senderInfo | IStakeManager.StakeInfo | undefined |
-| factoryInfo | IStakeManager.StakeInfo | undefined |
-| paymasterInfo | IStakeManager.StakeInfo | undefined |
+| senderInfo | IAAStakeManager.StakeInfo | undefined |
+| factoryInfo | IAAStakeManager.StakeInfo | undefined |
+| paymasterInfo | IAAStakeManager.StakeInfo | undefined |
 
 ### ValidationResultWithAggregation
 
 ```solidity
-error ValidationResultWithAggregation(IEntryPoint.ReturnInfo returnInfo, IStakeManager.StakeInfo senderInfo, IStakeManager.StakeInfo factoryInfo, IStakeManager.StakeInfo paymasterInfo, IEntryPoint.AggregatorStakeInfo aggregatorInfo)
+error ValidationResultWithAggregation(IEntryPoint.ReturnInfo returnInfo, IAAStakeManager.StakeInfo senderInfo, IAAStakeManager.StakeInfo factoryInfo, IAAStakeManager.StakeInfo paymasterInfo, IEntryPoint.AggregatorStakeInfo aggregatorInfo)
 ```
 
 
@@ -670,9 +670,9 @@ error ValidationResultWithAggregation(IEntryPoint.ReturnInfo returnInfo, IStakeM
 | Name | Type | Description |
 |---|---|---|
 | returnInfo | IEntryPoint.ReturnInfo | undefined |
-| senderInfo | IStakeManager.StakeInfo | undefined |
-| factoryInfo | IStakeManager.StakeInfo | undefined |
-| paymasterInfo | IStakeManager.StakeInfo | undefined |
+| senderInfo | IAAStakeManager.StakeInfo | undefined |
+| factoryInfo | IAAStakeManager.StakeInfo | undefined |
+| paymasterInfo | IAAStakeManager.StakeInfo | undefined |
 | aggregatorInfo | IEntryPoint.AggregatorStakeInfo | undefined |
 
 

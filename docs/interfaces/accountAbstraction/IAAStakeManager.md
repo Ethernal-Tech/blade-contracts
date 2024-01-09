@@ -1,4 +1,4 @@
-# IStakeManager
+# IAAStakeManager
 
 
 
@@ -67,7 +67,7 @@ add to the deposit of the given account
 ### getDepositInfo
 
 ```solidity
-function getDepositInfo(address account) external view returns (struct IStakeManager.DepositInfo info)
+function getDepositInfo(address account) external view returns (struct IAAStakeManager.DepositInfo info)
 ```
 
 
@@ -84,7 +84,7 @@ function getDepositInfo(address account) external view returns (struct IStakeMan
 
 | Name | Type | Description |
 |---|---|---|
-| info | IStakeManager.DepositInfo | - full deposit information of given account |
+| info | IAAStakeManager.DepositInfo | - full deposit information of given account |
 
 ### unlockStake
 
