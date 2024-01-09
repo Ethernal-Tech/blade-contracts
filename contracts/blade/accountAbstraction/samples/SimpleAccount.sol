@@ -100,6 +100,7 @@ contract SimpleAccount is BaseAccount, TokenCallbackHandler, UUPSUpgradeable, In
     }
 
     function _call(address target, uint256 value, bytes memory data) internal {
+        //slither-disable-next-line arbitrary-send-eth
         (bool success, bytes memory result) = target.call{value: value}(data);
         if (!success) {
             assembly {

@@ -45,6 +45,7 @@ contract EntryPoint is IEntryPoint, StakeManager, NonceManager, ReentrancyGuard 
      */
     function _compensate(address payable beneficiary, uint256 amount) internal {
         require(beneficiary != address(0), "AA90 invalid beneficiary");
+        //slither-disable-next-line arbitrary-send-eth
         (bool success, ) = beneficiary.call{value: amount}("");
         require(success, "AA91 failed send to beneficiary");
     }
