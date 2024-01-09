@@ -484,8 +484,19 @@ describe("EntryPoint", function () {
         expect.fail(null, null, "should fail on first simulation");
         //} catch (e: any) {
       } catch (e: any) {
-        expect(e.actual).to.include("Revert after first validation");
-        //expect(e.message).to.include('Revert after first validation')
+        console.log("ERROR ERROR ERROR 1", e);
+        console.log("ERROR ERROR ERROR 2", e.message);
+        console.log("ERROR ERROR ERROR 3", e.actual);
+        console.log(
+          e.actual ===
+            'VM Exception while processing transaction: reverted with custom error \'FailedOp(0, "AA23 reverted: Revert after first validation")'
+        );
+        //if for npx hardhat test else for npm run coverage
+        if (e.actual.includes("Revert after first validation")) {
+          expect(e.actual).to.include("Revert after first validation");
+        } else {
+          expect(e.message).to.include("Revert after first validation");
+        }
       }
     });
 
