@@ -8,6 +8,8 @@ import "../../interfaces/accountAbstraction/IAccount.sol";
 import "../../interfaces/accountAbstraction/IEntryPoint.sol";
 import "./Helpers.sol";
 
+// slither-disable-start low-level-calls
+
 /**
  * Basic account implementation.
  * this contract provides the basic logic for implementing the IAccount interface  - validateUserOp
@@ -109,4 +111,6 @@ abstract contract BaseAccount is IAccount {
             //ignore failure (its EntryPoint's job to verify, not account.)
         }
     }
+
+    // slither-disable-end low-level-calls
 }
