@@ -101,6 +101,7 @@ abstract contract AAStakeManager is IAAStakeManager {
         info.withdrawTime = 0;
         info.stake = 0;
         emit StakeWithdrawn(msg.sender, withdrawAddress, stake);
+        // slither-disable-next-line missing-zero-check
         (bool success, ) = withdrawAddress.call{value: stake}("");
         require(success, "failed to withdraw stake");
     }
