@@ -433,6 +433,7 @@ contract EntryPoint is IEntryPoint, AAStakeManager, NonceManager, ReentrancyGuar
             uint256 preGas = gasleft();
             MemoryUserOp memory mUserOp = opInfo.mUserOp;
             address sender = mUserOp.sender;
+            //slither-disable-next-line reentrancy-eth
             _createSenderIfNeeded(opIndex, opInfo, op.initCode);
             address paymaster = mUserOp.paymaster;
             numberMarker();
