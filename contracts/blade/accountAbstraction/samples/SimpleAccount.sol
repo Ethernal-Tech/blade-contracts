@@ -13,6 +13,8 @@ import "../BaseAccount.sol";
 
 import "../callback/TokenCallbackHandler.sol";
 
+// slither-disable-start low-level-calls
+
 /**
  * minimal account.
  *  this is sample minimal account.
@@ -136,4 +138,6 @@ contract SimpleAccount is BaseAccount, TokenCallbackHandler, UUPSUpgradeable, In
         (newImplementation);
         _onlyOwner();
     }
+
+    // slither-disable-end low-level-calls
 }

@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-only
 pragma solidity ^0.8.12;
 
+// slither-disable-start low-level-calls
+
 /**
  * manage deposits and stakes.
  * deposit is just a balance used to pay for UserOperations (either by a paymaster or an account)
