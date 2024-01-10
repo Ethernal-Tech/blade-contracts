@@ -17,6 +17,7 @@ contract MaliciousAccount is IAccount {
         bytes32,
         uint256 missingAccountFunds
     ) external returns (uint256 validationData) {
+        //slither-disable-next-line arbitrary-send-eth
         ep.depositTo{value: missingAccountFunds}(address(this));
         // Now calculate basefee per EntryPoint.getUserOpGasPrice() and compare it to the basefe we pass off-chain in the signature
         uint256 externalBaseFee = abi.decode(userOp.signature, (uint256));

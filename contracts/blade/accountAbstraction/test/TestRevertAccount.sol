@@ -16,6 +16,7 @@ contract TestRevertAccount is IAccount {
         bytes32,
         uint256 missingAccountFunds
     ) external override returns (uint256 validationData) {
+        //slither-disable-next-line arbitrary-send-eth
         ep.depositTo{value: missingAccountFunds}(address(this));
         return 0;
     }

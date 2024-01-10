@@ -20,6 +20,7 @@ contract TestWarmColdAccount is IAccount {
         bytes32,
         uint256 missingAccountFunds
     ) external override returns (uint256 validationData) {
+        //slither-disable-next-line arbitrary-send-eth
         ep.depositTo{value: missingAccountFunds}(address(this));
         if (userOp.nonce == 1) {
             // can only succeed if storage is already warm

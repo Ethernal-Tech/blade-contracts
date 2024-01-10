@@ -438,6 +438,7 @@ contract EntryPoint is IEntryPoint, AAStakeManager, NonceManager, ReentrancyGuar
             uint256 missingAccountFunds = 0;
             if (paymaster == address(0)) {
                 uint256 bal = balanceOf(sender);
+                //slither-disable-next-line timestamp
                 missingAccountFunds = bal > requiredPrefund ? 0 : requiredPrefund - bal;
             }
             try
@@ -541,6 +542,7 @@ contract EntryPoint is IEntryPoint, AAStakeManager, NonceManager, ReentrancyGuar
         }
         ValidationData memory data = _parseValidationData(validationData);
         // solhint-disable-next-line not-rely-on-time
+        //slither-disable-next-line timestamp
         outOfTimeRange = block.timestamp > data.validUntil || block.timestamp < data.validAfter;
         aggregator = data.aggregator;
     }

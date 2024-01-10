@@ -73,7 +73,9 @@ abstract contract AAStakeManager is IAAStakeManager {
      */
     function unlockStake() external {
         DepositInfo storage info = deposits[msg.sender];
+        //slither-disable-next-line timestamp
         require(info.unstakeDelaySec != 0, "not staked");
+        //slither-disable-next-line timestamp
         require(info.staked, "already unstaking");
         uint48 withdrawTime = uint48(block.timestamp) + info.unstakeDelaySec;
         info.withdrawTime = withdrawTime;
@@ -89,6 +91,7 @@ abstract contract AAStakeManager is IAAStakeManager {
     function withdrawStake(address payable withdrawAddress) external {
         DepositInfo storage info = deposits[msg.sender];
         uint256 stake = info.stake;
+        //slither-disable-next-line timestamp
         require(stake > 0, "No stake to withdraw");
         require(info.withdrawTime > 0, "must call unlockStake() first");
         require(info.withdrawTime <= block.timestamp, "Stake withdrawal is not due");
