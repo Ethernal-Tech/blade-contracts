@@ -7,6 +7,7 @@ pragma solidity ^0.8.12;
 
 /* solhint-disable avoid-low-level-calls */
 /* solhint-disable no-inline-assembly */
+/* solhint-disable reentrancy-eth */
 
 import "../../interfaces/accountAbstraction/IAccount.sol";
 import "../../interfaces/accountAbstraction/IPaymaster.sol";
