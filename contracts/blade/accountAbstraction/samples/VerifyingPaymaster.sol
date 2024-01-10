@@ -3,6 +3,7 @@ pragma solidity ^0.8.12;
 
 /* solhint-disable reason-string */
 /* solhint-disable no-inline-assembly */
+// slither-disable-start assembly
 
 import "../BasePaymaster.sol";
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
@@ -122,4 +123,5 @@ contract VerifyingPaymaster is BasePaymaster {
         );
         signature = paymasterAndData[SIGNATURE_OFFSET:];
     }
+    // slither-disable-start assembly
 }
