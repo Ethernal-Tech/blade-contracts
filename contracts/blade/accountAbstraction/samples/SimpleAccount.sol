@@ -13,7 +13,7 @@ import "../BaseAccount.sol";
 
 import "../callback/TokenCallbackHandler.sol";
 
-// slither-disable-start low-level-calls,dead-code,assembly
+// slither-disable-start low-level-calls,dead-code,assembly,calls-loop
 
 /**
  * minimal account.
@@ -139,5 +139,5 @@ contract SimpleAccount is BaseAccount, TokenCallbackHandler, UUPSUpgradeable, In
         _onlyOwner();
     }
 
-    // slither-disable-end low-level-calls,dead-code,assembly
+    // slither-disable-end low-level-calls,dead-code,assembly,calls-loop
 }

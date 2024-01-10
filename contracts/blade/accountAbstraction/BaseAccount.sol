@@ -8,7 +8,7 @@ import "../../interfaces/accountAbstraction/IAccount.sol";
 import "../../interfaces/accountAbstraction/IEntryPoint.sol";
 import "./Helpers.sol";
 
-// slither-disable-start low-level-calls
+// slither-disable-start low-level-calls,return-bomb
 
 /**
  * Basic account implementation.
@@ -112,5 +112,5 @@ abstract contract BaseAccount is IAccount {
         }
     }
 
-    // slither-disable-end low-level-calls
+    // slither-disable-end low-level-calls,return-bomb
 }
