@@ -22,8 +22,10 @@ contract VerifyingPaymaster is BasePaymaster {
 
     address public immutable verifyingSigner;
 
+    // slither-disable-next-line unused-state
     uint256 private constant VALID_TIMESTAMP_OFFSET = 20;
 
+    // slither-disable-next-line unused-state
     uint256 private constant SIGNATURE_OFFSET = 84;
 
     constructor(IEntryPoint _entryPoint, address _verifyingSigner) BasePaymaster(_entryPoint) {

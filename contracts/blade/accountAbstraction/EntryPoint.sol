@@ -7,7 +7,7 @@ pragma solidity ^0.8.12;
 
 /* solhint-disable avoid-low-level-calls */
 /* solhint-disable no-inline-assembly */
-// slither-disable-start reentrancy
+// slither-disable-start reentrancy-no-eth,reentrancy-events,reentrancy-benign,uninitialized-local
 
 import "../../interfaces/accountAbstraction/IAccount.sol";
 import "../../interfaces/accountAbstraction/IPaymaster.sol";
@@ -26,6 +26,7 @@ contract EntryPoint is IEntryPoint, AAStakeManager, NonceManager, ReentrancyGuar
     SenderCreator private immutable senderCreator = new SenderCreator();
 
     // internal value used during simulation: need to query aggregator.
+    // slither-disable-next-line unused-state
     address private constant SIMULATE_FIND_AGGREGATOR = address(1);
 
     // marker for inner call revert on out of gas
@@ -592,6 +593,7 @@ contract EntryPoint is IEntryPoint, AAStakeManager, NonceManager, ReentrancyGuar
         // (used only by off-chain simulateValidation)
         numberMarker();
 
+        // slither-disable-next-line uninitialized-local
         bytes memory context;
         if (mUserOp.paymaster != address(0)) {
             (context, paymasterValidationData) = _validatePaymasterPrepayment(
@@ -723,5 +725,5 @@ contract EntryPoint is IEntryPoint, AAStakeManager, NonceManager, ReentrancyGuar
             mstore(0, number())
         }
     }
-    // slither-disable-end reentrancy
+    // slither-disable-end reentrancy-no-eth,reentrancy-events,reentrancy-benign,uninitialized-local
 }
