@@ -89,5 +89,5 @@ library UserOperationLib {
     function min(uint256 a, uint256 b) internal pure returns (uint256) {
         return a < b ? a : b;
     }
-    // slither-disable-start dead-code,assembly
+    // slither-disable-end dead-code,assembly
 }

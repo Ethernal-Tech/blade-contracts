@@ -124,5 +124,5 @@ contract VerifyingPaymaster is BasePaymaster {
         );
         signature = paymasterAndData[SIGNATURE_OFFSET:];
     }
-    // slither-disable-start assembly
+    // slither-disable-end assembly
 }

@@ -115,6 +115,7 @@ abstract contract AAStakeManager is IAAStakeManager {
         require(withdrawAmount <= info.deposit, "Withdraw amount too large");
         info.deposit = uint112(info.deposit - withdrawAmount);
         emit Withdrawn(msg.sender, withdrawAddress, withdrawAmount);
+        // slither-disable-next-line missing-zero-check
         (bool success, ) = withdrawAddress.call{value: withdrawAmount}("");
         require(success, "failed to withdraw");
     }
