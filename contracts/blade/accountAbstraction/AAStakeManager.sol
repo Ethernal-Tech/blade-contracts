@@ -95,6 +95,7 @@ abstract contract AAStakeManager is IAAStakeManager {
         //slither-disable-next-line timestamp
         require(stake > 0, "No stake to withdraw");
         require(info.withdrawTime > 0, "must call unlockStake() first");
+        //slither-disable-next-line timestamp
         require(info.withdrawTime <= block.timestamp, "Stake withdrawal is not due");
         info.unstakeDelaySec = 0;
         info.withdrawTime = 0;

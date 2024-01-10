@@ -2,6 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 // solhint-disable no-inline-assembly
+// slither-disable-start dead-code,assembly
 
 /**
  * Utility functions helpful when making different kinds of contract calls in Solidity.
@@ -67,4 +68,5 @@ library Exec {
             revertWithData(getReturnData(maxLen));
         }
     }
+    // slither-disable-end dead-code,assembly
 }

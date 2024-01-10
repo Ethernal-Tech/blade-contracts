@@ -2,6 +2,7 @@
 pragma solidity ^0.8.12;
 
 /* solhint-disable no-inline-assembly */
+// slither-disable-start dead-code
 
 import {calldataKeccak} from "../../blade/accountAbstraction/Helpers.sol";
 
@@ -88,4 +89,5 @@ library UserOperationLib {
     function min(uint256 a, uint256 b) internal pure returns (uint256) {
         return a < b ? a : b;
     }
+    // slither-disable-start dead-code
 }
