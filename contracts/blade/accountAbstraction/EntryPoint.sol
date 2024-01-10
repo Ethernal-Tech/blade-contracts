@@ -7,7 +7,7 @@ pragma solidity ^0.8.12;
 
 /* solhint-disable avoid-low-level-calls */
 /* solhint-disable no-inline-assembly */
-// slither-disable-start reentrancy-no-eth,reentrancy-events,reentrancy-benign,uninitialized-local
+// slither-disable-end reentrancy-no-eth,reentrancy-events,reentrancy-benign,uninitialized-local,imilar-names
 
 import "../../interfaces/accountAbstraction/IAccount.sol";
 import "../../interfaces/accountAbstraction/IPaymaster.sol";
@@ -725,5 +725,5 @@ contract EntryPoint is IEntryPoint, AAStakeManager, NonceManager, ReentrancyGuar
             mstore(0, number())
         }
     }
-    // slither-disable-end reentrancy-no-eth,reentrancy-events,reentrancy-benign,uninitialized-local
+    // slither-disable-end reentrancy-no-eth,reentrancy-events,reentrancy-benign,uninitialized-local,imilar-names
 }
