@@ -363,6 +363,7 @@ contract EntryPoint is IEntryPoint, AAStakeManager, NonceManager, ReentrancyGuar
         if (initCode.length != 0) {
             address sender = opInfo.mUserOp.sender;
             if (sender.code.length != 0) revert FailedOp(opIndex, "AA10 sender already constructed");
+            //slither-disable-next-line reentrancy-eth
             address sender1 = senderCreator.createSender{gas: opInfo.mUserOp.verificationGasLimit}(initCode);
             if (sender1 == address(0)) revert FailedOp(opIndex, "AA13 initCode failed or OOG");
             if (sender1 != sender) revert FailedOp(opIndex, "AA14 initCode must return sender");
@@ -433,7 +434,6 @@ contract EntryPoint is IEntryPoint, AAStakeManager, NonceManager, ReentrancyGuar
             uint256 preGas = gasleft();
             MemoryUserOp memory mUserOp = opInfo.mUserOp;
             address sender = mUserOp.sender;
-            //slither-disable-next-line reentrancy-eth
             _createSenderIfNeeded(opIndex, opInfo, op.initCode);
             address paymaster = mUserOp.paymaster;
             numberMarker();
@@ -723,5 +723,4 @@ contract EntryPoint is IEntryPoint, AAStakeManager, NonceManager, ReentrancyGuar
             mstore(0, number())
         }
     }
-    // slither-disable-end reentrancy-eth
 }
