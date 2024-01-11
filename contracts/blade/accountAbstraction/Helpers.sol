@@ -2,7 +2,6 @@
 pragma solidity ^0.8.12;
 
 /* solhint-disable no-inline-assembly */
-// slither-disable-start dead-code
 
 /**
  * returned data from validateUserOp.
@@ -82,4 +81,3 @@ function calldataKeccak(bytes calldata data) pure returns (bytes32 ret) {
         ret := keccak256(mem, len)
     }
 }
-// slither-disable-end dead-code
