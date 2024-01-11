@@ -101,7 +101,7 @@ abstract contract AAStakeManager is IAAStakeManager {
         info.withdrawTime = 0;
         info.stake = 0;
         emit StakeWithdrawn(msg.sender, withdrawAddress, stake);
-        // slither-disable-next-line missing-zero-check
+        // slither-disable-next-line missing-zero-check,low-level-calls
         (bool success, ) = withdrawAddress.call{value: stake}("");
         require(success, "failed to withdraw stake");
     }
@@ -116,7 +116,7 @@ abstract contract AAStakeManager is IAAStakeManager {
         require(withdrawAmount <= info.deposit, "Withdraw amount too large");
         info.deposit = uint112(info.deposit - withdrawAmount);
         emit Withdrawn(msg.sender, withdrawAddress, withdrawAmount);
-        // slither-disable-next-line missing-zero-check
+        // slither-disable-next-line missing-zero-check,low-level-calls
         (bool success, ) = withdrawAddress.call{value: withdrawAmount}("");
         require(success, "failed to withdraw");
     }
