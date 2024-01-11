@@ -103,7 +103,7 @@ abstract contract BaseAccount is IAccount {
      */
     function _payPrefund(uint256 missingAccountFunds) internal virtual {
         if (missingAccountFunds != 0) {
-            //slither-disable-next-line low-level-calls, return-bomb
+            //slither-disable-next-line low-level-calls,return-bomb,arbitrary-send-eth
             (bool success, ) = payable(msg.sender).call{value: missingAccountFunds, gas: type(uint256).max}("");
             (success);
             //ignore failure (its EntryPoint's job to verify, not account.)
