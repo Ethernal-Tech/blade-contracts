@@ -90,6 +90,7 @@ contract SimpleAccount is BaseAccount, TokenCallbackHandler, UUPSUpgradeable, In
     }
 
     /// implement template method of BaseAccount
+    //slither-disable-next-line dead-code
     function _validateSignature(
         UserOperation calldata userOp,
         bytes32 userOpHash
@@ -100,9 +101,10 @@ contract SimpleAccount is BaseAccount, TokenCallbackHandler, UUPSUpgradeable, In
     }
 
     function _call(address target, uint256 value, bytes memory data) internal {
-        //slither-disable-next-line arbitrary-send-eth
+        //slither-disable-next-line arbitrary-send-eth,calls-loop,low-level-calls
         (bool success, bytes memory result) = target.call{value: value}(data);
         if (!success) {
+            //slither-disable-next-line assembly
             assembly {
                 revert(add(result, 32), mload(result))
             }
