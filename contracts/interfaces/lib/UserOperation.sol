@@ -2,6 +2,7 @@
 pragma solidity ^0.8.12;
 
 /* solhint-disable no-inline-assembly */
+// slither-disable-start dead-code
 
 import {calldataKeccak} from "../../blade/accountAbstraction/Helpers.sol";
 
@@ -42,6 +43,7 @@ library UserOperationLib {
     function getSender(UserOperation calldata userOp) internal pure returns (address) {
         address data;
         //read sender from userOp, which is first userOp member (saves 800 gas...)
+        //slither-disable-next-line assembly
         assembly {data := calldataload(userOp)}
         return address(uint160(data));
     }
@@ -88,5 +90,5 @@ library UserOperationLib {
     function min(uint256 a, uint256 b) internal pure returns (uint256) {
         return a < b ? a : b;
     }
-    
+ // slither-disable-end dead-code   
 }
