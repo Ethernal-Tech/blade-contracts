@@ -1,8 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.12;
 
-// slither-disable-start assembly
-
 /**
  * helper contract for EntryPoint, to call userOp.initCode from a "neutral" address,
  * which is explicitly not the entryPoint itself.
@@ -18,6 +16,7 @@ contract SenderCreator {
         bytes memory initCallData = initCode[20:];
         bool success;
         /* solhint-disable no-inline-assembly */
+        //slither-disable-next-line assembly
         assembly {
             success := call(gas(), factory, 0, add(initCallData, 0x20), mload(initCallData), 0, 32)
             sender := mload(0)
@@ -26,5 +25,4 @@ contract SenderCreator {
             sender = address(0);
         }
     }
-    // slither-disable-end assembly
 }
