@@ -5,7 +5,7 @@ import "../../interfaces/accountAbstraction/IAAStakeManager.sol";
 
 /* solhint-disable avoid-low-level-calls */
 /* solhint-disable not-rely-on-time */
-// slither-disable-start reentrancy-no-eth,low-level-calls
+
 /**
  * manage deposits and stakes.
  * deposit is just a balance used to pay for UserOperations (either by a paymaster or an account)
@@ -120,5 +120,4 @@ abstract contract AAStakeManager is IAAStakeManager {
         (bool success, ) = withdrawAddress.call{value: withdrawAmount}("");
         require(success, "failed to withdraw");
     }
-    // slither-disable-end reentrancy-no-eth,low-level-calls
 }
