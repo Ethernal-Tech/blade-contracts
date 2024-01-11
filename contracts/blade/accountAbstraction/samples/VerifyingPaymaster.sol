@@ -3,7 +3,6 @@ pragma solidity ^0.8.12;
 
 /* solhint-disable reason-string */
 /* solhint-disable no-inline-assembly */
-// slither-disable-start assembly
 
 import "../BasePaymaster.sol";
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
@@ -42,6 +41,7 @@ contract VerifyingPaymaster is BasePaymaster {
         // copy directly the userOp from calldata up to (but not including) the paymasterAndData.
         // this encoding depends on the ABI encoding of calldata, but is much lighter to copy
         // than referencing each field separately.
+        //slither-disable-next-line assembly
         assembly {
             let ofs := userOp
             let len := sub(sub(pnd.offset, ofs), 32)
@@ -124,5 +124,4 @@ contract VerifyingPaymaster is BasePaymaster {
         );
         signature = paymasterAndData[SIGNATURE_OFFSET:];
     }
-    // slither-disable-end assembly
 }
