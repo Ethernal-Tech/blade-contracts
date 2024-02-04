@@ -35,22 +35,22 @@ contract VerifyingPaymaster is BasePaymaster {
 
     mapping(address => uint256) public senderNonce;
 
-    function pack(UserOperation calldata userOp) internal pure returns (bytes memory ret) {
-        // lighter signature scheme. must match UserOp.ts#packUserOp
-        bytes calldata pnd = userOp.paymasterAndData;
-        // copy directly the userOp from calldata up to (but not including) the paymasterAndData.
-        // this encoding depends on the ABI encoding of calldata, but is much lighter to copy
-        // than referencing each field separately.
-        //slither-disable-next-line assembly
-        assembly {
-            let ofs := userOp
-            let len := sub(sub(pnd.offset, ofs), 32)
-            ret := mload(0x40)
-            mstore(0x40, add(ret, add(len, 32)))
-            mstore(ret, len)
-            calldatacopy(add(ret, 32), ofs, len)
-        }
-    }
+    // function pack(UserOperation calldata userOp) internal pure returns (bytes memory ret) {
+    //     // lighter signature scheme. must match UserOp.ts#packUserOp
+    //     bytes calldata pnd = userOp.paymasterAndData;
+    //     // copy directly the userOp from calldata up to (but not including) the paymasterAndData.
+    //     // this encoding depends on the ABI encoding of calldata, but is much lighter to copy
+    //     // than referencing each field separately.
+    //     //slither-disable-next-line assembly
+    //     assembly {
+    //         let ofs := userOp
+    //         let len := sub(sub(pnd.offset, ofs), 32)
+    //         ret := mload(0x40)
+    //         mstore(0x40, add(ret, add(len, 32)))
+    //         mstore(ret, len)
+    //         calldatacopy(add(ret, 32), ofs, len)
+    //     }
+    // }
 
     /**
      * return the hash we're going to sign off-chain (and validate on-chain)
@@ -69,20 +69,25 @@ contract VerifyingPaymaster is BasePaymaster {
 
         return
             keccak256(
-                abi.encode(
-                    sender,
-                    userOp.nonce,
-                    keccak256(userOp.initCode),
-                    keccak256(userOp.callData),
-                    userOp.callGasLimit,
-                    userOp.verificationGasLimit,
-                    userOp.preVerificationGas,
-                    userOp.maxFeePerGas,
-                    userOp.maxPriorityFeePerGas,
-                    address(this),
-                    senderNonce[sender],
-                    validUntil,
-                    validAfter
+                bytes.concat(
+                    abi.encode(
+                        sender,
+                        userOp.nonce,
+                        keccak256(userOp.initCode),
+                        keccak256(userOp.callData),
+                        userOp.callGasLimit,
+                        userOp.verificationGasLimit,
+                        userOp.preVerificationGas,
+                        userOp.maxFeePerGas,
+                        userOp.maxPriorityFeePerGas
+                    ),
+                    abi.encodePacked(
+                        block.chainid,
+                        address(this),
+                        senderNonce[userOp.getSender()],
+                        validUntil,
+                        validAfter
+                    )
                 )
             );
     }
