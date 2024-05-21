@@ -62,7 +62,8 @@ contract DeployRootERC20PredicateTest is Test {
             newExitHelper,
             newChildERC20Predicate,
             newChildTokenTemplate,
-            nativeTokenRootAddress
+            nativeTokenRootAddress,
+            proxyAdmin
         );
 
         assertEq(

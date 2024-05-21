@@ -73,7 +73,8 @@ contract BladeManager_PremineInitialized is Initialized {
             address(new ExitHelper()),
             childERC20Predicate,
             childTokenTemplate,
-            address(token)
+            address(token),
+            bob
         );
     }
 

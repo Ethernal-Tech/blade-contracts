@@ -17,7 +17,7 @@ abstract contract RootMintableERC1155PredicateDeployer is Script {
     ) internal returns (address logicAddr, address proxyAddr) {
         bytes memory initData = abi.encodeCall(
             RootMintableERC1155Predicate.initialize,
-            (newL2StateSender, newStateReceiver, newChildERC1155Predicate, newChildTokenTemplate)
+            (newL2StateSender, newStateReceiver, newChildERC1155Predicate, newChildTokenTemplate, proxyAdmin)
         );
 
         vm.startBroadcast();

@@ -17,7 +17,7 @@ abstract contract RootMintableERC20PredicateDeployer is Script {
     ) internal returns (address logicAddr, address proxyAddr) {
         bytes memory initData = abi.encodeCall(
             RootMintableERC20Predicate.initialize,
-            (newL2StateSender, newStateReceiver, newChildERC20Predicate, newChildTokenTemplate)
+            (newL2StateSender, newStateReceiver, newChildERC20Predicate, newChildTokenTemplate, proxyAdmin)
         );
 
         vm.startBroadcast();

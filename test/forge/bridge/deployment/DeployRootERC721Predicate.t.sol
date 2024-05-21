@@ -58,7 +58,8 @@ contract DeployRootERC721PredicateTest is Test {
             newStateSender,
             newExitHelper,
             newChildERC721Predicate,
-            newChildTokenTemplate
+            newChildTokenTemplate,
+            proxyAdmin
         );
 
         assertEq(

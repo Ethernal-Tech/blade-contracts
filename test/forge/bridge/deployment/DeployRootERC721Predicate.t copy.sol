@@ -58,7 +58,8 @@ contract DeployRootERC1155PredicateTest is Test {
             newStateSender,
             newExitHelper,
             newChildERC1155Predicate,
-            newChildTokenTemplate
+            newChildTokenTemplate,
+            proxyAdmin
         );
 
         assertEq(
