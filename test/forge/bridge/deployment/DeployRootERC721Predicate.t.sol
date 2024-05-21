@@ -62,22 +62,10 @@ contract DeployRootERC721PredicateTest is Test {
             proxyAdmin
         );
 
-        assertEq(
-            vm.load(address(proxyAsRootERC721Predicate), bytes32(uint(0))),
-            bytes32(bytes.concat(hex"00000000000000000000", abi.encodePacked(newStateSender), hex"0001"))
-        );
-        assertEq(
-            vm.load(address(proxyAsRootERC721Predicate), bytes32(uint(1))),
-            bytes32(bytes.concat(hex"000000000000000000000000", abi.encodePacked(newExitHelper)))
-        );
-        assertEq(
-            vm.load(address(proxyAsRootERC721Predicate), bytes32(uint(2))),
-            bytes32(bytes.concat(hex"000000000000000000000000", abi.encodePacked(newChildERC721Predicate)))
-        );
-        assertEq(
-            vm.load(address(proxyAsRootERC721Predicate), bytes32(uint(3))),
-            bytes32(bytes.concat(hex"000000000000000000000000", abi.encodePacked(newChildTokenTemplate)))
-        );
+        assertEq(address(proxyAsRootERC721Predicate.stateSender()), newStateSender);
+        assertEq(proxyAsRootERC721Predicate.exitHelper(), newExitHelper);
+        assertEq(proxyAsRootERC721Predicate.childERC721Predicate(), newChildERC721Predicate);
+        assertEq(proxyAsRootERC721Predicate.childTokenTemplate(), newChildTokenTemplate);
     }
 
     function testLogicChange() public {

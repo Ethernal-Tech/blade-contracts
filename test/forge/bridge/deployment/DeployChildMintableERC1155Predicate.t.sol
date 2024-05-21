@@ -61,22 +61,10 @@ contract DeployChildMintableERC1155PredicateTest is Test {
             newChildTokenTemplate
         );
 
-        assertEq(
-            vm.load(address(proxyAsChildMintableERC1155Predicate), bytes32(uint(0))),
-            bytes32(bytes.concat(hex"00000000000000000000", abi.encodePacked(newStateSender), hex"0001"))
-        );
-        assertEq(
-            vm.load(address(proxyAsChildMintableERC1155Predicate), bytes32(uint(1))),
-            bytes32(bytes.concat(hex"000000000000000000000000", abi.encodePacked(newExitHelper)))
-        );
-        assertEq(
-            vm.load(address(proxyAsChildMintableERC1155Predicate), bytes32(uint(2))),
-            bytes32(bytes.concat(hex"000000000000000000000000", abi.encodePacked(newRootERC1155Predicate)))
-        );
-        assertEq(
-            vm.load(address(proxyAsChildMintableERC1155Predicate), bytes32(uint(3))),
-            bytes32(bytes.concat(hex"000000000000000000000000", abi.encodePacked(newChildTokenTemplate)))
-        );
+        assertEq(address(proxyAsChildMintableERC1155Predicate.stateSender()), newStateSender);
+        assertEq(proxyAsChildMintableERC1155Predicate.exitHelper(), newExitHelper);
+        assertEq(proxyAsChildMintableERC1155Predicate.rootERC1155Predicate(), newRootERC1155Predicate);
+        assertEq(proxyAsChildMintableERC1155Predicate.childTokenTemplate(), newChildTokenTemplate);
     }
 
     function testLogicChange() public {
