@@ -1,23 +1,20 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.19;
 
-import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/proxy/Clones.sol";
 import "../interfaces/bridge/IRootERC20Predicate.sol";
 import "../interfaces/IStateSender.sol";
+import "../lib/Predicate.sol";
 
 // solhint-disable reason-string
-contract RootERC20Predicate is Initializable, IRootERC20Predicate {
+contract RootERC20Predicate is Predicate, IRootERC20Predicate {
     using SafeERC20 for IERC20Metadata;
 
     IStateSender public stateSender;
     address public exitHelper;
     address public childERC20Predicate;
     address public childTokenTemplate;
-    bytes32 public constant DEPOSIT_SIG = keccak256("DEPOSIT");
-    bytes32 public constant WITHDRAW_SIG = keccak256("WITHDRAW");
-    bytes32 public constant MAP_TOKEN_SIG = keccak256("MAP_TOKEN");
     mapping(address => address) public rootTokenToChildToken;
     address public nativeTokenRoot;
 
@@ -26,6 +23,9 @@ contract RootERC20Predicate is Initializable, IRootERC20Predicate {
      * @param newStateSender Address of StateSender to send deposit information to
      * @param newExitHelper Address of ExitHelper to receive withdrawal information from
      * @param newChildERC20Predicate Address of child ERC20 predicate to communicate with
+     * @param newChildTokenTemplate Address of child token template to clone
+     * @param newNativeTokenRoot Address of root native token
+     * @param owner Address of the owner of the contract
      * @dev Can only be called once.
      */
     function initialize(
@@ -33,15 +33,19 @@ contract RootERC20Predicate is Initializable, IRootERC20Predicate {
         address newExitHelper,
         address newChildERC20Predicate,
         address newChildTokenTemplate,
-        address newNativeTokenRoot
+        address newNativeTokenRoot,
+        address owner
     ) external initializer {
         require(
             newStateSender != address(0) &&
                 newExitHelper != address(0) &&
                 newChildERC20Predicate != address(0) &&
-                newChildTokenTemplate != address(0),
+                newChildTokenTemplate != address(0) &&
+                owner != address(0),
             "RootERC20Predicate: BAD_INITIALIZATION"
         );
+
+        __Predicate_init(owner);
         stateSender = IStateSender(newStateSender);
         exitHelper = newExitHelper;
         childERC20Predicate = newChildERC20Predicate;
@@ -60,9 +64,13 @@ contract RootERC20Predicate is Initializable, IRootERC20Predicate {
      */
     function onL2StateReceive(uint256 /* id */, address sender, bytes calldata data) external {
         require(msg.sender == exitHelper, "RootERC20Predicate: ONLY_EXIT_HELPER");
-        require(sender == childERC20Predicate, "RootERC20Predicate: ONLY_CHILD_PREDICATE");
+        require(
+            sender == childERC20Predicate || trustedRelayers[sender],
+            "RootERC20Predicate: ONLY_CHILD_PREDICATE_OR_TRUSTED_RELAYER"
+        );
 
-        if (bytes32(data[:32]) == WITHDRAW_SIG) {
+        bytes32 sig = bytes32(data[:32]);
+        if (sig == WITHDRAW_SIG || sig == ROLLBACK_SIG) {
             _withdraw(data[32:]);
         } else {
             revert("RootERC20Predicate: INVALID_SIGNATURE");

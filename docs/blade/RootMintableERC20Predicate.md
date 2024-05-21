@@ -44,6 +44,23 @@ function BLOCKLIST_PRECOMPILE() external view returns (address)
 |---|---|---|
 | _0 | address | undefined |
 
+### DEPOSIT_BATCH_SIG
+
+```solidity
+function DEPOSIT_BATCH_SIG() external view returns (bytes32)
+```
+
+
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | bytes32 | undefined |
+
 ### DEPOSIT_SIG
 
 ```solidity
@@ -146,6 +163,23 @@ function READ_ADDRESSLIST_GAS() external view returns (uint256)
 |---|---|---|
 | _0 | uint256 | undefined |
 
+### ROLLBACK_SIG
+
+```solidity
+function ROLLBACK_SIG() external view returns (bytes32)
+```
+
+
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | bytes32 | undefined |
+
 ### SYSTEM
 
 ```solidity
@@ -197,6 +231,23 @@ function VALIDATOR_PKCHECK_PRECOMPILE_GAS() external view returns (uint256)
 |---|---|---|
 | _0 | uint256 | undefined |
 
+### WITHDRAW_BATCH_SIG
+
+```solidity
+function WITHDRAW_BATCH_SIG() external view returns (bytes32)
+```
+
+
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | bytes32 | undefined |
+
 ### WITHDRAW_SIG
 
 ```solidity
@@ -213,6 +264,33 @@ function WITHDRAW_SIG() external view returns (bytes32)
 | Name | Type | Description |
 |---|---|---|
 | _0 | bytes32 | undefined |
+
+### acceptOwnership
+
+```solidity
+function acceptOwnership() external nonpayable
+```
+
+
+
+*The new owner accepts the ownership transfer.*
+
+
+### addTrustedRelayer
+
+```solidity
+function addTrustedRelayer(address relayer) external nonpayable
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| relayer | address | undefined |
 
 ### childERC20Predicate
 
@@ -286,7 +364,7 @@ Function to deposit tokens from the depositor to another address on the child ch
 ### initialize
 
 ```solidity
-function initialize(address newL2StateSender, address newStateReceiver, address newChildERC20Predicate, address newChildTokenTemplate) external nonpayable
+function initialize(address newL2StateSender, address newStateReceiver, address newChildERC20Predicate, address newChildTokenTemplate, address owner) external nonpayable
 ```
 
 Initialization function for RootMintableERC20Predicate
@@ -301,6 +379,7 @@ Initialization function for RootMintableERC20Predicate
 | newStateReceiver | address | Address of StateReceiver to receive deposit information from |
 | newChildERC20Predicate | address | Address of child ERC20 predicate to communicate with |
 | newChildTokenTemplate | address | Address of child token implementation to deploy clones of |
+| owner | address | Address of the owner of the contract |
 
 ### l2StateSender
 
@@ -359,6 +438,67 @@ Function to be used for token withdrawals
 | sender | address | Address of the sender on the root chain |
 | data | bytes | Data sent by the sender |
 
+### owner
+
+```solidity
+function owner() external view returns (address)
+```
+
+
+
+*Returns the address of the current owner.*
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | address | undefined |
+
+### pendingOwner
+
+```solidity
+function pendingOwner() external view returns (address)
+```
+
+
+
+*Returns the address of the pending owner.*
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | address | undefined |
+
+### removeTrustedRelayer
+
+```solidity
+function removeTrustedRelayer(address relayer) external nonpayable
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| relayer | address | undefined |
+
+### renounceOwnership
+
+```solidity
+function renounceOwnership() external nonpayable
+```
+
+
+
+*Leaves the contract without owner. It will not be possible to call `onlyOwner` functions. Can only be called by the current owner. NOTE: Renouncing ownership will leave the contract without an owner, thereby disabling any functionality that is only available to the owner.*
+
+
 ### rootTokenToChildToken
 
 ```solidity
@@ -397,6 +537,22 @@ function stateReceiver() external view returns (address)
 | Name | Type | Description |
 |---|---|---|
 | _0 | address | undefined |
+
+### transferOwnership
+
+```solidity
+function transferOwnership(address newOwner) external nonpayable
+```
+
+
+
+*Starts the ownership transfer of the contract to a new account. Replaces the pending transfer if there is one. Can only be called by the current owner.*
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| newOwner | address | undefined |
 
 
 
@@ -474,6 +630,40 @@ event L2MintableTokenMapped(address indexed rootToken, address indexed childToke
 |---|---|---|
 | rootToken `indexed` | address | undefined |
 | childToken `indexed` | address | undefined |
+
+### OwnershipTransferStarted
+
+```solidity
+event OwnershipTransferStarted(address indexed previousOwner, address indexed newOwner)
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| previousOwner `indexed` | address | undefined |
+| newOwner `indexed` | address | undefined |
+
+### OwnershipTransferred
+
+```solidity
+event OwnershipTransferred(address indexed previousOwner, address indexed newOwner)
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| previousOwner `indexed` | address | undefined |
+| newOwner `indexed` | address | undefined |
 
 
 

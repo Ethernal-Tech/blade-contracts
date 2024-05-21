@@ -6,18 +6,14 @@ import "@openzeppelin/contracts/token/ERC1155/utils/ERC1155Holder.sol";
 import "@openzeppelin/contracts/proxy/Clones.sol";
 import "../interfaces/blade/IRootMintableERC1155Predicate.sol";
 import "../interfaces/IStateSender.sol";
+import "../lib/Predicate.sol";
 
 // solhint-disable reason-string
-contract RootMintableERC1155Predicate is Initializable, ERC1155Holder, IRootMintableERC1155Predicate {
+contract RootMintableERC1155Predicate is Predicate, ERC1155Holder, IRootMintableERC1155Predicate {
     IStateSender public l2StateSender;
     address public stateReceiver;
     address public childERC1155Predicate;
     address public childTokenTemplate;
-    bytes32 public constant DEPOSIT_SIG = keccak256("DEPOSIT");
-    bytes32 public constant DEPOSIT_BATCH_SIG = keccak256("DEPOSIT_BATCH");
-    bytes32 public constant WITHDRAW_SIG = keccak256("WITHDRAW");
-    bytes32 public constant WITHDRAW_BATCH_SIG = keccak256("WITHDRAW_BATCH");
-    bytes32 public constant MAP_TOKEN_SIG = keccak256("MAP_TOKEN");
     mapping(address => address) public rootTokenToChildToken;
 
     /**
@@ -25,15 +21,18 @@ contract RootMintableERC1155Predicate is Initializable, ERC1155Holder, IRootMint
      * @param newL2StateSender Address of L2StateSender to send deposit information to
      * @param newStateReceiver Address of StateReceiver to receive withdrawal information from
      * @param newChildERC1155Predicate Address of child ERC1155 predicate to communicate with
+     * @param newChildTokenTemplate Address of child token template to calculate child token addresses
+     * @param owner Address of the owner of the contract
      * @dev Can only be called once.
      */
     function initialize(
         address newL2StateSender,
         address newStateReceiver,
         address newChildERC1155Predicate,
-        address newChildTokenTemplate
+        address newChildTokenTemplate,
+        address owner
     ) external initializer {
-        _initialize(newL2StateSender, newStateReceiver, newChildERC1155Predicate, newChildTokenTemplate);
+        _initialize(newL2StateSender, newStateReceiver, newChildERC1155Predicate, newChildTokenTemplate, owner);
     }
 
     /**
@@ -43,9 +42,13 @@ contract RootMintableERC1155Predicate is Initializable, ERC1155Holder, IRootMint
      */
     function onStateReceive(uint256 /* id */, address sender, bytes calldata data) external {
         require(msg.sender == stateReceiver, "RootMintableERC1155Predicate: ONLY_STATE_RECEIVER");
-        require(sender == childERC1155Predicate, "RootMintableERC1155Predicate: ONLY_CHILD_PREDICATE");
+        require(
+            sender == childERC1155Predicate || trustedRelayers[sender],
+            "RootMintableERC1155Predicate: ONLY_CHILD_PREDICATE_OR_TRUSTED_RELAYER"
+        );
 
-        if (bytes32(data[:32]) == WITHDRAW_SIG) {
+        bytes32 sig = bytes32(data[:32]);
+        if (sig == WITHDRAW_SIG || sig == ROLLBACK_SIG) {
             _beforeTokenWithdraw();
             _withdraw(data[32:]);
             _afterTokenWithdraw();
@@ -124,15 +127,18 @@ contract RootMintableERC1155Predicate is Initializable, ERC1155Holder, IRootMint
         address newL2StateSender,
         address newStateReceiver,
         address newChildERC1155Predicate,
-        address newChildTokenTemplate
+        address newChildTokenTemplate,
+        address owner
     ) internal {
         require(
             newL2StateSender != address(0) &&
                 newStateReceiver != address(0) &&
                 newChildERC1155Predicate != address(0) &&
-                newChildTokenTemplate != address(0),
+                newChildTokenTemplate != address(0) &&
+                owner != address(0),
             "RootMintableERC1155Predicate: BAD_INITIALIZATION"
         );
+        __Predicate_init(owner);
         l2StateSender = IStateSender(newL2StateSender);
         stateReceiver = newStateReceiver;
         childERC1155Predicate = newChildERC1155Predicate;

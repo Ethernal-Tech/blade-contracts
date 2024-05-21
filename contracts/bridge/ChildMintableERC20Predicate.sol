@@ -8,6 +8,7 @@ import "@openzeppelin/contracts/proxy/Clones.sol";
 import "../interfaces/bridge/IChildMintableERC20Predicate.sol";
 import "../interfaces/blade/IChildERC20.sol";
 import "../interfaces/IStateSender.sol";
+import "../lib/Predicate.sol";
 
 /**
     @title ChildMintableERC20Predicate
@@ -15,16 +16,13 @@ import "../interfaces/IStateSender.sol";
     @notice Enables ERC20 token deposits and withdrawals across an arbitrary root chain and child chain
  */
 // solhint-disable reason-string
-contract ChildMintableERC20Predicate is Initializable, IChildMintableERC20Predicate {
+contract ChildMintableERC20Predicate is Predicate, IChildMintableERC20Predicate {
     using SafeERC20 for IERC20;
 
     IStateSender public stateSender;
     address public exitHelper;
     address public rootERC20Predicate;
     address public childTokenTemplate;
-    bytes32 public constant DEPOSIT_SIG = keccak256("DEPOSIT");
-    bytes32 public constant WITHDRAW_SIG = keccak256("WITHDRAW");
-    bytes32 public constant MAP_TOKEN_SIG = keccak256("MAP_TOKEN");
 
     mapping(address => address) public rootTokenToChildToken;
 
@@ -109,6 +107,7 @@ contract ChildMintableERC20Predicate is Initializable, IChildMintableERC20Predic
                 newChildTokenTemplate != address(0),
             "ChildMintableERC20Predicate: BAD_INITIALIZATION"
         );
+        __Predicate_init();
         stateSender = IStateSender(newStateSender);
         exitHelper = newExitHelper;
         rootERC20Predicate = newRootERC20Predicate;

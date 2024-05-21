@@ -9,6 +9,7 @@ import "../interfaces/blade/IChildERC20Predicate.sol";
 import "../interfaces/blade/IChildERC20.sol";
 import "../interfaces/IStateSender.sol";
 import "./System.sol";
+import "../lib/Predicate.sol";
 
 /**
     @title ChildERC20Predicate
@@ -16,7 +17,7 @@ import "./System.sol";
     @notice Enables ERC20 token deposits and withdrawals across an arbitrary root chain and child chain
  */
 // solhint-disable reason-string
-contract ChildERC20Predicate is IChildERC20Predicate, Initializable, System {
+contract ChildERC20Predicate is IChildERC20Predicate, Predicate, System {
     using SafeERC20 for IERC20;
 
     /// @custom:security write-protection="onlySystemCall()"
@@ -27,9 +28,6 @@ contract ChildERC20Predicate is IChildERC20Predicate, Initializable, System {
     address public rootERC20Predicate;
     /// @custom:security write-protection="onlySystemCall()"
     address public childTokenTemplate;
-    bytes32 public constant DEPOSIT_SIG = keccak256("DEPOSIT");
-    bytes32 public constant WITHDRAW_SIG = keccak256("WITHDRAW");
-    bytes32 public constant MAP_TOKEN_SIG = keccak256("MAP_TOKEN");
 
     mapping(address => address) public rootTokenToChildToken;
 
@@ -141,6 +139,7 @@ contract ChildERC20Predicate is IChildERC20Predicate, Initializable, System {
                 newChildTokenTemplate != address(0),
             "ChildERC20Predicate: BAD_INITIALIZATION"
         );
+        __Predicate_init();
         l2StateSender = IStateSender(newL2StateSender);
         stateReceiver = newStateReceiver;
         rootERC20Predicate = newRootERC20Predicate;

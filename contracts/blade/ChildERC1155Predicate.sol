@@ -8,6 +8,7 @@ import "../interfaces/blade/IChildERC1155Predicate.sol";
 import "../interfaces/blade/IChildERC1155.sol";
 import "../interfaces/IStateSender.sol";
 import "./System.sol";
+import "../lib/Predicate.sol";
 
 /**
     @title ChildERC1155Predicate
@@ -15,7 +16,7 @@ import "./System.sol";
     @notice Enables ERC1155 token deposits and withdrawals across an arbitrary root chain and child chain
  */
 // solhint-disable reason-string
-contract ChildERC1155Predicate is IChildERC1155Predicate, Initializable, System {
+contract ChildERC1155Predicate is IChildERC1155Predicate, Predicate, System {
     /// @custom:security write-protection="onlySystemCall()"
     IStateSender public l2StateSender;
     /// @custom:security write-protection="onlySystemCall()"
@@ -24,11 +25,6 @@ contract ChildERC1155Predicate is IChildERC1155Predicate, Initializable, System 
     address public rootERC1155Predicate;
     /// @custom:security write-protection="onlySystemCall()"
     address public childTokenTemplate;
-    bytes32 public constant DEPOSIT_SIG = keccak256("DEPOSIT");
-    bytes32 public constant DEPOSIT_BATCH_SIG = keccak256("DEPOSIT_BATCH");
-    bytes32 public constant WITHDRAW_SIG = keccak256("WITHDRAW");
-    bytes32 public constant WITHDRAW_BATCH_SIG = keccak256("WITHDRAW_BATCH");
-    bytes32 public constant MAP_TOKEN_SIG = keccak256("MAP_TOKEN");
 
     mapping(address => address) public rootTokenToChildToken;
 
@@ -177,6 +173,7 @@ contract ChildERC1155Predicate is IChildERC1155Predicate, Initializable, System 
                 newChildTokenTemplate != address(0),
             "ChildERC1155Predicate: BAD_INITIALIZATION"
         );
+        __Predicate_init();
         l2StateSender = IStateSender(newL2StateSender);
         stateReceiver = newStateReceiver;
         rootERC1155Predicate = newRootERC1155Predicate;

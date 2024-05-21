@@ -163,6 +163,23 @@ function READ_ADDRESSLIST_GAS() external view returns (uint256)
 |---|---|---|
 | _0 | uint256 | undefined |
 
+### ROLLBACK_SIG
+
+```solidity
+function ROLLBACK_SIG() external view returns (bytes32)
+```
+
+
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | bytes32 | undefined |
+
 ### SYSTEM
 
 ```solidity
@@ -259,6 +276,22 @@ function acceptOwnership() external nonpayable
 *The new owner accepts the ownership transfer.*
 
 
+### addTrustedRelayer
+
+```solidity
+function addTrustedRelayer(address relayer) external nonpayable
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| relayer | address | undefined |
+
 ### childERC721Predicate
 
 ```solidity
@@ -349,6 +382,26 @@ Function to deposit tokens from the depositor to another address on the child ch
 ### initialize
 
 ```solidity
+function initialize(address newL2StateSender, address newStateReceiver, address newChildERC721Predicate, address newChildTokenTemplate, address owner) external nonpayable
+```
+
+Initialization function for RootMintableERC721Predicate
+
+*Can only be called once.*
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| newL2StateSender | address | Address of L2StateSender to send deposit information to |
+| newStateReceiver | address | Address of StateReceiver to receive withdrawal information from |
+| newChildERC721Predicate | address | Address of child ERC721 predicate to communicate with |
+| newChildTokenTemplate | address | Address of child token template to calculate child token addresses |
+| owner | address | Address of the owner of the contract |
+
+### initialize
+
+```solidity
 function initialize(address newL2StateSender, address newStateReceiver, address newChildERC721Predicate, address newChildTokenTemplate, bool newUseAllowList, bool newUseBlockList, address newOwner) external nonpayable
 ```
 
@@ -367,25 +420,6 @@ function initialize(address newL2StateSender, address newStateReceiver, address 
 | newUseAllowList | bool | undefined |
 | newUseBlockList | bool | undefined |
 | newOwner | address | undefined |
-
-### initialize
-
-```solidity
-function initialize(address newL2StateSender, address newStateReceiver, address newChildERC721Predicate, address newChildTokenTemplate) external nonpayable
-```
-
-Initialization function for RootMintableERC721Predicate
-
-*Can only be called once.*
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| newL2StateSender | address | Address of L2StateSender to send deposit information to |
-| newStateReceiver | address | Address of StateReceiver to receive withdrawal information from |
-| newChildERC721Predicate | address | Address of child ERC721 predicate to communicate with |
-| newChildTokenTemplate | address | Address of child token template to calculate child token addresses |
 
 ### l2StateSender
 
@@ -502,6 +536,22 @@ function pendingOwner() external view returns (address)
 | Name | Type | Description |
 |---|---|---|
 | _0 | address | undefined |
+
+### removeTrustedRelayer
+
+```solidity
+function removeTrustedRelayer(address relayer) external nonpayable
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| relayer | address | undefined |
 
 ### renounceOwnership
 

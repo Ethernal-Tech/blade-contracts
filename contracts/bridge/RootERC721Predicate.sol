@@ -1,23 +1,18 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.19;
 
-import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts/token/ERC721/utils/ERC721Holder.sol";
 import "@openzeppelin/contracts/proxy/Clones.sol";
 import "../interfaces/bridge/IRootERC721Predicate.sol";
 import "../interfaces/IStateSender.sol";
+import "../lib/Predicate.sol";
 
 // solhint-disable reason-string
-contract RootERC721Predicate is Initializable, ERC721Holder, IRootERC721Predicate {
+contract RootERC721Predicate is Predicate, ERC721Holder, IRootERC721Predicate {
     IStateSender public stateSender;
     address public exitHelper;
     address public childERC721Predicate;
     address public childTokenTemplate;
-    bytes32 public constant DEPOSIT_SIG = keccak256("DEPOSIT");
-    bytes32 public constant DEPOSIT_BATCH_SIG = keccak256("DEPOSIT_BATCH");
-    bytes32 public constant WITHDRAW_SIG = keccak256("WITHDRAW");
-    bytes32 public constant WITHDRAW_BATCH_SIG = keccak256("WITHDRAW_BATCH");
-    bytes32 public constant MAP_TOKEN_SIG = keccak256("MAP_TOKEN");
     mapping(address => address) public rootTokenToChildToken;
 
     /**
@@ -31,15 +26,19 @@ contract RootERC721Predicate is Initializable, ERC721Holder, IRootERC721Predicat
         address newStateSender,
         address newExitHelper,
         address newChildERC721Predicate,
-        address newChildTokenTemplate
+        address newChildTokenTemplate,
+        address owner
     ) external initializer {
         require(
             newStateSender != address(0) &&
                 newExitHelper != address(0) &&
                 newChildERC721Predicate != address(0) &&
-                newChildTokenTemplate != address(0),
+                newChildTokenTemplate != address(0) &&
+                owner != address(0),
             "RootERC721Predicate: BAD_INITIALIZATION"
         );
+
+        __Predicate_init(owner);
         stateSender = IStateSender(newStateSender);
         exitHelper = newExitHelper;
         childERC721Predicate = newChildERC721Predicate;
@@ -53,11 +52,15 @@ contract RootERC721Predicate is Initializable, ERC721Holder, IRootERC721Predicat
      */
     function onL2StateReceive(uint256 /* id */, address sender, bytes calldata data) external {
         require(msg.sender == exitHelper, "RootERC721Predicate: ONLY_EXIT_HELPER");
-        require(sender == childERC721Predicate, "RootERC721Predicate: ONLY_CHILD_PREDICATE");
+        require(
+            sender == childERC721Predicate || trustedRelayers[sender],
+            "RootERC721Predicate: ONLY_CHILD_PREDICATE_OR_TRUSTED_RELAYER"
+        );
 
-        if (bytes32(data[:32]) == WITHDRAW_SIG) {
+        bytes32 sig = bytes32(data[:32]);
+        if (sig == WITHDRAW_SIG || sig == ROLLBACK_SIG) {
             _withdraw(data[32:]);
-        } else if (bytes32(data[:32]) == WITHDRAW_BATCH_SIG) {
+        } else if (sig == WITHDRAW_BATCH_SIG) {
             _withdrawBatch(data);
         } else {
             revert("RootERC721Predicate: INVALID_SIGNATURE");

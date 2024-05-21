@@ -8,6 +8,7 @@ import "../interfaces/blade/IChildERC721Predicate.sol";
 import "../interfaces/blade/IChildERC721.sol";
 import "../interfaces/IStateSender.sol";
 import "./System.sol";
+import "../lib/Predicate.sol";
 
 /**
     @title ChildERC721Predicate
@@ -15,7 +16,7 @@ import "./System.sol";
     @notice Enables ERC721 token deposits and withdrawals across an arbitrary root chain and child chain
  */
 // solhint-disable reason-string
-contract ChildERC721Predicate is IChildERC721Predicate, Initializable, System {
+contract ChildERC721Predicate is IChildERC721Predicate, Predicate, System {
     /// @custom:security write-protection="onlySystemCall()"
     IStateSender public l2StateSender;
     /// @custom:security write-protection="onlySystemCall()"
@@ -24,11 +25,6 @@ contract ChildERC721Predicate is IChildERC721Predicate, Initializable, System {
     address public rootERC721Predicate;
     /// @custom:security write-protection="onlySystemCall()"
     address public childTokenTemplate;
-    bytes32 public constant DEPOSIT_SIG = keccak256("DEPOSIT");
-    bytes32 public constant DEPOSIT_BATCH_SIG = keccak256("DEPOSIT_BATCH");
-    bytes32 public constant WITHDRAW_SIG = keccak256("WITHDRAW");
-    bytes32 public constant WITHDRAW_BATCH_SIG = keccak256("WITHDRAW_BATCH");
-    bytes32 public constant MAP_TOKEN_SIG = keccak256("MAP_TOKEN");
 
     mapping(address => address) public rootTokenToChildToken;
 
@@ -169,6 +165,7 @@ contract ChildERC721Predicate is IChildERC721Predicate, Initializable, System {
                 newChildTokenTemplate != address(0),
             "ChildERC721Predicate: BAD_INITIALIZATION"
         );
+        __Predicate_init();
         l2StateSender = IStateSender(newL2StateSender);
         stateReceiver = newStateReceiver;
         rootERC721Predicate = newRootERC721Predicate;

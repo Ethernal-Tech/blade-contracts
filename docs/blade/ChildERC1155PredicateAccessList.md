@@ -163,6 +163,23 @@ function READ_ADDRESSLIST_GAS() external view returns (uint256)
 |---|---|---|
 | _0 | uint256 | undefined |
 
+### ROLLBACK_SIG
+
+```solidity
+function ROLLBACK_SIG() external view returns (bytes32)
+```
+
+
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | bytes32 | undefined |
+
 ### SYSTEM
 
 ```solidity
@@ -258,6 +275,22 @@ function acceptOwnership() external nonpayable
 
 *The new owner accepts the ownership transfer.*
 
+
+### addTrustedRelayer
+
+```solidity
+function addTrustedRelayer(address relayer) external nonpayable
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| relayer | address | undefined |
 
 ### childTokenTemplate
 
@@ -385,6 +418,22 @@ function pendingOwner() external view returns (address)
 | Name | Type | Description |
 |---|---|---|
 | _0 | address | undefined |
+
+### removeTrustedRelayer
+
+```solidity
+function removeTrustedRelayer(address relayer) external nonpayable
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| relayer | address | undefined |
 
 ### renounceOwnership
 

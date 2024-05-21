@@ -7,6 +7,7 @@ import "@openzeppelin/contracts/proxy/Clones.sol";
 import "../interfaces/bridge/IChildMintableERC1155Predicate.sol";
 import "../interfaces/blade/IChildERC1155.sol";
 import "../interfaces/IStateSender.sol";
+import "../lib/Predicate.sol";
 
 /**
     @title ChildMintableERC1155Predicate
@@ -14,16 +15,11 @@ import "../interfaces/IStateSender.sol";
     @notice Enables mintable ERC1155 token deposits and withdrawals across an arbitrary root chain and child chain
  */
 // solhint-disable reason-string
-contract ChildMintableERC1155Predicate is Initializable, IChildMintableERC1155Predicate {
+contract ChildMintableERC1155Predicate is Predicate, IChildMintableERC1155Predicate {
     IStateSender public stateSender;
     address public exitHelper;
     address public rootERC1155Predicate;
     address public childTokenTemplate;
-    bytes32 public constant DEPOSIT_SIG = keccak256("DEPOSIT");
-    bytes32 public constant DEPOSIT_BATCH_SIG = keccak256("DEPOSIT_BATCH");
-    bytes32 public constant WITHDRAW_SIG = keccak256("WITHDRAW");
-    bytes32 public constant WITHDRAW_BATCH_SIG = keccak256("WITHDRAW_BATCH");
-    bytes32 public constant MAP_TOKEN_SIG = keccak256("MAP_TOKEN");
 
     mapping(address => address) public rootTokenToChildToken;
 
@@ -138,6 +134,7 @@ contract ChildMintableERC1155Predicate is Initializable, IChildMintableERC1155Pr
                 newChildTokenTemplate != address(0),
             "ChildMintableERC1155Predicate: BAD_INITIALIZATION"
         );
+        __Predicate_init();
         stateSender = IStateSender(newStateSender);
         exitHelper = newExitHelper;
         rootERC1155Predicate = newRootERC1155Predicate;

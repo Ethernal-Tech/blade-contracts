@@ -7,18 +7,14 @@ import "@openzeppelin/contracts/proxy/Clones.sol";
 import "../interfaces/blade/IRootMintableERC721Predicate.sol";
 import "../interfaces/IStateSender.sol";
 import "./System.sol";
+import "../lib/Predicate.sol";
 
 // solhint-disable reason-string
-contract RootMintableERC721Predicate is Initializable, ERC721Holder, System, IRootMintableERC721Predicate {
+contract RootMintableERC721Predicate is Predicate, ERC721Holder, System, IRootMintableERC721Predicate {
     IStateSender public l2StateSender;
     address public stateReceiver;
     address public childERC721Predicate;
     address public childTokenTemplate;
-    bytes32 public constant DEPOSIT_SIG = keccak256("DEPOSIT");
-    bytes32 public constant DEPOSIT_BATCH_SIG = keccak256("DEPOSIT_BATCH");
-    bytes32 public constant WITHDRAW_SIG = keccak256("WITHDRAW");
-    bytes32 public constant WITHDRAW_BATCH_SIG = keccak256("WITHDRAW_BATCH");
-    bytes32 public constant MAP_TOKEN_SIG = keccak256("MAP_TOKEN");
     mapping(address => address) public rootTokenToChildToken;
 
     /**
@@ -27,15 +23,17 @@ contract RootMintableERC721Predicate is Initializable, ERC721Holder, System, IRo
      * @param newStateReceiver Address of StateReceiver to receive withdrawal information from
      * @param newChildERC721Predicate Address of child ERC721 predicate to communicate with
      * @param newChildTokenTemplate Address of child token template to calculate child token addresses
+     * @param owner Address of the owner of the contract
      * @dev Can only be called once.
      */
     function initialize(
         address newL2StateSender,
         address newStateReceiver,
         address newChildERC721Predicate,
-        address newChildTokenTemplate
+        address newChildTokenTemplate,
+        address owner
     ) external virtual onlySystemCall initializer {
-        _initialize(newL2StateSender, newStateReceiver, newChildERC721Predicate, newChildTokenTemplate);
+        _initialize(newL2StateSender, newStateReceiver, newChildERC721Predicate, newChildTokenTemplate, owner);
     }
 
     /**
@@ -45,9 +43,13 @@ contract RootMintableERC721Predicate is Initializable, ERC721Holder, System, IRo
      */
     function onStateReceive(uint256 /* id */, address sender, bytes calldata data) external {
         require(msg.sender == stateReceiver, "RootMintableERC721Predicate: ONLY_STATE_RECEIVER");
-        require(sender == childERC721Predicate, "RootMintableERC721Predicate: ONLY_CHILD_PREDICATE");
+        require(
+            sender == childERC721Predicate || trustedRelayers[sender],
+            "RootMintableERC721Predicate: ONLY_CHILD_PREDICATE_OR_TRUSTED_RELAYER"
+        );
 
-        if (bytes32(data[:32]) == WITHDRAW_SIG) {
+        bytes32 sig = bytes32(data[:32]);
+        if (sig == WITHDRAW_SIG || sig == ROLLBACK_SIG) {
             _beforeTokenWithdraw();
             _withdraw(data[32:]);
             _afterTokenWithdraw();
@@ -128,15 +130,18 @@ contract RootMintableERC721Predicate is Initializable, ERC721Holder, System, IRo
         address newL2StateSender,
         address newStateReceiver,
         address newChildERC721Predicate,
-        address newChildTokenTemplate
+        address newChildTokenTemplate,
+        address owner
     ) internal {
         require(
             newL2StateSender != address(0) &&
                 newStateReceiver != address(0) &&
                 newChildERC721Predicate != address(0) &&
-                newChildTokenTemplate != address(0),
+                newChildTokenTemplate != address(0) &&
+                owner != address(0),
             "RootMintableERC721Predicate: BAD_INITIALIZATION"
         );
+        __Predicate_init(owner);
         l2StateSender = IStateSender(newL2StateSender);
         stateReceiver = newStateReceiver;
         childERC721Predicate = newChildERC721Predicate;

@@ -61,6 +61,23 @@ function MAP_TOKEN_SIG() external view returns (bytes32)
 |---|---|---|
 | _0 | bytes32 | undefined |
 
+### ROLLBACK_SIG
+
+```solidity
+function ROLLBACK_SIG() external view returns (bytes32)
+```
+
+
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | bytes32 | undefined |
+
 ### WITHDRAW_BATCH_SIG
 
 ```solidity
@@ -94,6 +111,33 @@ function WITHDRAW_SIG() external view returns (bytes32)
 | Name | Type | Description |
 |---|---|---|
 | _0 | bytes32 | undefined |
+
+### acceptOwnership
+
+```solidity
+function acceptOwnership() external nonpayable
+```
+
+
+
+*The new owner accepts the ownership transfer.*
+
+
+### addTrustedRelayer
+
+```solidity
+function addTrustedRelayer(address relayer) external nonpayable
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| relayer | address | undefined |
 
 ### childERC721Predicate
 
@@ -202,7 +246,7 @@ function exitHelper() external view returns (address)
 ### initialize
 
 ```solidity
-function initialize(address newStateSender, address newExitHelper, address newChildERC721Predicate, address newChildTokenTemplate) external nonpayable
+function initialize(address newStateSender, address newExitHelper, address newChildERC721Predicate, address newChildTokenTemplate, address owner) external nonpayable
 ```
 
 Initialization function for RootERC721Predicate
@@ -217,6 +261,7 @@ Initialization function for RootERC721Predicate
 | newExitHelper | address | Address of ExitHelper to receive withdrawal information from |
 | newChildERC721Predicate | address | Address of child ERC721 predicate to communicate with |
 | newChildTokenTemplate | address | undefined |
+| owner | address | undefined |
 
 ### mapToken
 
@@ -283,6 +328,67 @@ Function to be used for token withdrawals
 | sender | address | Address of the sender on the child chain |
 | data | bytes | Data sent by the sender |
 
+### owner
+
+```solidity
+function owner() external view returns (address)
+```
+
+
+
+*Returns the address of the current owner.*
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | address | undefined |
+
+### pendingOwner
+
+```solidity
+function pendingOwner() external view returns (address)
+```
+
+
+
+*Returns the address of the pending owner.*
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | address | undefined |
+
+### removeTrustedRelayer
+
+```solidity
+function removeTrustedRelayer(address relayer) external nonpayable
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| relayer | address | undefined |
+
+### renounceOwnership
+
+```solidity
+function renounceOwnership() external nonpayable
+```
+
+
+
+*Leaves the contract without owner. It will not be possible to call `onlyOwner` functions. Can only be called by the current owner. NOTE: Renouncing ownership will leave the contract without an owner, thereby disabling any functionality that is only available to the owner.*
+
+
 ### rootTokenToChildToken
 
 ```solidity
@@ -321,6 +427,22 @@ function stateSender() external view returns (contract IStateSender)
 | Name | Type | Description |
 |---|---|---|
 | _0 | contract IStateSender | undefined |
+
+### transferOwnership
+
+```solidity
+function transferOwnership(address newOwner) external nonpayable
+```
+
+
+
+*Starts the ownership transfer of the contract to a new account. Replaces the pending transfer if there is one. Can only be called by the current owner.*
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| newOwner | address | undefined |
 
 
 
@@ -421,6 +543,40 @@ event Initialized(uint8 version)
 | Name | Type | Description |
 |---|---|---|
 | version  | uint8 | undefined |
+
+### OwnershipTransferStarted
+
+```solidity
+event OwnershipTransferStarted(address indexed previousOwner, address indexed newOwner)
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| previousOwner `indexed` | address | undefined |
+| newOwner `indexed` | address | undefined |
+
+### OwnershipTransferred
+
+```solidity
+event OwnershipTransferred(address indexed previousOwner, address indexed newOwner)
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| previousOwner `indexed` | address | undefined |
+| newOwner `indexed` | address | undefined |
 
 ### TokenMapped
 

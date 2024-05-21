@@ -7,9 +7,10 @@ import "@openzeppelin/contracts/proxy/Clones.sol";
 import "../interfaces/blade/IRootMintableERC20Predicate.sol";
 import "../interfaces/IStateSender.sol";
 import "./System.sol";
+import "../lib/Predicate.sol";
 
 // solhint-disable reason-string
-contract RootMintableERC20Predicate is IRootMintableERC20Predicate, Initializable, System {
+contract RootMintableERC20Predicate is IRootMintableERC20Predicate, Predicate, System {
     using SafeERC20 for IERC20Metadata;
 
     /// @custom:security write-protection="onlySystemCall()"
@@ -21,9 +22,6 @@ contract RootMintableERC20Predicate is IRootMintableERC20Predicate, Initializabl
     /// @custom:security write-protection="onlySystemCall()"
     address public childTokenTemplate;
 
-    bytes32 public constant DEPOSIT_SIG = keccak256("DEPOSIT");
-    bytes32 public constant WITHDRAW_SIG = keccak256("WITHDRAW");
-    bytes32 public constant MAP_TOKEN_SIG = keccak256("MAP_TOKEN");
     mapping(address => address) public rootTokenToChildToken;
 
     /**
@@ -32,15 +30,17 @@ contract RootMintableERC20Predicate is IRootMintableERC20Predicate, Initializabl
      * @param newStateReceiver Address of StateReceiver to receive deposit information from
      * @param newChildERC20Predicate Address of child ERC20 predicate to communicate with
      * @param newChildTokenTemplate Address of child token implementation to deploy clones of
+     * @param owner Address of the owner of the contract
      * @dev Can only be called once.
      */
     function initialize(
         address newL2StateSender,
         address newStateReceiver,
         address newChildERC20Predicate,
-        address newChildTokenTemplate
+        address newChildTokenTemplate,
+        address owner
     ) public virtual onlySystemCall initializer {
-        _initialize(newL2StateSender, newStateReceiver, newChildERC20Predicate, newChildTokenTemplate);
+        _initialize(newL2StateSender, newStateReceiver, newChildERC20Predicate, newChildTokenTemplate, owner);
     }
 
     /**
@@ -51,9 +51,13 @@ contract RootMintableERC20Predicate is IRootMintableERC20Predicate, Initializabl
      */
     function onStateReceive(uint256 /* id */, address sender, bytes calldata data) external {
         require(msg.sender == stateReceiver, "RootMintableERC20Predicate: ONLY_STATE_RECEIVER");
-        require(sender == childERC20Predicate, "RootMintableERC20Predicate: ONLY_CHILD_PREDICATE");
+        require(
+            sender == childERC20Predicate || trustedRelayers[sender],
+            "RootMintableERC20Predicate: ONLY_CHILD_PREDICATE_OR_TRUSTED_RELAYER"
+        );
 
-        if (bytes32(data[:32]) == WITHDRAW_SIG) {
+        bytes32 sig = bytes32(data[:32]);
+        if (sig == WITHDRAW_SIG || sig == ROLLBACK_SIG) {
             _beforeTokenWithdraw();
             _withdraw(data[32:]);
             _afterTokenWithdraw();
@@ -109,21 +113,25 @@ contract RootMintableERC20Predicate is IRootMintableERC20Predicate, Initializabl
      * @param newStateReceiver Address of StateReceiver to receive deposit information from
      * @param newChildERC20Predicate Address of root ERC20 predicate to communicate with
      * @param newChildTokenTemplate Address of child token implementation to deploy clones of
+     * @param owner Address of the owner of the contract
      * @dev Can be called multiple times.
      */
     function _initialize(
         address newL2StateSender,
         address newStateReceiver,
         address newChildERC20Predicate,
-        address newChildTokenTemplate
+        address newChildTokenTemplate,
+        address owner
     ) internal {
         require(
             newL2StateSender != address(0) &&
                 newStateReceiver != address(0) &&
                 newChildERC20Predicate != address(0) &&
-                newChildTokenTemplate != address(0),
+                newChildTokenTemplate != address(0) &&
+                owner != address(0),
             "RootMintableERC20Predicate: BAD_INITIALIZATION"
         );
+        __Predicate_init(owner);
         l2StateSender = IStateSender(newL2StateSender);
         stateReceiver = newStateReceiver;
         childERC20Predicate = newChildERC20Predicate;

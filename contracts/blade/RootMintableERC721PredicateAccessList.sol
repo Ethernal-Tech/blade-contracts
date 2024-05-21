@@ -20,7 +20,7 @@ contract RootMintableERC721PredicateAccessList is AccessList, RootMintableERC721
         bool newUseBlockList,
         address newOwner
     ) public virtual onlySystemCall initializer {
-        _initialize(newL2StateSender, newStateReceiver, newChildERC721Predicate, newChildTokenTemplate);
+        _initialize(newL2StateSender, newStateReceiver, newChildERC721Predicate, newChildTokenTemplate, newOwner);
         _initializeAccessList(newUseAllowList, newUseBlockList);
         _transferOwnership(newOwner);
     }
