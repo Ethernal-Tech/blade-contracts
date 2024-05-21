@@ -38,7 +38,7 @@ contract RootERC721Predicate is Predicate, ERC721Holder, IRootERC721Predicate {
             "RootERC721Predicate: BAD_INITIALIZATION"
         );
 
-        __Predicate_init(owner);
+        predicateInit(owner);
         stateSender = IStateSender(newStateSender);
         exitHelper = newExitHelper;
         childERC721Predicate = newChildERC721Predicate;

@@ -134,7 +134,7 @@ contract ChildMintableERC1155Predicate is Predicate, IChildMintableERC1155Predic
                 newChildTokenTemplate != address(0),
             "ChildMintableERC1155Predicate: BAD_INITIALIZATION"
         );
-        __Predicate_init();
+        predicateInit();
         stateSender = IStateSender(newStateSender);
         exitHelper = newExitHelper;
         rootERC1155Predicate = newRootERC1155Predicate;

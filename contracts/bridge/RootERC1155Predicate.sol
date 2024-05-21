@@ -38,7 +38,7 @@ contract RootERC1155Predicate is Predicate, ERC1155Holder, IRootERC1155Predicate
             "RootERC1155Predicate: BAD_INITIALIZATION"
         );
 
-        __Predicate_init(owner);
+        predicateInit(owner);
         stateSender = IStateSender(newStateSender);
         exitHelper = newExitHelper;
         childERC1155Predicate = newChildERC1155Predicate;

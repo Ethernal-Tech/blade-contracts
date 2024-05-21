@@ -131,7 +131,7 @@ contract RootMintableERC20Predicate is IRootMintableERC20Predicate, Predicate, S
                 owner != address(0),
             "RootMintableERC20Predicate: BAD_INITIALIZATION"
         );
-        __Predicate_init(owner);
+        predicateInit(owner);
         l2StateSender = IStateSender(newL2StateSender);
         stateReceiver = newStateReceiver;
         childERC20Predicate = newChildERC20Predicate;

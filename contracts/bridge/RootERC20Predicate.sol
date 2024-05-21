@@ -45,7 +45,7 @@ contract RootERC20Predicate is Predicate, IRootERC20Predicate {
             "RootERC20Predicate: BAD_INITIALIZATION"
         );
 
-        __Predicate_init(owner);
+        predicateInit(owner);
         stateSender = IStateSender(newStateSender);
         exitHelper = newExitHelper;
         childERC20Predicate = newChildERC20Predicate;

@@ -165,7 +165,7 @@ contract ChildERC721Predicate is IChildERC721Predicate, Predicate, System {
                 newChildTokenTemplate != address(0),
             "ChildERC721Predicate: BAD_INITIALIZATION"
         );
-        __Predicate_init();
+        predicateInit();
         l2StateSender = IStateSender(newL2StateSender);
         stateReceiver = newStateReceiver;
         rootERC721Predicate = newRootERC721Predicate;

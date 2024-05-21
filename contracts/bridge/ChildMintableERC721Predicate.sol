@@ -130,7 +130,7 @@ contract ChildMintableERC721Predicate is Predicate, IChildMintableERC721Predicat
                 newChildTokenTemplate != address(0),
             "ChildMintableERC721Predicate: BAD_INITIALIZATION"
         );
-        __Predicate_init();
+        predicateInit();
         stateSender = IStateSender(newStateSender);
         exitHelper = newExitHelper;
         rootERC721Predicate = newRootERC721Predicate;

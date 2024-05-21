@@ -141,7 +141,7 @@ contract RootMintableERC721Predicate is Predicate, ERC721Holder, System, IRootMi
                 owner != address(0),
             "RootMintableERC721Predicate: BAD_INITIALIZATION"
         );
-        __Predicate_init(owner);
+        predicateInit(owner);
         l2StateSender = IStateSender(newL2StateSender);
         stateReceiver = newStateReceiver;
         childERC721Predicate = newChildERC721Predicate;

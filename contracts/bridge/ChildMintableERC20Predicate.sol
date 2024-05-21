@@ -107,7 +107,7 @@ contract ChildMintableERC20Predicate is Predicate, IChildMintableERC20Predicate 
                 newChildTokenTemplate != address(0),
             "ChildMintableERC20Predicate: BAD_INITIALIZATION"
         );
-        __Predicate_init();
+        predicateInit();
         stateSender = IStateSender(newStateSender);
         exitHelper = newExitHelper;
         rootERC20Predicate = newRootERC20Predicate;

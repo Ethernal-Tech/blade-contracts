@@ -138,7 +138,7 @@ contract RootMintableERC1155Predicate is Predicate, ERC1155Holder, IRootMintable
                 owner != address(0),
             "RootMintableERC1155Predicate: BAD_INITIALIZATION"
         );
-        __Predicate_init(owner);
+        predicateInit(owner);
         l2StateSender = IStateSender(newL2StateSender);
         stateReceiver = newStateReceiver;
         childERC1155Predicate = newChildERC1155Predicate;

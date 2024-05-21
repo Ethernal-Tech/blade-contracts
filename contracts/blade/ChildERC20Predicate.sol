@@ -139,7 +139,7 @@ contract ChildERC20Predicate is IChildERC20Predicate, Predicate, System {
                 newChildTokenTemplate != address(0),
             "ChildERC20Predicate: BAD_INITIALIZATION"
         );
-        __Predicate_init();
+        predicateInit();
         l2StateSender = IStateSender(newL2StateSender);
         stateReceiver = newStateReceiver;
         rootERC20Predicate = newRootERC20Predicate;

@@ -13,11 +13,11 @@ abstract contract Predicate is OwnableUpgradeable {
 
     mapping(address => bool) trustedRelayers;
 
-    function __Predicate_init() internal onlyInitializing {
+    function predicateInit() internal onlyInitializing {
         __Ownable_init();
     }
 
-    function __Predicate_init(address owner) internal onlyInitializing {
+    function predicateInit(address owner) internal onlyInitializing {
         __Ownable_init();
         transferOwnership(owner);
     } 
