@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.19;
 
-import {Ownable2StepUpgradeable} from "@openzeppelin/contracts-upgradeable/access/Ownable2StepUpgradeable.sol";
+import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import {IAddressList} from "../interfaces/IAddressList.sol";
 import {System} from "../blade/System.sol";
 
@@ -10,7 +10,7 @@ import {System} from "../blade/System.sol";
     @author Polygon Technology (@QEDK, @wschwab)
     @notice Checks the access lists to see if an address is allowed and not blocked
  */
-contract AccessList is Ownable2StepUpgradeable, System {
+contract AccessList is OwnableUpgradeable, System {
     bool private _useAllowList;
     bool private _useBlockList;
 

@@ -72,6 +72,7 @@ describe("RootMintableERC721Predicate", () => {
         "0x0000000000000000000000000000000000000000",
         "0x0000000000000000000000000000000000000000",
         "0x0000000000000000000000000000000000000000",
+        "0x0000000000000000000000000000000000000000",
         "0x0000000000000000000000000000000000000000"
       )
     ).to.be.revertedWith("RootMintableERC721Predicate: BAD_INITIALIZATION");
@@ -82,18 +83,21 @@ describe("RootMintableERC721Predicate", () => {
       l2StateSender.address,
       stateReceiver.address,
       childERC721Predicate,
-      childTokenTemplate.address
+      childTokenTemplate.address,
+      accounts[0].address
     );
 
     expect(await rootMintableERC721Predicate.l2StateSender()).to.equal(l2StateSender.address);
     expect(await rootMintableERC721Predicate.stateReceiver()).to.equal(stateReceiver.address);
     expect(await rootMintableERC721Predicate.childERC721Predicate()).to.equal(childERC721Predicate);
     expect(await rootMintableERC721Predicate.childTokenTemplate()).to.equal(childTokenTemplate.address);
+    expect(await rootMintableERC721Predicate.owner()).to.equal(accounts[0].address);
   });
 
   it("fail reinitialization", async () => {
     await expect(
       systemRootMintableERC721Predicate.initialize(
+        "0x0000000000000000000000000000000000000000",
         "0x0000000000000000000000000000000000000000",
         "0x0000000000000000000000000000000000000000",
         "0x0000000000000000000000000000000000000000",
@@ -111,7 +115,7 @@ describe("RootMintableERC721Predicate", () => {
   it("withdraw tokens fail: only child predicate", async () => {
     await expect(
       stateReceiverRootMintableERC721Predicate.onStateReceive(0, ethers.Wallet.createRandom().address, "0x00")
-    ).to.be.revertedWith("RootMintableERC721Predicate: ONLY_CHILD_PREDICATE");
+    ).to.be.revertedWith("RootMintableERC721Predicate: ONLY_CHILD_PREDICATE_OR_TRUSTED_RELAYER");
   });
 
   it("withdraw tokens fail: invalid signature", async () => {

@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.19;
 
-import {Ownable2StepUpgradeable} from "@openzeppelin/contracts-upgradeable/access/Ownable2StepUpgradeable.sol";
+import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 
-abstract contract Predicate is Ownable2StepUpgradeable {
+abstract contract Predicate is OwnableUpgradeable {
     bytes32 public constant DEPOSIT_SIG = keccak256("DEPOSIT");
     bytes32 public constant WITHDRAW_SIG = keccak256("WITHDRAW");
     bytes32 public constant MAP_TOKEN_SIG = keccak256("MAP_TOKEN");
@@ -14,11 +14,11 @@ abstract contract Predicate is Ownable2StepUpgradeable {
     mapping(address => bool) trustedRelayers;
 
     function __Predicate_init() internal onlyInitializing {
-        __Ownable2Step_init();
+        __Ownable_init();
     }
 
     function __Predicate_init(address owner) internal onlyInitializing {
-        __Ownable2Step_init();
+        __Ownable_init();
         transferOwnership(owner);
     } 
 

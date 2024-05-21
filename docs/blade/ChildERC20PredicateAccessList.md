@@ -265,17 +265,6 @@ function WITHDRAW_SIG() external view returns (bytes32)
 |---|---|---|
 | _0 | bytes32 | undefined |
 
-### acceptOwnership
-
-```solidity
-function acceptOwnership() external nonpayable
-```
-
-
-
-*The new owner accepts the ownership transfer.*
-
-
 ### addTrustedRelayer
 
 ```solidity
@@ -396,23 +385,6 @@ function owner() external view returns (address)
 
 
 *Returns the address of the current owner.*
-
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | address | undefined |
-
-### pendingOwner
-
-```solidity
-function pendingOwner() external view returns (address)
-```
-
-
-
-*Returns the address of the pending owner.*
 
 
 #### Returns
@@ -544,7 +516,7 @@ function transferOwnership(address newOwner) external nonpayable
 
 
 
-*Starts the ownership transfer of the contract to a new account. Replaces the pending transfer if there is one. Can only be called by the current owner.*
+*Transfers ownership of the contract to a new account (`newOwner`). Can only be called by the current owner.*
 
 #### Parameters
 
@@ -697,23 +669,6 @@ event L2TokenMapped(address indexed rootToken, address indexed childToken)
 |---|---|---|
 | rootToken `indexed` | address | undefined |
 | childToken `indexed` | address | undefined |
-
-### OwnershipTransferStarted
-
-```solidity
-event OwnershipTransferStarted(address indexed previousOwner, address indexed newOwner)
-```
-
-
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| previousOwner `indexed` | address | undefined |
-| newOwner `indexed` | address | undefined |
 
 ### OwnershipTransferred
 

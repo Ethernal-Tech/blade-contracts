@@ -61,6 +61,7 @@ describe("RootERC1155Predicate", () => {
         "0x0000000000000000000000000000000000000000",
         "0x0000000000000000000000000000000000000000",
         "0x0000000000000000000000000000000000000000",
+        "0x0000000000000000000000000000000000000000",
         "0x0000000000000000000000000000000000000000"
       )
     ).to.be.revertedWith("RootERC1155Predicate: BAD_INITIALIZATION");
@@ -71,18 +72,21 @@ describe("RootERC1155Predicate", () => {
       stateSender.address,
       exitHelper.address,
       childERC1155Predicate,
-      childTokenTemplate.address
+      childTokenTemplate.address,
+      accounts[0].address
     );
 
     expect(await rootERC1155Predicate.stateSender()).to.equal(stateSender.address);
     expect(await rootERC1155Predicate.exitHelper()).to.equal(exitHelper.address);
     expect(await rootERC1155Predicate.childERC1155Predicate()).to.equal(childERC1155Predicate);
     expect(await rootERC1155Predicate.childTokenTemplate()).to.equal(childTokenTemplate.address);
+    expect(await rootERC1155Predicate.owner()).to.equal(accounts[0].address);
   });
 
   it("fail reinitialization", async () => {
     await expect(
       rootERC1155Predicate.initialize(
+        "0x0000000000000000000000000000000000000000",
         "0x0000000000000000000000000000000000000000",
         "0x0000000000000000000000000000000000000000",
         "0x0000000000000000000000000000000000000000",
@@ -100,7 +104,7 @@ describe("RootERC1155Predicate", () => {
   it("withdraw tokens fail: only child predicate", async () => {
     await expect(
       exitHelperRootERC1155Predicate.onL2StateReceive(0, ethers.Wallet.createRandom().address, "0x00")
-    ).to.be.revertedWith("RootERC1155Predicate: ONLY_CHILD_PREDICATE");
+    ).to.be.revertedWith("RootERC1155Predicate: ONLY_CHILD_PREDICATE_OR_TRUSTED_RELAYER");
   });
 
   it("withdraw tokens fail: invalid signature", async () => {
