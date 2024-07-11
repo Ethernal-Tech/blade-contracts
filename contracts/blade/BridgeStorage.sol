@@ -8,7 +8,7 @@ contract BridgeStorage is System {
     /// @custom:security write-protection="onlySystemCall()"
     uint256 public batchCounter;
 
-    event NewBatch(uint256 Id);
+    event NewBatch(uint256 id);
 
     /**
      * @param id id of message
