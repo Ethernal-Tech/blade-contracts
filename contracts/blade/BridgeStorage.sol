@@ -13,7 +13,8 @@ contract BridgeStorage is Initializable, System {
     /// @custom:security write-protection="onlySystemCall()"
     uint256 public batchCounter;
 
-    Validator[] public currentValidatorSet;
+    mapping(uint256 => Validator) public currentValidatorSet;
+    uint256 public currentValidatorSetLength;
     bytes32 public currentValidatorSetHash;
     uint256 public totalVotingPower;
 
@@ -109,15 +110,16 @@ contract BridgeStorage is Initializable, System {
      */
     function _setNewValidatorSet(Validator[] calldata newValidatorSet) private {
         uint256 length = newValidatorSet.length;
+        currentValidatorSetLength = length;
         currentValidatorSetHash = keccak256(abi.encode(newValidatorSet));
         uint256 totalPower = 0;
         for (uint256 i = 0; i < length; ++i) {
             uint256 votingPower = newValidatorSet[i].votingPower;
             require(votingPower > 0, "VOTING_POWER_ZERO");
             totalPower += votingPower;
+            currentValidatorSet[i] = newValidatorSet[i];
         }
 
-        currentValidatorSet = newValidatorSet;
         totalVotingPower = totalPower;
     }
 
@@ -131,7 +133,7 @@ contract BridgeStorage is Initializable, System {
         uint256[2] calldata signature,
         bytes calldata bitmap
     ) private view {
-        uint256 length = currentValidatorSet.length;
+        uint256 length = currentValidatorSetLength;
         // slither-disable-next-line uninitialized-local
         uint256[4] memory aggPubkey;
         uint256 aggVotingPower = 0;
