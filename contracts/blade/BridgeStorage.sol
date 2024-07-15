@@ -77,8 +77,7 @@ contract BridgeStorage is Initializable, System {
      * @param batch new batch
      */
     function commitBatch(BridgeMessageBatch calldata batch) external onlySystemCall {
-        require(batch.messages.length > 0, "EMPTY_BATCH");
-
+        _verifyBatch(batch);
         _verifySignature(bls.hashToPoint(DOMAIN, abi.encode(currentValidatorSetHash)), batch.signature, batch.bitmap);
 
         batches[batchCounter++] = batch;
@@ -125,6 +124,19 @@ contract BridgeStorage is Initializable, System {
         }
 
         totalVotingPower = totalPower;
+    }
+
+    /**
+     * @notice Internal function that verifies the batch
+     * @param batch batch to verify
+     */
+    function _verifyBatch(BridgeMessageBatch calldata batch) private pure {
+        require(batch.messages.length > 0, "EMPTY_BATCH");
+
+        uint256 sourceChainId = batch.messages[0].sourceChainId;
+        for (uint256 i = 0; i < batch.messages.length; ++i) {
+            require(batch.messages[i].sourceChainId == sourceChainId, "INVALID_SOURCE_CHAIN_ID");
+        }
     }
 
     /**
