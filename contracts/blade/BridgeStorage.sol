@@ -82,7 +82,7 @@ contract BridgeStorage is Initializable, System {
         _verifySignature(bls.hashToPoint(DOMAIN, abi.encode(currentValidatorSetHash)), batch.signature, batch.bitmap);
 
         batches[batchCounter++] = batch;
-        
+
         emit NewBatch(batchCounter - 1);
     }
 
