@@ -77,8 +77,12 @@ contract BridgeStorage is Initializable, System {
      * @param batch new batch
      */
     function commitBatch(BridgeMessageBatch calldata batch) external onlySystemCall {
-        batches[batchCounter++] = batch;
+        require(batch.messages.length > 0, "EMPTY_BATCH");
 
+        _verifySignature(bls.hashToPoint(DOMAIN, abi.encode(currentValidatorSetHash)), batch.signature, batch.bitmap);
+
+        batches[batchCounter++] = batch;
+        
         emit NewBatch(batchCounter - 1);
     }
 
