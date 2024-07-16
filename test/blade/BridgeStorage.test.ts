@@ -3,6 +3,7 @@ import * as hre from "hardhat";
 import { ethers } from "hardhat";
 import { BLS, BN256G2, BridgeStorage } from "../../typechain-types";
 import * as mcl from "../../ts/mcl";
+import { bridge } from "../../typechain-types/contracts";
 
 const DOMAIN = ethers.utils.arrayify(ethers.utils.solidityKeccak256(["string"], ["DOMAIN_BRIDGE"]));
 
@@ -196,7 +197,7 @@ describe("BridgeStorage", () => {
     ).to.be.revertedWith("SIGNATURE_VERIFICATION_FAILED");
   });
 
-  it("Submit checkpoint with empty bitmap", async () => {
+  it("Bridge storage commitBatch fail: empty bitmap", async () => {
     msgs = [];
 
     msgs = [
@@ -265,7 +266,7 @@ describe("BridgeStorage", () => {
     ).to.be.revertedWith("BITMAP_IS_EMPTY");
   });
 
-  it("Submit checkpoint with not enough voting power", async () => {
+  it("Bridge storage commitBatch fail:not enough voting power", async () => {
     msgs = [];
 
     msgs = [
@@ -334,7 +335,7 @@ describe("BridgeStorage", () => {
     ).to.be.revertedWith("INSUFFICIENT_VOTING_POWER");
   })
 
-  it("Bridge storage commit batch success", async () => {
+  it("Bridge storage commitBatch success", async () => {
     msgs = [];
 
     msgs = [
@@ -362,23 +363,12 @@ describe("BridgeStorage", () => {
 
     const validatorSetHash = await bridgeStorage.currentValidatorSetHash()
 
-    console.log("validatorsHAsh: ", validatorSetHash)
-
-    const message = ethers.utils.keccak256(
-      ethers.utils.defaultAbiCoder.encode(
-        ["bytes32"],
-        [validatorSetHash]
-      )
-    );
-
     const signatures: mcl.Signature[] = [];
 
     let aggVotingPower = 0;
     for (let i = 0; i < validatorSecretKeys.length; i++) {
       const byteNumber = Math.floor(i / 8);
       const bitNumber = i % 8;
-
-      console.log("1")
 
       if (byteNumber >= bitmap.length / 2 - 1) {
         continue;
@@ -387,7 +377,7 @@ describe("BridgeStorage", () => {
       // Get the value of the bit at the given 'index' in a byte.
       const oneByte = parseInt(bitmap[2 + byteNumber * 2] + bitmap[3 + byteNumber * 2], 16);
       if ((oneByte & (1 << bitNumber)) > 0) {
-        const { signature, messagePoint } = mcl.sign(message, validatorSecretKeys[i], ethers.utils.arrayify(DOMAIN));
+        const { signature, messagePoint } = mcl.sign(validatorSetHash, validatorSecretKeys[i], ethers.utils.arrayify(DOMAIN));
         signatures.push(signature);
         aggVotingPower += parseInt(ethers.utils.formatEther(validatorSet[i].votingPower), 10);
       } else {
@@ -410,7 +400,7 @@ describe("BridgeStorage", () => {
     expect(firstLogs[0]?.args?.id).to.equal(0);
   });
 
-  it("Bridge storage bad commit fail: zero messages in batch", async () => {
+  it("Bridge storage commitBatch fail: zero messages in batch", async () => {
     msgs = [];
 
     let sign: [number, number];
@@ -426,7 +416,7 @@ describe("BridgeStorage", () => {
     await expect(systemBridgeStorage.commitBatch(batch)).to.be.revertedWith("EMPTY_BATCH")
   });
 
-  it("Bridge storage bad commit fail: bas source chain id", async () =>{
+  it("Bridge storage bad commitBatch fail: bad source chain id", async () =>{
     msgs = [];
 
     msgs = [
@@ -500,10 +490,6 @@ describe("BridgeStorage", () => {
         [validatorSet]
       ));
 
-    const message = ethers.utils.defaultAbiCoder.encode(
-      ["bytes32"],
-      [messageOfValidatorSet]
-    )
     const signatures: mcl.Signature[] = [];
 
     let aggVotingPower = 0;
@@ -518,7 +504,7 @@ describe("BridgeStorage", () => {
       // Get the value of the bit at the given 'index' in a byte.
       const oneByte = parseInt(bitmap[2 + byteNumber * 2] + bitmap[3 + byteNumber * 2], 16);
       if ((oneByte & (1 << bitNumber)) > 0) {
-        const { signature, messagePoint } = mcl.sign(message, validatorSecretKeys[i], ethers.utils.arrayify(DOMAIN));
+        const { signature, messagePoint } = mcl.sign(messageOfValidatorSet, validatorSecretKeys[i], ethers.utils.arrayify(DOMAIN));
         signatures.push(signature);
         aggVotingPower += parseInt(ethers.utils.formatEther(validatorSet[i].votingPower), 10);
       } else {
