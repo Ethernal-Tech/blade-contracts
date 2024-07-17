@@ -7,17 +7,16 @@ import { bridge } from "../../typechain-types/contracts";
 
 const DOMAIN = ethers.utils.arrayify(ethers.utils.solidityKeccak256(["string"], ["DOMAIN_BRIDGE"]));
 
-
 describe("BridgeStorage", () => {
-  let bridgeStorage: BridgeStorage, 
-  msgs: any[],
-  systemBridgeStorage: BridgeStorage,
-  bls: BLS,
-  bn256G2: BN256G2,
-  validatorSetSize: number,
-  validatorSecretKeys: any[],
-  validatorSet: any[],
-  accounts: any[]; // we use any so we can access address directly from object
+  let bridgeStorage: BridgeStorage,
+    msgs: any[],
+    systemBridgeStorage: BridgeStorage,
+    bls: BLS,
+    bn256G2: BN256G2,
+    validatorSetSize: number,
+    validatorSecretKeys: any[],
+    validatorSet: any[],
+    accounts: any[]; // we use any so we can access address directly from object
   before(async () => {
     await mcl.init();
     accounts = await ethers.getSigners();
@@ -65,11 +64,12 @@ describe("BridgeStorage", () => {
       });
     }
 
-    await expect(bridgeStorage.initialize(bls.address, bn256G2.address, validatorSet)).
-    to.be.revertedWith("VOTING_POWER_ZERO");
+    await expect(bridgeStorage.initialize(bls.address, bn256G2.address, validatorSet)).to.be.revertedWith(
+      "VOTING_POWER_ZERO"
+    );
   });
 
-  it("Initialize and validate initialization", async () =>{
+  it("Initialize and validate initialization", async () => {
     validatorSetSize = Math.floor(Math.random() * (5 - 1) + 8); // Randomly pick 8 - 12
 
     validatorSecretKeys = [];
@@ -121,11 +121,11 @@ describe("BridgeStorage", () => {
     };
 
     await expect(bridgeStorage.commitBatch(batch))
-    .to.be.revertedWithCustomError(bridgeStorage, "Unauthorized")
-    .withArgs("SYSTEMCALL")
+      .to.be.revertedWithCustomError(bridgeStorage, "Unauthorized")
+      .withArgs("SYSTEMCALL");
   });
 
-  it("Bridge storage commitBatch fail: invalid signature", async () =>{
+  it("Bridge storage commitBatch fail: invalid signature", async () => {
     msgs = [];
 
     msgs = [
@@ -156,10 +156,7 @@ describe("BridgeStorage", () => {
     const bitmap = `0x${bitmapStr}`;
 
     const message = ethers.utils.keccak256(
-      ethers.utils.defaultAbiCoder.encode(
-        ["bytes32"],
-        [ethers.utils.hexlify(ethers.utils.randomBytes(32))]
-      )
+      ethers.utils.defaultAbiCoder.encode(["bytes32"], [ethers.utils.hexlify(ethers.utils.randomBytes(32))])
     );
 
     const signatures: mcl.Signature[] = [];
@@ -192,9 +189,7 @@ describe("BridgeStorage", () => {
       bitmap: bitmap,
     };
 
-    await expect(
-      systemBridgeStorage.commitBatch(batch)
-    ).to.be.revertedWith("SIGNATURE_VERIFICATION_FAILED");
+    await expect(systemBridgeStorage.commitBatch(batch)).to.be.revertedWith("SIGNATURE_VERIFICATION_FAILED");
   });
 
   it("Bridge storage commitBatch fail: empty bitmap", async () => {
@@ -224,10 +219,7 @@ describe("BridgeStorage", () => {
     const bitmap = `0x${bitmapStr}`;
 
     const message = ethers.utils.keccak256(
-      ethers.utils.defaultAbiCoder.encode(
-        ["bytes32"],
-        [await systemBridgeStorage.currentValidatorSetHash()]
-      )
+      ethers.utils.defaultAbiCoder.encode(["bytes32"], [await systemBridgeStorage.currentValidatorSetHash()])
     );
 
     const signatures: mcl.Signature[] = [];
@@ -260,10 +252,7 @@ describe("BridgeStorage", () => {
       bitmap: bitmap,
     };
 
-
-    await expect(
-      systemBridgeStorage.commitBatch(batch)
-    ).to.be.revertedWith("BITMAP_IS_EMPTY");
+    await expect(systemBridgeStorage.commitBatch(batch)).to.be.revertedWith("BITMAP_IS_EMPTY");
   });
 
   it("Bridge storage commitBatch fail:not enough voting power", async () => {
@@ -293,10 +282,7 @@ describe("BridgeStorage", () => {
     const bitmap = `0x${bitmapStr}`;
 
     const message = ethers.utils.keccak256(
-      ethers.utils.defaultAbiCoder.encode(
-        ["bytes32"],
-        [await systemBridgeStorage.currentValidatorSetHash()]
-      )
+      ethers.utils.defaultAbiCoder.encode(["bytes32"], [await systemBridgeStorage.currentValidatorSetHash()])
     );
 
     const signatures: mcl.Signature[] = [];
@@ -329,11 +315,8 @@ describe("BridgeStorage", () => {
       bitmap: bitmap,
     };
 
-
-    await expect(
-      systemBridgeStorage.commitBatch(batch)
-    ).to.be.revertedWith("INSUFFICIENT_VOTING_POWER");
-  })
+    await expect(systemBridgeStorage.commitBatch(batch)).to.be.revertedWith("INSUFFICIENT_VOTING_POWER");
+  });
 
   it("Bridge storage commitBatch success", async () => {
     msgs = [];
@@ -361,7 +344,7 @@ describe("BridgeStorage", () => {
 
     const bitmap = `0x${bitmapStr}`;
 
-    const validatorSetHash = await bridgeStorage.currentValidatorSetHash()
+    const validatorSetHash = await bridgeStorage.currentValidatorSetHash();
 
     const signatures: mcl.Signature[] = [];
 
@@ -377,7 +360,11 @@ describe("BridgeStorage", () => {
       // Get the value of the bit at the given 'index' in a byte.
       const oneByte = parseInt(bitmap[2 + byteNumber * 2] + bitmap[3 + byteNumber * 2], 16);
       if ((oneByte & (1 << bitNumber)) > 0) {
-        const { signature, messagePoint } = mcl.sign(validatorSetHash, validatorSecretKeys[i], ethers.utils.arrayify(DOMAIN));
+        const { signature, messagePoint } = mcl.sign(
+          validatorSetHash,
+          validatorSecretKeys[i],
+          ethers.utils.arrayify(DOMAIN)
+        );
         signatures.push(signature);
         aggVotingPower += parseInt(ethers.utils.formatEther(validatorSet[i].votingPower), 10);
       } else {
@@ -413,10 +400,10 @@ describe("BridgeStorage", () => {
       bitmap: ethers.constants.AddressZero,
     };
 
-    await expect(systemBridgeStorage.commitBatch(batch)).to.be.revertedWith("EMPTY_BATCH")
+    await expect(systemBridgeStorage.commitBatch(batch)).to.be.revertedWith("EMPTY_BATCH");
   });
 
-  it("Bridge storage bad commitBatch fail: bad source chain id", async () =>{
+  it("Bridge storage bad commitBatch fail: bad source chain id", async () => {
     msgs = [];
 
     msgs = [
@@ -448,13 +435,10 @@ describe("BridgeStorage", () => {
       bitmap: ethers.constants.AddressZero,
     };
 
-    await expect(
-      systemBridgeStorage.commitBatch(batch)
-    ).to.be.revertedWith("INVALID_SOURCE_CHAIN_ID")
+    await expect(systemBridgeStorage.commitBatch(batch)).to.be.revertedWith("INVALID_SOURCE_CHAIN_ID");
   });
 
-  it("Bridge storage commitValidatorSet fail: empty validator set", async () =>
-  {
+  it("Bridge storage commitValidatorSet fail: empty validator set", async () => {
     validatorSetSize = Math.floor(Math.random() * (5 - 1) + 8); // Randomly pick 8 - 12
 
     validatorSet = [];
@@ -464,7 +448,7 @@ describe("BridgeStorage", () => {
     sign = [0, 0];
 
     await expect(
-      systemBridgeStorage.commitValidatorSet(validatorSet, sign,ethers.constants.AddressZero)
-    ).to.be.revertedWith("EMPTY_VALIDATOR_SET")
+      systemBridgeStorage.commitValidatorSet(validatorSet, sign, ethers.constants.AddressZero)
+    ).to.be.revertedWith("EMPTY_VALIDATOR_SET");
   });
 });
