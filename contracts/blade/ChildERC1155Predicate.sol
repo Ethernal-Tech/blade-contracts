@@ -2,7 +2,6 @@
 pragma solidity 0.8.19;
 
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import "@openzeppelin/contracts/token/ERC1155/IERC1155.sol";
 import "@openzeppelin/contracts/proxy/Clones.sol";
 import "../interfaces/blade/IChildERC1155Predicate.sol";
 import "../interfaces/blade/IChildERC1155.sol";

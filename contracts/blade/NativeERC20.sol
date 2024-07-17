@@ -3,7 +3,6 @@ pragma solidity 0.8.19;
 
 import "@openzeppelin/contracts/utils/Context.sol";
 import "@openzeppelin/contracts/proxy/utils/Initializable.sol";
-import "../interfaces/blade/IStateReceiver.sol";
 import "../interfaces/blade/INativeERC20.sol";
 import "./System.sol";
 

@@ -5,6 +5,7 @@ pragma solidity ^0.8.12;
 /* solhint-disable no-inline-assembly */
 
 import "../BasePaymaster.sol";
+import "../Helpers.sol";
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 
 /**
