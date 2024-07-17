@@ -1,4 +1,4 @@
-# Gateway
+# DestinationGateway
 
 
 
@@ -214,6 +214,24 @@ function bn256G2() external view returns (contract IBN256G2)
 |---|---|---|
 | _0 | contract IBN256G2 | undefined |
 
+### commitValidatorSet
+
+```solidity
+function commitValidatorSet(BaseBridgeGateway.Validator[] newValidatorSet, uint256[2] signature, bytes bitmap) external nonpayable
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| newValidatorSet | BaseBridgeGateway.Validator[] | undefined |
+| signature | uint256[2] | undefined |
+| bitmap | bytes | undefined |
+
 ### currentValidatorSet
 
 ```solidity
@@ -289,6 +307,61 @@ function initialize(contract IBLS newBls, contract IBN256G2 newBn256G2, BaseBrid
 | newBn256G2 | contract IBN256G2 | undefined |
 | validators | BaseBridgeGateway.Validator[] | undefined |
 
+### lastCommittedId
+
+```solidity
+function lastCommittedId() external view returns (uint256)
+```
+
+
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | undefined |
+
+### processedEvents
+
+```solidity
+function processedEvents(uint256) external view returns (bool)
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | undefined |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | bool | undefined |
+
+### receiveBatch
+
+```solidity
+function receiveBatch(BaseBridgeGateway.BridgeMessageBatch batch) external nonpayable
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| batch | BaseBridgeGateway.BridgeMessageBatch | undefined |
+
 ### totalVotingPower
 
 ```solidity
@@ -310,6 +383,24 @@ function totalVotingPower() external view returns (uint256)
 
 ## Events
 
+### BridgeMessageResult
+
+```solidity
+event BridgeMessageResult(uint256 indexed counter, bool indexed status, bytes message)
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| counter `indexed` | uint256 | undefined |
+| status `indexed` | bool | undefined |
+| message  | bytes | undefined |
+
 ### Initialized
 
 ```solidity
@@ -326,5 +417,40 @@ event Initialized(uint8 version)
 |---|---|---|
 | version  | uint8 | undefined |
 
+### NewValidatorSet
+
+```solidity
+event NewValidatorSet(BaseBridgeGateway.Validator[] newValidatorSet)
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| newValidatorSet  | BaseBridgeGateway.Validator[] | undefined |
+
+
+
+## Errors
+
+### Unauthorized
+
+```solidity
+error Unauthorized(string only)
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| only | string | undefined |
 
 

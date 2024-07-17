@@ -70,7 +70,7 @@ contract BaseBridgeGateway is Initializable, System {
         _setNewValidatorSet(validators);
     }
 
-        /**
+    /**
      * @notice commits new validator set
      * @param newValidatorSet new validator set
      * @param signature aggregated signature of validators that signed the new validator set

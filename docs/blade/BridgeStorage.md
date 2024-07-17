@@ -256,7 +256,7 @@ function bn256G2() external view returns (contract IBN256G2)
 ### commitBatch
 
 ```solidity
-function commitBatch(BridgeStorage.BridgeMessageBatch batch) external nonpayable
+function commitBatch(BaseBridgeGateway.BridgeMessageBatch batch) external nonpayable
 ```
 
 
@@ -267,7 +267,7 @@ function commitBatch(BridgeStorage.BridgeMessageBatch batch) external nonpayable
 
 | Name | Type | Description |
 |---|---|---|
-| batch | BridgeStorage.BridgeMessageBatch | undefined |
+| batch | BaseBridgeGateway.BridgeMessageBatch | undefined |
 
 ### commitValidatorSet
 

@@ -214,6 +214,24 @@ function bn256G2() external view returns (contract IBN256G2)
 |---|---|---|
 | _0 | contract IBN256G2 | undefined |
 
+### commitValidatorSet
+
+```solidity
+function commitValidatorSet(BaseBridgeGateway.Validator[] newValidatorSet, uint256[2] signature, bytes bitmap) external nonpayable
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| newValidatorSet | BaseBridgeGateway.Validator[] | undefined |
+| signature | uint256[2] | undefined |
+| bitmap | bytes | undefined |
+
 ### currentValidatorSet
 
 ```solidity
@@ -326,5 +344,40 @@ event Initialized(uint8 version)
 |---|---|---|
 | version  | uint8 | undefined |
 
+### NewValidatorSet
+
+```solidity
+event NewValidatorSet(BaseBridgeGateway.Validator[] newValidatorSet)
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| newValidatorSet  | BaseBridgeGateway.Validator[] | undefined |
+
+
+
+## Errors
+
+### Unauthorized
+
+```solidity
+error Unauthorized(string only)
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| only | string | undefined |
 
 
