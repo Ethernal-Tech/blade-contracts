@@ -6,7 +6,6 @@ pragma solidity ^0.8.12;
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "../../interfaces/accountAbstraction/IPaymaster.sol";
 import "../../interfaces/accountAbstraction/IEntryPoint.sol";
-import "./Helpers.sol";
 
 /**
  * Helper class for creating a paymaster.
