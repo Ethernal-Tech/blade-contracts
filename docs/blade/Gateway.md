@@ -1,4 +1,4 @@
-# BridgeStorage
+# Gateway
 
 
 
@@ -180,45 +180,6 @@ function VALIDATOR_PKCHECK_PRECOMPILE_GAS() external view returns (uint256)
 |---|---|---|
 | _0 | uint256 | undefined |
 
-### batchCounter
-
-```solidity
-function batchCounter() external view returns (uint256)
-```
-
-
-
-
-
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | uint256 | undefined |
-
-### batches
-
-```solidity
-function batches(uint256) external view returns (bytes bitmap)
-```
-
-
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | uint256 | undefined |
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| bitmap | bytes | undefined |
-
 ### bls
 
 ```solidity
@@ -252,40 +213,6 @@ function bn256G2() external view returns (contract IBN256G2)
 | Name | Type | Description |
 |---|---|---|
 | _0 | contract IBN256G2 | undefined |
-
-### commitBatch
-
-```solidity
-function commitBatch(BridgeStorage.BridgeMessageBatch batch) external nonpayable
-```
-
-
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| batch | BridgeStorage.BridgeMessageBatch | undefined |
-
-### commitValidatorSet
-
-```solidity
-function commitValidatorSet(BaseBridgeGateway.Validator[] newValidatorSet, uint256[2] signature, bytes bitmap) external nonpayable
-```
-
-
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| newValidatorSet | BaseBridgeGateway.Validator[] | undefined |
-| signature | uint256[2] | undefined |
-| bitmap | bytes | undefined |
 
 ### currentValidatorSet
 
@@ -399,56 +326,5 @@ event Initialized(uint8 version)
 |---|---|---|
 | version  | uint8 | undefined |
 
-### NewBatch
-
-```solidity
-event NewBatch(uint256 id)
-```
-
-
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| id  | uint256 | undefined |
-
-### NewValidatorSet
-
-```solidity
-event NewValidatorSet(BaseBridgeGateway.Validator[] newValidatorSet)
-```
-
-
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| newValidatorSet  | BaseBridgeGateway.Validator[] | undefined |
-
-
-
-## Errors
-
-### Unauthorized
-
-```solidity
-error Unauthorized(string only)
-```
-
-
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| only | string | undefined |
 
 
