@@ -72,7 +72,7 @@ jobs:
       - uses: crytic/slither-action@v0.3.0
         with:
           node-version: 18
-          slither-args: "--compile-force-framework hardhat" 
+          slither-args: "--compile-force-framework hardhat"
   coverage:
     runs-on: ubuntu-latest
     steps:

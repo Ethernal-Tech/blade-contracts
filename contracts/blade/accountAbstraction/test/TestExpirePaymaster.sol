@@ -2,6 +2,7 @@
 pragma solidity ^0.8.12;
 
 import "../BasePaymaster.sol";
+import "../Helpers.sol";
 
 /**
  * test expiry mechanism: paymasterData encodes the "validUntil" and validAfter" times
