@@ -13,6 +13,8 @@ contract DestinationGateway is BaseBridgeGateway {
      */
     function receive(BridgeMessageBatch calldata batch) public {
         verifyBatch(batch);
-        verifySignature
+        
+        bytes memory hash = abi.encode(keccak256(abi.encode(batch)));
+        verifySignature(bls.hashToPoint(DOMAIN, hash), batch.signature, batch.bitmap);
     }
 }
