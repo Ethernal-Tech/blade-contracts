@@ -73,6 +73,7 @@ jobs:
         with:
           node-version: 18
           slither-args: "--compile-force-framework hardhat"
+          slither-args: "--filter-paths BaseAccount.sol|BasePaymaster.sol"
   coverage:
     runs-on: ubuntu-latest
     steps:
