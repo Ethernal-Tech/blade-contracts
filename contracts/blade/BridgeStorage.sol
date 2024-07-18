@@ -15,7 +15,11 @@ contract BridgeStorage is BaseBridgeGateway {
      * @notice commits new batch
      * @param batch new batch
      */
-    function commitBatch(BridgeMessageBatch calldata batch, uint256[2] calldata signature, bytes calldata bitmap) external onlySystemCall {
+    function commitBatch(
+        BridgeMessageBatch calldata batch,
+        uint256[2] calldata signature,
+        bytes calldata bitmap
+    ) external onlySystemCall {
         _verifyBatch(batch);
 
         bytes memory hash = abi.encode(keccak256(abi.encode(batch)));

@@ -5,8 +5,6 @@ import "./BaseBridgeGateway.sol";
 
 contract DestinationGateway is BaseBridgeGateway {
     /// @custom:security write-protection="onlySystemCall()"
-    uint256 public lastCommittedId;
-
     mapping(uint256 => bool) public processedEvents;
 
     event BridgeMessageResult(uint256 indexed counter, bool indexed status, bytes message);
@@ -15,7 +13,11 @@ contract DestinationGateway is BaseBridgeGateway {
      * @notice receives the batch of messages and executes them
      * @param batch batch of messages
      */
-    function receiveBatch(BridgeMessageBatch calldata batch, uint256[2] calldata signature, bytes calldata bitmap) public {
+    function receiveBatch(
+        BridgeMessageBatch calldata batch,
+        uint256[2] calldata signature,
+        bytes calldata bitmap
+    ) public {
         _verifyBatch(batch);
 
         bytes memory hash = abi.encode(keccak256(abi.encode(batch)));
@@ -42,7 +44,7 @@ contract DestinationGateway is BaseBridgeGateway {
         require(batch.destinationChainId == destinationChainId, "INVALID_DESTINATION_CHAIN_ID");
         for (uint256 i = 0; i < batch.messages.length; ++i) {
             BridgeMessage memory message = batch.messages[i];
-            require(message.sourceChainId == batch.destinationChainId, "INVALID_SOURCE_CHAIN_ID");
+            require(message.sourceChainId == batch.sourceChainId, "INVALID_SOURCE_CHAIN_ID");
             require(message.destinationChainId == destinationChainId, "INVALID_DESTINATION_CHAIN_ID");
         }
     }

@@ -48,7 +48,7 @@ contract BaseBridgeGateway is Initializable, System {
     /**
      * @param messages list of all messages in batch
      * @param sourceChainId id of chain which is source of batch
-     * @param destinationChainId id of chain which is destination of batch 
+     * @param destinationChainId id of chain which is destination of batch
      */
     struct BridgeMessageBatch {
         BridgeMessage[] messages;
