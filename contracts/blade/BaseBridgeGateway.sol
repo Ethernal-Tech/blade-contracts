@@ -52,7 +52,6 @@ contract BaseBridgeGateway is Initializable, System {
      */
     struct BridgeMessageBatch {
         BridgeMessage[] messages;
-        uint256[2] signature;
         bytes bitmap;
     }
 
