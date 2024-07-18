@@ -15,11 +15,11 @@ contract DestinationGateway is BaseBridgeGateway {
      * @notice receives the batch of messages and executes them
      * @param batch batch of messages
      */
-    function receiveBatch(BridgeMessageBatch calldata batch, uint256[2] calldata signature) public {
+    function receiveBatch(BridgeMessageBatch calldata batch, uint256[2] calldata signature, bytes calldata bitmap) public {
         _verifyBatch(batch);
 
         bytes memory hash = abi.encode(keccak256(abi.encode(batch)));
-        verifySignature(bls.hashToPoint(DOMAIN, hash), signature, batch.bitmap);
+        verifySignature(bls.hashToPoint(DOMAIN, hash), signature, bitmap);
 
         uint256 length = batch.messages.length;
         for (uint256 i = 0; i < length; ) {

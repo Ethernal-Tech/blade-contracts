@@ -47,12 +47,9 @@ contract BaseBridgeGateway is Initializable, System {
 
     /**
      * @param messages list of all messages in batch
-     * @param signature validators signature
-     * @param bitmap
      */
     struct BridgeMessageBatch {
         BridgeMessage[] messages;
-        bytes bitmap;
     }
 
     event NewValidatorSet(Validator[] newValidatorSet);
