@@ -200,7 +200,7 @@ function batchCounter() external view returns (uint256)
 ### batches
 
 ```solidity
-function batches(uint256) external view returns (bytes bitmap)
+function batches(uint256) external view returns (uint256 sourceChainId, uint256 destinationChainId)
 ```
 
 
@@ -217,7 +217,8 @@ function batches(uint256) external view returns (bytes bitmap)
 
 | Name | Type | Description |
 |---|---|---|
-| bitmap | bytes | undefined |
+| sourceChainId | uint256 | undefined |
+| destinationChainId | uint256 | undefined |
 
 ### bls
 
@@ -256,7 +257,7 @@ function bn256G2() external view returns (contract IBN256G2)
 ### commitBatch
 
 ```solidity
-function commitBatch(BaseBridgeGateway.BridgeMessageBatch batch) external nonpayable
+function commitBatch(BaseBridgeGateway.BridgeMessageBatch batch, uint256[2] signature, bytes bitmap) external nonpayable
 ```
 
 
@@ -268,6 +269,8 @@ function commitBatch(BaseBridgeGateway.BridgeMessageBatch batch) external nonpay
 | Name | Type | Description |
 |---|---|---|
 | batch | BaseBridgeGateway.BridgeMessageBatch | undefined |
+| signature | uint256[2] | undefined |
+| bitmap | bytes | undefined |
 
 ### commitValidatorSet
 

@@ -349,7 +349,7 @@ function processedEvents(uint256) external view returns (bool)
 ### receiveBatch
 
 ```solidity
-function receiveBatch(BaseBridgeGateway.BridgeMessageBatch batch) external nonpayable
+function receiveBatch(BaseBridgeGateway.BridgeMessageBatch batch, uint256[2] signature, bytes bitmap) external nonpayable
 ```
 
 
@@ -361,6 +361,8 @@ function receiveBatch(BaseBridgeGateway.BridgeMessageBatch batch) external nonpa
 | Name | Type | Description |
 |---|---|---|
 | batch | BaseBridgeGateway.BridgeMessageBatch | undefined |
+| signature | uint256[2] | undefined |
+| bitmap | bytes | undefined |
 
 ### totalVotingPower
 
