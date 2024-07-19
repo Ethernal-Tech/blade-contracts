@@ -17,7 +17,7 @@ contract DestinationGateway is BaseBridgeGateway {
         BridgeMessageBatch calldata batch,
         uint256[2] calldata signature,
         bytes calldata bitmap
-    ) public {
+    ) external {
         _verifyBatch(batch);
 
         bytes memory hash = abi.encode(keccak256(abi.encode(batch)));

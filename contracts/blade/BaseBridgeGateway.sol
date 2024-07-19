@@ -5,8 +5,9 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import {System} from "./System.sol";
 import "../interfaces/common/IBLS.sol";
 import "../interfaces/common/IBN256G2.sol";
+import "../interfaces/blade/IBridgeGateway.sol";
 
-contract BaseBridgeGateway is Initializable, System {
+contract BaseBridgeGateway is IBridgeGateway, Initializable, System {
     bytes32 public constant DOMAIN = keccak256("DOMAIN_BRIDGE");
 
     IBLS public bls;
@@ -16,47 +17,6 @@ contract BaseBridgeGateway is Initializable, System {
     uint256 public currentValidatorSetLength;
     bytes32 public currentValidatorSetHash;
     uint256 public totalVotingPower;
-
-    /**
-     * @param _address address of the validator
-     * @param blsKey BLS public key
-     * @param votingPower voting power of the validator
-     */
-    struct Validator {
-        address _address;
-        uint256[4] blsKey;
-        uint256 votingPower;
-    }
-
-    /**
-     * @param id id of message
-     * @param sourceChainId id of source chain
-     * @param destinationChainId id of destination chain
-     * @param sender sender account of this bridge message
-     * @param receiver receiver account of this bridge message
-     * @param payload payload
-     */
-    struct BridgeMessage {
-        uint256 id;
-        uint256 sourceChainId;
-        uint256 destinationChainId;
-        address sender;
-        address receiver;
-        bytes payload;
-    }
-
-    /**
-     * @param messages list of all messages in batch
-     * @param sourceChainId id of chain which is source of batch
-     * @param destinationChainId id of chain which is destination of batch
-     */
-    struct BridgeMessageBatch {
-        BridgeMessage[] messages;
-        uint256 sourceChainId;
-        uint256 destinationChainId;
-    }
-
-    event NewValidatorSet(Validator[] newValidatorSet);
 
     /**
      * @notice initializes the contract

@@ -257,7 +257,7 @@ function bn256G2() external view returns (contract IBN256G2)
 ### commitBatch
 
 ```solidity
-function commitBatch(BaseBridgeGateway.BridgeMessageBatch batch, uint256[2] signature, bytes bitmap) external nonpayable
+function commitBatch(BridgeMessageBatch batch, uint256[2] signature, bytes bitmap) external nonpayable
 ```
 
 
@@ -268,14 +268,14 @@ function commitBatch(BaseBridgeGateway.BridgeMessageBatch batch, uint256[2] sign
 
 | Name | Type | Description |
 |---|---|---|
-| batch | BaseBridgeGateway.BridgeMessageBatch | undefined |
+| batch | BridgeMessageBatch | undefined |
 | signature | uint256[2] | undefined |
 | bitmap | bytes | undefined |
 
 ### commitValidatorSet
 
 ```solidity
-function commitValidatorSet(BaseBridgeGateway.Validator[] newValidatorSet, uint256[2] signature, bytes bitmap) external nonpayable
+function commitValidatorSet(Validator[] newValidatorSet, uint256[2] signature, bytes bitmap) external nonpayable
 ```
 
 
@@ -286,7 +286,7 @@ function commitValidatorSet(BaseBridgeGateway.Validator[] newValidatorSet, uint2
 
 | Name | Type | Description |
 |---|---|---|
-| newValidatorSet | BaseBridgeGateway.Validator[] | undefined |
+| newValidatorSet | Validator[] | undefined |
 | signature | uint256[2] | undefined |
 | bitmap | bytes | undefined |
 
@@ -350,7 +350,7 @@ function currentValidatorSetLength() external view returns (uint256)
 ### initialize
 
 ```solidity
-function initialize(contract IBLS newBls, contract IBN256G2 newBn256G2, BaseBridgeGateway.Validator[] validators) external nonpayable
+function initialize(contract IBLS newBls, contract IBN256G2 newBn256G2, Validator[] validators) external nonpayable
 ```
 
 
@@ -363,7 +363,7 @@ function initialize(contract IBLS newBls, contract IBN256G2 newBn256G2, BaseBrid
 |---|---|---|
 | newBls | contract IBLS | undefined |
 | newBn256G2 | contract IBN256G2 | undefined |
-| validators | BaseBridgeGateway.Validator[] | undefined |
+| validators | Validator[] | undefined |
 
 ### totalVotingPower
 
@@ -421,7 +421,7 @@ event NewBatch(uint256 id)
 ### NewValidatorSet
 
 ```solidity
-event NewValidatorSet(BaseBridgeGateway.Validator[] newValidatorSet)
+event NewValidatorSet(Validator[] newValidatorSet)
 ```
 
 
@@ -432,7 +432,7 @@ event NewValidatorSet(BaseBridgeGateway.Validator[] newValidatorSet)
 
 | Name | Type | Description |
 |---|---|---|
-| newValidatorSet  | BaseBridgeGateway.Validator[] | undefined |
+| newValidatorSet  | Validator[] | undefined |
 
 
 

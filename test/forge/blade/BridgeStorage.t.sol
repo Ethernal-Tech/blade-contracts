@@ -3,6 +3,7 @@ pragma solidity 0.8.19;
 
 import "@utils/Test.sol";
 import {BridgeStorage} from "contracts/blade/BridgeStorage.sol";
+import {Validator, BridgeMessage, BridgeMessageBatch} from "contracts/interfaces/blade/IBridgeGateway.sol";
 import {BLS} from "contracts/common/BLS.sol";
 import {BN256G2} from "contracts/common/BN256G2.sol";
 import {System} from "contracts/blade/System.sol";
@@ -13,12 +14,12 @@ abstract contract BridgeStorageTest is Test, System, BridgeStorage{
 
     address public sender;
     address public receiver;
-    BridgeStorage.Validator[] public validatorSet;
+    Validator[] public validatorSet;
     bytes32[] public hashes;
     bytes[] public bitmaps;
     uint256[2][] public aggMessagePoints;
     uint256[] public aggVotingPowers;
-    BridgeStorage.BridgeMessage[] msgs;
+    BridgeMessage[] msgs;
 
     function setUp() public virtual{
         bls = new BLS();
@@ -37,11 +38,11 @@ abstract contract BridgeStorageTest is Test, System, BridgeStorage{
         cmd[3] = vm.toString(abi.encode(DOMAIN));
         bytes memory out = vm.ffi(cmd);
 
-        BridgeStorage.Validator[] memory validatorSetTmp;
+        Validator[] memory validatorSetTmp;
 
         (validatorSetSize, validatorSetTmp, aggMessagePoints, hashes, bitmaps, aggVotingPowers) = abi.decode(
             out,
-            (uint256, BridgeStorage.Validator[], uint256[2][], bytes32[], bytes[], uint256[])
+            (uint256, Validator[], uint256[2][], bytes32[], bytes[], uint256[])
         );
 
         for (uint256 i = 0; i < validatorSetSize; i++) {
@@ -61,7 +62,7 @@ abstract contract BridgeStorageWithMessages is BridgeStorageInitialized{
     function setUp() public virtual override{
         super.setUp();
         
-        BridgeStorage.BridgeMessage memory firstMessage = BridgeStorage.BridgeMessage({
+        BridgeMessage memory firstMessage = BridgeMessage({
             id:0,
             sourceChainId:100,
             destinationChainId:2,
@@ -91,50 +92,50 @@ contract BridgeStorageUnitialized is BridgeStorageTest{
 
 contract BridgeStorageCommitBatchTests is BridgeStorageWithMessages{
     function testCommitBatch_InvalidSignature() public{
-        BridgeStorage.BridgeMessageBatch memory batch = BridgeStorage.BridgeMessageBatch({
+        BridgeMessageBatch memory batch = BridgeMessageBatch({
             messages: msgs,
-            signature: aggMessagePoints[0],
-            bitmap: bitmaps[0]
+            sourceChainId: 100,
+            destinationChainId: 2
         });
 
         vm.expectRevert("SIGNATURE_VERIFICATION_FAILED");
-        bridgeStorage.commitBatch(batch);
+        bridgeStorage.commitBatch(batch, aggMessagePoints[0], bitmaps[0]);
     }
 
     function testCommitBatch_EmptyBitmap() public{
-        BridgeStorage.BridgeMessageBatch memory batch = BridgeStorage.BridgeMessageBatch({
+        BridgeMessageBatch memory batch = BridgeMessageBatch({
             messages: msgs,
-            signature: aggMessagePoints[1],
-            bitmap: bitmaps[1]
+            sourceChainId: 100,
+            destinationChainId: 2
         });
 
         vm.expectRevert("BITMAP_IS_EMPTY");
-        bridgeStorage.commitBatch(batch);
+        bridgeStorage.commitBatch(batch, aggMessagePoints[1], bitmaps[1]);
     }
 
     function testCommitBatch_NotEnoughPower() public{
-        BridgeStorage.BridgeMessageBatch memory batch = BridgeStorage.BridgeMessageBatch({
+        BridgeMessageBatch memory batch = BridgeMessageBatch({
             messages: msgs,
-            signature: aggMessagePoints[2],
-            bitmap: bitmaps[2]
+            sourceChainId: 100,
+            destinationChainId: 2
         });
 
         vm.expectRevert("INSUFFICIENT_VOTING_POWER");
-        bridgeStorage.commitBatch(batch);
+        bridgeStorage.commitBatch(batch, aggMessagePoints[2], bitmaps[2]);
     }
 
 
 
     function testCommitBatch_Succes() public{
-        BridgeStorage.BridgeMessageBatch memory batch = BridgeStorage.BridgeMessageBatch({
+        BridgeMessageBatch memory batch = BridgeMessageBatch({
             messages: msgs,
-            signature: aggMessagePoints[3],
-            bitmap: bitmaps[3]
+            sourceChainId: 100,
+            destinationChainId: 2
         });
 
         vm.expectEmit();
         emit NewBatch(0);
-        bridgeStorage.commitBatch(batch);
+        bridgeStorage.commitBatch(batch, aggMessagePoints[3], bitmaps[3]);
     } 
 }
 
