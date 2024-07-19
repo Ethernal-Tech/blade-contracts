@@ -6,7 +6,7 @@ import * as mcl from "../../ts/mcl";
 import { bridge } from "../../typechain-types/contracts";
 
 const DOMAIN = ethers.utils.arrayify(ethers.utils.solidityKeccak256(["string"], ["DOMAIN_BRIDGE"]));
-const sourceChainId  = 2;
+const sourceChainId = 2;
 const destinationChainId = 3;
 
 describe("BridgeStorage", () => {
@@ -33,7 +33,6 @@ describe("BridgeStorage", () => {
     const BN256G2 = await ethers.getContractFactory("BN256G2");
     bn256G2 = (await BN256G2.deploy()) as BN256G2;
     await bn256G2.deployed();
-
 
     validatorSetSize = Math.floor(Math.random() * (5 - 1) + 8); // Randomly pick 8 - 12
 
@@ -79,15 +78,15 @@ describe("BridgeStorage", () => {
     const bitmap = `0x${bitmapStr}`;
 
     const batch = {
-        messages: msgs,
-        sourceChainId: sourceChainId,
-        destinationChainId: destinationChainId
-      };
+      messages: msgs,
+      sourceChainId: sourceChainId,
+      destinationChainId: destinationChainId,
+    };
 
-      const message = ethers.utils.keccak256(
-        ethers.utils.defaultAbiCoder.encode(["bytes32"], [ethers.utils.hexlify(ethers.utils.randomBytes(32))])
-      );
-  
+    const message = ethers.utils.keccak256(
+      ethers.utils.defaultAbiCoder.encode(["bytes32"], [ethers.utils.hexlify(ethers.utils.randomBytes(32))])
+    );
+
     const signatures: mcl.Signature[] = [];
 
     let aggVotingPower = 0;
@@ -112,8 +111,9 @@ describe("BridgeStorage", () => {
 
     const aggMessagePoint: mcl.MessagePoint = mcl.g1ToHex(mcl.aggregateRaw(signatures));
 
-
-    await expect(destinationGateway.receiveBatch(batch, aggMessagePoint, bitmap)).to.be.revertedWith("SIGNATURE_VERIFICATION_FAILED");
+    await expect(destinationGateway.receiveBatch(batch, aggMessagePoint, bitmap)).to.be.revertedWith(
+      "SIGNATURE_VERIFICATION_FAILED"
+    );
   });
 
   it("Bridge storage commitBatch fail: empty bitmap", async () => {
@@ -143,21 +143,21 @@ describe("BridgeStorage", () => {
     const bitmap = `0x${bitmapStr}`;
 
     const batch = {
-        messages: msgs,
-        sourceChainId: sourceChainId,
-        destinationChainId: destinationChainId
-      };
+      messages: msgs,
+      sourceChainId: sourceChainId,
+      destinationChainId: destinationChainId,
+    };
 
-      const messageOfBatch = ethers.utils.keccak256(
-        ethers.utils.defaultAbiCoder.encode(
-          ["tuple(tuple(uint256 id, uint256 sourceChainId, uint256 destinationChainId, address sender, address receiver, bytes payload)[] messages, uint256 sourceChainId, uint256 destinationChainId)"],
-          [
-            batch
-          ]
-        )
-      );
+    const messageOfBatch = ethers.utils.keccak256(
+      ethers.utils.defaultAbiCoder.encode(
+        [
+          "tuple(tuple(uint256 id, uint256 sourceChainId, uint256 destinationChainId, address sender, address receiver, bytes payload)[] messages, uint256 sourceChainId, uint256 destinationChainId)",
+        ],
+        [batch]
+      )
+    );
 
-      const message = ethers.utils.defaultAbiCoder.encode(["bytes32"], [messageOfBatch]);
+    const message = ethers.utils.defaultAbiCoder.encode(["bytes32"], [messageOfBatch]);
 
     const signatures: mcl.Signature[] = [];
 
@@ -182,8 +182,6 @@ describe("BridgeStorage", () => {
     }
 
     const aggMessagePoint: mcl.MessagePoint = mcl.g1ToHex(mcl.aggregateRaw(signatures));
-
-
 
     await expect(destinationGateway.receiveBatch(batch, aggMessagePoint, bitmap)).to.be.revertedWith("BITMAP_IS_EMPTY");
   });
@@ -215,21 +213,21 @@ describe("BridgeStorage", () => {
     const bitmap = `0x${bitmapStr}`;
 
     const batch = {
-        messages: msgs,
-        sourceChainId: sourceChainId,
-        destinationChainId: destinationChainId
-      };
+      messages: msgs,
+      sourceChainId: sourceChainId,
+      destinationChainId: destinationChainId,
+    };
 
-      const messageOfBatch = ethers.utils.keccak256(
-        ethers.utils.defaultAbiCoder.encode(
-          ["tuple(tuple(uint256 id, uint256 sourceChainId, uint256 destinationChainId, address sender, address receiver, bytes payload)[] messages, uint256 sourceChainId, uint256 destinationChainId)"],
-          [
-            batch
-          ]
-        )
-      );
+    const messageOfBatch = ethers.utils.keccak256(
+      ethers.utils.defaultAbiCoder.encode(
+        [
+          "tuple(tuple(uint256 id, uint256 sourceChainId, uint256 destinationChainId, address sender, address receiver, bytes payload)[] messages, uint256 sourceChainId, uint256 destinationChainId)",
+        ],
+        [batch]
+      )
+    );
 
-      const message = ethers.utils.defaultAbiCoder.encode(["bytes32"], [messageOfBatch])
+    const message = ethers.utils.defaultAbiCoder.encode(["bytes32"], [messageOfBatch]);
 
     const signatures: mcl.Signature[] = [];
 
@@ -255,7 +253,9 @@ describe("BridgeStorage", () => {
 
     const aggMessagePoint: mcl.MessagePoint = mcl.g1ToHex(mcl.aggregateRaw(signatures));
 
-    await expect(destinationGateway.receiveBatch(batch, aggMessagePoint, bitmap)).to.be.revertedWith("INSUFFICIENT_VOTING_POWER");
+    await expect(destinationGateway.receiveBatch(batch, aggMessagePoint, bitmap)).to.be.revertedWith(
+      "INSUFFICIENT_VOTING_POWER"
+    );
   });
 
   it("Bridge storage commitBatch success", async () => {
@@ -285,21 +285,21 @@ describe("BridgeStorage", () => {
     const bitmap = `0x${bitmapStr}`;
 
     const batch = {
-        messages: msgs,
-        sourceChainId: sourceChainId,
-        destinationChainId: destinationChainId
-      };
+      messages: msgs,
+      sourceChainId: sourceChainId,
+      destinationChainId: destinationChainId,
+    };
 
-      const messageOfBatch = ethers.utils.keccak256(
-        ethers.utils.defaultAbiCoder.encode(
-          ["tuple(tuple(uint256 id, uint256 sourceChainId, uint256 destinationChainId, address sender, address receiver, bytes payload)[] messages, uint256 sourceChainId, uint256 destinationChainId)"],
-          [
-            batch
-          ]
-        )
-      );
+    const messageOfBatch = ethers.utils.keccak256(
+      ethers.utils.defaultAbiCoder.encode(
+        [
+          "tuple(tuple(uint256 id, uint256 sourceChainId, uint256 destinationChainId, address sender, address receiver, bytes payload)[] messages, uint256 sourceChainId, uint256 destinationChainId)",
+        ],
+        [batch]
+      )
+    );
 
-      const message = ethers.utils.defaultAbiCoder.encode(["bytes32"], [messageOfBatch])
+    const message = ethers.utils.defaultAbiCoder.encode(["bytes32"], [messageOfBatch]);
 
     const signatures: mcl.Signature[] = [];
 
@@ -315,11 +315,7 @@ describe("BridgeStorage", () => {
       // Get the value of the bit at the given 'index' in a byte.
       const oneByte = parseInt(bitmap[2 + byteNumber * 2] + bitmap[3 + byteNumber * 2], 16);
       if ((oneByte & (1 << bitNumber)) > 0) {
-        const { signature, messagePoint } = mcl.sign(
-          message,
-          validatorSecretKeys[i],
-          ethers.utils.arrayify(DOMAIN)
-        );
+        const { signature, messagePoint } = mcl.sign(message, validatorSecretKeys[i], ethers.utils.arrayify(DOMAIN));
         signatures.push(signature);
         aggVotingPower += parseInt(ethers.utils.formatEther(validatorSet[i].votingPower), 10);
       } else {
@@ -344,11 +340,13 @@ describe("BridgeStorage", () => {
 
     const batch = {
       messages: msgs,
-        sourceChainId : 2 ,
-        destinationChainId: 3, 
+      sourceChainId: 2,
+      destinationChainId: 3,
     };
 
-    await expect(destinationGateway.receiveBatch(batch, sign, ethers.constants.AddressZero)).to.be.revertedWith("EMPTY_BATCH");
+    await expect(destinationGateway.receiveBatch(batch, sign, ethers.constants.AddressZero)).to.be.revertedWith(
+      "EMPTY_BATCH"
+    );
   });
 
   it("Bridge storage bad commitBatch fail: bad source chain id", async () => {
@@ -372,9 +370,11 @@ describe("BridgeStorage", () => {
     const batch = {
       messages: msgs,
       sourceChainId: 2,
-      destinationChainId: 3
+      destinationChainId: 3,
     };
 
-    await expect(destinationGateway.receiveBatch(batch, sign, ethers.constants.AddressZero)).to.be.revertedWith("INVALID_SOURCE_CHAIN_ID");
+    await expect(destinationGateway.receiveBatch(batch, sign, ethers.constants.AddressZero)).to.be.revertedWith(
+      "INVALID_SOURCE_CHAIN_ID"
+    );
   });
 });

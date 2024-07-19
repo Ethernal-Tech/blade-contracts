@@ -2,7 +2,6 @@
 pragma solidity ^0.8.19;
 
 import "./BaseBridgeGateway.sol";
-import {System} from "./System.sol";
 
 contract BridgeStorage is BaseBridgeGateway {
     mapping(uint256 => BridgeMessageBatch) public batches;

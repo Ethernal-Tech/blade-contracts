@@ -60,7 +60,7 @@ const config: HardhatUserConfig = {
       // gasPrice: 0,
       gasPrice: 1000000000,
       hardfork: "london",
-      chainId : 3
+      chainId: 3,
     },
   },
   gasReporter: {

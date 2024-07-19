@@ -307,23 +307,6 @@ function initialize(contract IBLS newBls, contract IBN256G2 newBn256G2, BaseBrid
 | newBn256G2 | contract IBN256G2 | undefined |
 | validators | BaseBridgeGateway.Validator[] | undefined |
 
-### lastCommittedId
-
-```solidity
-function lastCommittedId() external view returns (uint256)
-```
-
-
-
-
-
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | uint256 | undefined |
-
 ### processedEvents
 
 ```solidity

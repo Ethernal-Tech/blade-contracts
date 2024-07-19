@@ -1,7 +1,7 @@
 import { expect } from "chai";
 import * as hre from "hardhat";
 import { ethers } from "hardhat";
-import { BLS, BN256G2,BaseBridgeGateway } from "../../typechain-types";
+import { BLS, BN256G2, BaseBridgeGateway } from "../../typechain-types";
 import * as mcl from "../../ts/mcl";
 import { bridge } from "../../typechain-types/contracts";
 
