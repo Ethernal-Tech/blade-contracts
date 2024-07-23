@@ -3,6 +3,9 @@ import { BigNumberish, BigNumber } from "ethers";
 import * as mcl from "../../../ts/mcl";
 const input = process.argv[2];
 
+const sourceChainId = 2;
+const destinationChainId = 3;
+
 // let DOMAIN = ethers.utils.arrayify(ethers.utils.hexlify(ethers.utils.randomBytes(32)));
 // let eventRoot = ethers.utils.arrayify(ethers.utils.hexlify(ethers.utils.randomBytes(32)));
 
@@ -21,6 +24,29 @@ let blockHash: any;
 let currentValidatorSetHash: any;
 let bitmaps: any[] = [];
 let aggVotingPowers: any[] = [];
+let msgs = [
+  {
+    id: 1,
+    sourceChainId: sourceChainId,
+    destinationChainId: destinationChainId,
+    sender: ethers.constants.AddressZero,
+    receiver: ethers.constants.AddressZero,
+    payload: ethers.constants.HashZero,
+  },
+  {
+    id: 2,
+    sourceChainId: sourceChainId,
+    destinationChainId: destinationChainId,
+    sender: ethers.constants.AddressZero,
+    receiver: ethers.constants.AddressZero,
+    payload: ethers.constants.HashZero,
+  },
+];
+let batch = {
+  messages: msgs,
+  sourceChainId: sourceChainId,
+  destinationChainId: destinationChainId,
+};
 
 async function generateMsg() {
   const input = process.argv[2];
@@ -58,21 +84,12 @@ async function generateMsg() {
 
   const output = ethers.utils.defaultAbiCoder.encode(
     [
-      "uint256",
       "tuple(address _address, uint256[4] blsKey, uint256 votingPower)[]",
       "uint256[2][]",
-      "bytes32[]",
       "bytes[]",
-      "uint256[]",
+      "tuple(uint256 id, uint256 sourceChainId, uint256 destinationChainId, address sender, address receiver, bytes payload)[]",
     ],
-    [
-      validatorSetSize,
-      validatorSet,
-      aggMessagePoints,
-      [eventRoot, blockHash, currentValidatorSetHash],
-      bitmaps,
-      aggVotingPowers,
-    ]
+    [validatorSet, aggMessagePoints, bitmaps, msgs]
   );
 
   console.log(output);
@@ -82,7 +99,7 @@ function generateSignature0() {
   const bitmapStr = "ffff";
 
   const bitmap = `0x${bitmapStr}`;
-  const messageOfValidatorSet = "0x1234";
+  const message = "0x1234";
 
   const signatures: mcl.Signature[] = [];
   let flag = false;
@@ -99,7 +116,7 @@ function generateSignature0() {
     // Get the value of the bit at the given 'index' in a byte.
     const oneByte = parseInt(bitmap[2 + byteNumber * 2] + bitmap[3 + byteNumber * 2], 16);
     if ((oneByte & (1 << bitNumber)) > 0) {
-      const { signature, messagePoint } = mcl.sign(messageOfValidatorSet, validatorSecretKeys[i], ethers.utils.arrayify(domain));
+      const { signature, messagePoint } = mcl.sign(message, validatorSecretKeys[i], ethers.utils.arrayify(domain));
       signatures.push(signature);
       aggVotingPower = validatorSet[i].votingPower.add(aggVotingPower);
     } else {
@@ -117,10 +134,12 @@ function generateSignature1() {
   const bitmapStr = "00";
 
   const bitmap = `0x${bitmapStr}`;
-  const messageOfValidatorSet = ethers.utils.keccak256(
+  const message = ethers.utils.keccak256(
     ethers.utils.defaultAbiCoder.encode(
-      ["tuple(address _address, uint256[4] blsKey, uint256 votingPower)[]"],
-      [validatorSet]
+      [
+        "tuple(tuple(uint256 id, uint256 sourceChainId, uint256 destinationChainId, address sender, address receiver, bytes payload)[] messages, uint256 sourceChainId, uint256 destinationChainId)",
+      ],
+      [batch]
     )
   );
 
@@ -139,7 +158,7 @@ function generateSignature1() {
     // Get the value of the bit at the given 'index' in a byte.
     const oneByte = parseInt(bitmap[2 + byteNumber * 2] + bitmap[3 + byteNumber * 2], 16);
     if ((oneByte & (1 << bitNumber)) > 0) {
-      const { signature, messagePoint } = mcl.sign(messageOfValidatorSet, validatorSecretKeys[i], ethers.utils.arrayify(domain));
+      const { signature, messagePoint } = mcl.sign(message, validatorSecretKeys[i], ethers.utils.arrayify(domain));
       signatures.push(signature);
       aggVotingPower = validatorSet[i].votingPower.add(aggVotingPower);
     } else {
@@ -157,10 +176,12 @@ function generateSignature2() {
   const bitmapStr = "01";
 
   const bitmap = `0x${bitmapStr}`;
-  const messageOfValidatorSet = ethers.utils.keccak256(
+  const message = ethers.utils.keccak256(
     ethers.utils.defaultAbiCoder.encode(
-      ["tuple(address _address, uint256[4] blsKey, uint256 votingPower)[]"],
-      [validatorSet]
+      [
+        "tuple(tuple(uint256 id, uint256 sourceChainId, uint256 destinationChainId, address sender, address receiver, bytes payload)[] messages, uint256 sourceChainId, uint256 destinationChainId)",
+      ],
+      [batch]
     )
   );
 
@@ -179,7 +200,7 @@ function generateSignature2() {
     // Get the value of the bit at the given 'index' in a byte.
     const oneByte = parseInt(bitmap[2 + byteNumber * 2] + bitmap[3 + byteNumber * 2], 16);
     if ((oneByte & (1 << bitNumber)) > 0) {
-      const { signature, messagePoint } = mcl.sign(messageOfValidatorSet, validatorSecretKeys[i], ethers.utils.arrayify(domain));
+      const { signature, messagePoint } = mcl.sign(message, validatorSecretKeys[i], ethers.utils.arrayify(domain));
       signatures.push(signature);
       aggVotingPower = validatorSet[i].votingPower.add(aggVotingPower);
     } else {
@@ -197,10 +218,13 @@ function generateSignature3() {
   const bitmapStr = "ffff";
 
   const bitmap = `0x${bitmapStr}`;
-  const messageOfValidatorSet = ethers.utils.keccak256(
+
+  const message = ethers.utils.keccak256(
     ethers.utils.defaultAbiCoder.encode(
-      ["tuple(address _address, uint256[4] blsKey, uint256 votingPower)[]"],
-      [validatorSet]
+      [
+        "tuple(tuple(uint256 id, uint256 sourceChainId, uint256 destinationChainId, address sender, address receiver, bytes payload)[] messages, uint256 sourceChainId, uint256 destinationChainId)",
+      ],
+      [batch]
     )
   );
 
@@ -219,7 +243,7 @@ function generateSignature3() {
     // Get the value of the bit at the given 'index' in a byte.
     const oneByte = parseInt(bitmap[2 + byteNumber * 2] + bitmap[3 + byteNumber * 2], 16);
     if ((oneByte & (1 << bitNumber)) > 0) {
-      const { signature, messagePoint } = mcl.sign(messageOfValidatorSet, validatorSecretKeys[i], ethers.utils.arrayify(domain));
+      const { signature, messagePoint } = mcl.sign(message, validatorSecretKeys[i], ethers.utils.arrayify(domain));
       signatures.push(signature);
       aggVotingPower = validatorSet[i].votingPower.add(aggVotingPower);
     } else {
