@@ -12,6 +12,8 @@ contract DestinationGateway is BaseBridgeGateway {
     /**
      * @notice receives the batch of messages and executes them
      * @param batch batch of messages
+     * @param signature the aggregated signature submitted by the proposer
+     * @param bitmap bitmap of which validators signed the message
      */
     function receiveBatch(
         BridgeMessageBatch calldata batch,
@@ -42,10 +44,13 @@ contract DestinationGateway is BaseBridgeGateway {
 
         uint256 destinationChainId = block.chainid;
         require(batch.destinationChainId == destinationChainId, "INVALID_DESTINATION_CHAIN_ID");
-        for (uint256 i = 0; i < batch.messages.length; ++i) {
+        for (uint256 i = 0; i < batch.messages.length; ) {
             BridgeMessage memory message = batch.messages[i];
             require(message.sourceChainId == batch.sourceChainId, "INVALID_SOURCE_CHAIN_ID");
             require(message.destinationChainId == destinationChainId, "INVALID_DESTINATION_CHAIN_ID");
+            unchecked {
+                ++i;
+            }
         }
     }
 

@@ -61,11 +61,14 @@ contract BaseBridgeGateway is IBridgeGateway, Initializable, System {
         currentValidatorSetLength = length;
         currentValidatorSetHash = keccak256(abi.encode(newValidatorSet));
         uint256 totalPower = 0;
-        for (uint256 i = 0; i < length; ++i) {
+        for (uint256 i = 0; i < length; ) {
             uint256 votingPower = newValidatorSet[i].votingPower;
             require(votingPower > 0, "VOTING_POWER_ZERO");
             totalPower += votingPower;
             currentValidatorSet[i] = newValidatorSet[i];
+            unchecked {
+                ++i;
+            }
         }
 
         totalVotingPower = totalPower;
@@ -75,6 +78,7 @@ contract BaseBridgeGateway is IBridgeGateway, Initializable, System {
      * @notice Internal function that asserts that the signature is valid and that the required threshold is met
      * @param message The message that was signed by validators (i.e. checkpoint hash)
      * @param signature The aggregated signature submitted by the proposer
+     * @param bitmap bitmap of which validators signed the message
      */
     function verifySignature(
         uint256[2] memory message,

@@ -7,7 +7,7 @@ import { bridge } from "../../typechain-types/contracts";
 
 const DOMAIN = ethers.utils.arrayify(ethers.utils.solidityKeccak256(["string"], ["DOMAIN_BRIDGE"]));
 
-describe("BridgeStorage", () => {
+describe("BaseBridgeGateway", () => {
   let baseBridgeGateway: BaseBridgeGateway,
     systemBaseBridgeGateway: BaseBridgeGateway,
     msgs: any[],
@@ -21,7 +21,7 @@ describe("BridgeStorage", () => {
     await mcl.init();
     accounts = await ethers.getSigners();
 
-    const BaseBridgeGateway = await ethers.getContractFactory("BridgeStorage");
+    const BaseBridgeGateway = await ethers.getContractFactory("BaseBridgeGateway");
     baseBridgeGateway = (await BaseBridgeGateway.deploy()) as BaseBridgeGateway;
     await baseBridgeGateway.deployed();
 
@@ -96,7 +96,7 @@ describe("BridgeStorage", () => {
     }
   });
 
-  it("Bridge storage fail: no system call", async () => {
+  it("Base bridge gateway fail: no system call", async () => {
     msgs = [];
 
     msgs = [
@@ -119,7 +119,7 @@ describe("BridgeStorage", () => {
       .withArgs("SYSTEMCALL");
   });
 
-  it("Bridge storage commitValidatorSet fail: empty validator set", async () => {
+  it("Base bridge gateway commitValidatorSet fail: empty validator set", async () => {
     validatorSetSize = Math.floor(Math.random() * (5 - 1) + 8); // Randomly pick 8 - 12
 
     validatorSet = [];

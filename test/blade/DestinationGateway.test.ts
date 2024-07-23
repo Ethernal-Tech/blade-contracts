@@ -9,7 +9,7 @@ const DOMAIN = ethers.utils.arrayify(ethers.utils.solidityKeccak256(["string"], 
 const sourceChainId = 2;
 const destinationChainId = 3;
 
-describe("BridgeStorage", () => {
+describe("DestinationGateway", () => {
   let destinationGateway: DestinationGateway,
     msgs: any[],
     bls: BLS,
@@ -51,7 +51,7 @@ describe("BridgeStorage", () => {
     await destinationGateway.initialize(bls.address, bn256G2.address, validatorSet);
   });
 
-  it("Bridge storage commitBatch fail: invalid signature", async () => {
+  it("Destination gateway receiveBatch fail: invalid signature", async () => {
     msgs = [];
 
     msgs = [
@@ -116,7 +116,7 @@ describe("BridgeStorage", () => {
     );
   });
 
-  it("Bridge storage commitBatch fail: empty bitmap", async () => {
+  it("Destination gateway receiveBatch fail: empty bitmap", async () => {
     msgs = [];
 
     msgs = [
@@ -186,7 +186,7 @@ describe("BridgeStorage", () => {
     await expect(destinationGateway.receiveBatch(batch, aggMessagePoint, bitmap)).to.be.revertedWith("BITMAP_IS_EMPTY");
   });
 
-  it("Bridge storage commitBatch fail:not enough voting power", async () => {
+  it("Destination gateway receiveBatch fail:not enough voting power", async () => {
     msgs = [];
 
     msgs = [
@@ -258,7 +258,7 @@ describe("BridgeStorage", () => {
     );
   });
 
-  it("Bridge storage commitBatch success", async () => {
+  it("Destination gateway commitBatch success", async () => {
     msgs = [];
 
     msgs = [
@@ -331,7 +331,7 @@ describe("BridgeStorage", () => {
     expect(firstLogs).to.exist;
   });
 
-  it("Bridge storage commitBatch fail: zero messages in batch", async () => {
+  it("Destination gateway receiveBatch fail: zero messages in batch", async () => {
     msgs = [];
 
     let sign: [number, number];
@@ -349,7 +349,7 @@ describe("BridgeStorage", () => {
     );
   });
 
-  it("Bridge storage bad commitBatch fail: bad source chain id", async () => {
+  it("Destination gateway receiveBatch fail: bad source chain id", async () => {
     msgs = [];
 
     msgs = [

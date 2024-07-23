@@ -36,10 +36,13 @@ contract BridgeStorage is BaseBridgeGateway {
     function _verifyBatch(BridgeMessageBatch calldata batch) private pure {
         require(batch.messages.length > 0, "EMPTY_BATCH");
 
-        for (uint256 i = 0; i < batch.messages.length; ++i) {
+        for (uint256 i = 0; i < batch.messages.length; ) {
             BridgeMessage memory message = batch.messages[i];
             require(message.sourceChainId == batch.sourceChainId, "INVALID_SOURCE_CHAIN_ID");
             require(message.destinationChainId == batch.destinationChainId, "INVALID_DESTINATION_CHAIN_ID");
+            unchecked {
+                ++i;
+            }
         }
     }
 
