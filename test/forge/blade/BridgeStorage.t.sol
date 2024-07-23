@@ -10,7 +10,6 @@ import {System} from "contracts/blade/System.sol";
 
 abstract contract BridgeStorageTest is Test, System, BridgeStorage {
     BridgeStorage bridgeStorage;
-    uint256 validatorSetSize;
 
     address public sender;
     address public receiver;
@@ -68,8 +67,7 @@ contract BridgeStorageUnitialized is BridgeStorageTest {
 
         assertEq(keccak256(abi.encode(bridgeStorage.bls())), keccak256(abi.encode(address(bls))));
         assertEq(keccak256(abi.encode(bridgeStorage.bn256G2())), keccak256(abi.encode(address(bn256G2))));
-        assertEq(bridgeStorage.currentValidatorSetLength(), validatorSetSize);
-        for (uint256 i = 0; i < validatorSetSize; i++) {
+        for (uint256 i = 0; i < validatorSet.length; i++) {
             (address _address, uint256 votingPower) = bridgeStorage.currentValidatorSet(i);
             assertEq(_address, validatorSet[i]._address);
             assertEq(votingPower, validatorSet[i].votingPower);
@@ -81,8 +79,8 @@ contract BridgeStorageCommitBatchTests is BridgeStorageInitialized {
     function testCommitBatch_InvalidSignature() public {
         BridgeMessageBatch memory batch = BridgeMessageBatch({
             messages: msgs,
-            sourceChainId: 100,
-            destinationChainId: 2
+            sourceChainId: 2,
+            destinationChainId: 3
         });
 
         vm.expectRevert("SIGNATURE_VERIFICATION_FAILED");
@@ -92,8 +90,8 @@ contract BridgeStorageCommitBatchTests is BridgeStorageInitialized {
     function testCommitBatch_EmptyBitmap() public {
         BridgeMessageBatch memory batch = BridgeMessageBatch({
             messages: msgs,
-            sourceChainId: 100,
-            destinationChainId: 2
+            sourceChainId: 2,
+            destinationChainId: 3
         });
 
         vm.expectRevert("BITMAP_IS_EMPTY");
@@ -103,8 +101,8 @@ contract BridgeStorageCommitBatchTests is BridgeStorageInitialized {
     function testCommitBatch_NotEnoughPower() public {
         BridgeMessageBatch memory batch = BridgeMessageBatch({
             messages: msgs,
-            sourceChainId: 100,
-            destinationChainId: 2
+            sourceChainId: 2,
+            destinationChainId: 3
         });
 
         vm.expectRevert("INSUFFICIENT_VOTING_POWER");
