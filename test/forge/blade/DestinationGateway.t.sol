@@ -101,8 +101,9 @@ contract DestinationGatewayReceiveBatchTests is DestinationGatewayInitialized {
         BridgeMessageBatch memory batch = BridgeMessageBatch({messages: msgs, sourceChainId: 2, destinationChainId: 3});
 
         vm.expectEmit();
-        emit BridgeMessageResult(1, false, bytes("0x"));
-        emit BridgeMessageResult(2, false, bytes("0x"));
+        emit BridgeMessageResult(1, false, bytes(""));
+        vm.expectEmit();
+        emit BridgeMessageResult(2, false, bytes(""));
         destinationGateway.receiveBatch(batch, aggMessagePoints[3], bitmaps[3]);
     }
 }
