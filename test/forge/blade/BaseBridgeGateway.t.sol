@@ -6,8 +6,9 @@ import {BaseBridgeGateway} from "contracts/blade/BaseBridgeGateway.sol";
 import {Validator, BridgeMessage, BridgeMessageBatch} from "contracts/interfaces/blade/IBridgeGateway.sol";
 import {BLS} from "contracts/common/BLS.sol";
 import {BN256G2} from "contracts/common/BN256G2.sol";
+import {System} from "contracts/blade/System.sol";
 
-abstract contract BaseBridgeGatewayTest is Test, BaseBridgeGateway {
+abstract contract BaseBridgeGatewayTest is Test,System, BaseBridgeGateway {
     uint256 validatorSetSize;
     bytes32[] hashes;
 
@@ -28,7 +29,7 @@ abstract contract BaseBridgeGatewayTest is Test, BaseBridgeGateway {
         string[] memory cmd = new string[](4);
         cmd[0] = "npx";
         cmd[1] = "ts-node";
-        cmd[2] = "test/forge/blade/generateMsgBaseBridge.ts";
+        cmd[2] = "test/forge/blade/generateMsgBaseBridgeGateway.ts";
         cmd[3] = vm.toString(abi.encode(DOMAIN));
         bytes memory out = vm.ffi(cmd);
 

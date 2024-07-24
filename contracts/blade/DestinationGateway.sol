@@ -5,6 +5,7 @@ import "./BaseBridgeGateway.sol";
 
 contract DestinationGateway is BaseBridgeGateway {
     /// @custom:security write-protection="onlySystemCall()"
+    // slither-disable-next-line protected-variables
     mapping(uint256 => bool) public processedEvents;
 
     event BridgeMessageResult(uint256 indexed counter, bool indexed status, bytes message);
@@ -15,7 +16,7 @@ contract DestinationGateway is BaseBridgeGateway {
      * @param signature the aggregated signature submitted by the proposer
      * @param bitmap bitmap of which validators signed the message
      */
-    //slither-disable-next-line protected-variables
+    // slither-disable-next-line protected-variables
     function receiveBatch(
         BridgeMessageBatch calldata batch,
         uint256[2] calldata signature,
