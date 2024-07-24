@@ -119,6 +119,60 @@ describe("BaseBridgeGateway", () => {
       .withArgs("SYSTEMCALL");
   });
 
+  it("Bridge storage commitValidator success", async () => {
+    validatorSetSize = Math.floor(Math.random() * (5 - 1) + 8); // Randomly pick 8 - 12
+    const bitmap = "0xffff";
+
+    let validatorSetTmp = [];
+    let validatorSecretKeysTmp = [];
+
+    for (let i = 0; i < validatorSetSize; i++) {
+      const { pubkey, secret } = mcl.newKeyPair();
+      validatorSecretKeysTmp.push(secret);
+      validatorSetTmp.push({
+        _address: accounts[i].address,
+        blsKey: mcl.g2ToHex(pubkey),
+        votingPower: ethers.utils.parseEther(((i + 1) * 2).toString()),
+      });
+    }
+
+    const message = ethers.utils.keccak256(
+      ethers.utils.defaultAbiCoder.encode(
+        ["tuple(address _address, uint256[4] blsKey, uint256 votingPower)[]"],
+        [validatorSetTmp]
+      )
+    );
+
+    const signatures: mcl.Signature[] = [];
+
+    let aggVotingPower = 0;
+    for (let i = 0; i < validatorSecretKeys.length; i++) {
+      const byteNumber = Math.floor(i / 8);
+      const bitNumber = i % 8;
+
+      if (byteNumber >= bitmap.length / 2 - 1) {
+        continue;
+      }
+
+      // Get the value of the bit at the given 'index' in a byte.
+      const oneByte = parseInt(bitmap[2 + byteNumber * 2] + bitmap[3 + byteNumber * 2], 16);
+      if ((oneByte & (1 << bitNumber)) > 0) {
+        const { signature, messagePoint } = mcl.sign(message, validatorSecretKeys[i], ethers.utils.arrayify(DOMAIN));
+        signatures.push(signature);
+        aggVotingPower += parseInt(ethers.utils.formatEther(validatorSet[i].votingPower), 10);
+      } else {
+        continue;
+      }
+    }
+
+    const aggMessagePoint: mcl.MessagePoint = mcl.g1ToHex(mcl.aggregateRaw(signatures));
+
+    const firstTx = await systemBaseBridgeGateway.commitValidatorSet(validatorSetTmp, aggMessagePoint, bitmap);
+    const firstReceipt = await firstTx.wait();
+    const firstLogs = firstReceipt?.events?.filter((log) => log.event === "NewValidatorSet") as any[];
+    expect(firstLogs).to.exist;
+  });
+
   it("Base bridge gateway commitValidatorSet fail: empty validator set", async () => {
     validatorSetSize = Math.floor(Math.random() * (5 - 1) + 8); // Randomly pick 8 - 12
 

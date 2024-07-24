@@ -5,6 +5,7 @@ import "./BaseBridgeGateway.sol";
 
 contract DestinationGateway is BaseBridgeGateway {
     /// @custom:security write-protection="onlySystemCall()"
+    //slither-disable-next-line protected-variables
     mapping(uint256 => bool) public processedEvents;
 
     event BridgeMessageResult(uint256 indexed counter, bool indexed status, bytes message);

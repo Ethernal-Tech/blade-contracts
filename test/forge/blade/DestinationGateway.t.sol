@@ -2,14 +2,14 @@
 pragma solidity 0.8.19;
 
 import "@utils/Test.sol";
-import {BridgeStorage} from "contracts/blade/BridgeStorage.sol";
+import {DestinationGateway} from "contracts/blade/DestinationGateway.sol";
 import {Validator, BridgeMessage, BridgeMessageBatch} from "contracts/interfaces/blade/IBridgeGateway.sol";
 import {BLS} from "contracts/common/BLS.sol";
 import {BN256G2} from "contracts/common/BN256G2.sol";
 import {System} from "contracts/blade/System.sol";
 
-abstract contract BridgeStorageTest is Test, System, BridgeStorage {
-    BridgeStorage bridgeStorage;
+abstract contract DestinationGatewayTest is Test, System, DestinationGateway {
+    DestinationGateway destinationGateway;
 
     address public sender;
     address public receiver;
@@ -21,9 +21,9 @@ abstract contract BridgeStorageTest is Test, System, BridgeStorage {
     function setUp() public virtual {
         bls = new BLS();
         bn256G2 = new BN256G2();
-        bridgeStorage = new BridgeStorage();
+        destinationGateway = new DestinationGateway();
 
-        vm.startPrank(SYSTEM);
+        vm.chainId(3);
 
         sender = makeAddr("sender");
         receiver = makeAddr("receiver");
@@ -54,54 +54,55 @@ abstract contract BridgeStorageTest is Test, System, BridgeStorage {
     }
 }
 
-abstract contract BridgeStorageInitialized is BridgeStorageTest {
+abstract contract DestinationGatewayInitialized is DestinationGatewayTest {
     function setUp() public virtual override {
         super.setUp();
-        bridgeStorage.initialize(bls, bn256G2, validatorSet);
+        destinationGateway.initialize(bls, bn256G2, validatorSet);
     }
 }
 
-contract BridgeStorageUnitialized is BridgeStorageTest {
+contract DestinationGatewayUninitialized is DestinationGatewayTest {
     function testInitialize() public {
-        bridgeStorage.initialize(bls, bn256G2, validatorSet);
+        destinationGateway.initialize(bls, bn256G2, validatorSet);
 
-        assertEq(keccak256(abi.encode(bridgeStorage.bls())), keccak256(abi.encode(address(bls))));
-        assertEq(keccak256(abi.encode(bridgeStorage.bn256G2())), keccak256(abi.encode(address(bn256G2))));
+        assertEq(keccak256(abi.encode(destinationGateway.bls())), keccak256(abi.encode(address(bls))));
+        assertEq(keccak256(abi.encode(destinationGateway.bn256G2())), keccak256(abi.encode(address(bn256G2))));
         for (uint256 i = 0; i < validatorSet.length; i++) {
-            (address _address, uint256 votingPower) = bridgeStorage.currentValidatorSet(i);
+            (address _address, uint256 votingPower) = destinationGateway.currentValidatorSet(i);
             assertEq(_address, validatorSet[i]._address);
             assertEq(votingPower, validatorSet[i].votingPower);
         }
     }
 }
 
-contract BridgeStorageCommitBatchTests is BridgeStorageInitialized {
-    function testCommitBatch_InvalidSignature() public {
+contract DestinationGatewayReceiveBatchTests is DestinationGatewayInitialized {
+    function testReceiveBatch_InvalidSignature() public {
         BridgeMessageBatch memory batch = BridgeMessageBatch({messages: msgs, sourceChainId: 2, destinationChainId: 3});
 
         vm.expectRevert("SIGNATURE_VERIFICATION_FAILED");
-        bridgeStorage.commitBatch(batch, aggMessagePoints[0], bitmaps[0]);
+        destinationGateway.receiveBatch(batch, aggMessagePoints[0], bitmaps[0]);
     }
 
-    function testCommitBatch_EmptyBitmap() public {
+    function testReceiveBatch_EmptyBitmap() public {
         BridgeMessageBatch memory batch = BridgeMessageBatch({messages: msgs, sourceChainId: 2, destinationChainId: 3});
 
         vm.expectRevert("BITMAP_IS_EMPTY");
-        bridgeStorage.commitBatch(batch, aggMessagePoints[1], bitmaps[1]);
+        destinationGateway.receiveBatch(batch, aggMessagePoints[1], bitmaps[1]);
     }
 
-    function testCommitBatch_NotEnoughPower() public {
+    function testReceiveBatch_NotEnoughPower() public {
         BridgeMessageBatch memory batch = BridgeMessageBatch({messages: msgs, sourceChainId: 2, destinationChainId: 3});
 
         vm.expectRevert("INSUFFICIENT_VOTING_POWER");
-        bridgeStorage.commitBatch(batch, aggMessagePoints[2], bitmaps[2]);
+        destinationGateway.receiveBatch(batch, aggMessagePoints[2], bitmaps[2]);
     }
 
-    function testCommitBatch_Succes() public {
+    function testReceiveBatch_Success() public {
         BridgeMessageBatch memory batch = BridgeMessageBatch({messages: msgs, sourceChainId: 2, destinationChainId: 3});
 
         vm.expectEmit();
-        emit NewBatch(0);
-        bridgeStorage.commitBatch(batch, aggMessagePoints[3], bitmaps[3]);
+        emit BridgeMessageResult(1, false, bytes("0x"));
+        emit BridgeMessageResult(2, false, bytes("0x"));
+        destinationGateway.receiveBatch(batch, aggMessagePoints[3], bitmaps[3]);
     }
 }
