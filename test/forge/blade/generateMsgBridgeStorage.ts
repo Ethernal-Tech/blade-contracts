@@ -29,17 +29,17 @@ let msgs = [
     id: 1,
     sourceChainId: sourceChainId,
     destinationChainId: destinationChainId,
-    sender: ethers.constants.AddressZero,
-    receiver: ethers.constants.AddressZero,
-    payload: ethers.constants.HashZero,
+    sender: ethers.utils.getAddress("sender"),
+    receiver: ethers.utils.getAddress("receiver"),
+    payload: ethers.utils.id("1122"),
   },
   {
     id: 2,
     sourceChainId: sourceChainId,
     destinationChainId: destinationChainId,
-    sender: ethers.constants.AddressZero,
-    receiver: ethers.constants.AddressZero,
-    payload: ethers.constants.HashZero,
+    sender: ethers.utils.getAddress("sender"),
+    receiver: ethers.utils.getAddress("receiver"),
+    payload: ethers.utils.id("2233"),
   },
 ];
 let batch = {

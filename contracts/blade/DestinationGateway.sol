@@ -3,13 +3,7 @@ pragma solidity ^0.8.19;
 
 import "./BaseBridgeGateway.sol";
 
-contract DestinationGateway is BaseBridgeGateway {
-    /// @custom:security write-protection="onlySystemCall()"
-    // slither-disable-next-line protected-vars
-    mapping(uint256 => bool) public processedEvents;
-
-    event BridgeMessageResult(uint256 indexed counter, bool indexed status, bytes message);
-
+contract DestinationGateway is ValidatorSetStorage {
     /**
      * @notice receives the batch of messages and executes them
      * @param batch batch of messages
@@ -25,7 +19,7 @@ contract DestinationGateway is BaseBridgeGateway {
         _verifyBatch(batch);
 
         bytes memory hash = abi.encode(keccak256(abi.encode(batch)));
-        verifySignature(bls.hashToPoint(DOMAIN, hash), signature, bitmap);
+        verifySignature(bls.hashToPoint(DOMAIN_VALIDATOR_SET, hash), signature, bitmap);
 
         uint256 length = batch.messages.length;
         for (uint256 i = 0; i < length; ) {
@@ -57,7 +51,7 @@ contract DestinationGateway is BaseBridgeGateway {
     }
 
     function _executeBridgeMessage(BridgeMessage calldata message) private {
-        require(!processedEvents[message.id], "DestinationGateway: BRIDGE_MESSAGE_IS_PROCESSED");
+        require(!processedEvents[message.id], "DestinationGateway: BRIDGE_MESSAGE_IS_ALREADY_PROCESSED");
         // Skip transaction if client has added flag, or receiver has no code
         if (message.receiver.code.length == 0) {
             emit BridgeMessageResult(message.id, false, "");

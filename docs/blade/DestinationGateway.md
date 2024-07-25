@@ -44,10 +44,10 @@ function BLOCKLIST_PRECOMPILE() external view returns (address)
 |---|---|---|
 | _0 | address | undefined |
 
-### DOMAIN
+### DOMAIN_VALIDATOR_SET
 
 ```solidity
-function DOMAIN() external view returns (bytes32)
+function DOMAIN_VALIDATOR_SET() external view returns (bytes32)
 ```
 
 
@@ -307,32 +307,10 @@ function initialize(contract IBLS newBls, contract IBN256G2 newBn256G2, Validato
 | newBn256G2 | contract IBN256G2 | undefined |
 | validators | Validator[] | undefined |
 
-### processedEvents
-
-```solidity
-function processedEvents(uint256) external view returns (bool)
-```
-
-
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | uint256 | undefined |
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | bool | undefined |
-
 ### receiveBatch
 
 ```solidity
-function receiveBatch(BridgeMessageBatch batch, uint256[2] signature, bytes bitmap) external nonpayable
+function receiveBatch(BridgeStructs.BridgeMessageBatch batch, uint256[2] signature, bytes bitmap) external nonpayable
 ```
 
 
@@ -343,7 +321,7 @@ function receiveBatch(BridgeMessageBatch batch, uint256[2] signature, bytes bitm
 
 | Name | Type | Description |
 |---|---|---|
-| batch | BridgeMessageBatch | undefined |
+| batch | BridgeStructs.BridgeMessageBatch | undefined |
 | signature | uint256[2] | undefined |
 | bitmap | bytes | undefined |
 

@@ -3,7 +3,7 @@ pragma solidity ^0.8.19;
 
 import "./BaseBridgeGateway.sol";
 
-contract BridgeStorage is BaseBridgeGateway {
+contract BridgeStorage is ValidatorSetStorage {
     mapping(uint256 => BridgeMessageBatch) public batches;
     /// @custom:security write-protection="onlySystemCall()"
     uint256 public batchCounter;

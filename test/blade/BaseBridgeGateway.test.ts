@@ -3,9 +3,8 @@ import * as hre from "hardhat";
 import { ethers } from "hardhat";
 import { BLS, BN256G2, BaseBridgeGateway } from "../../typechain-types";
 import * as mcl from "../../ts/mcl";
-import { bridge } from "../../typechain-types/contracts";
 
-const DOMAIN = ethers.utils.arrayify(ethers.utils.solidityKeccak256(["string"], ["DOMAIN_BRIDGE"]));
+const DOMAIN_VALIDATOR_SET = ethers.utils.arrayify(ethers.utils.solidityKeccak256(["string"], ["DOMAIN_VALIDATOR_SET"]));
 
 describe("BaseBridgeGateway", () => {
   let baseBridgeGateway: BaseBridgeGateway,
@@ -157,7 +156,7 @@ describe("BaseBridgeGateway", () => {
       // Get the value of the bit at the given 'index' in a byte.
       const oneByte = parseInt(bitmap[2 + byteNumber * 2] + bitmap[3 + byteNumber * 2], 16);
       if ((oneByte & (1 << bitNumber)) > 0) {
-        const { signature, messagePoint } = mcl.sign(message, validatorSecretKeys[i], ethers.utils.arrayify(DOMAIN));
+        const { signature, messagePoint } = mcl.sign(message, validatorSecretKeys[i], ethers.utils.arrayify(DOMAIN_VALIDATOR_SET));
         signatures.push(signature);
         aggVotingPower += parseInt(ethers.utils.formatEther(validatorSet[i].votingPower), 10);
       } else {
@@ -169,7 +168,7 @@ describe("BaseBridgeGateway", () => {
 
     const firstTx = await systemBaseBridgeGateway.commitValidatorSet(validatorSetTmp, aggMessagePoint, bitmap);
     const firstReceipt = await firstTx.wait();
-    const firstLogs = firstReceipt?.events?.filter((log) => log.event === "NewValidatorSet") as any[];
+    const firstLogs = firstReceipt?.events?.filter((log: { event: string; }) => log.event === "NewValidatorSet") as any[];
     expect(firstLogs).to.exist;
   });
 

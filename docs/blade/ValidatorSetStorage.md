@@ -1,4 +1,4 @@
-# BaseBridgeGateway
+# ValidatorSetStorage
 
 
 
@@ -44,10 +44,10 @@ function BLOCKLIST_PRECOMPILE() external view returns (address)
 |---|---|---|
 | _0 | address | undefined |
 
-### DOMAIN
+### DOMAIN_VALIDATOR_SET
 
 ```solidity
-function DOMAIN() external view returns (bytes32)
+function DOMAIN_VALIDATOR_SET() external view returns (bytes32)
 ```
 
 

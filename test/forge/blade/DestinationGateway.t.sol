@@ -3,10 +3,11 @@ pragma solidity 0.8.19;
 
 import "@utils/Test.sol";
 import {DestinationGateway} from "contracts/blade/DestinationGateway.sol";
-import {Validator, BridgeMessage, BridgeMessageBatch} from "contracts/interfaces/blade/IBridgeGateway.sol";
+import {Validator} from "contracts/interfaces/blade/IBridgeGateway.sol";
 import {BLS} from "contracts/common/BLS.sol";
 import {BN256G2} from "contracts/common/BN256G2.sol";
 import {System} from "contracts/blade/System.sol";
+import "contracts/blade/BridgeStructs.sol";
 
 abstract contract DestinationGatewayTest is Test, System, DestinationGateway {
     DestinationGateway destinationGateway;

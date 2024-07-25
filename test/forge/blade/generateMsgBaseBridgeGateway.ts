@@ -9,10 +9,7 @@ let validatorSecretKeys: any[] = [];
 const validatorSetSize = Math.floor(Math.random() * (5 - 1) + 8); // Randomly pick 8 - 12
 let aggMessagePoints: mcl.MessagePoint[] = [];
 let accounts: any[] = [];
-let newValidator: any;
-let newAddress: any;
 let validatorSet: any[] = [];
-let submitCounter: number;
 let eventRoot: any;
 let blockHash: any;
 let currentValidatorSetHash: any;
@@ -46,7 +43,6 @@ async function generateMsg() {
       [validatorSet]
     )
   );
-  submitCounter = 1;
 
   generateSignature0();
   generateSignature1();
@@ -82,7 +78,6 @@ function generateSignature0() {
   const messageOfValidatorSet = "0x1234";
 
   const signatures: mcl.Signature[] = [];
-  let flag = false;
 
   let aggVotingPower = 0;
   for (let i = 0; i < validatorSecretKeys.length; i++) {
@@ -126,7 +121,6 @@ function generateSignature1() {
   );
 
   const signatures: mcl.Signature[] = [];
-  let flag = false;
 
   let aggVotingPower = 0;
   for (let i = 0; i < validatorSecretKeys.length; i++) {
@@ -170,7 +164,6 @@ function generateSignature2() {
   );
 
   const signatures: mcl.Signature[] = [];
-  let flag = false;
 
   let aggVotingPower = 0;
   for (let i = 0; i < validatorSecretKeys.length; i++) {
@@ -214,7 +207,6 @@ function generateSignature3() {
   );
 
   const signatures: mcl.Signature[] = [];
-  let flag = false;
 
   let aggVotingPower = 0;
   for (let i = 0; i < validatorSecretKeys.length; i++) {

@@ -6,10 +6,9 @@ import {System} from "./System.sol";
 import "../interfaces/common/IBLS.sol";
 import "../interfaces/common/IBN256G2.sol";
 import "../interfaces/blade/IBridgeGateway.sol";
+import "./BridgeStructs.sol";
 
-contract BaseBridgeGateway is IBridgeGateway, Initializable, System {
-    bytes32 public constant DOMAIN = keccak256("DOMAIN_BRIDGE");
-
+contract ValidatorSetStorage is IValidatorSetStorage, Initializable, System, BridgeStructs {
     IBLS public bls;
     IBN256G2 public bn256G2;
 
@@ -45,7 +44,7 @@ contract BaseBridgeGateway is IBridgeGateway, Initializable, System {
 
         bytes memory hash = abi.encode(keccak256(abi.encode(newValidatorSet)));
 
-        verifySignature(bls.hashToPoint(DOMAIN, hash), signature, bitmap);
+        verifySignature(bls.hashToPoint(DOMAIN_VALIDATOR_SET, hash), signature, bitmap);
 
         _setNewValidatorSet(newValidatorSet);
 
@@ -123,7 +122,7 @@ contract BaseBridgeGateway is IBridgeGateway, Initializable, System {
     }
 
     /**
-     * @notice Internal function that gets the value of a bit in a bitmap
+     * @notice Private function that gets the value of a bit in a bitmap
      * @param bitmap bitmap
      * @param index index of the bit
      */
