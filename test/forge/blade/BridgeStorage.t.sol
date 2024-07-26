@@ -3,11 +3,10 @@ pragma solidity 0.8.19;
 
 import "@utils/Test.sol";
 import {BridgeStorage} from "contracts/blade/BridgeStorage.sol";
-import {Validator} from "contracts/interfaces/blade/IBridgeGateway.sol";
+import {Validator, BridgeMessage, BridgeMessageBatch, DOMAIN_BRIDGE} from "contracts/interfaces/blade/IBridgeGateway.sol";
 import {BLS} from "contracts/common/BLS.sol";
 import {BN256G2} from "contracts/common/BN256G2.sol";
 import {System} from "contracts/blade/System.sol";
-import {BridgeStructs} from "contracts/blade/BridgeStructs.sol";
 
 abstract contract BridgeStorageTest is Test, System, BridgeStorage {
     BridgeStorage bridgeStorage;
@@ -33,7 +32,7 @@ abstract contract BridgeStorageTest is Test, System, BridgeStorage {
         cmd[0] = "npx";
         cmd[1] = "ts-node";
         cmd[2] = "test/forge/blade/generateMsgBridgeStorage.ts";
-        cmd[3] = vm.toString(abi.encode(DOMAIN));
+        cmd[3] = vm.toString(abi.encode(DOMAIN_BRIDGE));
         bytes memory out = vm.ffi(cmd);
 
         Validator[] memory validatorTemp;
@@ -98,7 +97,7 @@ contract BridgeStorageCommitBatchTests is BridgeStorageInitialized {
         bridgeStorage.commitBatch(batch, aggMessagePoints[2], bitmaps[2]);
     }
 
-    function testCommitBatch_Succes() public {
+    function testCommitBatch_Success() public {
         BridgeMessageBatch memory batch = BridgeMessageBatch({messages: msgs, sourceChainId: 2, destinationChainId: 3});
 
         vm.expectEmit();

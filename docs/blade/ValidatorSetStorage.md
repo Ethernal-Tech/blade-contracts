@@ -44,23 +44,6 @@ function BLOCKLIST_PRECOMPILE() external view returns (address)
 |---|---|---|
 | _0 | address | undefined |
 
-### DOMAIN_VALIDATOR_SET
-
-```solidity
-function DOMAIN_VALIDATOR_SET() external view returns (bytes32)
-```
-
-
-
-
-
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | bytes32 | undefined |
-
 ### NATIVE_TOKEN_CONTRACT
 
 ```solidity

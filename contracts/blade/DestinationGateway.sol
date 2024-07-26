@@ -1,9 +1,15 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import "./BaseBridgeGateway.sol";
+import "./ValidatorSetStorage.sol";
 
 contract DestinationGateway is ValidatorSetStorage {
+    /// @custom:security write-protection="onlySystemCall()"
+    // slither-disable-next-line protected-vars
+    mapping(uint256 => bool) public processedEvents;
+
+    event BridgeMessageResult(uint256 indexed counter, bool indexed status, bytes message);
+
     /**
      * @notice receives the batch of messages and executes them
      * @param batch batch of messages

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import "./BaseBridgeGateway.sol";
+import "./ValidatorSetStorage.sol";
 
 contract BridgeStorage is ValidatorSetStorage {
     mapping(uint256 => BridgeMessageBatch) public batches;
@@ -22,7 +22,7 @@ contract BridgeStorage is ValidatorSetStorage {
         _verifyBatch(batch);
 
         bytes memory hash = abi.encode(keccak256(abi.encode(batch)));
-        verifySignature(bls.hashToPoint(DOMAIN, hash), signature, bitmap);
+        verifySignature(bls.hashToPoint(DOMAIN_BRIDGE, hash), signature, bitmap);
 
         batches[batchCounter++] = batch;
 

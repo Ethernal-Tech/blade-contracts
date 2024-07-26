@@ -1,5 +1,4 @@
 import { ethers } from "hardhat";
-import { BigNumberish, BigNumber } from "ethers";
 import * as mcl from "../../../ts/mcl";
 const input = process.argv[2];
 
@@ -15,10 +14,7 @@ let validatorSecretKeys: any[] = [];
 const validatorSetSize = Math.floor(Math.random() * (5 - 1) + 8); // Randomly pick 8 - 12
 let aggMessagePoints: mcl.MessagePoint[] = [];
 let accounts: any[] = [];
-let newValidator: any;
-let newAddress: any;
 let validatorSet: any[] = [];
-let submitCounter: number;
 let eventRoot: any;
 let blockHash: any;
 let currentValidatorSetHash: any;
@@ -29,16 +25,16 @@ let msgs = [
     id: 1,
     sourceChainId: sourceChainId,
     destinationChainId: destinationChainId,
-    sender: ethers.utils.getAddress("sender"),
-    receiver: ethers.utils.getAddress("receiver"),
+    sender: ethers.constants.AddressZero,
+    receiver: ethers.constants.AddressZero,
     payload: ethers.utils.id("1122"),
   },
   {
     id: 2,
     sourceChainId: sourceChainId,
     destinationChainId: destinationChainId,
-    sender: ethers.utils.getAddress("sender"),
-    receiver: ethers.utils.getAddress("receiver"),
+    sender: ethers.constants.AddressZero,
+    receiver: ethers.constants.AddressZero,
     payload: ethers.utils.id("2233"),
   },
 ];
@@ -75,7 +71,6 @@ async function generateMsg() {
       [validatorSet]
     )
   );
-  submitCounter = 1;
 
   generateSignature0();
   generateSignature1();

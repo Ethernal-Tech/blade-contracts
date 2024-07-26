@@ -3,11 +3,10 @@ pragma solidity 0.8.19;
 
 import "@utils/Test.sol";
 import {DestinationGateway} from "contracts/blade/DestinationGateway.sol";
-import {Validator} from "contracts/interfaces/blade/IBridgeGateway.sol";
+import {Validator, BridgeMessage, BridgeMessageBatch, DOMAIN_BRIDGE} from "contracts/interfaces/blade/IBridgeGateway.sol";
 import {BLS} from "contracts/common/BLS.sol";
 import {BN256G2} from "contracts/common/BN256G2.sol";
 import {System} from "contracts/blade/System.sol";
-import "contracts/blade/BridgeStructs.sol";
 
 abstract contract DestinationGatewayTest is Test, System, DestinationGateway {
     DestinationGateway destinationGateway;
@@ -33,7 +32,7 @@ abstract contract DestinationGatewayTest is Test, System, DestinationGateway {
         cmd[0] = "npx";
         cmd[1] = "ts-node";
         cmd[2] = "test/forge/blade/generateMsgBridgeStorage.ts";
-        cmd[3] = vm.toString(abi.encode(DOMAIN));
+        cmd[3] = vm.toString(abi.encode(DOMAIN_BRIDGE));
         bytes memory out = vm.ffi(cmd);
 
         Validator[] memory validatorTemp;

@@ -44,23 +44,6 @@ function BLOCKLIST_PRECOMPILE() external view returns (address)
 |---|---|---|
 | _0 | address | undefined |
 
-### DOMAIN_VALIDATOR_SET
-
-```solidity
-function DOMAIN_VALIDATOR_SET() external view returns (bytes32)
-```
-
-
-
-
-
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | bytes32 | undefined |
-
 ### NATIVE_TOKEN_CONTRACT
 
 ```solidity
@@ -257,7 +240,7 @@ function bn256G2() external view returns (contract IBN256G2)
 ### commitBatch
 
 ```solidity
-function commitBatch(BridgeStructs.BridgeMessageBatch batch, uint256[2] signature, bytes bitmap) external nonpayable
+function commitBatch(BridgeMessageBatch batch, uint256[2] signature, bytes bitmap) external nonpayable
 ```
 
 
@@ -268,7 +251,7 @@ function commitBatch(BridgeStructs.BridgeMessageBatch batch, uint256[2] signatur
 
 | Name | Type | Description |
 |---|---|---|
-| batch | BridgeStructs.BridgeMessageBatch | undefined |
+| batch | BridgeMessageBatch | undefined |
 | signature | uint256[2] | undefined |
 | bitmap | bytes | undefined |
 
@@ -385,24 +368,6 @@ function totalVotingPower() external view returns (uint256)
 
 
 ## Events
-
-### BridgeMessageResult
-
-```solidity
-event BridgeMessageResult(uint256 indexed counter, bool indexed status, bytes message)
-```
-
-
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| counter `indexed` | uint256 | undefined |
-| status `indexed` | bool | undefined |
-| message  | bytes | undefined |
 
 ### Initialized
 

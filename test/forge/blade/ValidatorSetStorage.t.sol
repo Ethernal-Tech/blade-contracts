@@ -2,18 +2,18 @@
 pragma solidity 0.8.19;
 
 import "@utils/Test.sol";
-import {ValidatorSetStorage} from "contracts/blade/BaseBridgeGateway.sol";
-import {Validator} from "contracts/interfaces/blade/IBridgeGateway.sol";
+import {ValidatorSetStorage} from "contracts/blade/ValidatorSetStorage.sol";
+import {Validator, DOMAIN_VALIDATOR_SET} from "contracts/interfaces/blade/IBridgeGateway.sol";
 import {BLS} from "contracts/common/BLS.sol";
 import {BN256G2} from "contracts/common/BN256G2.sol";
 import {System} from "contracts/blade/System.sol";
 
-abstract contract BaseBridgeGatewayTest is Test, System, ValidatorSetStorage {
+abstract contract ValidatorSetStorageTest is Test, System, ValidatorSetStorage {
     uint256 validatorSetSize;
     bytes32[] hashes;
 
     uint256[] aggVotingPowers;
-    ValidatorSetStorage baseBridgeGateway;
+    ValidatorSetStorage validatorSetStorage;
     Validator[] public validatorSet;
 
     bytes[] public bitmaps;
@@ -22,14 +22,14 @@ abstract contract BaseBridgeGatewayTest is Test, System, ValidatorSetStorage {
     function setUp() public virtual {
         bls = new BLS();
         bn256G2 = new BN256G2();
-        baseBridgeGateway = new ValidatorSetStorage();
+        validatorSetStorage = new ValidatorSetStorage();
 
         vm.startPrank(SYSTEM);
 
         string[] memory cmd = new string[](4);
         cmd[0] = "npx";
         cmd[1] = "ts-node";
-        cmd[2] = "test/forge/blade/generateMsgBaseBridgeGateway.ts";
+        cmd[2] = "test/forge/blade/generateMsgValidatorSetStorage.ts";
         cmd[3] = vm.toString(abi.encode(DOMAIN_VALIDATOR_SET));
         bytes memory out = vm.ffi(cmd);
 
@@ -46,32 +46,32 @@ abstract contract BaseBridgeGatewayTest is Test, System, ValidatorSetStorage {
     }
 }
 
-abstract contract BaseBridgeGatewayInitialized is BaseBridgeGatewayTest {
+abstract contract BaseBridgeGatewayInitialized is ValidatorSetStorageTest {
     function setUp() public virtual override {
         super.setUp();
-        baseBridgeGateway.initialize(bls, bn256G2, validatorSet);
+        validatorSetStorage.initialize(bls, bn256G2, validatorSet);
     }
 }
 
 contract BaseBridgeCommitValidatorSetTests is BaseBridgeGatewayInitialized {
     function testCommitValidatorSet_InvalidSignature() public {
         vm.expectRevert("SIGNATURE_VERIFICATION_FAILED");
-        baseBridgeGateway.commitValidatorSet(validatorSet, aggMessagePoints[0], bitmaps[0]);
+        validatorSetStorage.commitValidatorSet(validatorSet, aggMessagePoints[0], bitmaps[0]);
     }
 
     function testCommitValidatorSet_EmptyBitmap() public {
         vm.expectRevert("BITMAP_IS_EMPTY");
-        baseBridgeGateway.commitValidatorSet(validatorSet, aggMessagePoints[1], bitmaps[1]);
+        validatorSetStorage.commitValidatorSet(validatorSet, aggMessagePoints[1], bitmaps[1]);
     }
 
     function testCommitValidatorSet_NotEnoughPower() public {
         vm.expectRevert("INSUFFICIENT_VOTING_POWER");
-        baseBridgeGateway.commitValidatorSet(validatorSet, aggMessagePoints[2], bitmaps[2]);
+        validatorSetStorage.commitValidatorSet(validatorSet, aggMessagePoints[2], bitmaps[2]);
     }
 
     function testCommitValidatorSet_Success() public {
         vm.expectEmit();
         emit NewValidatorSet(validatorSet);
-        baseBridgeGateway.commitValidatorSet(validatorSet, aggMessagePoints[3], bitmaps[3]);
+        validatorSetStorage.commitValidatorSet(validatorSet, aggMessagePoints[3], bitmaps[3]);
     }
 }

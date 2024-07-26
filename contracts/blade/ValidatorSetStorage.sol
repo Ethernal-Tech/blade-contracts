@@ -6,9 +6,8 @@ import {System} from "./System.sol";
 import "../interfaces/common/IBLS.sol";
 import "../interfaces/common/IBN256G2.sol";
 import "../interfaces/blade/IBridgeGateway.sol";
-import "./BridgeStructs.sol";
 
-contract ValidatorSetStorage is IValidatorSetStorage, Initializable, System, BridgeStructs {
+contract ValidatorSetStorage is IValidatorSetStorage, Initializable, System {
     IBLS public bls;
     IBN256G2 public bn256G2;
 
