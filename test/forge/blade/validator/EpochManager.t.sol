@@ -42,14 +42,30 @@ abstract contract Uninitialized is Test {
         token.approve(address(stakeManager), type(uint256).max);
 
         GenesisValidator[] memory validators = new GenesisValidator[](2);
-        validators[0] = GenesisValidator({addr: bob, stake: 300, blsKey: [type(uint256).max, type(uint256).max, type(uint256).max, type(uint256).max]});
-        validators[1] = GenesisValidator({addr: alice, stake: 100, blsKey: [type(uint256).max, type(uint256).max, type(uint256).max, type(uint256).max]});
-        stakeManager.initialize(address(token), blsAddr, address(epochManager), address(networkParams), bob, testDomain, validators);
-        
+        validators[0] = GenesisValidator({
+            addr: bob,
+            stake: 300,
+            blsKey: [type(uint256).max, type(uint256).max, type(uint256).max, type(uint256).max]
+        });
+        validators[1] = GenesisValidator({
+            addr: alice,
+            stake: 100,
+            blsKey: [type(uint256).max, type(uint256).max, type(uint256).max, type(uint256).max]
+        });
+        stakeManager.initialize(
+            address(token),
+            blsAddr,
+            address(epochManager),
+            address(networkParams),
+            bob,
+            testDomain,
+            validators
+        );
+
         InitParams memory initParams = InitParams({
-            newOwner: bob, 
-            newEpochSize: epochSize, 
-            newEpochReward: 1 ether, 
+            newOwner: bob,
+            newEpochSize: epochSize,
+            newEpochReward: 1 ether,
             newCheckpointBlockInterval: 900,
             newSprintSize: 5,
             newMinValidatorSetSize: 3,
