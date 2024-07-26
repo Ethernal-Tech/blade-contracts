@@ -10,9 +10,6 @@ import {System} from "contracts/blade/System.sol";
 
 abstract contract DestinationGatewayTest is Test, System, DestinationGateway {
     DestinationGateway destinationGateway;
-
-    address public sender;
-    address public receiver;
     Validator[] public validatorSet;
     bytes[] public bitmaps;
     uint256[2][] public aggMessagePoints;
@@ -24,9 +21,6 @@ abstract contract DestinationGatewayTest is Test, System, DestinationGateway {
         destinationGateway = new DestinationGateway();
 
         vm.chainId(3);
-
-        sender = makeAddr("sender");
-        receiver = makeAddr("receiver");
 
         string[] memory cmd = new string[](4);
         cmd[0] = "npx";

@@ -258,7 +258,7 @@ describe("DestinationGateway", () => {
     );
   });
 
-  it("Destination gateway commitBatch success", async () => {
+  it("Destination gateway receiveBatch success", async () => {
     msgs = [];
 
     msgs = [

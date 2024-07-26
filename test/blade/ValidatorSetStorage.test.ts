@@ -1,7 +1,7 @@
 import { expect } from "chai";
 import * as hre from "hardhat";
 import { ethers } from "hardhat";
-import { BLS, BN256G2, BaseBridgeGateway } from "../../typechain-types";
+import { BLS, BN256G2, ValidatorSetStorage } from "../../typechain-types";
 import * as mcl from "../../ts/mcl";
 
 const DOMAIN_VALIDATOR_SET = ethers.utils.arrayify(
@@ -9,8 +9,8 @@ const DOMAIN_VALIDATOR_SET = ethers.utils.arrayify(
 );
 
 describe("BaseBridgeGateway", () => {
-  let baseBridgeGateway: BaseBridgeGateway,
-    systemBaseBridgeGateway: BaseBridgeGateway,
+  let validatorSetStorage: ValidatorSetStorage,
+    systemValidatorSetStorage: ValidatorSetStorage,
     msgs: any[],
     bls: BLS,
     bn256G2: BN256G2,
@@ -22,9 +22,9 @@ describe("BaseBridgeGateway", () => {
     await mcl.init();
     accounts = await ethers.getSigners();
 
-    const BaseBridgeGateway = await ethers.getContractFactory("BaseBridgeGateway");
-    baseBridgeGateway = (await BaseBridgeGateway.deploy()) as BaseBridgeGateway;
-    await baseBridgeGateway.deployed();
+    const BaseBridgeGateway = await ethers.getContractFactory("ValidatorSetStorage");
+    validatorSetStorage = (await BaseBridgeGateway.deploy()) as ValidatorSetStorage;
+    await validatorSetStorage.deployed();
 
     const BLS = await ethers.getContractFactory("BLS");
     bls = (await BLS.deploy()) as BLS;
@@ -47,7 +47,7 @@ describe("BaseBridgeGateway", () => {
       params: ["0xffffFFFfFFffffffffffffffFfFFFfffFFFfFFfE"],
     });
     const systemSigner = await ethers.getSigner("0xffffFFFfFFffffffffffffffFfFFFfffFFFfFFfE");
-    systemBaseBridgeGateway = baseBridgeGateway.connect(systemSigner);
+    systemValidatorSetStorage = validatorSetStorage.connect(systemSigner);
   });
 
   it("Initialize failed by zero voting power", async () => {
@@ -65,7 +65,7 @@ describe("BaseBridgeGateway", () => {
       });
     }
 
-    await expect(baseBridgeGateway.initialize(bls.address, bn256G2.address, validatorSet)).to.be.revertedWith(
+    await expect(validatorSetStorage.initialize(bls.address, bn256G2.address, validatorSet)).to.be.revertedWith(
       "VOTING_POWER_ZERO"
     );
   });
@@ -85,13 +85,13 @@ describe("BaseBridgeGateway", () => {
       });
     }
 
-    await baseBridgeGateway.initialize(bls.address, bn256G2.address, validatorSet);
-    expect(await baseBridgeGateway.bls()).to.equal(bls.address);
-    expect(await baseBridgeGateway.bn256G2()).to.equal(bn256G2.address);
-    expect(await baseBridgeGateway.currentValidatorSetLength()).to.equal(validatorSetSize);
+    await validatorSetStorage.initialize(bls.address, bn256G2.address, validatorSet);
+    expect(await validatorSetStorage.bls()).to.equal(bls.address);
+    expect(await validatorSetStorage.bn256G2()).to.equal(bn256G2.address);
+    expect(await validatorSetStorage.currentValidatorSetLength()).to.equal(validatorSetSize);
 
     for (let i = 0; i < validatorSetSize; i++) {
-      const validator = await baseBridgeGateway.currentValidatorSet(i);
+      const validator = await validatorSetStorage.currentValidatorSet(i);
       expect(validator._address).to.equal(accounts[i].address);
       expect(validator.votingPower).to.equal(ethers.utils.parseEther(((i + 1) * 2).toString()));
     }
@@ -115,8 +115,8 @@ describe("BaseBridgeGateway", () => {
 
     sign = [1, 1];
 
-    await expect(baseBridgeGateway.commitValidatorSet(validatorSet, sign, ethers.constants.AddressZero))
-      .to.be.revertedWithCustomError(baseBridgeGateway, "Unauthorized")
+    await expect(validatorSetStorage.commitValidatorSet(validatorSet, sign, ethers.constants.AddressZero))
+      .to.be.revertedWithCustomError(validatorSetStorage, "Unauthorized")
       .withArgs("SYSTEMCALL");
   });
 
@@ -172,10 +172,10 @@ describe("BaseBridgeGateway", () => {
 
     const aggMessagePoint: mcl.MessagePoint = mcl.g1ToHex(mcl.aggregateRaw(signatures));
 
-    const firstTx = await systemBaseBridgeGateway.commitValidatorSet(validatorSetTmp, aggMessagePoint, bitmap);
+    const firstTx = await systemValidatorSetStorage.commitValidatorSet(validatorSetTmp, aggMessagePoint, bitmap);
     const firstReceipt = await firstTx.wait();
     const firstLogs = firstReceipt?.events?.filter(
-      (log: { event: string }) => log.event === "NewValidatorSet"
+      (log) => log.event === "NewValidatorSet"
     ) as any[];
     expect(firstLogs).to.exist;
   });
@@ -190,7 +190,7 @@ describe("BaseBridgeGateway", () => {
     sign = [0, 0];
 
     await expect(
-      systemBaseBridgeGateway.commitValidatorSet(validatorSet, sign, ethers.constants.AddressZero)
+      systemValidatorSetStorage.commitValidatorSet(validatorSet, sign, ethers.constants.AddressZero)
     ).to.be.revertedWith("EMPTY_VALIDATOR_SET");
   });
 });

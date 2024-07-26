@@ -25,7 +25,7 @@ contract DestinationGateway is ValidatorSetStorage {
         _verifyBatch(batch);
 
         bytes memory hash = abi.encode(keccak256(abi.encode(batch)));
-        verifySignature(bls.hashToPoint(DOMAIN_VALIDATOR_SET, hash), signature, bitmap);
+        verifySignature(bls.hashToPoint(DOMAIN_BRIDGE, hash), signature, bitmap);
 
         uint256 length = batch.messages.length;
         for (uint256 i = 0; i < length; ) {
