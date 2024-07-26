@@ -174,9 +174,7 @@ describe("BaseBridgeGateway", () => {
 
     const firstTx = await systemValidatorSetStorage.commitValidatorSet(validatorSetTmp, aggMessagePoint, bitmap);
     const firstReceipt = await firstTx.wait();
-    const firstLogs = firstReceipt?.events?.filter(
-      (log) => log.event === "NewValidatorSet"
-    ) as any[];
+    const firstLogs = firstReceipt?.events?.filter((log) => log.event === "NewValidatorSet") as any[];
     expect(firstLogs).to.exist;
   });
 
