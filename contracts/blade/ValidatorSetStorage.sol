@@ -5,7 +5,7 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import {System} from "./System.sol";
 import "../interfaces/common/IBLS.sol";
 import "../interfaces/common/IBN256G2.sol";
-import "../interfaces/blade/IBridgeGateway.sol";
+import "../interfaces/blade/IValidatorSetStorage.sol";
 
 contract ValidatorSetStorage is IValidatorSetStorage, Initializable, System {
     IBLS public bls;

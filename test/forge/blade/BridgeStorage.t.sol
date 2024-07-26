@@ -3,7 +3,7 @@ pragma solidity 0.8.19;
 
 import "@utils/Test.sol";
 import {BridgeStorage} from "contracts/blade/BridgeStorage.sol";
-import {Validator, BridgeMessage, BridgeMessageBatch, DOMAIN_BRIDGE} from "contracts/interfaces/blade/IBridgeGateway.sol";
+import {Validator, BridgeMessage, BridgeMessageBatch, DOMAIN_BRIDGE} from "contracts/interfaces/blade/IValidatorSetStorage.sol";
 import {BLS} from "contracts/common/BLS.sol";
 import {BN256G2} from "contracts/common/BN256G2.sol";
 import {System} from "contracts/blade/System.sol";
