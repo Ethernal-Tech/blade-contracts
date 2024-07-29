@@ -35,23 +35,20 @@ contract RootERC20Predicate is Initializable, IRootERC20Predicate {
         address newChildTokenTemplate,
         address newNativeTokenRoot
     ) external initializer {
-        require(
-            newGateway != address(0) &&
-                newExitHelper != address(0) &&
-                newChildERC20Predicate != address(0) &&
-                newChildTokenTemplate != address(0),
-            "RootERC20Predicate: BAD_INITIALIZATION"
-        );
-        gateway = IGateway(newGateway);
-        exitHelper = newExitHelper;
-        childERC20Predicate = newChildERC20Predicate;
-        childTokenTemplate = newChildTokenTemplate;
-        if (newNativeTokenRoot != address(0)) {
-            nativeTokenRoot = newNativeTokenRoot;
-            rootTokenToChildToken[nativeTokenRoot] = 0x0000000000000000000000000000000000001010;
-            emit TokenMapped(nativeTokenRoot, 0x0000000000000000000000000000000000001010);
-        }
+        _initialize(newGateway, newExitHelper, newChildERC20Predicate, newChildTokenTemplate, newNativeTokenRoot);
     }
+
+    // solhint-disable no-empty-blocks
+    // slither-disable-start dead-code
+    function _beforeTokenDeposit() internal virtual {}
+
+    function _beforeTokenWithdraw() internal virtual {}
+
+    function _afterTokenDeposit() internal virtual {}
+
+    function _afterTokenWithdraw() internal virtual {}
+
+    // slither-disable-end dead-code
 
     /**
      * @inheritdoc IL2StateReceiver
@@ -111,6 +108,7 @@ contract RootERC20Predicate is Initializable, IRootERC20Predicate {
     }
 
     function _deposit(IERC20Metadata rootToken, address receiver, uint256 amount) private {
+        _beforeTokenDeposit();
         address childToken = rootTokenToChildToken[address(rootToken)];
 
         if (childToken == address(0)) {
@@ -124,6 +122,8 @@ contract RootERC20Predicate is Initializable, IRootERC20Predicate {
         gateway.sendBridgeMsg(childERC20Predicate, abi.encode(DEPOSIT_SIG, rootToken, msg.sender, receiver, amount));
         // slither-disable-next-line reentrancy-events
         emit ERC20Deposit(address(rootToken), childToken, msg.sender, receiver, amount);
+
+        _afterTokenDeposit();
     }
 
     function _withdraw(bytes calldata data) private {
@@ -139,6 +139,40 @@ contract RootERC20Predicate is Initializable, IRootERC20Predicate {
         emit ERC20Withdraw(address(rootToken), childToken, withdrawer, receiver, amount);
     }
 
+    /**
+     * @notice Internal initialization function for RootMintableERC20Predicate
+     * @param newGateway Address of Gateway contract
+     * @param newExitHelper Address of ExitHelper to receive deposit information from
+     * @param newChildERC20Predicate Address of root ERC20 predicate to communicate with
+     * @param newChildTokenTemplate Address of child token implementation to deploy clones of
+     * @param newNativeTokenRoot Address of rootchain token that represents the native token
+     * @dev Can be called multiple times.
+     */
+    function _initialize(
+        address newGateway,
+        address newExitHelper,
+        address newChildERC20Predicate,
+        address newChildTokenTemplate,
+        address newNativeTokenRoot
+    ) internal {
+        require(
+            newGateway != address(0) &&
+                newExitHelper != address(0) &&
+                newChildERC20Predicate != address(0) &&
+                newChildTokenTemplate != address(0),
+            "RootERC20Predicate: BAD_INITIALIZATION"
+        );
+        gateway = IGateway(newGateway);
+        exitHelper = newExitHelper;
+        childERC20Predicate = newChildERC20Predicate;
+        childTokenTemplate = newChildTokenTemplate;
+        if (newNativeTokenRoot != address(0)) {
+            nativeTokenRoot = newNativeTokenRoot;
+            rootTokenToChildToken[nativeTokenRoot] = 0x0000000000000000000000000000000000001010;
+            emit TokenMapped(nativeTokenRoot, 0x0000000000000000000000000000000000001010);
+        }
+    }
+
     // slither-disable-next-line unused-state,naming-convention
-    uint256[49] private __gap;
+    uint256[50] private __gap;
 }

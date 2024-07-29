@@ -33,17 +33,7 @@ contract RootERC721Predicate is Initializable, ERC721Holder, IRootERC721Predicat
         address newChildERC721Predicate,
         address newChildTokenTemplate
     ) external initializer {
-        require(
-            newGateway != address(0) &&
-                newExitHelper != address(0) &&
-                newChildERC721Predicate != address(0) &&
-                newChildTokenTemplate != address(0),
-            "RootERC721Predicate: BAD_INITIALIZATION"
-        );
-        gateway = IGateway(newGateway);
-        exitHelper = newExitHelper;
-        childERC721Predicate = newChildERC721Predicate;
-        childTokenTemplate = newChildTokenTemplate;
+        _initialize(newGateway, newExitHelper, newChildERC721Predicate, newChildTokenTemplate);
     }
 
     /**
@@ -117,6 +107,7 @@ contract RootERC721Predicate is Initializable, ERC721Holder, IRootERC721Predicat
     }
 
     function _deposit(IERC721Metadata rootToken, address receiver, uint256 tokenId) private {
+        _beforeTokenDeposit();
         address childToken = _getChildToken(rootToken);
 
         rootToken.safeTransferFrom(msg.sender, address(this), tokenId);
@@ -124,6 +115,7 @@ contract RootERC721Predicate is Initializable, ERC721Holder, IRootERC721Predicat
         gateway.sendBridgeMsg(childERC721Predicate, abi.encode(DEPOSIT_SIG, rootToken, msg.sender, receiver, tokenId));
         // slither-disable-next-line reentrancy-events
         emit ERC721Deposit(address(rootToken), childToken, msg.sender, receiver, tokenId);
+        _afterTokenDeposit();
     }
 
     function _depositBatch(
@@ -131,6 +123,7 @@ contract RootERC721Predicate is Initializable, ERC721Holder, IRootERC721Predicat
         address[] calldata receivers,
         uint256[] calldata tokenIds
     ) private {
+        _beforeTokenDeposit();
         address childToken = _getChildToken(rootToken);
 
         for (uint256 i = 0; i < tokenIds.length; ) {
@@ -146,6 +139,7 @@ contract RootERC721Predicate is Initializable, ERC721Holder, IRootERC721Predicat
         );
         // slither-disable-next-line reentrancy-events
         emit ERC721DepositBatch(address(rootToken), childToken, msg.sender, receivers, tokenIds);
+        _afterTokenDeposit();
     }
 
     function _withdraw(bytes calldata data) private {
@@ -182,6 +176,46 @@ contract RootERC721Predicate is Initializable, ERC721Holder, IRootERC721Predicat
         childToken = rootTokenToChildToken[address(rootToken)];
         if (childToken == address(0)) childToken = mapToken(IERC721Metadata(rootToken));
         assert(childToken != address(0)); // invariant because we map the token if mapping does not exist
+    }
+
+    // solhint-disable no-empty-blocks
+
+    // slither-disable-start dead-code
+
+    function _beforeTokenDeposit() internal virtual {}
+
+    function _beforeTokenWithdraw() internal virtual {}
+
+    function _afterTokenDeposit() internal virtual {}
+
+    function _afterTokenWithdraw() internal virtual {}
+
+    // slither-disable-end dead-code
+
+    /**
+     * @notice Initialization function for RootERC721Predicate
+     * @param newGateway Address of Gateway contract
+     * @param newExitHelper Address of ExitHelper to receive withdrawal information from
+     * @param newChildERC721Predicate Address of child ERC721 predicate to communicate with
+     * @dev Can only be called once.
+     */
+    function _initialize(
+        address newGateway,
+        address newExitHelper,
+        address newChildERC721Predicate,
+        address newChildTokenTemplate
+    ) internal {
+        require(
+            newGateway != address(0) &&
+                newExitHelper != address(0) &&
+                newChildERC721Predicate != address(0) &&
+                newChildTokenTemplate != address(0),
+            "RootERC721Predicate: BAD_INITIALIZATION"
+        );
+        gateway = IGateway(newGateway);
+        exitHelper = newExitHelper;
+        childERC721Predicate = newChildERC721Predicate;
+        childTokenTemplate = newChildTokenTemplate;
     }
 
     // slither-disable-next-line unused-state,naming-convention
