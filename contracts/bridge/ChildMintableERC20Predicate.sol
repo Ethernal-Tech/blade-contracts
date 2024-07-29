@@ -7,7 +7,7 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/proxy/Clones.sol";
 import "../interfaces/bridge/IChildMintableERC20Predicate.sol";
 import "../interfaces/blade/IChildERC20.sol";
-import "../interfaces/IStateSender.sol";
+import "../interfaces/IGateway.sol";
 
 /**
     @title ChildMintableERC20Predicate
@@ -18,7 +18,7 @@ import "../interfaces/IStateSender.sol";
 contract ChildMintableERC20Predicate is Initializable, IChildMintableERC20Predicate {
     using SafeERC20 for IERC20;
 
-    IStateSender public stateSender;
+    IGateway public gateway;
     address public exitHelper;
     address public rootERC20Predicate;
     address public childTokenTemplate;
@@ -90,26 +90,26 @@ contract ChildMintableERC20Predicate is Initializable, IChildMintableERC20Predic
 
     /**
      * @notice Internal initialization function for ChildERC20Predicate
-     * @param newStateSender Address of L2StateSender to send exit information to
+     * @param newGateway Address of gateway to send exit information to
      * @param newExitHelper Address of StateReceiver to receive deposit information from
      * @param newRootERC20Predicate Address of root ERC20 predicate to communicate with
      * @param newChildTokenTemplate Address of child token implementation to deploy clones of
      * @dev Can be called multiple times.
      */
     function _initialize(
-        address newStateSender,
+        address newGateway,
         address newExitHelper,
         address newRootERC20Predicate,
         address newChildTokenTemplate
     ) internal {
         require(
-            newStateSender != address(0) &&
+            newGateway != address(0) &&
                 newExitHelper != address(0) &&
                 newRootERC20Predicate != address(0) &&
                 newChildTokenTemplate != address(0),
             "ChildMintableERC20Predicate: BAD_INITIALIZATION"
         );
-        stateSender = IStateSender(newStateSender);
+        gateway = IGateway(newGateway);
         exitHelper = newExitHelper;
         rootERC20Predicate = newRootERC20Predicate;
         childTokenTemplate = newChildTokenTemplate;
@@ -137,7 +137,7 @@ contract ChildMintableERC20Predicate is Initializable, IChildMintableERC20Predic
         assert(childToken.predicate() == address(this));
 
         require(childToken.burn(msg.sender, amount), "ChildMintableERC20Predicate: BURN_FAILED");
-        stateSender.syncState(rootERC20Predicate, abi.encode(WITHDRAW_SIG, rootToken, msg.sender, receiver, amount));
+        gateway.syncState(rootERC20Predicate, abi.encode(WITHDRAW_SIG, rootToken, msg.sender, receiver, amount));
 
         // slither-disable-next-line reentrancy-events
         emit MintableERC20Withdraw(rootToken, address(childToken), msg.sender, receiver, amount);

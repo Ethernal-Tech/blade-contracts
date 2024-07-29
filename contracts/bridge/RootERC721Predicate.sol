@@ -5,11 +5,11 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts/token/ERC721/utils/ERC721Holder.sol";
 import "@openzeppelin/contracts/proxy/Clones.sol";
 import "../interfaces/bridge/IRootERC721Predicate.sol";
-import "../interfaces/IStateSender.sol";
+import "../interfaces/IGateway.sol";
 
 // solhint-disable reason-string
 contract RootERC721Predicate is Initializable, ERC721Holder, IRootERC721Predicate {
-    IStateSender public stateSender;
+    IGateway public gateway;
     address public exitHelper;
     address public childERC721Predicate;
     address public childTokenTemplate;
@@ -22,25 +22,25 @@ contract RootERC721Predicate is Initializable, ERC721Holder, IRootERC721Predicat
 
     /**
      * @notice Initialization function for RootERC721Predicate
-     * @param newStateSender Address of StateSender to send deposit information to
+     * @param newGateway Address of gateway to send deposit information to
      * @param newExitHelper Address of ExitHelper to receive withdrawal information from
      * @param newChildERC721Predicate Address of child ERC721 predicate to communicate with
      * @dev Can only be called once.
      */
     function initialize(
-        address newStateSender,
+        address newGateway,
         address newExitHelper,
         address newChildERC721Predicate,
         address newChildTokenTemplate
     ) external initializer {
         require(
-            newStateSender != address(0) &&
+            newGateway != address(0) &&
                 newExitHelper != address(0) &&
                 newChildERC721Predicate != address(0) &&
                 newChildTokenTemplate != address(0),
             "RootERC721Predicate: BAD_INITIALIZATION"
         );
-        stateSender = IStateSender(newStateSender);
+        gateway = IGateway(newGateway);
         exitHelper = newExitHelper;
         childERC721Predicate = newChildERC721Predicate;
         childTokenTemplate = newChildTokenTemplate;
@@ -107,7 +107,7 @@ contract RootERC721Predicate is Initializable, ERC721Holder, IRootERC721Predicat
 
         rootTokenToChildToken[address(rootToken)] = childToken;
 
-        stateSender.syncState(
+        gateway.syncState(
             childPredicate,
             abi.encode(MAP_TOKEN_SIG, rootToken, rootToken.name(), rootToken.symbol())
         );
@@ -121,7 +121,7 @@ contract RootERC721Predicate is Initializable, ERC721Holder, IRootERC721Predicat
 
         rootToken.safeTransferFrom(msg.sender, address(this), tokenId);
 
-        stateSender.syncState(childERC721Predicate, abi.encode(DEPOSIT_SIG, rootToken, msg.sender, receiver, tokenId));
+        gateway.syncState(childERC721Predicate, abi.encode(DEPOSIT_SIG, rootToken, msg.sender, receiver, tokenId));
         // slither-disable-next-line reentrancy-events
         emit ERC721Deposit(address(rootToken), childToken, msg.sender, receiver, tokenId);
     }
@@ -140,7 +140,7 @@ contract RootERC721Predicate is Initializable, ERC721Holder, IRootERC721Predicat
             }
         }
 
-        stateSender.syncState(
+        gateway.syncState(
             childERC721Predicate,
             abi.encode(DEPOSIT_BATCH_SIG, rootToken, msg.sender, receivers, tokenIds)
         );

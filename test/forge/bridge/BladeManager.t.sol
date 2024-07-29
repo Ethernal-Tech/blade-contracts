@@ -2,7 +2,7 @@
 pragma solidity 0.8.19;
 
 import "@utils/Test.sol";
-import "contracts/bridge/StateSender.sol";
+import "contracts/blade/Gateway.sol";
 import {ExitHelper} from "contracts/bridge/ExitHelper.sol";
 import {BladeManager, GenesisAccount} from "contracts/bridge/BladeManager.sol";
 import {MockERC20} from "contracts/mocks/MockERC20.sol";
@@ -69,7 +69,7 @@ contract BladeManager_PremineInitialized is Initialized {
         childERC20Predicate = makeAddr("childERC20Predicate");
         childTokenTemplate = makeAddr("childTokenTemplate");
         rootERC20Predicate.initialize(
-            address(new StateSender()),
+            address(new Gateway()),
             address(new ExitHelper()),
             childERC20Predicate,
             childTokenTemplate,

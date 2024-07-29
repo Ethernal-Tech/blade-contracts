@@ -5,7 +5,7 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts/proxy/Clones.sol";
 import "../interfaces/bridge/IChildMintableERC721Predicate.sol";
 import "../interfaces/blade/IChildERC721.sol";
-import "../interfaces/IStateSender.sol";
+import "../interfaces/IGateway.sol";
 
 /**
     @title ChildMintableERC721Predicate
@@ -14,7 +14,7 @@ import "../interfaces/IStateSender.sol";
  */
 // solhint-disable reason-string
 contract ChildMintableERC721Predicate is Initializable, IChildMintableERC721Predicate {
-    IStateSender public stateSender;
+    IGateway public gateway;
     address public exitHelper;
     address public rootERC721Predicate;
     address public childTokenTemplate;
@@ -33,19 +33,19 @@ contract ChildMintableERC721Predicate is Initializable, IChildMintableERC721Pred
 
     /**
      * @notice Initialization function for ChildMintableERC721Predicate
-     * @param newStateSender Address of StateSender to send exit information to
+     * @param newSourceGateway Address of StateSender to send exit information to
      * @param newExitHelper Address of ExitHelper to receive deposit information from
      * @param newRootERC721Predicate Address of root ERC721 predicate to communicate with
      * @param newChildTokenTemplate Address of child token implementation to deploy clones of
      * @dev Can only be called once. `newNativeTokenRootAddress` should be set to zero where root token does not exist.
      */
     function initialize(
-        address newStateSender,
+        address newSourceGateway,
         address newExitHelper,
         address newRootERC721Predicate,
         address newChildTokenTemplate
     ) public virtual initializer {
-        _initialize(newStateSender, newExitHelper, newRootERC721Predicate, newChildTokenTemplate);
+        _initialize(newSourceGateway, newExitHelper, newRootERC721Predicate, newChildTokenTemplate);
     }
 
     /**
@@ -114,26 +114,26 @@ contract ChildMintableERC721Predicate is Initializable, IChildMintableERC721Pred
 
     /**
      * @notice Initialization function for ChildMintableERC721Predicate
-     * @param newStateSender Address of StateSender to send exit information to
+     * @param newGateway Address of gateway to send exit information to
      * @param newExitHelper Address of ExitHelper to receive deposit information from
      * @param newRootERC721Predicate Address of root ERC721 predicate to communicate with
      * @param newChildTokenTemplate Address of child token implementation to deploy clones of
      * @dev Can be called multiple times.
      */
     function _initialize(
-        address newStateSender,
+        address newGateway,
         address newExitHelper,
         address newRootERC721Predicate,
         address newChildTokenTemplate
     ) internal virtual {
         require(
-            newStateSender != address(0) &&
+            newGateway != address(0) &&
                 newExitHelper != address(0) &&
                 newRootERC721Predicate != address(0) &&
                 newChildTokenTemplate != address(0),
             "ChildMintableERC721Predicate: BAD_INITIALIZATION"
         );
-        stateSender = IStateSender(newStateSender);
+        gateway = IGateway(newGateway);
         exitHelper = newExitHelper;
         rootERC721Predicate = newRootERC721Predicate;
         childTokenTemplate = newChildTokenTemplate;
@@ -164,7 +164,7 @@ contract ChildMintableERC721Predicate is Initializable, IChildMintableERC721Pred
         assert(childToken.predicate() == address(this));
 
         require(childToken.burn(msg.sender, tokenId), "ChildMintableERC721Predicate: BURN_FAILED");
-        stateSender.syncState(rootERC721Predicate, abi.encode(WITHDRAW_SIG, rootToken, msg.sender, receiver, tokenId));
+        gateway.syncState(rootERC721Predicate, abi.encode(WITHDRAW_SIG, rootToken, msg.sender, receiver, tokenId));
 
         // slither-disable-next-line reentrancy-events
         emit MintableERC721Withdraw(rootToken, address(childToken), msg.sender, receiver, tokenId);
@@ -188,7 +188,7 @@ contract ChildMintableERC721Predicate is Initializable, IChildMintableERC721Pred
 
         require(receivers.length == tokenIds.length, "ChildMintableERC721Predicate: INVALID_LENGTH");
         require(childToken.burnBatch(msg.sender, tokenIds), "ChildMintableERC721Predicate: BURN_FAILED");
-        stateSender.syncState(
+        gateway.syncState(
             rootERC721Predicate,
             abi.encode(WITHDRAW_BATCH_SIG, rootToken, msg.sender, receivers, tokenIds)
         );

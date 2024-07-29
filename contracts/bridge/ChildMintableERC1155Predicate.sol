@@ -5,7 +5,7 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts/proxy/Clones.sol";
 import "../interfaces/bridge/IChildMintableERC1155Predicate.sol";
 import "../interfaces/blade/IChildERC1155.sol";
-import "../interfaces/IStateSender.sol";
+import "../interfaces/IGateway.sol";
 
 /**
     @title ChildMintableERC1155Predicate
@@ -14,7 +14,7 @@ import "../interfaces/IStateSender.sol";
  */
 // solhint-disable reason-string
 contract ChildMintableERC1155Predicate is Initializable, IChildMintableERC1155Predicate {
-    IStateSender public stateSender;
+    IGateway public gateway;
     address public exitHelper;
     address public rootERC1155Predicate;
     address public childTokenTemplate;
@@ -33,19 +33,19 @@ contract ChildMintableERC1155Predicate is Initializable, IChildMintableERC1155Pr
 
     /**
      * @notice Initialization function for ChildMintableERC1155Predicate
-     * @param newStateSender Address of StateSender to send exit information to
+     * @param newGateway Address of Gateway to send exit information to
      * @param newExitHelper Address of ExitHelper to receive deposit information from
      * @param newRootERC1155Predicate Address of root ERC1155 predicate to communicate with
      * @param newChildTokenTemplate Address of child token implementation to deploy clones of
      * @dev Can only be called once.
      */
     function initialize(
-        address newStateSender,
+        address newGateway,
         address newExitHelper,
         address newRootERC1155Predicate,
         address newChildTokenTemplate
     ) public virtual initializer {
-        _initialize(newStateSender, newExitHelper, newRootERC1155Predicate, newChildTokenTemplate);
+        _initialize(newGateway, newExitHelper, newRootERC1155Predicate, newChildTokenTemplate);
     }
 
     /**
@@ -118,26 +118,26 @@ contract ChildMintableERC1155Predicate is Initializable, IChildMintableERC1155Pr
 
     /**
      * @notice Internal initialization function for ChildMintableERC1155Predicate
-     * @param newStateSender Address of StateSender to send exit information to
+     * @param newGateway Address of gateway to send exit information to
      * @param newExitHelper Address of ExitHelper to receive deposit information from
      * @param newRootERC1155Predicate Address of root ERC1155 predicate to communicate with
      * @param newChildTokenTemplate Address of child token implementation to deploy clones of
      * @dev Can be called multiple times.
      */
     function _initialize(
-        address newStateSender,
+        address newGateway,
         address newExitHelper,
         address newRootERC1155Predicate,
         address newChildTokenTemplate
     ) internal {
         require(
-            newStateSender != address(0) &&
+            newGateway != address(0) &&
                 newExitHelper != address(0) &&
                 newRootERC1155Predicate != address(0) &&
                 newChildTokenTemplate != address(0),
             "ChildMintableERC1155Predicate: BAD_INITIALIZATION"
         );
-        stateSender = IStateSender(newStateSender);
+        gateway = IGateway(newGateway);
         exitHelper = newExitHelper;
         rootERC1155Predicate = newRootERC1155Predicate;
         childTokenTemplate = newChildTokenTemplate;
@@ -173,7 +173,7 @@ contract ChildMintableERC1155Predicate is Initializable, IChildMintableERC1155Pr
         assert(childToken.predicate() == address(this));
 
         require(childToken.burn(msg.sender, tokenId, amount), "ChildMintableERC1155Predicate: BURN_FAILED");
-        stateSender.syncState(
+        gateway.syncState(
             rootERC1155Predicate,
             abi.encode(WITHDRAW_SIG, rootToken, msg.sender, receiver, tokenId, amount)
         );
@@ -205,7 +205,7 @@ contract ChildMintableERC1155Predicate is Initializable, IChildMintableERC1155Pr
 
         require(childToken.burnBatch(msg.sender, tokenIds, amounts), "ChildMintableERC1155Predicate: BURN_FAILED");
 
-        stateSender.syncState(
+        gateway.syncState(
             rootERC1155Predicate,
             abi.encode(WITHDRAW_BATCH_SIG, rootToken, msg.sender, receivers, tokenIds, amounts)
         );

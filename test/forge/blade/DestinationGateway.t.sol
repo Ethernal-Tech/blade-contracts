@@ -2,23 +2,26 @@
 pragma solidity 0.8.19;
 
 import "@utils/Test.sol";
-import {DestinationGateway} from "contracts/blade/DestinationGateway.sol";
+import {Gateway} from "contracts/blade/Gateway.sol";
 import {Validator, BridgeMessage, BridgeMessageBatch, DOMAIN_BRIDGE} from "contracts/interfaces/blade/IValidatorSetStorage.sol";
 import {BLS} from "contracts/common/BLS.sol";
 import {BN256G2} from "contracts/common/BN256G2.sol";
 import {System} from "contracts/blade/System.sol";
 
-abstract contract DestinationGatewayTest is Test, System, DestinationGateway {
-    DestinationGateway destinationGateway;
+abstract contract GatewayTest is Test, System, Gateway {
+    Gateway gateway;
     Validator[] public validatorSet;
     bytes[] public bitmaps;
     uint256[2][] public aggMessagePoints;
     BridgeMessage[] public msgs;
+    address receiver;
+    bytes maxData;
+    bytes moreThanMaxData;
 
     function setUp() public virtual {
         bls = new BLS();
         bn256G2 = new BN256G2();
-        destinationGateway = new DestinationGateway();
+        gateway = new Gateway();
 
         vm.chainId(3);
 
@@ -45,50 +48,88 @@ abstract contract DestinationGatewayTest is Test, System, DestinationGateway {
         for (uint256 i = 0; i < messageTmp.length; i++) {
             msgs.push(messageTmp[i]);
         }
+
+                receiver = makeAddr("receiver");
+        maxData = new bytes(gateway.MAX_LENGTH());
+        moreThanMaxData = new bytes(gateway.MAX_LENGTH() + 1);
     }
 }
 
-abstract contract DestinationGatewayInitialized is DestinationGatewayTest {
+abstract contract GatewayInitialized is GatewayTest {
     function setUp() public virtual override {
         super.setUp();
-        destinationGateway.initialize(bls, bn256G2, validatorSet);
+        gateway.initialize(bls, bn256G2, validatorSet);
     }
 }
 
-contract DestinationGatewayUninitialized is DestinationGatewayTest {
+contract Uninitialized is GatewayTest {
     function testInitialize() public {
-        destinationGateway.initialize(bls, bn256G2, validatorSet);
+        gateway.initialize(bls, bn256G2, validatorSet);
 
-        assertEq(keccak256(abi.encode(destinationGateway.bls())), keccak256(abi.encode(address(bls))));
-        assertEq(keccak256(abi.encode(destinationGateway.bn256G2())), keccak256(abi.encode(address(bn256G2))));
+        assertEq(keccak256(abi.encode(gateway.bls())), keccak256(abi.encode(address(bls))));
+        assertEq(keccak256(abi.encode(gateway.bn256G2())), keccak256(abi.encode(address(bn256G2))));
         for (uint256 i = 0; i < validatorSet.length; i++) {
-            (address _address, uint256 votingPower) = destinationGateway.currentValidatorSet(i);
+            (address _address, uint256 votingPower) = gateway.currentValidatorSet(i);
             assertEq(_address, validatorSet[i]._address);
             assertEq(votingPower, validatorSet[i].votingPower);
         }
     }
 }
 
-contract DestinationGatewayReceiveBatchTests is DestinationGatewayInitialized {
+contract GatewayStateSyncTest is GatewayInitialized{
+    function testConstructor() public {
+        assertEq(gateway.counter(), 0);
+    }
+
+    function testCannotSyncState_InvalidReceiver() public {
+        vm.expectRevert("INVALID_RECEIVER");
+        gateway.syncState(address(0), "");
+    }
+
+    function testCannotSyncState_ExceedsMaxLength() public {
+        vm.expectRevert("EXCEEDS_MAX_LENGTH");
+        gateway.syncState(receiver, moreThanMaxData);
+    }
+
+    function testSyncState_EmitsEvent() public {
+        vm.expectEmit(true, true, true, true);
+        emit StateSynced(1, address(this), receiver, maxData);
+        gateway.syncState(receiver, maxData);
+    }
+
+    function testSyncState_IncreasesCounter() public {
+        gateway.syncState(receiver, maxData);
+        gateway.syncState(receiver, maxData);
+        vm.expectRevert("EXCEEDS_MAX_LENGTH");
+        gateway.syncState(receiver, moreThanMaxData);
+        gateway.syncState(receiver, maxData);
+        vm.expectRevert("EXCEEDS_MAX_LENGTH");
+        gateway.syncState(receiver, moreThanMaxData);
+
+        assertEq(gateway.counter(), 3);
+    }
+}
+
+contract GatewayReceiveBatchTests is GatewayInitialized {
     function testReceiveBatch_InvalidSignature() public {
         BridgeMessageBatch memory batch = BridgeMessageBatch({messages: msgs, sourceChainId: 2, destinationChainId: 3});
 
         vm.expectRevert("SIGNATURE_VERIFICATION_FAILED");
-        destinationGateway.receiveBatch(batch, aggMessagePoints[0], bitmaps[0]);
+        gateway.receiveBatch(batch, aggMessagePoints[0], bitmaps[0]);
     }
 
     function testReceiveBatch_EmptyBitmap() public {
         BridgeMessageBatch memory batch = BridgeMessageBatch({messages: msgs, sourceChainId: 2, destinationChainId: 3});
 
         vm.expectRevert("BITMAP_IS_EMPTY");
-        destinationGateway.receiveBatch(batch, aggMessagePoints[1], bitmaps[1]);
+        gateway.receiveBatch(batch, aggMessagePoints[1], bitmaps[1]);
     }
 
     function testReceiveBatch_NotEnoughPower() public {
         BridgeMessageBatch memory batch = BridgeMessageBatch({messages: msgs, sourceChainId: 2, destinationChainId: 3});
 
         vm.expectRevert("INSUFFICIENT_VOTING_POWER");
-        destinationGateway.receiveBatch(batch, aggMessagePoints[2], bitmaps[2]);
+        gateway.receiveBatch(batch, aggMessagePoints[2], bitmaps[2]);
     }
 
     function testReceiveBatch_Success() public {
@@ -98,6 +139,6 @@ contract DestinationGatewayReceiveBatchTests is DestinationGatewayInitialized {
         emit BridgeMessageResult(1, false, bytes(""));
         vm.expectEmit();
         emit BridgeMessageResult(2, false, bytes(""));
-        destinationGateway.receiveBatch(batch, aggMessagePoints[3], bitmaps[3]);
+        gateway.receiveBatch(batch, aggMessagePoints[3], bitmaps[3]);
     }
 }

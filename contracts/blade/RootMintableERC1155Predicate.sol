@@ -5,11 +5,11 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts/token/ERC1155/utils/ERC1155Holder.sol";
 import "@openzeppelin/contracts/proxy/Clones.sol";
 import "../interfaces/blade/IRootMintableERC1155Predicate.sol";
-import "../interfaces/IStateSender.sol";
+import "../interfaces/IGateway.sol";
 
 // solhint-disable reason-string
 contract RootMintableERC1155Predicate is Initializable, ERC1155Holder, IRootMintableERC1155Predicate {
-    IStateSender public l2StateSender;
+    IGateway public gateway;
     address public stateReceiver;
     address public childERC1155Predicate;
     address public childTokenTemplate;
@@ -22,18 +22,18 @@ contract RootMintableERC1155Predicate is Initializable, ERC1155Holder, IRootMint
 
     /**
      * @notice Initialization function for RootMintableERC1155Predicate
-     * @param newL2StateSender Address of L2StateSender to send deposit information to
+     * @param newGateway Address of gateway to send deposit information to
      * @param newStateReceiver Address of StateReceiver to receive withdrawal information from
      * @param newChildERC1155Predicate Address of child ERC1155 predicate to communicate with
      * @dev Can only be called once.
      */
     function initialize(
-        address newL2StateSender,
+        address newGateway,
         address newStateReceiver,
         address newChildERC1155Predicate,
         address newChildTokenTemplate
     ) external initializer {
-        _initialize(newL2StateSender, newStateReceiver, newChildERC1155Predicate, newChildTokenTemplate);
+        _initialize(newGateway, newStateReceiver, newChildERC1155Predicate, newChildTokenTemplate);
     }
 
     /**
@@ -115,25 +115,25 @@ contract RootMintableERC1155Predicate is Initializable, ERC1155Holder, IRootMint
             uri = tokenUri;
         } catch {}
 
-        l2StateSender.syncState(childPredicate, abi.encode(MAP_TOKEN_SIG, rootToken, uri));
+        gateway.syncState(childPredicate, abi.encode(MAP_TOKEN_SIG, rootToken, uri));
         // slither-disable-next-line reentrancy-events
         emit L2MintableTokenMapped(address(rootToken), childToken);
     }
 
     function _initialize(
-        address newL2StateSender,
+        address newGateway,
         address newStateReceiver,
         address newChildERC1155Predicate,
         address newChildTokenTemplate
     ) internal {
         require(
-            newL2StateSender != address(0) &&
+            newGateway != address(0) &&
                 newStateReceiver != address(0) &&
                 newChildERC1155Predicate != address(0) &&
                 newChildTokenTemplate != address(0),
             "RootMintableERC1155Predicate: BAD_INITIALIZATION"
         );
-        l2StateSender = IStateSender(newL2StateSender);
+        gateway = IGateway(newGateway);
         stateReceiver = newStateReceiver;
         childERC1155Predicate = newChildERC1155Predicate;
         childTokenTemplate = newChildTokenTemplate;
@@ -157,7 +157,7 @@ contract RootMintableERC1155Predicate is Initializable, ERC1155Holder, IRootMint
 
         rootToken.safeTransferFrom(msg.sender, address(this), tokenId, amount, "");
 
-        l2StateSender.syncState(
+        gateway.syncState(
             childERC1155Predicate,
             abi.encode(DEPOSIT_SIG, rootToken, msg.sender, receiver, tokenId, amount)
         );
@@ -182,7 +182,7 @@ contract RootMintableERC1155Predicate is Initializable, ERC1155Holder, IRootMint
             }
         }
 
-        l2StateSender.syncState(
+        gateway.syncState(
             childERC1155Predicate,
             abi.encode(DEPOSIT_BATCH_SIG, rootToken, msg.sender, receivers, tokenIds, amounts)
         );

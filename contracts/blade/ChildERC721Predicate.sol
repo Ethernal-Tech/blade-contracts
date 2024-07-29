@@ -5,7 +5,7 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts/proxy/Clones.sol";
 import "../interfaces/blade/IChildERC721Predicate.sol";
 import "../interfaces/blade/IChildERC721.sol";
-import "../interfaces/IStateSender.sol";
+import "../interfaces/IGateway.sol";
 import "./System.sol";
 
 /**
@@ -16,7 +16,7 @@ import "./System.sol";
 // solhint-disable reason-string
 contract ChildERC721Predicate is IChildERC721Predicate, Initializable, System {
     /// @custom:security write-protection="onlySystemCall()"
-    IStateSender public l2StateSender;
+    IGateway public gateway;
     /// @custom:security write-protection="onlySystemCall()"
     address public stateReceiver;
     /// @custom:security write-protection="onlySystemCall()"
@@ -149,26 +149,26 @@ contract ChildERC721Predicate is IChildERC721Predicate, Initializable, System {
 
     /**
      * @notice Initialization function for ChildERC721Predicate
-     * @param newL2StateSender Address of L2StateSender to send exit information to
+     * @param newGateway Address of gateway to send exit information to
      * @param newStateReceiver Address of StateReceiver to receive deposit information from
      * @param newRootERC721Predicate Address of root ERC721 predicate to communicate with
      * @param newChildTokenTemplate Address of child token implementation to deploy clones of
      * @dev Can be called multiple times.
      */
     function _initialize(
-        address newL2StateSender,
+        address newGateway,
         address newStateReceiver,
         address newRootERC721Predicate,
         address newChildTokenTemplate
     ) internal {
         require(
-            newL2StateSender != address(0) &&
+            newGateway != address(0) &&
                 newStateReceiver != address(0) &&
                 newRootERC721Predicate != address(0) &&
                 newChildTokenTemplate != address(0),
             "ChildERC721Predicate: BAD_INITIALIZATION"
         );
-        l2StateSender = IStateSender(newL2StateSender);
+        gateway = IGateway(newGateway);
         stateReceiver = newStateReceiver;
         rootERC721Predicate = newRootERC721Predicate;
         childTokenTemplate = newChildTokenTemplate;
@@ -196,7 +196,7 @@ contract ChildERC721Predicate is IChildERC721Predicate, Initializable, System {
         assert(childToken.predicate() == address(this));
 
         require(childToken.burn(msg.sender, tokenId), "ChildERC721Predicate: BURN_FAILED");
-        l2StateSender.syncState(
+        gateway.syncState(
             rootERC721Predicate,
             abi.encode(WITHDRAW_SIG, rootToken, msg.sender, receiver, tokenId)
         );
@@ -220,7 +220,7 @@ contract ChildERC721Predicate is IChildERC721Predicate, Initializable, System {
 
         require(receivers.length == tokenIds.length, "ChildERC721Predicate: INVALID_LENGTH");
         require(childToken.burnBatch(msg.sender, tokenIds), "ChildERC721Predicate: BURN_FAILED");
-        l2StateSender.syncState(
+        gateway.syncState(
             rootERC721Predicate,
             abi.encode(WITHDRAW_BATCH_SIG, rootToken, msg.sender, receivers, tokenIds)
         );

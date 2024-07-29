@@ -5,7 +5,7 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/proxy/Clones.sol";
 import "../interfaces/blade/IRootMintableERC20Predicate.sol";
-import "../interfaces/IStateSender.sol";
+import "../interfaces/IGateway.sol";
 import "./System.sol";
 
 // solhint-disable reason-string
@@ -13,7 +13,7 @@ contract RootMintableERC20Predicate is IRootMintableERC20Predicate, Initializabl
     using SafeERC20 for IERC20Metadata;
 
     /// @custom:security write-protection="onlySystemCall()"
-    IStateSender public l2StateSender;
+    IGateway public gateway;
     /// @custom:security write-protection="onlySystemCall()"
     address public stateReceiver;
     /// @custom:security write-protection="onlySystemCall()"
@@ -28,19 +28,19 @@ contract RootMintableERC20Predicate is IRootMintableERC20Predicate, Initializabl
 
     /**
      * @notice Initialization function for RootMintableERC20Predicate
-     * @param newL2StateSender Address of L2StateSender to send exit information to
+     * @param newGateway Address of L2StateSender to send exit information to
      * @param newStateReceiver Address of StateReceiver to receive deposit information from
      * @param newChildERC20Predicate Address of child ERC20 predicate to communicate with
      * @param newChildTokenTemplate Address of child token implementation to deploy clones of
      * @dev Can only be called once.
      */
     function initialize(
-        address newL2StateSender,
+        address newGateway,
         address newStateReceiver,
         address newChildERC20Predicate,
         address newChildTokenTemplate
     ) public virtual onlySystemCall initializer {
-        _initialize(newL2StateSender, newStateReceiver, newChildERC20Predicate, newChildTokenTemplate);
+        _initialize(newGateway, newStateReceiver, newChildERC20Predicate, newChildTokenTemplate);
     }
 
     /**
@@ -93,7 +93,7 @@ contract RootMintableERC20Predicate is IRootMintableERC20Predicate, Initializabl
 
         rootTokenToChildToken[address(rootToken)] = childToken;
 
-        l2StateSender.syncState(
+        gateway.syncState(
             childPredicate,
             abi.encode(MAP_TOKEN_SIG, rootToken, rootToken.name(), rootToken.symbol(), rootToken.decimals())
         );
@@ -105,26 +105,26 @@ contract RootMintableERC20Predicate is IRootMintableERC20Predicate, Initializabl
 
     /**
      * @notice Internal initialization function for RootMintableERC20Predicate
-     * @param newL2StateSender Address of L2StateSender to send exit information to
+     * @param newGateway Address of gateway to send exit information to
      * @param newStateReceiver Address of StateReceiver to receive deposit information from
      * @param newChildERC20Predicate Address of root ERC20 predicate to communicate with
      * @param newChildTokenTemplate Address of child token implementation to deploy clones of
      * @dev Can be called multiple times.
      */
     function _initialize(
-        address newL2StateSender,
+        address newGateway,
         address newStateReceiver,
         address newChildERC20Predicate,
         address newChildTokenTemplate
     ) internal {
         require(
-            newL2StateSender != address(0) &&
+            newGateway != address(0) &&
                 newStateReceiver != address(0) &&
                 newChildERC20Predicate != address(0) &&
                 newChildTokenTemplate != address(0),
             "RootMintableERC20Predicate: BAD_INITIALIZATION"
         );
-        l2StateSender = IStateSender(newL2StateSender);
+        gateway = IGateway(newGateway);
         stateReceiver = newStateReceiver;
         childERC20Predicate = newChildERC20Predicate;
         childTokenTemplate = newChildTokenTemplate;
@@ -154,7 +154,7 @@ contract RootMintableERC20Predicate is IRootMintableERC20Predicate, Initializabl
 
         rootToken.safeTransferFrom(msg.sender, address(this), amount);
 
-        l2StateSender.syncState(childERC20Predicate, abi.encode(DEPOSIT_SIG, rootToken, msg.sender, receiver, amount));
+        gateway.syncState(childERC20Predicate, abi.encode(DEPOSIT_SIG, rootToken, msg.sender, receiver, amount));
         // slither-disable-next-line reentrancy-events
         emit L2MintableERC20Deposit(address(rootToken), childToken, msg.sender, receiver, amount);
         _afterTokenDeposit();
