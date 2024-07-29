@@ -25,6 +25,7 @@ abstract contract RootMintableERC20PredicateAccessListDeployer is Script {
                 newStateReceiver,
                 newChildERC20Predicate,
                 newChildTokenTemplate,
+                address(0),
                 newUseAllowList,
                 newUseBlockList,
                 newOwner
