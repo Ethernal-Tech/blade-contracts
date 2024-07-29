@@ -481,10 +481,10 @@ function onERC1155Received(address, address, uint256, uint256, bytes) external n
 |---|---|---|
 | _0 | bytes4 | undefined |
 
-### onStateReceive
+### onL2StateReceive
 
 ```solidity
-function onStateReceive(uint256, address sender, bytes data) external nonpayable
+function onL2StateReceive(uint256, address sender, bytes data) external nonpayable
 ```
 
 Function to be used for token withdrawals
@@ -496,8 +496,8 @@ Function to be used for token withdrawals
 | Name | Type | Description |
 |---|---|---|
 | _0 | uint256 | undefined |
-| sender | address | undefined |
-| data | bytes | undefined |
+| sender | address | Address of the sender on the child chain |
+| data | bytes | Data sent by the sender |
 
 ### owner
 
@@ -598,10 +598,10 @@ function setBlockList(bool newUseBlockList) external nonpayable
 |---|---|---|
 | newUseBlockList | bool | undefined |
 
-### stateReceiver
+### stateSender
 
 ```solidity
-function stateReceiver() external view returns (address)
+function stateSender() external view returns (contract IStateSender)
 ```
 
 
@@ -613,7 +613,7 @@ function stateReceiver() external view returns (address)
 
 | Name | Type | Description |
 |---|---|---|
-| _0 | address | undefined |
+| _0 | contract IStateSender | undefined |
 
 ### supportsInterface
 
@@ -691,26 +691,10 @@ event BlockListUsageSet(uint256 indexed block, bool indexed status)
 | block `indexed` | uint256 | undefined |
 | status `indexed` | bool | undefined |
 
-### Initialized
+### ERC1155Deposit
 
 ```solidity
-event Initialized(uint8 version)
-```
-
-
-
-*Triggered when the contract has been initialized or reinitialized.*
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| version  | uint8 | undefined |
-
-### L2MintableERC1155Deposit
-
-```solidity
-event L2MintableERC1155Deposit(address indexed rootToken, address indexed childToken, address depositor, address indexed receiver, uint256 tokenId, uint256 amount)
+event ERC1155Deposit(address indexed rootToken, address indexed childToken, address depositor, address indexed receiver, uint256 tokenId, uint256 amount)
 ```
 
 
@@ -728,10 +712,10 @@ event L2MintableERC1155Deposit(address indexed rootToken, address indexed childT
 | tokenId  | uint256 | undefined |
 | amount  | uint256 | undefined |
 
-### L2MintableERC1155DepositBatch
+### ERC1155DepositBatch
 
 ```solidity
-event L2MintableERC1155DepositBatch(address indexed rootToken, address indexed childToken, address indexed depositor, address[] receivers, uint256[] tokenIds, uint256[] amounts)
+event ERC1155DepositBatch(address indexed rootToken, address indexed childToken, address indexed depositor, address[] receivers, uint256[] tokenIds, uint256[] amounts)
 ```
 
 
@@ -749,10 +733,10 @@ event L2MintableERC1155DepositBatch(address indexed rootToken, address indexed c
 | tokenIds  | uint256[] | undefined |
 | amounts  | uint256[] | undefined |
 
-### L2MintableERC1155Withdraw
+### ERC1155Withdraw
 
 ```solidity
-event L2MintableERC1155Withdraw(address indexed rootToken, address indexed childToken, address withdrawer, address indexed receiver, uint256 tokenId, uint256 amount)
+event ERC1155Withdraw(address indexed rootToken, address indexed childToken, address withdrawer, address indexed receiver, uint256 tokenId, uint256 amount)
 ```
 
 
@@ -770,10 +754,10 @@ event L2MintableERC1155Withdraw(address indexed rootToken, address indexed child
 | tokenId  | uint256 | undefined |
 | amount  | uint256 | undefined |
 
-### L2MintableERC1155WithdrawBatch
+### ERC1155WithdrawBatch
 
 ```solidity
-event L2MintableERC1155WithdrawBatch(address indexed rootToken, address indexed childToken, address indexed withdrawer, address[] receivers, uint256[] tokenIds, uint256[] amounts)
+event ERC1155WithdrawBatch(address indexed rootToken, address indexed childToken, address indexed withdrawer, address[] receivers, uint256[] tokenIds, uint256[] amounts)
 ```
 
 
@@ -791,22 +775,21 @@ event L2MintableERC1155WithdrawBatch(address indexed rootToken, address indexed 
 | tokenIds  | uint256[] | undefined |
 | amounts  | uint256[] | undefined |
 
-### L2MintableTokenMapped
+### Initialized
 
 ```solidity
-event L2MintableTokenMapped(address indexed rootToken, address indexed childToken)
+event Initialized(uint8 version)
 ```
 
 
 
-
+*Triggered when the contract has been initialized or reinitialized.*
 
 #### Parameters
 
 | Name | Type | Description |
 |---|---|---|
-| rootToken `indexed` | address | undefined |
-| childToken `indexed` | address | undefined |
+| version  | uint8 | undefined |
 
 ### OwnershipTransferStarted
 
@@ -841,6 +824,23 @@ event OwnershipTransferred(address indexed previousOwner, address indexed newOwn
 |---|---|---|
 | previousOwner `indexed` | address | undefined |
 | newOwner `indexed` | address | undefined |
+
+### TokenMapped
+
+```solidity
+event TokenMapped(address indexed rootToken, address indexed childToken)
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| rootToken `indexed` | address | undefined |
+| childToken `indexed` | address | undefined |
 
 
 
