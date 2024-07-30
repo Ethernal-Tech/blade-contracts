@@ -349,6 +349,23 @@ Function to deposit tokens from the depositor to another address on the child ch
 | tokenId | uint256 | Index of the NFT to deposit |
 | amount | uint256 | Amount to deposit |
 
+### exitHelper
+
+```solidity
+function exitHelper() external view returns (address)
+```
+
+
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | address | undefined |
+
 ### gateway
 
 ```solidity
@@ -391,10 +408,10 @@ function initialize(address newGateway, address newStateReceiver, address newChi
 ### initialize
 
 ```solidity
-function initialize(address newGateway, address newStateReceiver, address newChildERC1155Predicate, address newChildTokenTemplate) external nonpayable
+function initialize(address newGateway, address newExitHelper, address newChildERC1155Predicate, address newChildTokenTemplate) external nonpayable
 ```
 
-Initialization function for RootMintableERC1155Predicate
+Initialization function for RootERC1155Predicate
 
 *Can only be called once.*
 
@@ -403,7 +420,7 @@ Initialization function for RootMintableERC1155Predicate
 | Name | Type | Description |
 |---|---|---|
 | newGateway | address | Address of gateway to send deposit information to |
-| newStateReceiver | address | Address of StateReceiver to receive withdrawal information from |
+| newExitHelper | address | Address of ExitHelper to receive withdrawal information from |
 | newChildERC1155Predicate | address | Address of child ERC1155 predicate to communicate with |
 | newChildTokenTemplate | address | undefined |
 
@@ -597,23 +614,6 @@ function setBlockList(bool newUseBlockList) external nonpayable
 | Name | Type | Description |
 |---|---|---|
 | newUseBlockList | bool | undefined |
-
-### stateSender
-
-```solidity
-function stateSender() external view returns (contract IStateSender)
-```
-
-
-
-
-
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | contract IStateSender | undefined |
 
 ### supportsInterface
 

@@ -294,6 +294,23 @@ Function to deposit tokens from the depositor to another address on the child ch
 | receiver | address | undefined |
 | amount | uint256 | Amount to deposit |
 
+### exitHelper
+
+```solidity
+function exitHelper() external view returns (address)
+```
+
+
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | address | undefined |
+
 ### gateway
 
 ```solidity
@@ -314,7 +331,27 @@ function gateway() external view returns (contract IGateway)
 ### initialize
 
 ```solidity
-function initialize(address newGateway, address newStateReceiver, address newChildERC20Predicate, address newChildTokenTemplate, bool newUseAllowList, bool newUseBlockList, address newOwner) external nonpayable
+function initialize(address newGateway, address newExitHelper, address newChildERC20Predicate, address newChildTokenTemplate, address newNativeTokenRoot) external nonpayable
+```
+
+Initialization function for RootERC20Predicate
+
+*Can only be called once.*
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| newGateway | address | Address of gateway to send deposit information to |
+| newExitHelper | address | Address of ExitHelper to receive withdrawal information from |
+| newChildERC20Predicate | address | Address of child ERC20 predicate to communicate with |
+| newChildTokenTemplate | address | undefined |
+| newNativeTokenRoot | address | undefined |
+
+### initialize
+
+```solidity
+function initialize(address newGateway, address newStateReceiver, address newChildERC20Predicate, address newChildTokenTemplate, address newNativeTokenRoot, bool newUseAllowList, bool newUseBlockList, address newOwner) external nonpayable
 ```
 
 
@@ -329,28 +366,10 @@ function initialize(address newGateway, address newStateReceiver, address newChi
 | newStateReceiver | address | undefined |
 | newChildERC20Predicate | address | undefined |
 | newChildTokenTemplate | address | undefined |
+| newNativeTokenRoot | address | undefined |
 | newUseAllowList | bool | undefined |
 | newUseBlockList | bool | undefined |
 | newOwner | address | undefined |
-
-### initialize
-
-```solidity
-function initialize(address newGateway, address newStateReceiver, address newChildERC20Predicate, address newChildTokenTemplate) external nonpayable
-```
-
-Initialization function for RootMintableERC20Predicate
-
-*Can only be called once.*
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| newGateway | address | Address of gateway to send exit information to |
-| newStateReceiver | address | Address of StateReceiver to receive deposit information from |
-| newChildERC20Predicate | address | Address of child ERC20 predicate to communicate with |
-| newChildTokenTemplate | address | Address of child token implementation to deploy clones of |
 
 ### mapToken
 
@@ -507,23 +526,6 @@ function setBlockList(bool newUseBlockList) external nonpayable
 | Name | Type | Description |
 |---|---|---|
 | newUseBlockList | bool | undefined |
-
-### stateSender
-
-```solidity
-function stateSender() external view returns (contract IStateSender)
-```
-
-
-
-
-
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | contract IStateSender | undefined |
 
 ### transferOwnership
 
