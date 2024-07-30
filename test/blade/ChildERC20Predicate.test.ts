@@ -3,8 +3,8 @@ import { ethers, network } from "hardhat";
 import {
   ChildERC20Predicate,
   ChildERC20Predicate__factory,
-  L2StateSender,
-  L2StateSender__factory,
+  Gateway,
+  Gateway__factory,
   StateReceiver,
   StateReceiver__factory,
   ChildERC20,
@@ -26,7 +26,7 @@ describe("ChildERC20Predicate", () => {
   let childERC20Predicate: ChildERC20Predicate,
     systemChildERC20Predicate: ChildERC20Predicate,
     stateReceiverChildERC20Predicate: ChildERC20Predicate,
-    l2StateSender: L2StateSender,
+    gateway: Gateway,
     stateReceiver: StateReceiver,
     rootERC20Predicate: string,
     childERC20: ChildERC20,
@@ -38,10 +38,10 @@ describe("ChildERC20Predicate", () => {
   before(async () => {
     accounts = await ethers.getSigners();
 
-    const L2StateSender: L2StateSender__factory = await ethers.getContractFactory("L2StateSender");
-    l2StateSender = await L2StateSender.deploy();
+    const Gateway: Gateway__factory = await ethers.getContractFactory("Gateway");
+    gateway = await Gateway.deploy();
 
-    await l2StateSender.deployed();
+    await gateway.deployed();
 
     const StateReceiver: StateReceiver__factory = await ethers.getContractFactory("StateReceiver");
     stateReceiver = await StateReceiver.deploy();
@@ -117,7 +117,7 @@ describe("ChildERC20Predicate", () => {
 
   it("initialize and validate initialization", async () => {
     await systemChildERC20Predicate.initialize(
-      l2StateSender.address,
+      gateway.address,
       stateReceiver.address,
       rootERC20Predicate,
       childERC20.address,
@@ -128,7 +128,7 @@ describe("ChildERC20Predicate", () => {
     );
     await expect(systemNativeERC20.initialize(childERC20Predicate.address, nativeERC20RootToken, "TEST", "TEST", 18, 0))
       .to.not.be.reverted;
-    expect(await childERC20Predicate.l2StateSender()).to.equal(l2StateSender.address);
+    expect(await childERC20Predicate.gateway()).to.equal(gateway.address);
     expect(await childERC20Predicate.stateReceiver()).to.equal(stateReceiver.address);
     expect(await childERC20Predicate.rootERC20Predicate()).to.equal(rootERC20Predicate);
     expect(await childERC20Predicate.childTokenTemplate()).to.equal(childERC20.address);
@@ -140,7 +140,7 @@ describe("ChildERC20Predicate", () => {
   it("fail reinitialization", async () => {
     await expect(
       systemChildERC20Predicate.initialize(
-        l2StateSender.address,
+        gateway.address,
         stateReceiver.address,
         rootERC20Predicate,
         childERC20.address,

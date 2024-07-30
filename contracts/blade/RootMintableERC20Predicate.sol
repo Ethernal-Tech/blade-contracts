@@ -28,7 +28,7 @@ contract RootMintableERC20Predicate is IRootMintableERC20Predicate, Initializabl
 
     /**
      * @notice Initialization function for RootMintableERC20Predicate
-     * @param newGateway Address of L2StateSender to send exit information to
+     * @param newGateway Address of gateway to send exit information to
      * @param newStateReceiver Address of StateReceiver to receive deposit information from
      * @param newChildERC20Predicate Address of child ERC20 predicate to communicate with
      * @param newChildTokenTemplate Address of child token implementation to deploy clones of

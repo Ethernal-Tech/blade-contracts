@@ -3,8 +3,8 @@ import { ethers, network } from "hardhat";
 import {
   ChildERC721Predicate,
   ChildERC721Predicate__factory,
-  L2StateSender,
-  L2StateSender__factory,
+  Gateway,
+  Gateway__factory,
   StateReceiver,
   StateReceiver__factory,
   ChildERC721,
@@ -23,7 +23,7 @@ describe("ChildERC721Predicate", () => {
   let childERC721Predicate: ChildERC721Predicate,
     systemChildERC721Predicate: ChildERC721Predicate,
     stateReceiverChildERC721Predicate: ChildERC721Predicate,
-    l2StateSender: L2StateSender,
+    gateway: Gateway,
     stateReceiver: StateReceiver,
     rootERC721Predicate: string,
     childERC721: ChildERC721,
@@ -36,10 +36,10 @@ describe("ChildERC721Predicate", () => {
   before(async () => {
     accounts = await ethers.getSigners();
 
-    const L2StateSender: L2StateSender__factory = await ethers.getContractFactory("L2StateSender");
-    l2StateSender = await L2StateSender.deploy();
+    const Gateway: Gateway__factory = await ethers.getContractFactory("Gateway");
+    gateway = await Gateway.deploy();
 
-    await l2StateSender.deployed();
+    await gateway.deployed();
 
     const StateReceiver: StateReceiver__factory = await ethers.getContractFactory("StateReceiver");
     stateReceiver = await StateReceiver.deploy();
@@ -96,12 +96,12 @@ describe("ChildERC721Predicate", () => {
 
   it("initialize and validate initialization", async () => {
     await systemChildERC721Predicate.initialize(
-      l2StateSender.address,
+      gateway.address,
       stateReceiver.address,
       rootERC721Predicate,
       childERC721.address
     );
-    expect(await childERC721Predicate.l2StateSender()).to.equal(l2StateSender.address);
+    expect(await childERC721Predicate.gateway()).to.equal(gateway.address);
     expect(await childERC721Predicate.stateReceiver()).to.equal(stateReceiver.address);
     expect(await childERC721Predicate.rootERC721Predicate()).to.equal(rootERC721Predicate);
     expect(await childERC721Predicate.childTokenTemplate()).to.equal(childERC721.address);
@@ -110,7 +110,7 @@ describe("ChildERC721Predicate", () => {
   it("fail reinitialization", async () => {
     await expect(
       systemChildERC721Predicate.initialize(
-        l2StateSender.address,
+        gateway.address,
         stateReceiver.address,
         rootERC721Predicate,
         childERC721.address

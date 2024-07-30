@@ -10,7 +10,7 @@ import {TransparentUpgradeableProxy} from "@openzeppelin/contracts/proxy/transpa
 abstract contract ChildERC20PredicateDeployer is Script {
     function deployChildERC20Predicate(
         address proxyAdmin,
-        address newL2StateSender,
+        address newGateway,
         address newStateReceiver,
         address newRootERC20Predicate,
         address newChildTokenTemplate,
@@ -19,7 +19,7 @@ abstract contract ChildERC20PredicateDeployer is Script {
         bytes memory initData = abi.encodeCall(
             ChildERC20Predicate.initialize,
             (
-                newL2StateSender,
+                newGateway,
                 newStateReceiver,
                 newRootERC20Predicate,
                 newChildTokenTemplate,
@@ -47,7 +47,7 @@ abstract contract ChildERC20PredicateDeployer is Script {
 contract DeployChildERC20Predicate is ChildERC20PredicateDeployer {
     function run(
         address proxyAdmin,
-        address newL2StateSender,
+        address newGateway,
         address newStateReceiver,
         address newRootERC20Predicate,
         address newChildTokenTemplate,
@@ -56,7 +56,7 @@ contract DeployChildERC20Predicate is ChildERC20PredicateDeployer {
         return
             deployChildERC20Predicate(
                 proxyAdmin,
-                newL2StateSender,
+                newGateway,
                 newStateReceiver,
                 newRootERC20Predicate,
                 newChildTokenTemplate,

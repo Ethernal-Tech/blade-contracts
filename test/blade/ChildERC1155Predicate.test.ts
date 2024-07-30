@@ -4,8 +4,8 @@ import { BigNumber } from "ethers";
 import {
   ChildERC1155Predicate,
   ChildERC1155Predicate__factory,
-  L2StateSender,
-  L2StateSender__factory,
+  Gateway,
+  Gateway__factory,
   StateReceiver,
   StateReceiver__factory,
   ChildERC1155,
@@ -19,7 +19,7 @@ describe("ChildERC1155Predicate", () => {
   let childERC1155Predicate: ChildERC1155Predicate,
     systemChildERC1155Predicate: ChildERC1155Predicate,
     stateReceiverChildERC1155Predicate: ChildERC1155Predicate,
-    l2StateSender: L2StateSender,
+    gateway: Gateway,
     stateReceiver: StateReceiver,
     rootERC1155Predicate: string,
     childERC1155: ChildERC1155,
@@ -32,10 +32,10 @@ describe("ChildERC1155Predicate", () => {
   before(async () => {
     accounts = await ethers.getSigners();
 
-    const L2StateSender: L2StateSender__factory = await ethers.getContractFactory("L2StateSender");
-    l2StateSender = await L2StateSender.deploy();
+    const Gateway: Gateway__factory = await ethers.getContractFactory("Gateway");
+    gateway = await Gateway.deploy();
 
-    await l2StateSender.deployed();
+    await gateway.deployed();
 
     const StateReceiver: StateReceiver__factory = await ethers.getContractFactory("StateReceiver");
     stateReceiver = await StateReceiver.deploy();
@@ -94,12 +94,12 @@ describe("ChildERC1155Predicate", () => {
 
   it("initialize and validate initialization", async () => {
     await systemChildERC1155Predicate.initialize(
-      l2StateSender.address,
+      gateway.address,
       stateReceiver.address,
       rootERC1155Predicate,
       childERC1155.address
     );
-    expect(await childERC1155Predicate.l2StateSender()).to.equal(l2StateSender.address);
+    expect(await childERC1155Predicate.gateway()).to.equal(gateway.address);
     expect(await childERC1155Predicate.stateReceiver()).to.equal(stateReceiver.address);
     expect(await childERC1155Predicate.rootERC1155Predicate()).to.equal(rootERC1155Predicate);
     expect(await childERC1155Predicate.childTokenTemplate()).to.equal(childERC1155.address);
@@ -108,7 +108,7 @@ describe("ChildERC1155Predicate", () => {
   it("fail reinitialization", async () => {
     await expect(
       systemChildERC1155Predicate.initialize(
-        l2StateSender.address,
+        gateway.address,
         stateReceiver.address,
         rootERC1155Predicate,
         childERC1155.address

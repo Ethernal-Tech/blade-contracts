@@ -10,7 +10,7 @@ import {TransparentUpgradeableProxy} from "@openzeppelin/contracts/proxy/transpa
 abstract contract RootMintableERC1155PredicateAccessListDeployer is Script {
     function deployRootMintableERC1155PredicateAccessList(
         address proxyAdmin,
-        address newL2StateSender,
+        address newGateway,
         address newStateReceiver,
         address newChildERC1155Predicate,
         address newChildTokenTemplate,
@@ -21,7 +21,7 @@ abstract contract RootMintableERC1155PredicateAccessListDeployer is Script {
         bytes memory initData = abi.encodeCall(
             RootMintableERC1155PredicateAccessList.initialize,
             (
-                newL2StateSender,
+                newGateway,
                 newStateReceiver,
                 newChildERC1155Predicate,
                 newChildTokenTemplate,
@@ -51,7 +51,7 @@ abstract contract RootMintableERC1155PredicateAccessListDeployer is Script {
 contract DeployRootMintableERC1155PredicateAccessList is RootMintableERC1155PredicateAccessListDeployer {
     function run(
         address proxyAdmin,
-        address newL2StateSender,
+        address newGateway,
         address newStateReceiver,
         address newChildERC1155Predicate,
         address newChildTokenTemplate,
@@ -62,7 +62,7 @@ contract DeployRootMintableERC1155PredicateAccessList is RootMintableERC1155Pred
         return
             deployRootMintableERC1155PredicateAccessList(
                 proxyAdmin,
-                newL2StateSender,
+                newGateway,
                 newStateReceiver,
                 newChildERC1155Predicate,
                 newChildTokenTemplate,

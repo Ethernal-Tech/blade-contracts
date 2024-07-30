@@ -3,8 +3,8 @@ import { ethers, network } from "hardhat";
 import {
   RootMintableERC20Predicate,
   RootMintableERC20Predicate__factory,
-  L2StateSender,
-  L2StateSender__factory,
+  Gateway,
+  Gateway__factory,
   StateReceiver,
   StateReceiver__factory,
   ChildERC20,
@@ -21,7 +21,7 @@ describe("RootMintableERC20Predicate", () => {
   let rootMintableERC20Predicate: RootMintableERC20Predicate,
     systemRootMintableERC20Predicate: RootMintableERC20Predicate,
     stateReceiverRootMintableERC20Predicate: RootMintableERC20Predicate,
-    l2StateSender: L2StateSender,
+    gateway: Gateway,
     stateReceiver: StateReceiver,
     childERC20Predicate: string,
     childTokenTemplate: ChildERC20,
@@ -31,10 +31,10 @@ describe("RootMintableERC20Predicate", () => {
   before(async () => {
     accounts = await ethers.getSigners();
 
-    const L2StateSender: L2StateSender__factory = await ethers.getContractFactory("L2StateSender");
-    l2StateSender = await L2StateSender.deploy();
+    const Gateway: Gateway__factory = await ethers.getContractFactory("Gateway");
+    gateway = await Gateway.deploy();
 
-    await l2StateSender.deployed();
+    await gateway.deployed();
 
     const StateReceiver: StateReceiver__factory = await ethers.getContractFactory("StateReceiver");
     stateReceiver = await StateReceiver.deploy();
@@ -97,13 +97,13 @@ describe("RootMintableERC20Predicate", () => {
 
   it("initialize and validate initialization", async () => {
     await systemRootMintableERC20Predicate.initialize(
-      l2StateSender.address,
+      gateway.address,
       stateReceiver.address,
       childERC20Predicate,
       childTokenTemplate.address
     );
 
-    expect(await rootMintableERC20Predicate.l2StateSender()).to.equal(l2StateSender.address);
+    expect(await rootMintableERC20Predicate.gateway()).to.equal(gateway.address);
     expect(await rootMintableERC20Predicate.stateReceiver()).to.equal(stateReceiver.address);
     expect(await rootMintableERC20Predicate.childERC20Predicate()).to.equal(childERC20Predicate);
     expect(await rootMintableERC20Predicate.childTokenTemplate()).to.equal(childTokenTemplate.address);

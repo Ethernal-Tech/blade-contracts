@@ -10,14 +10,14 @@ import {TransparentUpgradeableProxy} from "@openzeppelin/contracts/proxy/transpa
 abstract contract ChildERC721PredicateDeployer is Script {
     function deployChildERC721Predicate(
         address proxyAdmin,
-        address newL2StateSender,
+        address newGateway,
         address newStateReceiver,
         address newRootERC721Predicate,
         address newChildTokenTemplate
     ) internal returns (address logicAddr, address proxyAddr) {
         bytes memory initData = abi.encodeCall(
             ChildERC721Predicate.initialize,
-            (newL2StateSender, newStateReceiver, newRootERC721Predicate, newChildTokenTemplate)
+            (newGateway, newStateReceiver, newRootERC721Predicate, newChildTokenTemplate)
         );
 
         vm.startBroadcast();
@@ -40,7 +40,7 @@ abstract contract ChildERC721PredicateDeployer is Script {
 contract DeployChildERC721Predicate is ChildERC721PredicateDeployer {
     function run(
         address proxyAdmin,
-        address newL2StateSender,
+        address newGateway,
         address newStateReceiver,
         address newRootERC721Predicate,
         address newChildTokenTemplate
@@ -48,7 +48,7 @@ contract DeployChildERC721Predicate is ChildERC721PredicateDeployer {
         return
             deployChildERC721Predicate(
                 proxyAdmin,
-                newL2StateSender,
+                newGateway,
                 newStateReceiver,
                 newRootERC721Predicate,
                 newChildTokenTemplate

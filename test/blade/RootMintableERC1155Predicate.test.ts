@@ -3,8 +3,8 @@ import { ethers } from "hardhat";
 import {
   RootMintableERC1155Predicate,
   RootMintableERC1155Predicate__factory,
-  L2StateSender,
-  L2StateSender__factory,
+  Gateway,
+  Gateway__factory,
   StateReceiver,
   StateReceiver__factory,
   ChildERC1155,
@@ -18,7 +18,7 @@ describe("RootMintableERC1155Predicate", () => {
   let rootMintableERC1155Predicate: RootMintableERC1155Predicate,
     systemRootMintableERC1155Predicate: RootMintableERC1155Predicate,
     stateReceiverRootMintableERC1155Predicate: RootMintableERC1155Predicate,
-    l2StateSender: L2StateSender,
+    gateway: Gateway,
     stateReceiver: StateReceiver,
     childERC1155Predicate: string,
     childTokenTemplate: ChildERC1155,
@@ -29,10 +29,10 @@ describe("RootMintableERC1155Predicate", () => {
   before(async () => {
     accounts = await ethers.getSigners();
 
-    const L2StateSender: L2StateSender__factory = await ethers.getContractFactory("L2StateSender");
-    l2StateSender = await L2StateSender.deploy();
+    const Gateway: Gateway__factory = await ethers.getContractFactory("Gateway");
+    gateway = await Gateway.deploy();
 
-    await l2StateSender.deployed();
+    await gateway.deployed();
 
     const StateReceiver: StateReceiver__factory = await ethers.getContractFactory("StateReceiver");
     stateReceiver = await StateReceiver.deploy();
@@ -80,13 +80,13 @@ describe("RootMintableERC1155Predicate", () => {
 
   it("initialize and validate initialization", async () => {
     await systemRootMintableERC1155Predicate.initialize(
-      l2StateSender.address,
+      gateway.address,
       stateReceiver.address,
       childERC1155Predicate,
       childTokenTemplate.address
     );
 
-    expect(await rootMintableERC1155Predicate.l2StateSender()).to.equal(l2StateSender.address);
+    expect(await rootMintableERC1155Predicate.gateway()).to.equal(gateway.address);
     expect(await rootMintableERC1155Predicate.stateReceiver()).to.equal(stateReceiver.address);
     expect(await rootMintableERC1155Predicate.childERC1155Predicate()).to.equal(childERC1155Predicate);
     expect(await rootMintableERC1155Predicate.childTokenTemplate()).to.equal(childTokenTemplate.address);

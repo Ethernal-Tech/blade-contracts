@@ -68,19 +68,19 @@ contract ChildERC721Predicate is IChildERC721Predicate, Initializable, System {
 
     /**
      * @notice Initialization function for ChildERC721Predicate
-     * @param newL2StateSender Address of L2StateSender to send exit information to
+     * @param newGateway Address of gateway to send exit information to
      * @param newStateReceiver Address of StateReceiver to receive deposit information from
      * @param newRootERC721Predicate Address of root ERC721 predicate to communicate with
      * @param newChildTokenTemplate Address of child token implementation to deploy clones of
      * @dev Can only be called once. `newNativeTokenRootAddress` should be set to zero where root token does not exist.
      */
     function initialize(
-        address newL2StateSender,
+        address newGateway,
         address newStateReceiver,
         address newRootERC721Predicate,
         address newChildTokenTemplate
     ) public virtual onlySystemCall initializer {
-        _initialize(newL2StateSender, newStateReceiver, newRootERC721Predicate, newChildTokenTemplate);
+        _initialize(newGateway, newStateReceiver, newRootERC721Predicate, newChildTokenTemplate);
     }
 
     /**
