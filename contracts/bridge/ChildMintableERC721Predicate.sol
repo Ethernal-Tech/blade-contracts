@@ -33,19 +33,19 @@ contract ChildMintableERC721Predicate is Initializable, IChildMintableERC721Pred
 
     /**
      * @notice Initialization function for ChildMintableERC721Predicate
-     * @param newSourceGateway Address of StateSender to send exit information to
+     * @param newGateway Address of gateway to send exit information to
      * @param newExitHelper Address of ExitHelper to receive deposit information from
      * @param newRootERC721Predicate Address of root ERC721 predicate to communicate with
      * @param newChildTokenTemplate Address of child token implementation to deploy clones of
      * @dev Can only be called once. `newNativeTokenRootAddress` should be set to zero where root token does not exist.
      */
     function initialize(
-        address newSourceGateway,
+        address newGateway,
         address newExitHelper,
         address newRootERC721Predicate,
         address newChildTokenTemplate
     ) public virtual initializer {
-        _initialize(newSourceGateway, newExitHelper, newRootERC721Predicate, newChildTokenTemplate);
+        _initialize(newGateway, newExitHelper, newRootERC721Predicate, newChildTokenTemplate);
     }
 
     /**

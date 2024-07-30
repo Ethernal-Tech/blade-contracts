@@ -307,9 +307,7 @@ describe("Gateway", () => {
 
     const aggMessagePoint: mcl.MessagePoint = mcl.g1ToHex(mcl.aggregateRaw(signatures));
 
-    await expect(gateway.receiveBatch(batch, aggMessagePoint, bitmap)).to.be.revertedWith(
-      "INSUFFICIENT_VOTING_POWER"
-    );
+    await expect(gateway.receiveBatch(batch, aggMessagePoint, bitmap)).to.be.revertedWith("INSUFFICIENT_VOTING_POWER");
   });
 
   it("Gateway receiveBatch success", async () => {
@@ -398,9 +396,7 @@ describe("Gateway", () => {
       destinationChainId: 3,
     };
 
-    await expect(gateway.receiveBatch(batch, sign, ethers.constants.AddressZero)).to.be.revertedWith(
-      "EMPTY_BATCH"
-    );
+    await expect(gateway.receiveBatch(batch, sign, ethers.constants.AddressZero)).to.be.revertedWith("EMPTY_BATCH");
   });
 
   it("Gateway receiveBatch fail: bad source chain id", async () => {

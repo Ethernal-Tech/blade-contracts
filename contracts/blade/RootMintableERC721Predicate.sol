@@ -103,10 +103,7 @@ contract RootMintableERC721Predicate is Initializable, ERC721Holder, System, IRo
 
         rootTokenToChildToken[address(rootToken)] = childToken;
 
-        gateway.syncState(
-            childPredicate,
-            abi.encode(MAP_TOKEN_SIG, rootToken, rootToken.name(), rootToken.symbol())
-        );
+        gateway.syncState(childPredicate, abi.encode(MAP_TOKEN_SIG, rootToken, rootToken.name(), rootToken.symbol()));
         // slither-disable-next-line reentrancy-events
         emit L2MintableTokenMapped(address(rootToken), childToken);
         return childToken;
@@ -149,10 +146,7 @@ contract RootMintableERC721Predicate is Initializable, ERC721Holder, System, IRo
 
         rootToken.safeTransferFrom(msg.sender, address(this), tokenId);
 
-        gateway.syncState(
-            childERC721Predicate,
-            abi.encode(DEPOSIT_SIG, rootToken, msg.sender, receiver, tokenId)
-        );
+        gateway.syncState(childERC721Predicate, abi.encode(DEPOSIT_SIG, rootToken, msg.sender, receiver, tokenId));
         // slither-disable-next-line reentrancy-events
         emit L2MintableERC721Deposit(address(rootToken), childToken, msg.sender, receiver, tokenId);
         _afterTokenDeposit();

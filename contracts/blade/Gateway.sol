@@ -4,7 +4,7 @@ pragma solidity ^0.8.19;
 import "./ValidatorSetStorage.sol";
 import "../interfaces/IGateway.sol";
 
-contract Gateway is ValidatorSetStorage, IGateway{
+contract Gateway is ValidatorSetStorage, IGateway {
     uint256 public constant MAX_LENGTH = 2048;
     uint256 public counter;
 
@@ -13,7 +13,6 @@ contract Gateway is ValidatorSetStorage, IGateway{
     mapping(uint256 => bool) public processedEvents;
 
     event BridgeMessageResult(uint256 indexed counter, bool indexed status, bytes message);
-
 
     event StateSynced(uint256 indexed id, address indexed sender, address indexed receiver, bytes data);
 

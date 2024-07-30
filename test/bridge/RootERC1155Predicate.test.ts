@@ -3,8 +3,8 @@ import { ethers } from "hardhat";
 import {
   RootERC1155Predicate,
   RootERC1155Predicate__factory,
-  StateSender,
-  StateSender__factory,
+  Gateway,
+  Gateway__factory,
   ExitHelper,
   ExitHelper__factory,
   ChildERC1155,
@@ -17,7 +17,7 @@ import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 describe("RootERC1155Predicate", () => {
   let rootERC1155Predicate: RootERC1155Predicate,
     exitHelperRootERC1155Predicate: RootERC1155Predicate,
-    stateSender: StateSender,
+    gateway: Gateway,
     exitHelper: ExitHelper,
     childERC1155Predicate: string,
     childTokenTemplate: ChildERC1155,
@@ -28,10 +28,10 @@ describe("RootERC1155Predicate", () => {
   before(async () => {
     accounts = await ethers.getSigners();
 
-    const StateSender: StateSender__factory = await ethers.getContractFactory("StateSender");
-    stateSender = await StateSender.deploy();
+    const Gateway: Gateway__factory = await ethers.getContractFactory("Gateway");
+    gateway = await Gateway.deploy();
 
-    await stateSender.deployed();
+    await gateway.deployed();
 
     const ExitHelper: ExitHelper__factory = await ethers.getContractFactory("ExitHelper");
     exitHelper = await ExitHelper.deploy();
@@ -68,13 +68,13 @@ describe("RootERC1155Predicate", () => {
 
   it("initialize and validate initialization", async () => {
     await rootERC1155Predicate.initialize(
-      stateSender.address,
+      gateway.address,
       exitHelper.address,
       childERC1155Predicate,
       childTokenTemplate.address
     );
 
-    expect(await rootERC1155Predicate.stateSender()).to.equal(stateSender.address);
+    expect(await rootERC1155Predicate.gateway()).to.equal(gateway.address);
     expect(await rootERC1155Predicate.exitHelper()).to.equal(exitHelper.address);
     expect(await rootERC1155Predicate.childERC1155Predicate()).to.equal(childERC1155Predicate);
     expect(await rootERC1155Predicate.childTokenTemplate()).to.equal(childTokenTemplate.address);

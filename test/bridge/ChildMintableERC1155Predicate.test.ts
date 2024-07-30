@@ -4,8 +4,8 @@ import { BigNumber } from "ethers";
 import {
   ChildMintableERC1155Predicate,
   ChildMintableERC1155Predicate__factory,
-  StateSender,
-  StateSender__factory,
+  Gateway,
+  Gateway__factory,
   ExitHelper,
   ExitHelper__factory,
   ChildERC1155,
@@ -18,7 +18,7 @@ import { smock } from "@defi-wonderland/smock";
 describe("ChildMintableERC1155Predicate", () => {
   let childMintableERC1155Predicate: ChildMintableERC1155Predicate,
     exitHelperChildERC1155Predicate: ChildMintableERC1155Predicate,
-    stateSender: StateSender,
+    gateway: Gateway,
     exitHelper: ExitHelper,
     rootERC1155Predicate: string,
     childERC1155: ChildERC1155,
@@ -31,10 +31,10 @@ describe("ChildMintableERC1155Predicate", () => {
   before(async () => {
     accounts = await ethers.getSigners();
 
-    const StateSender: StateSender__factory = await ethers.getContractFactory("StateSender");
-    stateSender = await StateSender.deploy();
+    const Gateway: Gateway__factory = await ethers.getContractFactory("Gateway");
+    gateway = await Gateway.deploy();
 
-    await stateSender.deployed();
+    await gateway.deployed();
 
     const ExitHelper: ExitHelper__factory = await ethers.getContractFactory("ExitHelper");
     exitHelper = await ExitHelper.deploy();
@@ -73,12 +73,12 @@ describe("ChildMintableERC1155Predicate", () => {
 
   it("initialize and validate initialization", async () => {
     await childMintableERC1155Predicate.initialize(
-      stateSender.address,
+      gateway.address,
       exitHelper.address,
       rootERC1155Predicate,
       childERC1155.address
     );
-    expect(await childMintableERC1155Predicate.stateSender()).to.equal(stateSender.address);
+    expect(await childMintableERC1155Predicate.gateway()).to.equal(gateway.address);
     expect(await childMintableERC1155Predicate.exitHelper()).to.equal(exitHelper.address);
     expect(await childMintableERC1155Predicate.rootERC1155Predicate()).to.equal(rootERC1155Predicate);
     expect(await childMintableERC1155Predicate.childTokenTemplate()).to.equal(childERC1155.address);
@@ -87,7 +87,7 @@ describe("ChildMintableERC1155Predicate", () => {
   it("fail reinitialization", async () => {
     await expect(
       childMintableERC1155Predicate.initialize(
-        stateSender.address,
+        gateway.address,
         exitHelper.address,
         rootERC1155Predicate,
         childERC1155.address

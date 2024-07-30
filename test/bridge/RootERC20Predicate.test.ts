@@ -3,8 +3,8 @@ import { ethers } from "hardhat";
 import {
   RootERC20Predicate,
   RootERC20Predicate__factory,
-  StateSender,
-  StateSender__factory,
+  Gateway,
+  Gateway__factory,
   ExitHelper,
   ExitHelper__factory,
   ChildERC20,
@@ -17,7 +17,7 @@ import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 describe("RootERC20Predicate", () => {
   let rootERC20Predicate: RootERC20Predicate,
     exitHelperRootERC20Predicate: RootERC20Predicate,
-    stateSender: StateSender,
+    gateway: Gateway,
     exitHelper: ExitHelper,
     childERC20Predicate: string,
     childTokenTemplate: ChildERC20,
@@ -27,10 +27,10 @@ describe("RootERC20Predicate", () => {
   before(async () => {
     accounts = await ethers.getSigners();
 
-    const StateSender: StateSender__factory = await ethers.getContractFactory("StateSender");
-    stateSender = await StateSender.deploy();
+    const Gateway: Gateway__factory = await ethers.getContractFactory("Gateway");
+    gateway = await Gateway.deploy();
 
-    await stateSender.deployed();
+    await gateway.deployed();
 
     const ExitHelper: ExitHelper__factory = await ethers.getContractFactory("ExitHelper");
     exitHelper = await ExitHelper.deploy();
@@ -69,14 +69,14 @@ describe("RootERC20Predicate", () => {
   it("initialize and validate initialization", async () => {
     const nativeTokenRootAddress = ethers.Wallet.createRandom().address;
     await rootERC20Predicate.initialize(
-      stateSender.address,
+      gateway.address,
       exitHelper.address,
       childERC20Predicate,
       childTokenTemplate.address,
       nativeTokenRootAddress
     );
 
-    expect(await rootERC20Predicate.stateSender()).to.equal(stateSender.address);
+    expect(await rootERC20Predicate.gateway()).to.equal(gateway.address);
     expect(await rootERC20Predicate.exitHelper()).to.equal(exitHelper.address);
     expect(await rootERC20Predicate.childERC20Predicate()).to.equal(childERC20Predicate);
     expect(await rootERC20Predicate.childTokenTemplate()).to.equal(childTokenTemplate.address);

@@ -196,10 +196,7 @@ contract ChildERC721Predicate is IChildERC721Predicate, Initializable, System {
         assert(childToken.predicate() == address(this));
 
         require(childToken.burn(msg.sender, tokenId), "ChildERC721Predicate: BURN_FAILED");
-        gateway.syncState(
-            rootERC721Predicate,
-            abi.encode(WITHDRAW_SIG, rootToken, msg.sender, receiver, tokenId)
-        );
+        gateway.syncState(rootERC721Predicate, abi.encode(WITHDRAW_SIG, rootToken, msg.sender, receiver, tokenId));
 
         // slither-disable-next-line reentrancy-events
         emit L2ERC721Withdraw(rootToken, address(childToken), msg.sender, receiver, tokenId);

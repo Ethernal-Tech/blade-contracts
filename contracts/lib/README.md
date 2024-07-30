@@ -1,4 +1,5 @@
 # Libraries
+
 ##### Library contracts
 
 This directory contains all library contracts in use in the contract suite, with the exception of third-party libraries (such as OpenZeppelin's Arrays Upgradeable, used in Child Validator Set) and the merkle verification contract (which is in [common](../common/)). We will give a high-level overview of the contracts, and then focus more on the high-level usage of the contracts dealing with the queues, pools, and validator tree.
@@ -16,6 +17,7 @@ Helper contract for working with EIP712
 ## EIP712Upgradeable
 
 Implements an upgradeable modification of EIP712, adapted from OpenZeppelin.
+
 ## ModExp
 
 Focuses on mathematical operations related to cryptography.

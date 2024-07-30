@@ -30,18 +30,18 @@ contract ChildMintableERC20Predicate is Initializable, IChildMintableERC20Predic
 
     /**
      * @notice Initialization function for ChildMintableERC20Predicate
-     * @param newStateSender Address of StateSender to send deposit information to
+     * @param newGateway Address of gateway to send deposit information to
      * @param newExitHelper Address of ExitHelper to receive withdrawal information from
      * @param newRootERC20Predicate Address of root ERC20 predicate to communicate with
      * @dev Can only be called once.
      */
     function initialize(
-        address newStateSender,
+        address newGateway,
         address newExitHelper,
         address newRootERC20Predicate,
         address newChildTokenTemplate
     ) external virtual initializer {
-        _initialize(newStateSender, newExitHelper, newRootERC20Predicate, newChildTokenTemplate);
+        _initialize(newGateway, newExitHelper, newRootERC20Predicate, newChildTokenTemplate);
     }
 
     /**

@@ -3,8 +3,8 @@ import { ethers, network } from "hardhat";
 import {
   ChildMintableERC721Predicate,
   ChildMintableERC721Predicate__factory,
-  StateSender,
-  StateSender__factory,
+  Gateway,
+  Gateway__factory,
   ExitHelper,
   ExitHelper__factory,
   ChildERC721,
@@ -22,7 +22,7 @@ import { smock } from "@defi-wonderland/smock";
 describe("ChildMintableERC721Predicate", () => {
   let childMintableERC721Predicate: ChildMintableERC721Predicate,
     exitHelperChildMintableERC721Predicate: ChildMintableERC721Predicate,
-    stateSender: StateSender,
+    gateway: Gateway,
     exitHelper: ExitHelper,
     rootERC721Predicate: string,
     childERC721: ChildERC721,
@@ -35,10 +35,10 @@ describe("ChildMintableERC721Predicate", () => {
   before(async () => {
     accounts = await ethers.getSigners();
 
-    const StateSender: StateSender__factory = await ethers.getContractFactory("StateSender");
-    stateSender = await StateSender.deploy();
+    const Gateway: Gateway__factory = await ethers.getContractFactory("Gateway");
+    gateway = await Gateway.deploy();
 
-    await stateSender.deployed();
+    await gateway.deployed();
 
     const ExitHelper: ExitHelper__factory = await ethers.getContractFactory("ExitHelper");
     exitHelper = await ExitHelper.deploy();
@@ -79,12 +79,12 @@ describe("ChildMintableERC721Predicate", () => {
 
   it("initialize and validate initialization", async () => {
     await childMintableERC721Predicate.initialize(
-      stateSender.address,
+      gateway.address,
       exitHelper.address,
       rootERC721Predicate,
       childERC721.address
     );
-    expect(await childMintableERC721Predicate.stateSender()).to.equal(stateSender.address);
+    expect(await childMintableERC721Predicate.gateway()).to.equal(gateway.address);
     expect(await childMintableERC721Predicate.exitHelper()).to.equal(exitHelper.address);
     expect(await childMintableERC721Predicate.rootERC721Predicate()).to.equal(rootERC721Predicate);
     expect(await childMintableERC721Predicate.childTokenTemplate()).to.equal(childERC721.address);
@@ -93,7 +93,7 @@ describe("ChildMintableERC721Predicate", () => {
   it("fail reinitialization", async () => {
     await expect(
       childMintableERC721Predicate.initialize(
-        stateSender.address,
+        gateway.address,
         exitHelper.address,
         rootERC721Predicate,
         childERC721.address

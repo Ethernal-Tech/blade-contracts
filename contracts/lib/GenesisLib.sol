@@ -32,7 +32,13 @@ library GenesisLib {
      * @param stakedTokens amount of staked tokens
      * @param isVal indicates if account is a validator
      */
-    function insert(GenesisSet storage self, address account, uint256 preminedTokens, uint256 stakedTokens, bool isVal) internal {
+    function insert(
+        GenesisSet storage self,
+        address account,
+        uint256 preminedTokens,
+        uint256 stakedTokens,
+        bool isVal
+    ) internal {
         assert(self.status == GenesisStatus.NOT_STARTED);
         uint256 index = self.indices[account];
         if (index == 0) {
@@ -71,7 +77,7 @@ library GenesisLib {
         return self.status == GenesisStatus.COMPLETED;
     }
 
-    function isValidator(GenesisSet storage self, address account) internal view returns(bool) {
+    function isValidator(GenesisSet storage self, address account) internal view returns (bool) {
         uint256 index = self.indices[account];
         if (index == 0) {
             return false;

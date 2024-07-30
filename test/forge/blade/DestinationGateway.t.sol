@@ -49,7 +49,7 @@ abstract contract GatewayTest is Test, System, Gateway {
             msgs.push(messageTmp[i]);
         }
 
-                receiver = makeAddr("receiver");
+        receiver = makeAddr("receiver");
         maxData = new bytes(gateway.MAX_LENGTH());
         moreThanMaxData = new bytes(gateway.MAX_LENGTH() + 1);
     }
@@ -76,7 +76,7 @@ contract Uninitialized is GatewayTest {
     }
 }
 
-contract GatewayStateSyncTest is GatewayInitialized{
+contract GatewayStateSyncTest is GatewayInitialized {
     function testConstructor() public {
         assertEq(gateway.counter(), 0);
     }

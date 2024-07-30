@@ -107,10 +107,7 @@ contract RootERC721Predicate is Initializable, ERC721Holder, IRootERC721Predicat
 
         rootTokenToChildToken[address(rootToken)] = childToken;
 
-        gateway.syncState(
-            childPredicate,
-            abi.encode(MAP_TOKEN_SIG, rootToken, rootToken.name(), rootToken.symbol())
-        );
+        gateway.syncState(childPredicate, abi.encode(MAP_TOKEN_SIG, rootToken, rootToken.name(), rootToken.symbol()));
         // slither-disable-next-line reentrancy-events
         emit TokenMapped(address(rootToken), childToken);
         return childToken;
