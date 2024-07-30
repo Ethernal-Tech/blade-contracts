@@ -5,11 +5,11 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts/token/ERC1155/utils/ERC1155Holder.sol";
 import "@openzeppelin/contracts/proxy/Clones.sol";
 import "../interfaces/bridge/IRootERC1155Predicate.sol";
-import "../interfaces/IStateSender.sol";
+import "../interfaces/IGateway.sol";
 
 // solhint-disable reason-string
 contract RootERC1155Predicate is Initializable, ERC1155Holder, IRootERC1155Predicate {
-    IStateSender public stateSender;
+    IGateway public gateway;
     address public exitHelper;
     address public childERC1155Predicate;
     address public childTokenTemplate;
@@ -22,25 +22,25 @@ contract RootERC1155Predicate is Initializable, ERC1155Holder, IRootERC1155Predi
 
     /**
      * @notice Initialization function for RootERC1155Predicate
-     * @param newStateSender Address of StateSender to send deposit information to
+     * @param newGateway Address of gateway to send deposit information to
      * @param newExitHelper Address of ExitHelper to receive withdrawal information from
      * @param newChildERC1155Predicate Address of child ERC1155 predicate to communicate with
      * @dev Can only be called once.
      */
     function initialize(
-        address newStateSender,
+        address newGateway,
         address newExitHelper,
         address newChildERC1155Predicate,
         address newChildTokenTemplate
     ) external initializer {
         require(
-            newStateSender != address(0) &&
+            newGateway != address(0) &&
                 newExitHelper != address(0) &&
                 newChildERC1155Predicate != address(0) &&
                 newChildTokenTemplate != address(0),
             "RootERC1155Predicate: BAD_INITIALIZATION"
         );
-        stateSender = IStateSender(newStateSender);
+        gateway = IGateway(newGateway);
         exitHelper = newExitHelper;
         childERC1155Predicate = newChildERC1155Predicate;
         childTokenTemplate = newChildTokenTemplate;
@@ -118,7 +118,7 @@ contract RootERC1155Predicate is Initializable, ERC1155Holder, IRootERC1155Predi
             uri = tokenUri;
         } catch {}
 
-        stateSender.syncState(childPredicate, abi.encode(MAP_TOKEN_SIG, rootToken, uri));
+        gateway.sendBridgeMsg(childPredicate, abi.encode(MAP_TOKEN_SIG, rootToken, uri));
         // slither-disable-next-line reentrancy-events
         emit TokenMapped(address(rootToken), childToken);
     }
@@ -128,7 +128,7 @@ contract RootERC1155Predicate is Initializable, ERC1155Holder, IRootERC1155Predi
 
         rootToken.safeTransferFrom(msg.sender, address(this), tokenId, amount, "");
 
-        stateSender.syncState(
+        gateway.sendBridgeMsg(
             childERC1155Predicate,
             abi.encode(DEPOSIT_SIG, rootToken, msg.sender, receiver, tokenId, amount)
         );
@@ -151,7 +151,7 @@ contract RootERC1155Predicate is Initializable, ERC1155Holder, IRootERC1155Predi
             }
         }
 
-        stateSender.syncState(
+        gateway.sendBridgeMsg(
             childERC1155Predicate,
             abi.encode(DEPOSIT_BATCH_SIG, rootToken, msg.sender, receivers, tokenIds, amounts)
         );

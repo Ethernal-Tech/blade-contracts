@@ -1,16 +1,15 @@
 import { expect } from "chai";
 import * as hre from "hardhat";
 import { ethers } from "hardhat";
-import { BLS, BN256G2, DestinationGateway } from "../../typechain-types";
+import { BLS, BN256G2, Gateway } from "../../typechain-types";
 import * as mcl from "../../ts/mcl";
-import { bridge } from "../../typechain-types/contracts";
 
 const DOMAIN = ethers.utils.arrayify(ethers.utils.solidityKeccak256(["string"], ["DOMAIN_BRIDGE"]));
 const sourceChainId = 2;
 const destinationChainId = 3;
 
-describe("DestinationGateway", () => {
-  let destinationGateway: DestinationGateway,
+describe("Gateway", () => {
+  let gateway: Gateway,
     msgs: any[],
     bls: BLS,
     bn256G2: BN256G2,
@@ -22,9 +21,9 @@ describe("DestinationGateway", () => {
     await mcl.init();
     accounts = await ethers.getSigners();
 
-    const DestinationGateway = await ethers.getContractFactory("DestinationGateway");
-    destinationGateway = (await DestinationGateway.deploy()) as DestinationGateway;
-    await destinationGateway.deployed();
+    const DestinationGateway = await ethers.getContractFactory("Gateway");
+    gateway = (await DestinationGateway.deploy()) as Gateway;
+    await gateway.deployed();
 
     const BLS = await ethers.getContractFactory("BLS");
     bls = (await BLS.deploy()) as BLS;
@@ -48,10 +47,65 @@ describe("DestinationGateway", () => {
       });
     }
 
-    await destinationGateway.initialize(bls.address, bn256G2.address, validatorSet);
+    await gateway.initialize(bls.address, bn256G2.address, validatorSet);
   });
 
-  it("Destination gateway receiveBatch fail: invalid signature", async () => {
+  it("Gateway: should set initial params properly", async () => {
+    expect(await gateway.counter()).to.equal(0);
+  });
+
+  it("Gateway: should check receiver address", async () => {
+    const maxDataLength = (await gateway.MAX_LENGTH()).toNumber();
+    const moreThanMaxData = "0x" + "00".repeat(maxDataLength + 1); // notice `+ 1` here (it creates more than max data)
+    const receiver = "0x0000000000000000000000000000000000000000";
+
+    await expect(gateway.sendBridgeMsg(receiver, moreThanMaxData)).to.be.revertedWith("INVALID_RECEIVER");
+  });
+
+  it("Gateway: should check data length", async () => {
+    const maxDataLength = (await gateway.MAX_LENGTH()).toNumber();
+    const moreThanMaxData = "0x" + "00".repeat(maxDataLength + 1); // notice `+ 1` here (it creates more than max data)
+    const receiver = accounts[2].address;
+
+    await expect(gateway.sendBridgeMsg(receiver, moreThanMaxData)).to.be.revertedWith("EXCEEDS_MAX_LENGTH");
+  });
+
+  it("Gateway: should emit event properly", async () => {
+    const maxDataLength = (await gateway.MAX_LENGTH()).toNumber();
+    const maxData = "0x" + "00".repeat(maxDataLength);
+    const sender = accounts[0].address;
+    const receiver = accounts[1].address;
+
+    const tx = await gateway.sendBridgeMsg(receiver, maxData);
+    const receipt = await tx.wait();
+    expect(receipt.events?.length).to.equals(1);
+
+    const event = receipt.events?.find((log) => log.event === "BridgeMessageEvent");
+    expect(event?.args?.id).to.equal(1);
+    expect(event?.args?.sender).to.equal(sender);
+    expect(event?.args?.receiver).to.equal(receiver);
+    expect(event?.args?.data).to.equal(maxData);
+  });
+
+  it("Gateway: should increase counter properly", async () => {
+    const maxDataLength = (await gateway.MAX_LENGTH()).toNumber();
+    const maxData = "0x" + "00".repeat(maxDataLength);
+    const moreThanMaxData = "0x" + "00".repeat(maxDataLength + 1);
+    const receiver = accounts[1].address;
+
+    const initialCounter = (await gateway.counter()).toNumber();
+    expect(await gateway.counter()).to.equal(initialCounter);
+
+    await gateway.sendBridgeMsg(receiver, maxData);
+    await gateway.sendBridgeMsg(receiver, maxData);
+    await expect(gateway.sendBridgeMsg(receiver, moreThanMaxData)).to.be.revertedWith("EXCEEDS_MAX_LENGTH");
+    await gateway.sendBridgeMsg(receiver, maxData);
+    await expect(gateway.sendBridgeMsg(receiver, moreThanMaxData)).to.be.revertedWith("EXCEEDS_MAX_LENGTH");
+
+    expect(await gateway.counter()).to.equal(initialCounter + 3);
+  });
+
+  it("Gateway receiveBatch fail: invalid signature", async () => {
     msgs = [];
 
     msgs = [
@@ -111,12 +165,12 @@ describe("DestinationGateway", () => {
 
     const aggMessagePoint: mcl.MessagePoint = mcl.g1ToHex(mcl.aggregateRaw(signatures));
 
-    await expect(destinationGateway.receiveBatch(batch, aggMessagePoint, bitmap)).to.be.revertedWith(
+    await expect(gateway.receiveBatch(batch, aggMessagePoint, bitmap)).to.be.revertedWith(
       "SIGNATURE_VERIFICATION_FAILED"
     );
   });
 
-  it("Destination gateway receiveBatch fail: empty bitmap", async () => {
+  it("Gateway receiveBatch fail: empty bitmap", async () => {
     msgs = [];
 
     msgs = [
@@ -183,10 +237,10 @@ describe("DestinationGateway", () => {
 
     const aggMessagePoint: mcl.MessagePoint = mcl.g1ToHex(mcl.aggregateRaw(signatures));
 
-    await expect(destinationGateway.receiveBatch(batch, aggMessagePoint, bitmap)).to.be.revertedWith("BITMAP_IS_EMPTY");
+    await expect(gateway.receiveBatch(batch, aggMessagePoint, bitmap)).to.be.revertedWith("BITMAP_IS_EMPTY");
   });
 
-  it("Destination gateway receiveBatch fail:not enough voting power", async () => {
+  it("Gateway receiveBatch fail:not enough voting power", async () => {
     msgs = [];
 
     msgs = [
@@ -253,12 +307,10 @@ describe("DestinationGateway", () => {
 
     const aggMessagePoint: mcl.MessagePoint = mcl.g1ToHex(mcl.aggregateRaw(signatures));
 
-    await expect(destinationGateway.receiveBatch(batch, aggMessagePoint, bitmap)).to.be.revertedWith(
-      "INSUFFICIENT_VOTING_POWER"
-    );
+    await expect(gateway.receiveBatch(batch, aggMessagePoint, bitmap)).to.be.revertedWith("INSUFFICIENT_VOTING_POWER");
   });
 
-  it("Destination gateway receiveBatch success", async () => {
+  it("Gateway receiveBatch success", async () => {
     msgs = [];
 
     msgs = [
@@ -325,13 +377,13 @@ describe("DestinationGateway", () => {
 
     const aggMessagePoint: mcl.MessagePoint = mcl.g1ToHex(mcl.aggregateRaw(signatures));
 
-    const firstTx = await destinationGateway.receiveBatch(batch, aggMessagePoint, bitmap);
+    const firstTx = await gateway.receiveBatch(batch, aggMessagePoint, bitmap);
     const firstReceipt = await firstTx.wait();
     const firstLogs = firstReceipt?.events?.filter((log) => log.event === "BridgeMessageResult") as any[];
     expect(firstLogs).to.exist;
   });
 
-  it("Destination gateway receiveBatch fail: zero messages in batch", async () => {
+  it("Gateway receiveBatch fail: zero messages in batch", async () => {
     msgs = [];
 
     let sign: [number, number];
@@ -344,12 +396,10 @@ describe("DestinationGateway", () => {
       destinationChainId: 3,
     };
 
-    await expect(destinationGateway.receiveBatch(batch, sign, ethers.constants.AddressZero)).to.be.revertedWith(
-      "EMPTY_BATCH"
-    );
+    await expect(gateway.receiveBatch(batch, sign, ethers.constants.AddressZero)).to.be.revertedWith("EMPTY_BATCH");
   });
 
-  it("Destination gateway receiveBatch fail: bad source chain id", async () => {
+  it("Gateway receiveBatch fail: bad source chain id", async () => {
     msgs = [];
 
     msgs = [
@@ -373,7 +423,7 @@ describe("DestinationGateway", () => {
       destinationChainId: 3,
     };
 
-    await expect(destinationGateway.receiveBatch(batch, sign, ethers.constants.AddressZero)).to.be.revertedWith(
+    await expect(gateway.receiveBatch(batch, sign, ethers.constants.AddressZero)).to.be.revertedWith(
       "INVALID_SOURCE_CHAIN_ID"
     );
   });

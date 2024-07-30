@@ -3,8 +3,8 @@ import { ethers, network } from "hardhat";
 import {
   ChildMintableERC20Predicate,
   ChildMintableERC20Predicate__factory,
-  StateSender,
-  StateSender__factory,
+  Gateway,
+  Gateway__factory,
   ExitHelper,
   ExitHelper__factory,
   ChildERC20,
@@ -19,7 +19,7 @@ import { alwaysTrueBytecode } from "../constants";
 describe("ChildMintableERC20Predicate", () => {
   let childMintableERC20Predicate: ChildMintableERC20Predicate,
     exitHelperChildMintableERC20Predicate: ChildMintableERC20Predicate,
-    stateSender: StateSender,
+    gateway: Gateway,
     exitHelper: ExitHelper,
     rootERC20Predicate: string,
     rootToken: string,
@@ -30,10 +30,10 @@ describe("ChildMintableERC20Predicate", () => {
   before(async () => {
     accounts = await ethers.getSigners();
 
-    const StateSender: StateSender__factory = await ethers.getContractFactory("StateSender");
-    stateSender = await StateSender.deploy();
+    const Gateway: Gateway__factory = await ethers.getContractFactory("Gateway");
+    gateway = await Gateway.deploy();
 
-    await stateSender.deployed();
+    await gateway.deployed();
 
     const ExitHelper: ExitHelper__factory = await ethers.getContractFactory("ExitHelper");
     exitHelper = await ExitHelper.deploy();
@@ -75,12 +75,12 @@ describe("ChildMintableERC20Predicate", () => {
 
   it("initialize and validate initialization", async () => {
     await childMintableERC20Predicate.initialize(
-      stateSender.address,
+      gateway.address,
       exitHelper.address,
       rootERC20Predicate,
       childTokenTemplate.address
     );
-    expect(await childMintableERC20Predicate.stateSender()).to.equal(stateSender.address);
+    expect(await childMintableERC20Predicate.gateway()).to.equal(gateway.address);
     expect(await childMintableERC20Predicate.exitHelper()).to.equal(exitHelper.address);
     expect(await childMintableERC20Predicate.rootERC20Predicate()).to.equal(rootERC20Predicate);
     expect(await childMintableERC20Predicate.childTokenTemplate()).to.equal(childTokenTemplate.address);

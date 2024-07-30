@@ -3,8 +3,8 @@ import { expect } from "chai";
 import * as hre from "hardhat";
 import { ethers, network } from "hardhat";
 import {
-  L2StateSender,
-  L2StateSender__factory,
+  Gateway,
+  Gateway__factory,
   StateReceiver,
   StateReceiver__factory,
   ChildERC20,
@@ -21,7 +21,7 @@ import { alwaysTrueBytecode } from "../constants";
 
 describe("EIP1559Burn", () => {
   let eip1559Burn: EIP1559Burn,
-    l2StateSender: L2StateSender,
+    gateway: Gateway,
     stateReceiver: StateReceiver,
     childERC20: ChildERC20,
     childERC20Predicate: ChildERC20Predicate,
@@ -38,10 +38,10 @@ describe("EIP1559Burn", () => {
     await hre.network.provider.send("hardhat_reset");
     accounts = await ethers.getSigners();
 
-    const L2StateSender: L2StateSender__factory = await ethers.getContractFactory("L2StateSender");
-    l2StateSender = await L2StateSender.deploy();
+    const Gateway: Gateway__factory = await ethers.getContractFactory("Gateway");
+    gateway = await Gateway.deploy();
 
-    await l2StateSender.deployed();
+    await gateway.deployed();
 
     const StateReceiver: StateReceiver__factory = await ethers.getContractFactory("StateReceiver");
     stateReceiver = await StateReceiver.deploy();
@@ -86,7 +86,7 @@ describe("EIP1559Burn", () => {
     );
 
     await systemChildERC20Predicate.initialize(
-      l2StateSender.address,
+      gateway.address,
       stateReceiver.address,
       rootERC20Predicate,
       childERC20.address,

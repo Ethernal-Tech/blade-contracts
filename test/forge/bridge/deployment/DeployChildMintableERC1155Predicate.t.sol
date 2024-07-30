@@ -19,7 +19,7 @@ contract DeployChildMintableERC1155PredicateTest is Test {
     ITransparentUpgradeableProxy internal proxy;
 
     address proxyAdmin;
-    address newStateSender;
+    address newGateway;
     address newExitHelper;
     address newRootERC1155Predicate;
     address newChildTokenTemplate;
@@ -28,14 +28,14 @@ contract DeployChildMintableERC1155PredicateTest is Test {
         deployer = new DeployChildMintableERC1155Predicate();
 
         proxyAdmin = makeAddr("proxyAdmin");
-        newStateSender = makeAddr("newStateSender");
+        newGateway = makeAddr("newGateway");
         newExitHelper = makeAddr("newExitHelper");
         newRootERC1155Predicate = makeAddr("newRootERC1155Predicate");
         newChildTokenTemplate = makeAddr("newChildTokenTemplate");
 
         (logicAddr, proxyAddr) = deployer.run(
             proxyAdmin,
-            newStateSender,
+            newGateway,
             newExitHelper,
             newRootERC1155Predicate,
             newChildTokenTemplate
@@ -55,7 +55,7 @@ contract DeployChildMintableERC1155PredicateTest is Test {
     function testInitialization() public {
         vm.expectRevert("Initializable: contract is already initialized");
         proxyAsChildMintableERC1155Predicate.initialize(
-            newStateSender,
+            newGateway,
             newExitHelper,
             newRootERC1155Predicate,
             newChildTokenTemplate
@@ -63,7 +63,7 @@ contract DeployChildMintableERC1155PredicateTest is Test {
 
         assertEq(
             vm.load(address(proxyAsChildMintableERC1155Predicate), bytes32(uint(0))),
-            bytes32(bytes.concat(hex"00000000000000000000", abi.encodePacked(newStateSender), hex"0001"))
+            bytes32(bytes.concat(hex"00000000000000000000", abi.encodePacked(newGateway), hex"0001"))
         );
         assertEq(
             vm.load(address(proxyAsChildMintableERC1155Predicate), bytes32(uint(1))),

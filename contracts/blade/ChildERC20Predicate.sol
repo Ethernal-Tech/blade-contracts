@@ -7,7 +7,7 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/proxy/Clones.sol";
 import "../interfaces/blade/IChildERC20Predicate.sol";
 import "../interfaces/blade/IChildERC20.sol";
-import "../interfaces/IStateSender.sol";
+import "../interfaces/IGateway.sol";
 import "./System.sol";
 
 /**
@@ -20,7 +20,7 @@ contract ChildERC20Predicate is IChildERC20Predicate, Initializable, System {
     using SafeERC20 for IERC20;
 
     /// @custom:security write-protection="onlySystemCall()"
-    IStateSender public l2StateSender;
+    IGateway public gateway;
     /// @custom:security write-protection="onlySystemCall()"
     address public stateReceiver;
     /// @custom:security write-protection="onlySystemCall()"
@@ -51,7 +51,7 @@ contract ChildERC20Predicate is IChildERC20Predicate, Initializable, System {
 
     /**
      * @notice Initialization function for ChildERC20Predicate
-     * @param newL2StateSender Address of L2StateSender to send exit information to
+     * @param newGateway Address of gateway to send exit information to
      * @param newStateReceiver Address of StateReceiver to receive deposit information from
      * @param newRootERC20Predicate Address of root ERC20 predicate to communicate with
      * @param newChildTokenTemplate Address of child token implementation to deploy clones of
@@ -59,14 +59,14 @@ contract ChildERC20Predicate is IChildERC20Predicate, Initializable, System {
      * @dev Can only be called once. `newNativeTokenRootAddress` should be set to zero where root token does not exist.
      */
     function initialize(
-        address newL2StateSender,
+        address newGateway,
         address newStateReceiver,
         address newRootERC20Predicate,
         address newChildTokenTemplate,
         address newNativeTokenRootAddress
     ) public virtual onlySystemCall initializer {
         _initialize(
-            newL2StateSender,
+            newGateway,
             newStateReceiver,
             newRootERC20Predicate,
             newChildTokenTemplate,
@@ -120,7 +120,7 @@ contract ChildERC20Predicate is IChildERC20Predicate, Initializable, System {
 
     /**
      * @notice Internal initialization function for ChildERC20Predicate
-     * @param newL2StateSender Address of L2StateSender to send exit information to
+     * @param newGateway Address of gateway to send exit information to
      * @param newStateReceiver Address of StateReceiver to receive deposit information from
      * @param newRootERC20Predicate Address of root ERC20 predicate to communicate with
      * @param newChildTokenTemplate Address of child token implementation to deploy clones of
@@ -128,20 +128,20 @@ contract ChildERC20Predicate is IChildERC20Predicate, Initializable, System {
      * @dev Can be called multiple times.
      */
     function _initialize(
-        address newL2StateSender,
+        address newGateway,
         address newStateReceiver,
         address newRootERC20Predicate,
         address newChildTokenTemplate,
         address newNativeTokenRootAddress
     ) internal {
         require(
-            newL2StateSender != address(0) &&
+            newGateway != address(0) &&
                 newStateReceiver != address(0) &&
                 newRootERC20Predicate != address(0) &&
                 newChildTokenTemplate != address(0),
             "ChildERC20Predicate: BAD_INITIALIZATION"
         );
-        l2StateSender = IStateSender(newL2StateSender);
+        gateway = IGateway(newGateway);
         stateReceiver = newStateReceiver;
         rootERC20Predicate = newRootERC20Predicate;
         childTokenTemplate = newChildTokenTemplate;
@@ -174,7 +174,7 @@ contract ChildERC20Predicate is IChildERC20Predicate, Initializable, System {
         assert(childToken.predicate() == address(this));
 
         require(childToken.burn(msg.sender, amount), "ChildERC20Predicate: BURN_FAILED");
-        l2StateSender.syncState(rootERC20Predicate, abi.encode(WITHDRAW_SIG, rootToken, msg.sender, receiver, amount));
+        gateway.sendBridgeMsg(rootERC20Predicate, abi.encode(WITHDRAW_SIG, rootToken, msg.sender, receiver, amount));
 
         // slither-disable-next-line reentrancy-events
         emit L2ERC20Withdraw(rootToken, address(childToken), msg.sender, receiver, amount);

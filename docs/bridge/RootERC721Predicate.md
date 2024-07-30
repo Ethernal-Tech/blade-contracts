@@ -199,10 +199,27 @@ function exitHelper() external view returns (address)
 |---|---|---|
 | _0 | address | undefined |
 
+### gateway
+
+```solidity
+function gateway() external view returns (contract IGateway)
+```
+
+
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | contract IGateway | undefined |
+
 ### initialize
 
 ```solidity
-function initialize(address newStateSender, address newExitHelper, address newChildERC721Predicate, address newChildTokenTemplate) external nonpayable
+function initialize(address newGateway, address newExitHelper, address newChildERC721Predicate, address newChildTokenTemplate) external nonpayable
 ```
 
 Initialization function for RootERC721Predicate
@@ -213,7 +230,7 @@ Initialization function for RootERC721Predicate
 
 | Name | Type | Description |
 |---|---|---|
-| newStateSender | address | Address of StateSender to send deposit information to |
+| newGateway | address | Address of gateway to send deposit information to |
 | newExitHelper | address | Address of ExitHelper to receive withdrawal information from |
 | newChildERC721Predicate | address | Address of child ERC721 predicate to communicate with |
 | newChildTokenTemplate | address | undefined |
@@ -304,23 +321,6 @@ function rootTokenToChildToken(address) external view returns (address)
 | Name | Type | Description |
 |---|---|---|
 | _0 | address | undefined |
-
-### stateSender
-
-```solidity
-function stateSender() external view returns (contract IStateSender)
-```
-
-
-
-
-
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | contract IStateSender | undefined |
 
 
 

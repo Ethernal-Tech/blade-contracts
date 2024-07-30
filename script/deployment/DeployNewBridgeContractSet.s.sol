@@ -6,18 +6,18 @@ import "forge-std/Script.sol";
 
 import {ProxyAdmin} from "@openzeppelin/contracts/proxy/transparent/ProxyAdmin.sol";
 
-import "script/deployment/bridge/DeployStateSender.s.sol";
+import "script/deployment/bridge/DeployGateway.s.sol";
 import "script/deployment/bridge/DeployCheckpointManager.s.sol";
 import "script/deployment/bridge/DeployExitHelper.s.sol";
 
-contract DeployNewBridgeContractSet is StateSenderDeployer, CheckpointManagerDeployer, ExitHelperDeployer {
+contract DeployNewBridgeContractSet is GatewayDeployer, CheckpointManagerDeployer, ExitHelperDeployer {
     using stdJson for string;
 
     function run()
         external
         returns (
             address proxyAdmin,
-            address stateSender,
+            address gateway,
             address checkpointManagerLogic,
             address checkpointManagerProxy,
             address exitHelperLogic,
@@ -35,7 +35,7 @@ contract DeployNewBridgeContractSet is StateSenderDeployer, CheckpointManagerDep
 
         proxyAdmin = address(_proxyAdmin);
 
-        stateSender = deployStateSender();
+        gateway = deployGateway();
 
         // To be initialized manually later.
         (checkpointManagerLogic, checkpointManagerProxy) = deployCheckpointManager(

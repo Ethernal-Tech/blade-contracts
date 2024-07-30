@@ -16,7 +16,7 @@ import "script/deployment/test/blade/DeployChildERC1155.s.sol";
 import "script/deployment/test/blade/DeployChildERC1155Predicate.s.sol";
 import "script/deployment/test/blade/DeployChildERC1155PredicateAccessList.s.sol";
 import "script/deployment/test/blade/DeployEIP1559Burn.s.sol";
-import "script/deployment/test/blade/DeployL2StateSender.s.sol";
+import "script/deployment/test/blade/DeployGateway.s.sol";
 import "script/deployment/test/blade/validator/DeployEpochManager.s.sol";
 import "script/deployment/test/blade/DeployNativeERC20.s.sol";
 import "script/deployment/test/blade/DeployNativeERC20Mintable.s.sol";
@@ -42,7 +42,7 @@ contract DeployBladeContracts is
     ChildERC1155PredicateDeployer,
     ChildERC1155PredicateAccessListDeployer,
     EIP1559BurnDeployer,
-    L2StateSenderDeployer,
+    GatewayDeployer,
     NativeERC20Deployer,
     NativeERC20MintableDeployer,
     RootMintableERC20PredicateDeployer,
@@ -80,7 +80,7 @@ contract DeployBladeContracts is
     address public childERC1155PredicateAccessListProxy;
     address public eip1559BurnLogic;
     address public eip1559BurnProxy;
-    address public l2StateSender;
+    address public gateway;
     address public nativeERC20Logic;
     address public nativeERC20Proxy;
     address public nativeERC20MintableLogic;
@@ -132,11 +132,11 @@ contract DeployBladeContracts is
             uint8(config.readUint('["ChildERC20"].decimals_'))
         );
 
-        l2StateSender = deployL2StateSender();
+        gateway = deployGateway();
 
         (childERC20PredicateLogic, childERC20PredicateProxy) = deployChildERC20Predicate(
             proxyAdmin,
-            l2StateSender,
+            gateway,
             stateReceiver,
             config.readAddress('["ChildERC20Predicate"].newRootERC20Predicate'),
             config.readAddress('["ChildERC20Predicate"].newChildTokenTemplate'),
@@ -145,7 +145,7 @@ contract DeployBladeContracts is
 
         (childERC20PredicateAccessListLogic, childERC20PredicateAccessListProxy) = deployChildERC20PredicateAccessList(
             proxyAdmin,
-            l2StateSender,
+            gateway,
             stateReceiver,
             config.readAddress('["ChildERC20PredicateAccessList"].newRootERC20Predicate'),
             config.readAddress('["ChildERC20PredicateAccessList"].newChildTokenTemplate'),
@@ -164,7 +164,7 @@ contract DeployBladeContracts is
 
         (childERC721PredicateLogic, childERC721PredicateProxy) = deployChildERC721Predicate(
             proxyAdmin,
-            l2StateSender,
+            gateway,
             stateReceiver,
             config.readAddress('["ChildERC721Predicate"].newRootERC721Predicate'),
             config.readAddress('["ChildERC721Predicate"].newChildTokenTemplate')
@@ -175,7 +175,7 @@ contract DeployBladeContracts is
             childERC721PredicateAccessListProxy
         ) = deployChildERC721PredicateAccessList(
             proxyAdmin,
-            l2StateSender,
+            gateway,
             stateReceiver,
             config.readAddress('["ChildERC721PredicateAccessList"].newRootERC721Predicate'),
             config.readAddress('["ChildERC721PredicateAccessList"].newChildTokenTemplate'),
@@ -192,7 +192,7 @@ contract DeployBladeContracts is
 
         (childERC1155PredicateLogic, childERC1155PredicateProxy) = deployChildERC1155Predicate(
             proxyAdmin,
-            l2StateSender,
+            gateway,
             stateReceiver,
             config.readAddress('["ChildERC1155Predicate"].newRootERC1155Predicate'),
             config.readAddress('["ChildERC1155Predicate"].newChildTokenTemplate')
@@ -203,7 +203,7 @@ contract DeployBladeContracts is
             childERC1155PredicateAccessListProxy
         ) = deployChildERC1155PredicateAccessList(
             proxyAdmin,
-            l2StateSender,
+            gateway,
             stateReceiver,
             config.readAddress('["ChildERC1155PredicateAccessList"].newRootERC1155Predicate'),
             config.readAddress('["ChildERC1155PredicateAccessList"].newChildTokenTemplate'),
@@ -241,7 +241,7 @@ contract DeployBladeContracts is
 
         (rootMintableERC20PredicateLogic, rootMintableERC20PredicateProxy) = deployRootMintableERC20Predicate(
             proxyAdmin,
-            l2StateSender,
+            gateway,
             stateReceiver,
             childERC20PredicateProxy,
             config.readAddress('["RootMintableERC20Predicate"].newChildTokenTemplate')
@@ -252,7 +252,7 @@ contract DeployBladeContracts is
             rootMintableERC20PredicateAccessListProxy
         ) = deployRootMintableERC20PredicateAccessList(
             proxyAdmin,
-            l2StateSender,
+            gateway,
             stateReceiver,
             childERC20PredicateProxy,
             config.readAddress('["RootMintableERC20PredicateAccessList"].newChildTokenTemplate'),
@@ -263,7 +263,7 @@ contract DeployBladeContracts is
 
         (rootMintableERC721PredicateLogic, rootMintableERC721PredicateProxy) = deployRootMintableERC721Predicate(
             proxyAdmin,
-            l2StateSender,
+            gateway,
             stateReceiver,
             childERC721PredicateProxy,
             config.readAddress('["RootMintableERC721Predicate"].newChildTokenTemplate')
@@ -274,7 +274,7 @@ contract DeployBladeContracts is
             rootMintableERC721PredicateAccessListProxy
         ) = deployRootMintableERC721PredicateAccessList(
             proxyAdmin,
-            l2StateSender,
+            gateway,
             stateReceiver,
             childERC721PredicateProxy,
             config.readAddress('["RootMintableERC721PredicateAccessList"].newChildTokenTemplate'),
@@ -285,7 +285,7 @@ contract DeployBladeContracts is
 
         (rootMintableERC1155PredicateLogic, rootMintableERC1155PredicateProxy) = deployRootMintableERC1155Predicate(
             proxyAdmin,
-            l2StateSender,
+            gateway,
             stateReceiver,
             childERC1155PredicateProxy,
             config.readAddress('["RootMintableERC1155Predicate"].newChildTokenTemplate')
@@ -296,7 +296,7 @@ contract DeployBladeContracts is
             rootMintableERC1155PredicateAccessListProxy
         ) = deployRootMintableERC1155PredicateAccessList(
             proxyAdmin,
-            l2StateSender,
+            gateway,
             stateReceiver,
             childERC1155PredicateProxy,
             config.readAddress('["RootMintableERC1155PredicateAccessList"].newChildTokenTemplate'),

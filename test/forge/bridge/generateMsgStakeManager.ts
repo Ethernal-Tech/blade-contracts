@@ -8,9 +8,9 @@ const CHAIN_ID = 31337;
 
 async function generateRegistrationSignature(signerAddress: string, contractAddress: string) {
   if (signerAddress === undefined || contractAddress === undefined) {
-    return
+    return;
   }
-  
+
   await mcl.init();
   const { pubkey, secret } = mcl.newKeyPair();
   const parsedPubkey = mcl.g2ToHex(pubkey);

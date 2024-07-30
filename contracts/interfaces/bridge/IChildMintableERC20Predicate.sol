@@ -22,7 +22,7 @@ interface IChildMintableERC20Predicate is IL2StateReceiver {
     event MintableTokenMapped(address indexed rootToken, address indexed childToken);
 
     function initialize(
-        address newL2StateSender,
+        address newGateway,
         address newStateReceiver,
         address newRootERC20Predicate,
         address newChildTokenTemplate

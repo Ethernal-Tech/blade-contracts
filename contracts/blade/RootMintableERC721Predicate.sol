@@ -5,12 +5,12 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts/token/ERC721/utils/ERC721Holder.sol";
 import "@openzeppelin/contracts/proxy/Clones.sol";
 import "../interfaces/blade/IRootMintableERC721Predicate.sol";
-import "../interfaces/IStateSender.sol";
+import "../interfaces/IGateway.sol";
 import "./System.sol";
 
 // solhint-disable reason-string
 contract RootMintableERC721Predicate is Initializable, ERC721Holder, System, IRootMintableERC721Predicate {
-    IStateSender public l2StateSender;
+    IGateway public gateway;
     address public stateReceiver;
     address public childERC721Predicate;
     address public childTokenTemplate;
@@ -23,19 +23,19 @@ contract RootMintableERC721Predicate is Initializable, ERC721Holder, System, IRo
 
     /**
      * @notice Initialization function for RootMintableERC721Predicate
-     * @param newL2StateSender Address of L2StateSender to send deposit information to
+     * @param newGateway Address of gateway to send deposit information to
      * @param newStateReceiver Address of StateReceiver to receive withdrawal information from
      * @param newChildERC721Predicate Address of child ERC721 predicate to communicate with
      * @param newChildTokenTemplate Address of child token template to calculate child token addresses
      * @dev Can only be called once.
      */
     function initialize(
-        address newL2StateSender,
+        address newGateway,
         address newStateReceiver,
         address newChildERC721Predicate,
         address newChildTokenTemplate
     ) external virtual onlySystemCall initializer {
-        _initialize(newL2StateSender, newStateReceiver, newChildERC721Predicate, newChildTokenTemplate);
+        _initialize(newGateway, newStateReceiver, newChildERC721Predicate, newChildTokenTemplate);
     }
 
     /**
@@ -103,7 +103,7 @@ contract RootMintableERC721Predicate is Initializable, ERC721Holder, System, IRo
 
         rootTokenToChildToken[address(rootToken)] = childToken;
 
-        l2StateSender.syncState(
+        gateway.sendBridgeMsg(
             childPredicate,
             abi.encode(MAP_TOKEN_SIG, rootToken, rootToken.name(), rootToken.symbol())
         );
@@ -125,19 +125,19 @@ contract RootMintableERC721Predicate is Initializable, ERC721Holder, System, IRo
     // slither-disable-end dead-code
 
     function _initialize(
-        address newL2StateSender,
+        address newGateway,
         address newStateReceiver,
         address newChildERC721Predicate,
         address newChildTokenTemplate
     ) internal {
         require(
-            newL2StateSender != address(0) &&
+            newGateway != address(0) &&
                 newStateReceiver != address(0) &&
                 newChildERC721Predicate != address(0) &&
                 newChildTokenTemplate != address(0),
             "RootMintableERC721Predicate: BAD_INITIALIZATION"
         );
-        l2StateSender = IStateSender(newL2StateSender);
+        gateway = IGateway(newGateway);
         stateReceiver = newStateReceiver;
         childERC721Predicate = newChildERC721Predicate;
         childTokenTemplate = newChildTokenTemplate;
@@ -149,10 +149,7 @@ contract RootMintableERC721Predicate is Initializable, ERC721Holder, System, IRo
 
         rootToken.safeTransferFrom(msg.sender, address(this), tokenId);
 
-        l2StateSender.syncState(
-            childERC721Predicate,
-            abi.encode(DEPOSIT_SIG, rootToken, msg.sender, receiver, tokenId)
-        );
+        gateway.sendBridgeMsg(childERC721Predicate, abi.encode(DEPOSIT_SIG, rootToken, msg.sender, receiver, tokenId));
         // slither-disable-next-line reentrancy-events
         emit L2MintableERC721Deposit(address(rootToken), childToken, msg.sender, receiver, tokenId);
         _afterTokenDeposit();
@@ -173,7 +170,7 @@ contract RootMintableERC721Predicate is Initializable, ERC721Holder, System, IRo
             }
         }
 
-        l2StateSender.syncState(
+        gateway.sendBridgeMsg(
             childERC721Predicate,
             abi.encode(DEPOSIT_BATCH_SIG, rootToken, msg.sender, receivers, tokenIds)
         );

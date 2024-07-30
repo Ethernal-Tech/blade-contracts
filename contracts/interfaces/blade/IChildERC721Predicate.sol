@@ -6,7 +6,7 @@ import "./IStateReceiver.sol";
 
 interface IChildERC721Predicate is IStateReceiver {
     function initialize(
-        address newL2StateSender,
+        address newGateway,
         address newStateReceiver,
         address newRootERC721Predicate,
         address newChildTokenTemplate

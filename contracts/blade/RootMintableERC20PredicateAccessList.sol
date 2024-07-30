@@ -12,7 +12,7 @@ import {AccessList} from "../lib/AccessList.sol";
 // solhint-disable reason-string
 contract RootMintableERC20PredicateAccessList is AccessList, RootMintableERC20Predicate {
     function initialize(
-        address newL2StateSender,
+        address newGateway,
         address newStateReceiver,
         address newChildERC20Predicate,
         address newChildTokenTemplate,
@@ -20,7 +20,7 @@ contract RootMintableERC20PredicateAccessList is AccessList, RootMintableERC20Pr
         bool newUseBlockList,
         address newOwner
     ) public virtual onlySystemCall initializer {
-        _initialize(newL2StateSender, newStateReceiver, newChildERC20Predicate, newChildTokenTemplate);
+        _initialize(newGateway, newStateReceiver, newChildERC20Predicate, newChildTokenTemplate);
         _initializeAccessList(newUseAllowList, newUseBlockList);
         _transferOwnership(newOwner);
     }

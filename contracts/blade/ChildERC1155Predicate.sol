@@ -5,7 +5,7 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts/proxy/Clones.sol";
 import "../interfaces/blade/IChildERC1155Predicate.sol";
 import "../interfaces/blade/IChildERC1155.sol";
-import "../interfaces/IStateSender.sol";
+import "../interfaces/IGateway.sol";
 import "./System.sol";
 
 /**
@@ -16,7 +16,7 @@ import "./System.sol";
 // solhint-disable reason-string
 contract ChildERC1155Predicate is IChildERC1155Predicate, Initializable, System {
     /// @custom:security write-protection="onlySystemCall()"
-    IStateSender public l2StateSender;
+    IGateway public gateway;
     /// @custom:security write-protection="onlySystemCall()"
     address public stateReceiver;
     /// @custom:security write-protection="onlySystemCall()"
@@ -72,19 +72,19 @@ contract ChildERC1155Predicate is IChildERC1155Predicate, Initializable, System 
 
     /**
      * @notice Initialization function for ChildERC1155Predicate
-     * @param newL2StateSender Address of L2StateSender to send exit information to
+     * @param newGateway Address of gateway to send exit information to
      * @param newStateReceiver Address of StateReceiver to receive deposit information from
      * @param newRootERC1155Predicate Address of root ERC1155 predicate to communicate with
      * @param newChildTokenTemplate Address of child token implementation to deploy clones of
      * @dev Can only be called once.
      */
     function initialize(
-        address newL2StateSender,
+        address newGateway,
         address newStateReceiver,
         address newRootERC1155Predicate,
         address newChildTokenTemplate
     ) public virtual onlySystemCall initializer {
-        _initialize(newL2StateSender, newStateReceiver, newRootERC1155Predicate, newChildTokenTemplate);
+        _initialize(newGateway, newStateReceiver, newRootERC1155Predicate, newChildTokenTemplate);
     }
 
     /**
@@ -157,26 +157,26 @@ contract ChildERC1155Predicate is IChildERC1155Predicate, Initializable, System 
 
     /**
      * @notice Internal initialization function for ChildERC1155Predicate
-     * @param newL2StateSender Address of L2StateSender to send exit information to
+     * @param newGateway Address of gateway to send exit information to
      * @param newStateReceiver Address of StateReceiver to receive deposit information from
      * @param newRootERC1155Predicate Address of root ERC1155 predicate to communicate with
      * @param newChildTokenTemplate Address of child token implementation to deploy clones of
      * @dev Can be called multiple times.
      */
     function _initialize(
-        address newL2StateSender,
+        address newGateway,
         address newStateReceiver,
         address newRootERC1155Predicate,
         address newChildTokenTemplate
     ) internal {
         require(
-            newL2StateSender != address(0) &&
+            newGateway != address(0) &&
                 newStateReceiver != address(0) &&
                 newRootERC1155Predicate != address(0) &&
                 newChildTokenTemplate != address(0),
             "ChildERC1155Predicate: BAD_INITIALIZATION"
         );
-        l2StateSender = IStateSender(newL2StateSender);
+        gateway = IGateway(newGateway);
         stateReceiver = newStateReceiver;
         rootERC1155Predicate = newRootERC1155Predicate;
         childTokenTemplate = newChildTokenTemplate;
@@ -209,7 +209,7 @@ contract ChildERC1155Predicate is IChildERC1155Predicate, Initializable, System 
         assert(childToken.predicate() == address(this));
 
         require(childToken.burn(msg.sender, tokenId, amount), "ChildERC1155Predicate: BURN_FAILED");
-        l2StateSender.syncState(
+        gateway.sendBridgeMsg(
             rootERC1155Predicate,
             abi.encode(WITHDRAW_SIG, rootToken, msg.sender, receiver, tokenId, amount)
         );
@@ -238,7 +238,7 @@ contract ChildERC1155Predicate is IChildERC1155Predicate, Initializable, System 
 
         require(childToken.burnBatch(msg.sender, tokenIds, amounts), "ChildERC1155Predicate: BURN_FAILED");
 
-        l2StateSender.syncState(
+        gateway.sendBridgeMsg(
             rootERC1155Predicate,
             abi.encode(WITHDRAW_BATCH_SIG, rootToken, msg.sender, receivers, tokenIds, amounts)
         );

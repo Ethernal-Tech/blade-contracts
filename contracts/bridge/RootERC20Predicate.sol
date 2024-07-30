@@ -5,13 +5,13 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/proxy/Clones.sol";
 import "../interfaces/bridge/IRootERC20Predicate.sol";
-import "../interfaces/IStateSender.sol";
+import "../interfaces/IGateway.sol";
 
 // solhint-disable reason-string
 contract RootERC20Predicate is Initializable, IRootERC20Predicate {
     using SafeERC20 for IERC20Metadata;
 
-    IStateSender public stateSender;
+    IGateway public gateway;
     address public exitHelper;
     address public childERC20Predicate;
     address public childTokenTemplate;
@@ -23,26 +23,26 @@ contract RootERC20Predicate is Initializable, IRootERC20Predicate {
 
     /**
      * @notice Initialization function for RootERC20Predicate
-     * @param newStateSender Address of StateSender to send deposit information to
+     * @param newGateway Address of gateway to send deposit information to
      * @param newExitHelper Address of ExitHelper to receive withdrawal information from
      * @param newChildERC20Predicate Address of child ERC20 predicate to communicate with
      * @dev Can only be called once.
      */
     function initialize(
-        address newStateSender,
+        address newGateway,
         address newExitHelper,
         address newChildERC20Predicate,
         address newChildTokenTemplate,
         address newNativeTokenRoot
     ) external initializer {
         require(
-            newStateSender != address(0) &&
+            newGateway != address(0) &&
                 newExitHelper != address(0) &&
                 newChildERC20Predicate != address(0) &&
                 newChildTokenTemplate != address(0),
             "RootERC20Predicate: BAD_INITIALIZATION"
         );
-        stateSender = IStateSender(newStateSender);
+        gateway = IGateway(newGateway);
         exitHelper = newExitHelper;
         childERC20Predicate = newChildERC20Predicate;
         childTokenTemplate = newChildTokenTemplate;
@@ -100,7 +100,7 @@ contract RootERC20Predicate is Initializable, IRootERC20Predicate {
 
         rootTokenToChildToken[address(rootToken)] = childToken;
 
-        stateSender.syncState(
+        gateway.sendBridgeMsg(
             childPredicate,
             abi.encode(MAP_TOKEN_SIG, rootToken, rootToken.name(), rootToken.symbol(), rootToken.decimals())
         );
@@ -121,7 +121,7 @@ contract RootERC20Predicate is Initializable, IRootERC20Predicate {
 
         rootToken.safeTransferFrom(msg.sender, address(this), amount);
 
-        stateSender.syncState(childERC20Predicate, abi.encode(DEPOSIT_SIG, rootToken, msg.sender, receiver, amount));
+        gateway.sendBridgeMsg(childERC20Predicate, abi.encode(DEPOSIT_SIG, rootToken, msg.sender, receiver, amount));
         // slither-disable-next-line reentrancy-events
         emit ERC20Deposit(address(rootToken), childToken, msg.sender, receiver, amount);
     }

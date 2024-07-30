@@ -40,7 +40,7 @@ interface IChildMintableERC1155Predicate is IL2StateReceiver {
     event MintableTokenMapped(address indexed rootToken, address indexed childToken);
 
     function initialize(
-        address newStateSender,
+        address newGateway,
         address newExitHelper,
         address newRootERC721Predicate,
         address newChildTokenTemplate

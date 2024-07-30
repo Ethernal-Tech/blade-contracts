@@ -21,7 +21,7 @@ contract DeployBladeManagerTest is Test {
     address proxyAdmin;
     address newStakeManager;
     address newBls;
-    address newStateSender;
+    address newGateway;
     address newMatic;
     address newChildValidatorSet;
     address newExitHelper;
@@ -38,30 +38,11 @@ contract DeployBladeManagerTest is Test {
         newRootERC20Predicate = makeAddr("newRootERC20Predicate");
 
         GenesisAccount[] memory validators = new GenesisAccount[](3);
-        validators[0] = GenesisAccount({
-            addr: bob,
-            stakedTokens: 0,
-            preminedTokens: 0,
-            isValidator: true
-        });
-        validators[1] = GenesisAccount({
-            addr: alice,
-            stakedTokens: 0,
-            preminedTokens: 0,
-            isValidator: true
-        });
-        validators[2] = GenesisAccount({
-            addr: jim,
-            stakedTokens: 0,
-            preminedTokens: 0,
-            isValidator: true
-        });
+        validators[0] = GenesisAccount({addr: bob, stakedTokens: 0, preminedTokens: 0, isValidator: true});
+        validators[1] = GenesisAccount({addr: alice, stakedTokens: 0, preminedTokens: 0, isValidator: true});
+        validators[2] = GenesisAccount({addr: jim, stakedTokens: 0, preminedTokens: 0, isValidator: true});
 
-        (logicAddr, proxyAddr) = deployer.run(
-            proxyAdmin,
-            newRootERC20Predicate,
-            validators
-        );
+        (logicAddr, proxyAddr) = deployer.run(proxyAdmin, newRootERC20Predicate, validators);
         _recordProxy(proxyAddr);
     }
 
@@ -76,10 +57,7 @@ contract DeployBladeManagerTest is Test {
 
     function testInitialization() public {
         vm.expectRevert("Initializable: contract is already initialized");
-        proxyAsBladeManager.initialize(
-            newRootERC20Predicate,
-            new GenesisAccount[](0)
-        );
+        proxyAsBladeManager.initialize(newRootERC20Predicate, new GenesisAccount[](0));
     }
 
     function testLogicChange() public {

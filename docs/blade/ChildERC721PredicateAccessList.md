@@ -276,51 +276,10 @@ function childTokenTemplate() external view returns (address)
 |---|---|---|
 | _0 | address | undefined |
 
-### initialize
+### gateway
 
 ```solidity
-function initialize(address newL2StateSender, address newStateReceiver, address newRootERC721Predicate, address newChildTokenTemplate, bool newUseAllowList, bool newUseBlockList, address newOwner) external nonpayable
-```
-
-
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| newL2StateSender | address | undefined |
-| newStateReceiver | address | undefined |
-| newRootERC721Predicate | address | undefined |
-| newChildTokenTemplate | address | undefined |
-| newUseAllowList | bool | undefined |
-| newUseBlockList | bool | undefined |
-| newOwner | address | undefined |
-
-### initialize
-
-```solidity
-function initialize(address newL2StateSender, address newStateReceiver, address newRootERC721Predicate, address newChildTokenTemplate) external nonpayable
-```
-
-Initialization function for ChildERC721Predicate
-
-*Can only be called once. `newNativeTokenRootAddress` should be set to zero where root token does not exist.*
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| newL2StateSender | address | Address of L2StateSender to send exit information to |
-| newStateReceiver | address | Address of StateReceiver to receive deposit information from |
-| newRootERC721Predicate | address | Address of root ERC721 predicate to communicate with |
-| newChildTokenTemplate | address | Address of child token implementation to deploy clones of |
-
-### l2StateSender
-
-```solidity
-function l2StateSender() external view returns (contract IStateSender)
+function gateway() external view returns (contract IGateway)
 ```
 
 
@@ -332,7 +291,48 @@ function l2StateSender() external view returns (contract IStateSender)
 
 | Name | Type | Description |
 |---|---|---|
-| _0 | contract IStateSender | undefined |
+| _0 | contract IGateway | undefined |
+
+### initialize
+
+```solidity
+function initialize(address newGateway, address newStateReceiver, address newRootERC721Predicate, address newChildTokenTemplate, bool newUseAllowList, bool newUseBlockList, address newOwner) external nonpayable
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| newGateway | address | undefined |
+| newStateReceiver | address | undefined |
+| newRootERC721Predicate | address | undefined |
+| newChildTokenTemplate | address | undefined |
+| newUseAllowList | bool | undefined |
+| newUseBlockList | bool | undefined |
+| newOwner | address | undefined |
+
+### initialize
+
+```solidity
+function initialize(address newGateway, address newStateReceiver, address newRootERC721Predicate, address newChildTokenTemplate) external nonpayable
+```
+
+Initialization function for ChildERC721Predicate
+
+*Can only be called once. `newNativeTokenRootAddress` should be set to zero where root token does not exist.*
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| newGateway | address | Address of gateway to send exit information to |
+| newStateReceiver | address | Address of StateReceiver to receive deposit information from |
+| newRootERC721Predicate | address | Address of root ERC721 predicate to communicate with |
+| newChildTokenTemplate | address | Address of child token implementation to deploy clones of |
 
 ### onStateReceive
 

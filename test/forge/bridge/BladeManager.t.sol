@@ -2,7 +2,7 @@
 pragma solidity 0.8.19;
 
 import "@utils/Test.sol";
-import "contracts/bridge/StateSender.sol";
+import "contracts/blade/Gateway.sol";
 import {ExitHelper} from "contracts/bridge/ExitHelper.sol";
 import {BladeManager, GenesisAccount} from "contracts/bridge/BladeManager.sol";
 import {MockERC20} from "contracts/mocks/MockERC20.sol";
@@ -30,29 +30,11 @@ abstract contract Initialized is Uninitialized {
         super.setUp();
 
         GenesisAccount[] memory validators = new GenesisAccount[](3);
-        validators[0] = GenesisAccount({
-            addr: bob,
-            stakedTokens: 0,
-            preminedTokens: 0,
-            isValidator: true
-        });
-        validators[1] = GenesisAccount({
-            addr: alice,
-            stakedTokens: 0,
-            preminedTokens: 0,
-            isValidator: true
-        });
-        validators[2] = GenesisAccount({
-            addr: jim,
-            stakedTokens: 0,
-            preminedTokens: 0,
-            isValidator: true
-        });
+        validators[0] = GenesisAccount({addr: bob, stakedTokens: 0, preminedTokens: 0, isValidator: true});
+        validators[1] = GenesisAccount({addr: alice, stakedTokens: 0, preminedTokens: 0, isValidator: true});
+        validators[2] = GenesisAccount({addr: jim, stakedTokens: 0, preminedTokens: 0, isValidator: true});
 
-        bladeManager.initialize(
-            address(rootERC20Predicate),
-           validators
-        );
+        bladeManager.initialize(address(rootERC20Predicate), validators);
     }
 }
 
@@ -69,7 +51,7 @@ contract BladeManager_PremineInitialized is Initialized {
         childERC20Predicate = makeAddr("childERC20Predicate");
         childTokenTemplate = makeAddr("childTokenTemplate");
         rootERC20Predicate.initialize(
-            address(new StateSender()),
+            address(new Gateway()),
             address(new ExitHelper()),
             childERC20Predicate,
             childTokenTemplate,
@@ -82,20 +64,20 @@ contract BladeManager_PremineInitialized is Initialized {
         token.approve(address(bladeManager), balance);
         vm.expectEmit(true, true, true, true);
         emit GenesisBalanceAdded(bob, balance);
-        bladeManager.addGenesisBalance(balance/2, balance/2);
+        bladeManager.addGenesisBalance(balance / 2, balance / 2);
 
         GenesisAccount[] memory genesisAccounts = bladeManager.genesisSet();
         assertEq(genesisAccounts.length, 3, "should set genesisSet");
         GenesisAccount memory account = genesisAccounts[0];
         assertEq(account.addr, bob, "should set validator address");
-        assertEq(account.stakedTokens, balance/2, "should be equal to added staked amount");
-        assertEq(account.preminedTokens, balance/2, "should be equal to added staked amount");
+        assertEq(account.stakedTokens, balance / 2, "should be equal to added staked amount");
+        assertEq(account.preminedTokens, balance / 2, "should be equal to added staked amount");
     }
 
     function test_addGenesisBalance_genesisSetFinalizedRevert() public {
         bladeManager.finalizeGenesis();
         vm.expectRevert("BladeManager: CHILD_CHAIN_IS_LIVE");
-        bladeManager.addGenesisBalance(balance/2, balance/2);
+        bladeManager.addGenesisBalance(balance / 2, balance / 2);
     }
 
     function test_addGenesisBalance_invalidAmountRevert() public {
@@ -133,16 +115,15 @@ contract BladeManager_UndefinedRootERC20Predicate is Uninitialized {
     function setUp() public virtual override {
         super.setUp();
     }
+
     function test_initialize_revertUndefinedRootERC20Predicate() public {
         vm.expectRevert("INVALID_INPUT");
 
         bladeManager.initialize(address(0), new GenesisAccount[](0));
     }
-       
+
     function test_addGenesisBalance_revertUndefinedRootERC20Predicate() public {
-        vm.expectRevert(
-            abi.encodeWithSelector(Unauthorized.selector, "BladeManager: UNDEFINED_ROOT_ERC20_PREDICATE")
-        );
+        vm.expectRevert(abi.encodeWithSelector(Unauthorized.selector, "BladeManager: UNDEFINED_ROOT_ERC20_PREDICATE"));
         bladeManager.addGenesisBalance(100 ether, 100 ether);
     }
 }
