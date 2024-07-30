@@ -18,13 +18,7 @@ abstract contract ChildERC20PredicateDeployer is Script {
     ) internal returns (address logicAddr, address proxyAddr) {
         bytes memory initData = abi.encodeCall(
             ChildERC20Predicate.initialize,
-            (
-                newGateway,
-                newStateReceiver,
-                newRootERC20Predicate,
-                newChildTokenTemplate,
-                newNativeTokenRootAddress
-            )
+            (newGateway, newStateReceiver, newRootERC20Predicate, newChildTokenTemplate, newNativeTokenRootAddress)
         );
 
         vm.startBroadcast();
