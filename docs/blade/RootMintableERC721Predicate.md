@@ -335,29 +335,10 @@ Function to deposit tokens from the depositor to another address on the child ch
 | receiver | address | undefined |
 | tokenId | uint256 | Index of the NFT to deposit |
 
-### initialize
+### gateway
 
 ```solidity
-function initialize(address newL2StateSender, address newStateReceiver, address newChildERC721Predicate, address newChildTokenTemplate) external nonpayable
-```
-
-Initialization function for RootMintableERC721Predicate
-
-*Can only be called once.*
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| newL2StateSender | address | Address of L2StateSender to send deposit information to |
-| newStateReceiver | address | Address of StateReceiver to receive withdrawal information from |
-| newChildERC721Predicate | address | Address of child ERC721 predicate to communicate with |
-| newChildTokenTemplate | address | Address of child token template to calculate child token addresses |
-
-### l2StateSender
-
-```solidity
-function l2StateSender() external view returns (contract IStateSender)
+function gateway() external view returns (contract IGateway)
 ```
 
 
@@ -369,7 +350,26 @@ function l2StateSender() external view returns (contract IStateSender)
 
 | Name | Type | Description |
 |---|---|---|
-| _0 | contract IStateSender | undefined |
+| _0 | contract IGateway | undefined |
+
+### initialize
+
+```solidity
+function initialize(address newGateway, address newStateReceiver, address newChildERC721Predicate, address newChildTokenTemplate) external nonpayable
+```
+
+Initialization function for RootMintableERC721Predicate
+
+*Can only be called once.*
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| newGateway | address | Address of gateway to send deposit information to |
+| newStateReceiver | address | Address of StateReceiver to receive withdrawal information from |
+| newChildERC721Predicate | address | Address of child ERC721 predicate to communicate with |
+| newChildTokenTemplate | address | Address of child token template to calculate child token addresses |
 
 ### mapToken
 

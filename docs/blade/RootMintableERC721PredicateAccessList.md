@@ -346,6 +346,23 @@ Function to deposit tokens from the depositor to another address on the child ch
 | receiver | address | undefined |
 | tokenId | uint256 | Index of the NFT to deposit |
 
+### gateway
+
+```solidity
+function gateway() external view returns (contract IGateway)
+```
+
+
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | contract IGateway | undefined |
+
 ### initialize
 
 ```solidity
@@ -371,7 +388,7 @@ function initialize(address newL2StateSender, address newStateReceiver, address 
 ### initialize
 
 ```solidity
-function initialize(address newL2StateSender, address newStateReceiver, address newChildERC721Predicate, address newChildTokenTemplate) external nonpayable
+function initialize(address newGateway, address newStateReceiver, address newChildERC721Predicate, address newChildTokenTemplate) external nonpayable
 ```
 
 Initialization function for RootMintableERC721Predicate
@@ -382,27 +399,10 @@ Initialization function for RootMintableERC721Predicate
 
 | Name | Type | Description |
 |---|---|---|
-| newL2StateSender | address | Address of L2StateSender to send deposit information to |
+| newGateway | address | Address of gateway to send deposit information to |
 | newStateReceiver | address | Address of StateReceiver to receive withdrawal information from |
 | newChildERC721Predicate | address | Address of child ERC721 predicate to communicate with |
 | newChildTokenTemplate | address | Address of child token template to calculate child token addresses |
-
-### l2StateSender
-
-```solidity
-function l2StateSender() external view returns (contract IStateSender)
-```
-
-
-
-
-
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | contract IStateSender | undefined |
 
 ### mapToken
 

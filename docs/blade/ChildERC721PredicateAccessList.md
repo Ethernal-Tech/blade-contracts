@@ -276,6 +276,23 @@ function childTokenTemplate() external view returns (address)
 |---|---|---|
 | _0 | address | undefined |
 
+### gateway
+
+```solidity
+function gateway() external view returns (contract IGateway)
+```
+
+
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | contract IGateway | undefined |
+
 ### initialize
 
 ```solidity
@@ -316,23 +333,6 @@ Initialization function for ChildERC721Predicate
 | newStateReceiver | address | Address of StateReceiver to receive deposit information from |
 | newRootERC721Predicate | address | Address of root ERC721 predicate to communicate with |
 | newChildTokenTemplate | address | Address of child token implementation to deploy clones of |
-
-### l2StateSender
-
-```solidity
-function l2StateSender() external view returns (contract IStateSender)
-```
-
-
-
-
-
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | contract IStateSender | undefined |
 
 ### onStateReceive
 

@@ -242,10 +242,27 @@ function childTokenTemplate() external view returns (address)
 |---|---|---|
 | _0 | address | undefined |
 
+### gateway
+
+```solidity
+function gateway() external view returns (contract IGateway)
+```
+
+
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | contract IGateway | undefined |
+
 ### initialize
 
 ```solidity
-function initialize(address newL2StateSender, address newStateReceiver, address newRootERC20Predicate, address newChildTokenTemplate, address newNativeTokenRootAddress) external nonpayable
+function initialize(address newGateway, address newStateReceiver, address newRootERC20Predicate, address newChildTokenTemplate, address newNativeTokenRootAddress) external nonpayable
 ```
 
 Initialization function for ChildERC20Predicate
@@ -256,7 +273,7 @@ Initialization function for ChildERC20Predicate
 
 | Name | Type | Description |
 |---|---|---|
-| newL2StateSender | address | Address of L2StateSender to send exit information to |
+| newGateway | address | Address of gateway to send exit information to |
 | newStateReceiver | address | Address of StateReceiver to receive deposit information from |
 | newRootERC20Predicate | address | Address of root ERC20 predicate to communicate with |
 | newChildTokenTemplate | address | Address of child token implementation to deploy clones of |
@@ -284,23 +301,6 @@ function initialize(address newL2StateSender, address newStateReceiver, address 
 | newUseAllowList | bool | undefined |
 | newUseBlockList | bool | undefined |
 | newOwner | address | undefined |
-
-### l2StateSender
-
-```solidity
-function l2StateSender() external view returns (contract IStateSender)
-```
-
-
-
-
-
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | contract IStateSender | undefined |
 
 ### onStateReceive
 
