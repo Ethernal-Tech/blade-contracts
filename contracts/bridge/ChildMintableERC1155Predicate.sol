@@ -173,7 +173,7 @@ contract ChildMintableERC1155Predicate is Initializable, IChildMintableERC1155Pr
         assert(childToken.predicate() == address(this));
 
         require(childToken.burn(msg.sender, tokenId, amount), "ChildMintableERC1155Predicate: BURN_FAILED");
-        gateway.syncState(
+        gateway.sendBridgeMsg(
             rootERC1155Predicate,
             abi.encode(WITHDRAW_SIG, rootToken, msg.sender, receiver, tokenId, amount)
         );
@@ -205,7 +205,7 @@ contract ChildMintableERC1155Predicate is Initializable, IChildMintableERC1155Pr
 
         require(childToken.burnBatch(msg.sender, tokenIds, amounts), "ChildMintableERC1155Predicate: BURN_FAILED");
 
-        gateway.syncState(
+        gateway.sendBridgeMsg(
             rootERC1155Predicate,
             abi.encode(WITHDRAW_BATCH_SIG, rootToken, msg.sender, receivers, tokenIds, amounts)
         );

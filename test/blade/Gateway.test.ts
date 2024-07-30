@@ -59,7 +59,7 @@ describe("Gateway", () => {
     const moreThanMaxData = "0x" + "00".repeat(maxDataLength + 1); // notice `+ 1` here (it creates more than max data)
     const receiver = "0x0000000000000000000000000000000000000000";
 
-    await expect(gateway.syncState(receiver, moreThanMaxData)).to.be.revertedWith("INVALID_RECEIVER");
+    await expect(gateway.sendBridgeMsg(receiver, moreThanMaxData)).to.be.revertedWith("INVALID_RECEIVER");
   });
 
   it("Gateway: should check data length", async () => {
@@ -67,7 +67,7 @@ describe("Gateway", () => {
     const moreThanMaxData = "0x" + "00".repeat(maxDataLength + 1); // notice `+ 1` here (it creates more than max data)
     const receiver = accounts[2].address;
 
-    await expect(gateway.syncState(receiver, moreThanMaxData)).to.be.revertedWith("EXCEEDS_MAX_LENGTH");
+    await expect(gateway.sendBridgeMsg(receiver, moreThanMaxData)).to.be.revertedWith("EXCEEDS_MAX_LENGTH");
   });
 
   it("Gateway: should emit event properly", async () => {
@@ -76,11 +76,11 @@ describe("Gateway", () => {
     const sender = accounts[0].address;
     const receiver = accounts[1].address;
 
-    const tx = await gateway.syncState(receiver, maxData);
+    const tx = await gateway.sendBridgeMsg(receiver, maxData);
     const receipt = await tx.wait();
     expect(receipt.events?.length).to.equals(1);
 
-    const event = receipt.events?.find((log) => log.event === "StateSynced");
+    const event = receipt.events?.find((log) => log.event === "BridgeMessageEvent");
     expect(event?.args?.id).to.equal(1);
     expect(event?.args?.sender).to.equal(sender);
     expect(event?.args?.receiver).to.equal(receiver);
@@ -96,11 +96,11 @@ describe("Gateway", () => {
     const initialCounter = (await gateway.counter()).toNumber();
     expect(await gateway.counter()).to.equal(initialCounter);
 
-    await gateway.syncState(receiver, maxData);
-    await gateway.syncState(receiver, maxData);
-    await expect(gateway.syncState(receiver, moreThanMaxData)).to.be.revertedWith("EXCEEDS_MAX_LENGTH");
-    await gateway.syncState(receiver, maxData);
-    await expect(gateway.syncState(receiver, moreThanMaxData)).to.be.revertedWith("EXCEEDS_MAX_LENGTH");
+    await gateway.sendBridgeMsg(receiver, maxData);
+    await gateway.sendBridgeMsg(receiver, maxData);
+    await expect(gateway.sendBridgeMsg(receiver, moreThanMaxData)).to.be.revertedWith("EXCEEDS_MAX_LENGTH");
+    await gateway.sendBridgeMsg(receiver, maxData);
+    await expect(gateway.sendBridgeMsg(receiver, moreThanMaxData)).to.be.revertedWith("EXCEEDS_MAX_LENGTH");
 
     expect(await gateway.counter()).to.equal(initialCounter + 3);
   });

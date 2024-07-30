@@ -107,7 +107,7 @@ contract RootERC721Predicate is Initializable, ERC721Holder, IRootERC721Predicat
 
         rootTokenToChildToken[address(rootToken)] = childToken;
 
-        gateway.syncState(childPredicate, abi.encode(MAP_TOKEN_SIG, rootToken, rootToken.name(), rootToken.symbol()));
+        gateway.sendBridgeMsg(childPredicate, abi.encode(MAP_TOKEN_SIG, rootToken, rootToken.name(), rootToken.symbol()));
         // slither-disable-next-line reentrancy-events
         emit TokenMapped(address(rootToken), childToken);
         return childToken;
@@ -118,7 +118,7 @@ contract RootERC721Predicate is Initializable, ERC721Holder, IRootERC721Predicat
 
         rootToken.safeTransferFrom(msg.sender, address(this), tokenId);
 
-        gateway.syncState(childERC721Predicate, abi.encode(DEPOSIT_SIG, rootToken, msg.sender, receiver, tokenId));
+        gateway.sendBridgeMsg(childERC721Predicate, abi.encode(DEPOSIT_SIG, rootToken, msg.sender, receiver, tokenId));
         // slither-disable-next-line reentrancy-events
         emit ERC721Deposit(address(rootToken), childToken, msg.sender, receiver, tokenId);
     }
@@ -137,7 +137,7 @@ contract RootERC721Predicate is Initializable, ERC721Holder, IRootERC721Predicat
             }
         }
 
-        gateway.syncState(
+        gateway.sendBridgeMsg(
             childERC721Predicate,
             abi.encode(DEPOSIT_BATCH_SIG, rootToken, msg.sender, receivers, tokenIds)
         );

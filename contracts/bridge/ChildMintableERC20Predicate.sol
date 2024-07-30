@@ -137,7 +137,7 @@ contract ChildMintableERC20Predicate is Initializable, IChildMintableERC20Predic
         assert(childToken.predicate() == address(this));
 
         require(childToken.burn(msg.sender, amount), "ChildMintableERC20Predicate: BURN_FAILED");
-        gateway.syncState(rootERC20Predicate, abi.encode(WITHDRAW_SIG, rootToken, msg.sender, receiver, amount));
+        gateway.sendBridgeMsg(rootERC20Predicate, abi.encode(WITHDRAW_SIG, rootToken, msg.sender, receiver, amount));
 
         // slither-disable-next-line reentrancy-events
         emit MintableERC20Withdraw(rootToken, address(childToken), msg.sender, receiver, amount);

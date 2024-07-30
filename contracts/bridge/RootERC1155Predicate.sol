@@ -118,7 +118,7 @@ contract RootERC1155Predicate is Initializable, ERC1155Holder, IRootERC1155Predi
             uri = tokenUri;
         } catch {}
 
-        gateway.syncState(childPredicate, abi.encode(MAP_TOKEN_SIG, rootToken, uri));
+        gateway.sendBridgeMsg(childPredicate, abi.encode(MAP_TOKEN_SIG, rootToken, uri));
         // slither-disable-next-line reentrancy-events
         emit TokenMapped(address(rootToken), childToken);
     }
@@ -128,7 +128,7 @@ contract RootERC1155Predicate is Initializable, ERC1155Holder, IRootERC1155Predi
 
         rootToken.safeTransferFrom(msg.sender, address(this), tokenId, amount, "");
 
-        gateway.syncState(
+        gateway.sendBridgeMsg(
             childERC1155Predicate,
             abi.encode(DEPOSIT_SIG, rootToken, msg.sender, receiver, tokenId, amount)
         );
@@ -151,7 +151,7 @@ contract RootERC1155Predicate is Initializable, ERC1155Holder, IRootERC1155Predi
             }
         }
 
-        gateway.syncState(
+        gateway.sendBridgeMsg(
             childERC1155Predicate,
             abi.encode(DEPOSIT_BATCH_SIG, rootToken, msg.sender, receivers, tokenIds, amounts)
         );

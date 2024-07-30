@@ -149,7 +149,7 @@ function gateway() external view returns (contract IGateway)
 ### initialize
 
 ```solidity
-function initialize(address newSourceGateway, address newExitHelper, address newRootERC721Predicate, address newChildTokenTemplate) external nonpayable
+function initialize(address newGateway, address newExitHelper, address newRootERC721Predicate, address newChildTokenTemplate) external nonpayable
 ```
 
 Initialization function for ChildMintableERC721Predicate
@@ -160,7 +160,7 @@ Initialization function for ChildMintableERC721Predicate
 
 | Name | Type | Description |
 |---|---|---|
-| newSourceGateway | address | Address of StateSender to send exit information to |
+| newGateway | address | Address of gateway to send exit information to |
 | newExitHelper | address | Address of ExitHelper to receive deposit information from |
 | newRootERC721Predicate | address | Address of root ERC721 predicate to communicate with |
 | newChildTokenTemplate | address | Address of child token implementation to deploy clones of |

@@ -10,10 +10,10 @@
 
 ## Methods
 
-### syncState
+### sendBridgeMsg
 
 ```solidity
-function syncState(address receiver, bytes data) external nonpayable
+function sendBridgeMsg(address receiver, bytes data) external nonpayable
 ```
 
 

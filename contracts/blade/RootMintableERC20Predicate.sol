@@ -93,7 +93,7 @@ contract RootMintableERC20Predicate is IRootMintableERC20Predicate, Initializabl
 
         rootTokenToChildToken[address(rootToken)] = childToken;
 
-        gateway.syncState(
+        gateway.sendBridgeMsg(
             childPredicate,
             abi.encode(MAP_TOKEN_SIG, rootToken, rootToken.name(), rootToken.symbol(), rootToken.decimals())
         );
@@ -154,7 +154,7 @@ contract RootMintableERC20Predicate is IRootMintableERC20Predicate, Initializabl
 
         rootToken.safeTransferFrom(msg.sender, address(this), amount);
 
-        gateway.syncState(childERC20Predicate, abi.encode(DEPOSIT_SIG, rootToken, msg.sender, receiver, amount));
+        gateway.sendBridgeMsg(childERC20Predicate, abi.encode(DEPOSIT_SIG, rootToken, msg.sender, receiver, amount));
         // slither-disable-next-line reentrancy-events
         emit L2MintableERC20Deposit(address(rootToken), childToken, msg.sender, receiver, amount);
         _afterTokenDeposit();

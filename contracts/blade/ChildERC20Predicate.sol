@@ -174,7 +174,7 @@ contract ChildERC20Predicate is IChildERC20Predicate, Initializable, System {
         assert(childToken.predicate() == address(this));
 
         require(childToken.burn(msg.sender, amount), "ChildERC20Predicate: BURN_FAILED");
-        gateway.syncState(rootERC20Predicate, abi.encode(WITHDRAW_SIG, rootToken, msg.sender, receiver, amount));
+        gateway.sendBridgeMsg(rootERC20Predicate, abi.encode(WITHDRAW_SIG, rootToken, msg.sender, receiver, amount));
 
         // slither-disable-next-line reentrancy-events
         emit L2ERC20Withdraw(rootToken, address(childToken), msg.sender, receiver, amount);

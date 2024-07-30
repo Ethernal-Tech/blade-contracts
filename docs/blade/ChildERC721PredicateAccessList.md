@@ -296,7 +296,7 @@ function gateway() external view returns (contract IGateway)
 ### initialize
 
 ```solidity
-function initialize(address newL2StateSender, address newStateReceiver, address newRootERC721Predicate, address newChildTokenTemplate, bool newUseAllowList, bool newUseBlockList, address newOwner) external nonpayable
+function initialize(address newGateway, address newStateReceiver, address newRootERC721Predicate, address newChildTokenTemplate, bool newUseAllowList, bool newUseBlockList, address newOwner) external nonpayable
 ```
 
 
@@ -307,7 +307,7 @@ function initialize(address newL2StateSender, address newStateReceiver, address 
 
 | Name | Type | Description |
 |---|---|---|
-| newL2StateSender | address | undefined |
+| newGateway | address | undefined |
 | newStateReceiver | address | undefined |
 | newRootERC721Predicate | address | undefined |
 | newChildTokenTemplate | address | undefined |
@@ -318,7 +318,7 @@ function initialize(address newL2StateSender, address newStateReceiver, address 
 ### initialize
 
 ```solidity
-function initialize(address newL2StateSender, address newStateReceiver, address newRootERC721Predicate, address newChildTokenTemplate) external nonpayable
+function initialize(address newGateway, address newStateReceiver, address newRootERC721Predicate, address newChildTokenTemplate) external nonpayable
 ```
 
 Initialization function for ChildERC721Predicate
@@ -329,7 +329,7 @@ Initialization function for ChildERC721Predicate
 
 | Name | Type | Description |
 |---|---|---|
-| newL2StateSender | address | Address of L2StateSender to send exit information to |
+| newGateway | address | Address of gateway to send exit information to |
 | newStateReceiver | address | Address of StateReceiver to receive deposit information from |
 | newRootERC721Predicate | address | Address of root ERC721 predicate to communicate with |
 | newChildTokenTemplate | address | Address of child token implementation to deploy clones of |

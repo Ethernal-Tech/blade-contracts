@@ -100,7 +100,7 @@ contract RootERC20Predicate is Initializable, IRootERC20Predicate {
 
         rootTokenToChildToken[address(rootToken)] = childToken;
 
-        gateway.syncState(
+        gateway.sendBridgeMsg(
             childPredicate,
             abi.encode(MAP_TOKEN_SIG, rootToken, rootToken.name(), rootToken.symbol(), rootToken.decimals())
         );
@@ -121,7 +121,7 @@ contract RootERC20Predicate is Initializable, IRootERC20Predicate {
 
         rootToken.safeTransferFrom(msg.sender, address(this), amount);
 
-        gateway.syncState(childERC20Predicate, abi.encode(DEPOSIT_SIG, rootToken, msg.sender, receiver, amount));
+        gateway.sendBridgeMsg(childERC20Predicate, abi.encode(DEPOSIT_SIG, rootToken, msg.sender, receiver, amount));
         // slither-disable-next-line reentrancy-events
         emit ERC20Deposit(address(rootToken), childToken, msg.sender, receiver, amount);
     }

@@ -364,10 +364,10 @@ function receiveBatch(BridgeMessageBatch batch, uint256[2] signature, bytes bitm
 | signature | uint256[2] | undefined |
 | bitmap | bytes | undefined |
 
-### syncState
+### sendBridgeMsg
 
 ```solidity
-function syncState(address receiver, bytes data) external nonpayable
+function sendBridgeMsg(address receiver, bytes data) external nonpayable
 ```
 
 Generates sync state event based on receiver and data. Anyone can call this method to emit an event. Receiver on Polygon should add check based on sender.
@@ -401,6 +401,25 @@ function totalVotingPower() external view returns (uint256)
 
 
 ## Events
+
+### BridgeMessageEvent
+
+```solidity
+event BridgeMessageEvent(uint256 indexed id, address indexed sender, address indexed receiver, bytes data)
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| id `indexed` | uint256 | undefined |
+| sender `indexed` | address | undefined |
+| receiver `indexed` | address | undefined |
+| data  | bytes | undefined |
 
 ### BridgeMessageResult
 
@@ -451,25 +470,6 @@ event NewValidatorSet(Validator[] newValidatorSet)
 | Name | Type | Description |
 |---|---|---|
 | newValidatorSet  | Validator[] | undefined |
-
-### StateSynced
-
-```solidity
-event StateSynced(uint256 indexed id, address indexed sender, address indexed receiver, bytes data)
-```
-
-
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| id `indexed` | uint256 | undefined |
-| sender `indexed` | address | undefined |
-| receiver `indexed` | address | undefined |
-| data  | bytes | undefined |
 
 
 

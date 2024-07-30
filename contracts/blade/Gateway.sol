@@ -14,7 +14,7 @@ contract Gateway is ValidatorSetStorage, IGateway {
 
     event BridgeMessageResult(uint256 indexed counter, bool indexed status, bytes message);
 
-    event StateSynced(uint256 indexed id, address indexed sender, address indexed receiver, bytes data);
+    event BridgeMessageEvent(uint256 indexed id, address indexed sender, address indexed receiver, bytes data);
 
     /**
      *
@@ -25,14 +25,14 @@ contract Gateway is ValidatorSetStorage, IGateway {
      * @param data Data to send on Polygon chain
      *
      */
-    function syncState(address receiver, bytes calldata data) external {
+    function sendBridgeMsg(address receiver, bytes calldata data) external {
         // check receiver
         require(receiver != address(0), "INVALID_RECEIVER");
         // check data length
         require(data.length <= MAX_LENGTH, "EXCEEDS_MAX_LENGTH");
 
         // State sync id will start with 1
-        emit StateSynced(++counter, msg.sender, receiver, data);
+        emit BridgeMessageEvent(++counter, msg.sender, receiver, data);
     }
 
     /**

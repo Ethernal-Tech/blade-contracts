@@ -209,7 +209,7 @@ contract ChildERC1155Predicate is IChildERC1155Predicate, Initializable, System 
         assert(childToken.predicate() == address(this));
 
         require(childToken.burn(msg.sender, tokenId, amount), "ChildERC1155Predicate: BURN_FAILED");
-        gateway.syncState(
+        gateway.sendBridgeMsg(
             rootERC1155Predicate,
             abi.encode(WITHDRAW_SIG, rootToken, msg.sender, receiver, tokenId, amount)
         );
@@ -238,7 +238,7 @@ contract ChildERC1155Predicate is IChildERC1155Predicate, Initializable, System 
 
         require(childToken.burnBatch(msg.sender, tokenIds, amounts), "ChildERC1155Predicate: BURN_FAILED");
 
-        gateway.syncState(
+        gateway.sendBridgeMsg(
             rootERC1155Predicate,
             abi.encode(WITHDRAW_BATCH_SIG, rootToken, msg.sender, receivers, tokenIds, amounts)
         );

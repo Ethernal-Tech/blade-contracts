@@ -2,5 +2,5 @@
 pragma solidity 0.8.19;
 
 interface IGateway {
-    function syncState(address receiver, bytes calldata data) external;
+    function sendBridgeMsg(address receiver, bytes calldata data) external;
 }
