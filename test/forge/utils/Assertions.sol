@@ -8,7 +8,6 @@ pragma solidity 0.8.19;
 import {StdAssertions} from "forge-std/StdAssertions.sol";
 
 // 📦 BOILERPLATE
-import {StateReceiver} from "contracts/blade/StateReceiver.sol";
 import {Withdrawal} from "contracts/lib/WithdrawalQueue.sol";
 import {RewardPool, Validator, Node, ValidatorTree} from "contracts/interfaces/lib/IValidator.sol";
 
@@ -31,13 +30,6 @@ abstract contract Assertions is StdAssertions {
 
     function assertEq(Withdrawal memory a, Withdrawal memory b) internal virtual {
         _compareHash(keccak256(abi.encode(a)), keccak256(abi.encode(b)), "Withdrawal");
-    }
-
-    function assertEq(
-        StateReceiver.StateSyncCommitment memory a,
-        StateReceiver.StateSyncCommitment memory b
-    ) internal virtual {
-        _compareHash(keccak256(abi.encode(a)), keccak256(abi.encode(b)), "StateSyncCommitment");
     }
 
     function _compareHash(bytes32 a, bytes32 b, string memory typeName) private {

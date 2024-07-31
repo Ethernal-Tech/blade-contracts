@@ -5,8 +5,6 @@ import { ethers, network } from "hardhat";
 import {
   Gateway,
   Gateway__factory,
-  StateReceiver,
-  StateReceiver__factory,
   ChildERC20,
   ChildERC20__factory,
   ChildERC20Predicate,

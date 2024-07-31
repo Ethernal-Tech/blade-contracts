@@ -6,8 +6,6 @@ import {
   ChildERC1155Predicate__factory,
   Gateway,
   Gateway__factory,
-  StateReceiver,
-  StateReceiver__factory,
   ChildERC1155,
   ChildERC1155__factory,
 } from "../../typechain-types";
