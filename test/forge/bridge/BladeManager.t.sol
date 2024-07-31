@@ -52,7 +52,6 @@ contract BladeManager_PremineInitialized is Initialized {
         childTokenTemplate = makeAddr("childTokenTemplate");
         rootERC20Predicate.initialize(
             address(new Gateway()),
-            address(new ExitHelper()),
             childERC20Predicate,
             childTokenTemplate,
             address(token)

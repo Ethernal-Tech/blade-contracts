@@ -81,7 +81,6 @@ contract DeployBladeContracts is
     address public rootMintableERC721PredicateAccessListProxy;
     address public rootMintableERC1155PredicateAccessListLogic;
     address public rootMintableERC1155PredicateAccessListProxy;
-    address public stateReceiver;
     address public system;
     address public stakeManagerLogic;
     address public stakeManagerProxy;
@@ -97,8 +96,6 @@ contract DeployBladeContracts is
         vm.stopBroadcast();
 
         proxyAdmin = address(_proxyAdmin);
-
-        stateReceiver = deployStateReceiver();
 
         (epochManagerLogic, epochManagerProxy) = deployEpochManager(
             proxyAdmin,
@@ -212,7 +209,6 @@ contract DeployBladeContracts is
         ) = deployRootMintableERC721PredicateAccessList(
             proxyAdmin,
             gateway,
-            stateReceiver,
             childERC721PredicateProxy,
             config.readAddress('["RootMintableERC721PredicateAccessList"].newTokenTemplate'),
             config.readBool('["RootMintableERC721PredicateAccessList"].newUseAllowList'),
@@ -226,7 +222,6 @@ contract DeployBladeContracts is
         ) = deployRootMintableERC1155PredicateAccessList(
             proxyAdmin,
             gateway,
-            stateReceiver,
             childERC1155PredicateProxy,
             config.readAddress('["RootMintableERC1155PredicateAccessList"].newTokenTemplate'),
             config.readBool('["RootMintableERC1155PredicateAccessList"].newUseAllowList'),

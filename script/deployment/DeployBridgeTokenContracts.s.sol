@@ -30,27 +30,24 @@ contract DeployBridgeTokenContracts is
 
         (rootERC20PredicateLogic, rootERC20PredicateProxy) = deployRootERC20Predicate(
             config.readAddress('["common"].proxyAdmin'),
-            config.readAddress('["common"].stateSender'),
-            config.readAddress('["common"].exitHelper'),
+            config.readAddress('["common"].newGateway'),
             config.readAddress('["RootERC20Predicate"].newChildERC20Predicate'),
-            config.readAddress('["RootERC20Predicate"].newChildTokenTemplate'),
+            config.readAddress('["RootERC20Predicate"].newDestinationTokenTemplate'),
             config.readAddress('["RootERC20Predicate"].nativeTokenRootAddress')
         );
 
         (rootERC721PredicateLogic, rootERC721PredicateProxy) = deployRootERC721Predicate(
             config.readAddress('["common"].proxyAdmin'),
-            config.readAddress('["common"].stateSender'),
-            config.readAddress('["common"].exitHelper'),
+            config.readAddress('["common"].newGateway'),
             config.readAddress('["RootERC721Predicate"].newChildERC721Predicate'),
-            config.readAddress('["RootERC721Predicate"].newChildTokenTemplate')
+            config.readAddress('["RootERC721Predicate"].newDestinationTokenTemplate')
         );
 
         (rootERC1155PredicateLogic, rootERC1155PredicateProxy) = deployRootERC1155Predicate(
             config.readAddress('["common"].proxyAdmin'),
-            config.readAddress('["common"].stateSender'),
-            config.readAddress('["common"].exitHelper'),
+            config.readAddress('["common"].newGateway'),
             config.readAddress('["RootERC1155Predicate"].newChildERC1155Predicate'),
-            config.readAddress('["RootERC1155Predicate"].newChildTokenTemplate')
+            config.readAddress('["RootERC1155Predicate"].newDestinationTokenTemplate')
         );
     }
 }
