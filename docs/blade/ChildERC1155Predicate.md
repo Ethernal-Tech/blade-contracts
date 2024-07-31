@@ -95,23 +95,6 @@ function WITHDRAW_SIG() external view returns (bytes32)
 |---|---|---|
 | _0 | bytes32 | undefined |
 
-### childTokenTemplate
-
-```solidity
-function childTokenTemplate() external view returns (address)
-```
-
-
-
-
-
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | address | undefined |
-
 ### gateway
 
 ```solidity
@@ -132,7 +115,7 @@ function gateway() external view returns (contract IGateway)
 ### initialize
 
 ```solidity
-function initialize(address newGateway, address newStateReceiver, address newRootERC1155Predicate, address newChildTokenTemplate) external nonpayable
+function initialize(address newGateway, address newRootERC1155Predicate, address newSourceTokenTemplate) external nonpayable
 ```
 
 Initialization function for ChildERC1155Predicate
@@ -143,10 +126,9 @@ Initialization function for ChildERC1155Predicate
 
 | Name | Type | Description |
 |---|---|---|
-| newGateway | address | Address of gateway to send exit information to |
-| newStateReceiver | address | Address of StateReceiver to receive deposit information from |
+| newGateway | address | Address of gateway contract |
 | newRootERC1155Predicate | address | Address of root ERC1155 predicate to communicate with |
-| newChildTokenTemplate | address | Address of child token implementation to deploy clones of |
+| newSourceTokenTemplate | address | Address of source token implementation to deploy clones of |
 
 ### onStateReceive
 
@@ -205,10 +187,10 @@ function rootTokenToChildToken(address) external view returns (address)
 |---|---|---|
 | _0 | address | undefined |
 
-### stateReceiver
+### sourceTokenTemplate
 
 ```solidity
-function stateReceiver() external view returns (address)
+function sourceTokenTemplate() external view returns (address)
 ```
 
 
@@ -282,6 +264,90 @@ Function to withdraw tokens from the withdrawer to another address on the root c
 
 ## Events
 
+### ERC1155Deposit
+
+```solidity
+event ERC1155Deposit(address indexed rootToken, address indexed childToken, address sender, address indexed receiver, uint256 tokenId, uint256 amount)
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| rootToken `indexed` | address | undefined |
+| childToken `indexed` | address | undefined |
+| sender  | address | undefined |
+| receiver `indexed` | address | undefined |
+| tokenId  | uint256 | undefined |
+| amount  | uint256 | undefined |
+
+### ERC1155DepositBatch
+
+```solidity
+event ERC1155DepositBatch(address indexed rootToken, address indexed childToken, address indexed sender, address[] receivers, uint256[] tokenIds, uint256[] amounts)
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| rootToken `indexed` | address | undefined |
+| childToken `indexed` | address | undefined |
+| sender `indexed` | address | undefined |
+| receivers  | address[] | undefined |
+| tokenIds  | uint256[] | undefined |
+| amounts  | uint256[] | undefined |
+
+### ERC1155Withdraw
+
+```solidity
+event ERC1155Withdraw(address indexed rootToken, address indexed childToken, address sender, address indexed receiver, uint256 tokenId, uint256 amount)
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| rootToken `indexed` | address | undefined |
+| childToken `indexed` | address | undefined |
+| sender  | address | undefined |
+| receiver `indexed` | address | undefined |
+| tokenId  | uint256 | undefined |
+| amount  | uint256 | undefined |
+
+### ERC1155WithdrawBatch
+
+```solidity
+event ERC1155WithdrawBatch(address indexed rootToken, address indexed childToken, address indexed sender, address[] receivers, uint256[] tokenIds, uint256[] amounts)
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| rootToken `indexed` | address | undefined |
+| childToken `indexed` | address | undefined |
+| sender `indexed` | address | undefined |
+| receivers  | address[] | undefined |
+| tokenIds  | uint256[] | undefined |
+| amounts  | uint256[] | undefined |
+
 ### Initialized
 
 ```solidity
@@ -298,94 +364,10 @@ event Initialized(uint8 version)
 |---|---|---|
 | version  | uint8 | undefined |
 
-### L2ERC1155Deposit
+### TokenMapped
 
 ```solidity
-event L2ERC1155Deposit(address indexed rootToken, address indexed childToken, address sender, address indexed receiver, uint256 tokenId, uint256 amount)
-```
-
-
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| rootToken `indexed` | address | undefined |
-| childToken `indexed` | address | undefined |
-| sender  | address | undefined |
-| receiver `indexed` | address | undefined |
-| tokenId  | uint256 | undefined |
-| amount  | uint256 | undefined |
-
-### L2ERC1155DepositBatch
-
-```solidity
-event L2ERC1155DepositBatch(address indexed rootToken, address indexed childToken, address indexed sender, address[] receivers, uint256[] tokenIds, uint256[] amounts)
-```
-
-
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| rootToken `indexed` | address | undefined |
-| childToken `indexed` | address | undefined |
-| sender `indexed` | address | undefined |
-| receivers  | address[] | undefined |
-| tokenIds  | uint256[] | undefined |
-| amounts  | uint256[] | undefined |
-
-### L2ERC1155Withdraw
-
-```solidity
-event L2ERC1155Withdraw(address indexed rootToken, address indexed childToken, address sender, address indexed receiver, uint256 tokenId, uint256 amount)
-```
-
-
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| rootToken `indexed` | address | undefined |
-| childToken `indexed` | address | undefined |
-| sender  | address | undefined |
-| receiver `indexed` | address | undefined |
-| tokenId  | uint256 | undefined |
-| amount  | uint256 | undefined |
-
-### L2ERC1155WithdrawBatch
-
-```solidity
-event L2ERC1155WithdrawBatch(address indexed rootToken, address indexed childToken, address indexed sender, address[] receivers, uint256[] tokenIds, uint256[] amounts)
-```
-
-
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| rootToken `indexed` | address | undefined |
-| childToken `indexed` | address | undefined |
-| sender `indexed` | address | undefined |
-| receivers  | address[] | undefined |
-| tokenIds  | uint256[] | undefined |
-| amounts  | uint256[] | undefined |
-
-### L2TokenMapped
-
-```solidity
-event L2TokenMapped(address indexed rootToken, address indexed childToken)
+event TokenMapped(address indexed rootToken, address indexed childToken)
 ```
 
 

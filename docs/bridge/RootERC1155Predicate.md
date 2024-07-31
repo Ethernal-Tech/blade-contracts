@@ -112,23 +112,6 @@ function childERC1155Predicate() external view returns (address)
 |---|---|---|
 | _0 | address | undefined |
 
-### childTokenTemplate
-
-```solidity
-function childTokenTemplate() external view returns (address)
-```
-
-
-
-
-
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | address | undefined |
-
 ### deposit
 
 ```solidity
@@ -185,10 +168,10 @@ Function to deposit tokens from the depositor to another address on the child ch
 | tokenId | uint256 | Index of the NFT to deposit |
 | amount | uint256 | Amount to deposit |
 
-### exitHelper
+### destinationTokenTemplate
 
 ```solidity
-function exitHelper() external view returns (address)
+function destinationTokenTemplate() external view returns (address)
 ```
 
 
@@ -222,7 +205,7 @@ function gateway() external view returns (contract IGateway)
 ### initialize
 
 ```solidity
-function initialize(address newGateway, address newExitHelper, address newChildERC1155Predicate, address newChildTokenTemplate) external nonpayable
+function initialize(address newGateway, address newChildERC1155Predicate, address newDestinationTokenTemplate) external nonpayable
 ```
 
 Initialization function for RootERC1155Predicate
@@ -234,9 +217,8 @@ Initialization function for RootERC1155Predicate
 | Name | Type | Description |
 |---|---|---|
 | newGateway | address | Address of gateway to send deposit information to |
-| newExitHelper | address | Address of ExitHelper to receive withdrawal information from |
 | newChildERC1155Predicate | address | Address of child ERC1155 predicate to communicate with |
-| newChildTokenTemplate | address | undefined |
+| newDestinationTokenTemplate | address | Address of child token template to deploy clones of |
 
 ### mapToken
 
@@ -330,10 +312,10 @@ Function to be used for token withdrawals
 | sender | address | Address of the sender on the child chain |
 | data | bytes | Data sent by the sender |
 
-### rootTokenToChildToken
+### sourceTokenToDestinationToken
 
 ```solidity
-function rootTokenToChildToken(address) external view returns (address)
+function sourceTokenToDestinationToken(address) external view returns (address)
 ```
 
 

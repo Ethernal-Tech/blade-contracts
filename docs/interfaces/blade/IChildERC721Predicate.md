@@ -13,7 +13,7 @@
 ### initialize
 
 ```solidity
-function initialize(address newGateway, address newStateReceiver, address newRootERC721Predicate, address newChildTokenTemplate) external nonpayable
+function initialize(address newGateway, address newRootERC721Predicate, address newSourceTokenTemplate) external nonpayable
 ```
 
 
@@ -25,9 +25,8 @@ function initialize(address newGateway, address newStateReceiver, address newRoo
 | Name | Type | Description |
 |---|---|---|
 | newGateway | address | undefined |
-| newStateReceiver | address | undefined |
 | newRootERC721Predicate | address | undefined |
-| newChildTokenTemplate | address | undefined |
+| newSourceTokenTemplate | address | undefined |
 
 ### onStateReceive
 

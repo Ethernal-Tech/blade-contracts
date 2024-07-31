@@ -259,23 +259,6 @@ function acceptOwnership() external nonpayable
 *The new owner accepts the ownership transfer.*
 
 
-### childTokenTemplate
-
-```solidity
-function childTokenTemplate() external view returns (address)
-```
-
-
-
-
-
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | address | undefined |
-
 ### gateway
 
 ```solidity
@@ -296,7 +279,25 @@ function gateway() external view returns (contract IGateway)
 ### initialize
 
 ```solidity
-function initialize(address newGateway, address newStateReceiver, address newRootERC721Predicate, address newChildTokenTemplate, bool newUseAllowList, bool newUseBlockList, address newOwner) external nonpayable
+function initialize(address newGateway, address newRootERC721Predicate, address newSourceTokenTemplate) external nonpayable
+```
+
+Initialization function for ChildERC721Predicate
+
+*Can only be called once. `newNativeTokenRootAddress` should be set to zero where root token does not exist.*
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| newGateway | address | Address of gateway contract |
+| newRootERC721Predicate | address | Address of root ERC721 predicate to communicate with |
+| newSourceTokenTemplate | address | Address of source token implementation to deploy clones of |
+
+### initialize
+
+```solidity
+function initialize(address newGateway, address newRootERC721Predicate, address newSourceTokenTemplate, bool newUseAllowList, bool newUseBlockList, address newOwner) external nonpayable
 ```
 
 
@@ -308,31 +309,11 @@ function initialize(address newGateway, address newStateReceiver, address newRoo
 | Name | Type | Description |
 |---|---|---|
 | newGateway | address | undefined |
-| newStateReceiver | address | undefined |
 | newRootERC721Predicate | address | undefined |
-| newChildTokenTemplate | address | undefined |
+| newSourceTokenTemplate | address | undefined |
 | newUseAllowList | bool | undefined |
 | newUseBlockList | bool | undefined |
 | newOwner | address | undefined |
-
-### initialize
-
-```solidity
-function initialize(address newGateway, address newStateReceiver, address newRootERC721Predicate, address newChildTokenTemplate) external nonpayable
-```
-
-Initialization function for ChildERC721Predicate
-
-*Can only be called once. `newNativeTokenRootAddress` should be set to zero where root token does not exist.*
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| newGateway | address | Address of gateway to send exit information to |
-| newStateReceiver | address | Address of StateReceiver to receive deposit information from |
-| newRootERC721Predicate | address | Address of root ERC721 predicate to communicate with |
-| newChildTokenTemplate | address | Address of child token implementation to deploy clones of |
 
 ### onStateReceive
 
@@ -468,10 +449,10 @@ function setBlockList(bool newUseBlockList) external nonpayable
 |---|---|---|
 | newUseBlockList | bool | undefined |
 
-### stateReceiver
+### sourceTokenTemplate
 
 ```solidity
-function stateReceiver() external view returns (address)
+function sourceTokenTemplate() external view returns (address)
 ```
 
 
@@ -592,6 +573,86 @@ event BlockListUsageSet(uint256 indexed block, bool indexed status)
 | block `indexed` | uint256 | undefined |
 | status `indexed` | bool | undefined |
 
+### ERC721Deposit
+
+```solidity
+event ERC721Deposit(address indexed rootToken, address indexed childToken, address sender, address indexed receiver, uint256 tokenId)
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| rootToken `indexed` | address | undefined |
+| childToken `indexed` | address | undefined |
+| sender  | address | undefined |
+| receiver `indexed` | address | undefined |
+| tokenId  | uint256 | undefined |
+
+### ERC721DepositBatch
+
+```solidity
+event ERC721DepositBatch(address indexed rootToken, address indexed childToken, address indexed sender, address[] receivers, uint256[] tokenIds)
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| rootToken `indexed` | address | undefined |
+| childToken `indexed` | address | undefined |
+| sender `indexed` | address | undefined |
+| receivers  | address[] | undefined |
+| tokenIds  | uint256[] | undefined |
+
+### ERC721Withdraw
+
+```solidity
+event ERC721Withdraw(address indexed rootToken, address indexed childToken, address sender, address indexed receiver, uint256 tokenId)
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| rootToken `indexed` | address | undefined |
+| childToken `indexed` | address | undefined |
+| sender  | address | undefined |
+| receiver `indexed` | address | undefined |
+| tokenId  | uint256 | undefined |
+
+### ERC721WithdrawBatch
+
+```solidity
+event ERC721WithdrawBatch(address indexed rootToken, address indexed childToken, address indexed sender, address[] receivers, uint256[] tokenIds)
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| rootToken `indexed` | address | undefined |
+| childToken `indexed` | address | undefined |
+| sender `indexed` | address | undefined |
+| receivers  | address[] | undefined |
+| tokenIds  | uint256[] | undefined |
+
 ### Initialized
 
 ```solidity
@@ -607,103 +668,6 @@ event Initialized(uint8 version)
 | Name | Type | Description |
 |---|---|---|
 | version  | uint8 | undefined |
-
-### L2ERC721Deposit
-
-```solidity
-event L2ERC721Deposit(address indexed rootToken, address indexed childToken, address sender, address indexed receiver, uint256 tokenId)
-```
-
-
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| rootToken `indexed` | address | undefined |
-| childToken `indexed` | address | undefined |
-| sender  | address | undefined |
-| receiver `indexed` | address | undefined |
-| tokenId  | uint256 | undefined |
-
-### L2ERC721DepositBatch
-
-```solidity
-event L2ERC721DepositBatch(address indexed rootToken, address indexed childToken, address indexed sender, address[] receivers, uint256[] tokenIds)
-```
-
-
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| rootToken `indexed` | address | undefined |
-| childToken `indexed` | address | undefined |
-| sender `indexed` | address | undefined |
-| receivers  | address[] | undefined |
-| tokenIds  | uint256[] | undefined |
-
-### L2ERC721Withdraw
-
-```solidity
-event L2ERC721Withdraw(address indexed rootToken, address indexed childToken, address sender, address indexed receiver, uint256 tokenId)
-```
-
-
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| rootToken `indexed` | address | undefined |
-| childToken `indexed` | address | undefined |
-| sender  | address | undefined |
-| receiver `indexed` | address | undefined |
-| tokenId  | uint256 | undefined |
-
-### L2ERC721WithdrawBatch
-
-```solidity
-event L2ERC721WithdrawBatch(address indexed rootToken, address indexed childToken, address indexed sender, address[] receivers, uint256[] tokenIds)
-```
-
-
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| rootToken `indexed` | address | undefined |
-| childToken `indexed` | address | undefined |
-| sender `indexed` | address | undefined |
-| receivers  | address[] | undefined |
-| tokenIds  | uint256[] | undefined |
-
-### L2TokenMapped
-
-```solidity
-event L2TokenMapped(address indexed rootToken, address indexed childToken)
-```
-
-
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| rootToken `indexed` | address | undefined |
-| childToken `indexed` | address | undefined |
 
 ### OwnershipTransferStarted
 
@@ -738,6 +702,23 @@ event OwnershipTransferred(address indexed previousOwner, address indexed newOwn
 |---|---|---|
 | previousOwner `indexed` | address | undefined |
 | newOwner `indexed` | address | undefined |
+
+### TokenMapped
+
+```solidity
+event TokenMapped(address indexed rootToken, address indexed childToken)
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| rootToken `indexed` | address | undefined |
+| childToken `indexed` | address | undefined |
 
 
 

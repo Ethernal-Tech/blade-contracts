@@ -1,23 +1,22 @@
 {
   "common": {
     "proxyAdmin": "",
-    "newStateSender": "",
-    "newExitHelper": ""
+    "newGateway": ""
   },
 
   "RootERC20Predicate": {
     "newChildERC20Predicate": "",
-    "newChildTokenTemplate": "",
+    "newDestinationTokenTemplate": "",
     "nativeTokenRootAddress": ""
   },
 
   "RootERC721Predicate": {
     "newChildERC721Predicate": "",
-    "newChildTokenTemplate": ""
+    "newDestinationTokenTemplate": ""
   },
 
   "RootERC1155Predicate": {
     "newChildERC1155Predicate": "",
-    "newChildTokenTemplate": ""
+    "newDestinationTokenTemplate": ""
   }
 }

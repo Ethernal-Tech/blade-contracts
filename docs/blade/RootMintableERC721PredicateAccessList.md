@@ -276,23 +276,6 @@ function childERC721Predicate() external view returns (address)
 |---|---|---|
 | _0 | address | undefined |
 
-### childTokenTemplate
-
-```solidity
-function childTokenTemplate() external view returns (address)
-```
-
-
-
-
-
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | address | undefined |
-
 ### deposit
 
 ```solidity
@@ -346,10 +329,10 @@ Function to deposit tokens from the depositor to another address on the child ch
 | receiver | address | undefined |
 | tokenId | uint256 | Index of the NFT to deposit |
 
-### exitHelper
+### destinationTokenTemplate
 
 ```solidity
-function exitHelper() external view returns (address)
+function destinationTokenTemplate() external view returns (address)
 ```
 
 
@@ -383,7 +366,25 @@ function gateway() external view returns (contract IGateway)
 ### initialize
 
 ```solidity
-function initialize(address newGateway, address newStateReceiver, address newChildERC721Predicate, address newChildTokenTemplate, bool newUseAllowList, bool newUseBlockList, address newOwner) external nonpayable
+function initialize(address newGateway, address newChildERC721Predicate, address newDestinationTokenTemplate) external nonpayable
+```
+
+Initialization function for RootERC721Predicate
+
+*Can only be called once.*
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| newGateway | address | Address of gateway contract |
+| newChildERC721Predicate | address | Address of child ERC721 predicate to communicate with |
+| newDestinationTokenTemplate | address | Address of destination token implementation to deploy clones of |
+
+### initialize
+
+```solidity
+function initialize(address newGateway, address newChildERC721Predicate, address newTokenTemplate, bool newUseAllowList, bool newUseBlockList, address newOwner) external nonpayable
 ```
 
 
@@ -395,31 +396,11 @@ function initialize(address newGateway, address newStateReceiver, address newChi
 | Name | Type | Description |
 |---|---|---|
 | newGateway | address | undefined |
-| newStateReceiver | address | undefined |
 | newChildERC721Predicate | address | undefined |
-| newChildTokenTemplate | address | undefined |
+| newTokenTemplate | address | undefined |
 | newUseAllowList | bool | undefined |
 | newUseBlockList | bool | undefined |
 | newOwner | address | undefined |
-
-### initialize
-
-```solidity
-function initialize(address newGateway, address newExitHelper, address newChildERC721Predicate, address newChildTokenTemplate) external nonpayable
-```
-
-Initialization function for RootERC721Predicate
-
-*Can only be called once.*
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| newGateway | address | Address of gateway to send deposit information to |
-| newExitHelper | address | Address of ExitHelper to receive withdrawal information from |
-| newChildERC721Predicate | address | Address of child ERC721 predicate to communicate with |
-| newChildTokenTemplate | address | undefined |
 
 ### mapToken
 
@@ -531,28 +512,6 @@ function renounceOwnership() external nonpayable
 *Leaves the contract without owner. It will not be possible to call `onlyOwner` functions. Can only be called by the current owner. NOTE: Renouncing ownership will leave the contract without an owner, thereby disabling any functionality that is only available to the owner.*
 
 
-### rootTokenToChildToken
-
-```solidity
-function rootTokenToChildToken(address) external view returns (address)
-```
-
-
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | address | undefined |
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | address | undefined |
-
 ### setAllowList
 
 ```solidity
@@ -584,6 +543,28 @@ function setBlockList(bool newUseBlockList) external nonpayable
 | Name | Type | Description |
 |---|---|---|
 | newUseBlockList | bool | undefined |
+
+### sourceTokenToDestinationToken
+
+```solidity
+function sourceTokenToDestinationToken(address) external view returns (address)
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | address | undefined |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | address | undefined |
 
 ### transferOwnership
 

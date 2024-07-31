@@ -27,7 +27,6 @@ describe("ChildERC20Predicate", () => {
     systemChildERC20Predicate: ChildERC20Predicate,
     stateReceiverChildERC20Predicate: ChildERC20Predicate,
     gateway: Gateway,
-    stateReceiver: StateReceiver,
     rootERC20Predicate: string,
     childERC20: ChildERC20,
     nativeERC20: NativeERC20,
@@ -42,11 +41,6 @@ describe("ChildERC20Predicate", () => {
     gateway = await Gateway.deploy();
 
     await gateway.deployed();
-
-    const StateReceiver: StateReceiver__factory = await ethers.getContractFactory("StateReceiver");
-    stateReceiver = await StateReceiver.deploy();
-
-    await stateReceiver.deployed();
 
     rootERC20Predicate = ethers.Wallet.createRandom().address;
 
@@ -84,15 +78,14 @@ describe("ChildERC20Predicate", () => {
       await ethers.getSigner("0xffffFFFfFFffffffffffffffFfFFFfffFFFfFFfE")
     );
 
-    impersonateAccount(stateReceiver.address);
-    setBalance(stateReceiver.address, "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF");
-    stateReceiverChildERC20Predicate = childERC20Predicate.connect(await ethers.getSigner(stateReceiver.address));
+    impersonateAccount(gateway.address);
+    setBalance(gateway.address, "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF");
+    stateReceiverChildERC20Predicate = childERC20Predicate.connect(await ethers.getSigner(gateway.address));
   });
 
   it("fail bad initialization", async () => {
     await expect(
       systemChildERC20Predicate.initialize(
-        "0x0000000000000000000000000000000000000000",
         "0x0000000000000000000000000000000000000000",
         "0x0000000000000000000000000000000000000000",
         "0x0000000000000000000000000000000000000000",
@@ -104,7 +97,6 @@ describe("ChildERC20Predicate", () => {
   it("initialize and validate initialization", async () => {
     await systemChildERC20Predicate.initialize(
       gateway.address,
-      stateReceiver.address,
       rootERC20Predicate,
       childERC20.address,
       nativeERC20RootToken
@@ -115,9 +107,8 @@ describe("ChildERC20Predicate", () => {
     await expect(systemNativeERC20.initialize(childERC20Predicate.address, nativeERC20RootToken, "TEST", "TEST", 18, 0))
       .to.not.be.reverted;
     expect(await childERC20Predicate.gateway()).to.equal(gateway.address);
-    expect(await childERC20Predicate.stateReceiver()).to.equal(stateReceiver.address);
     expect(await childERC20Predicate.rootERC20Predicate()).to.equal(rootERC20Predicate);
-    expect(await childERC20Predicate.childTokenTemplate()).to.equal(childERC20.address);
+    expect(await childERC20Predicate.sourceTokenTemplate()).to.equal(childERC20.address);
     expect(await childERC20Predicate.rootTokenToChildToken(nativeERC20RootToken)).to.equal(
       "0x0000000000000000000000000000000000001010"
     );
@@ -127,7 +118,6 @@ describe("ChildERC20Predicate", () => {
     await expect(
       systemChildERC20Predicate.initialize(
         gateway.address,
-        stateReceiver.address,
         rootERC20Predicate,
         childERC20.address,
         nativeERC20RootToken
@@ -151,7 +141,7 @@ describe("ChildERC20Predicate", () => {
     const depositTx = await stateReceiverChildERC20Predicate.onStateReceive(0, rootERC20Predicate, stateSyncData);
     const depositReceipt = await depositTx.wait();
     stopImpersonatingAccount(stateReceiverChildERC20Predicate.address);
-    const depositEvent = depositReceipt.events?.find((log) => log.event === "L2ERC20Deposit");
+    const depositEvent = depositReceipt.events?.find((log) => log.event === "ERC20Deposit");
     expect(depositEvent?.args?.rootToken).to.equal(nativeERC20RootToken);
     expect(depositEvent?.args?.childToken).to.equal(nativeERC20.address);
     expect(depositEvent?.args?.sender).to.equal(accounts[0].address);
@@ -174,7 +164,7 @@ describe("ChildERC20Predicate", () => {
     );
     const depositTx = await stateReceiverChildERC20Predicate.onStateReceive(0, rootERC20Predicate, stateSyncData);
     const depositReceipt = await depositTx.wait();
-    const depositEvent = depositReceipt.events?.find((log) => log.event === "L2ERC20Deposit");
+    const depositEvent = depositReceipt.events?.find((log) => log.event === "ERC20Deposit");
     expect(depositEvent?.args?.rootToken).to.equal(nativeERC20RootToken);
     expect(depositEvent?.args?.childToken).to.equal(nativeERC20.address);
     expect(depositEvent?.args?.sender).to.equal(accounts[0].address);
@@ -197,7 +187,7 @@ describe("ChildERC20Predicate", () => {
     );
     const mapTx = await stateReceiverChildERC20Predicate.onStateReceive(0, rootERC20Predicate, stateSyncData);
     const mapReceipt = await mapTx.wait();
-    const mapEvent = mapReceipt?.events?.find((log) => log.event === "L2TokenMapped");
+    const mapEvent = mapReceipt?.events?.find((log) => log.event === "TokenMapped");
     expect(mapEvent?.args?.rootToken).to.equal(rootToken);
     expect(mapEvent?.args?.childToken).to.equal(childTokenAddr);
     expect(await childToken.predicate()).to.equal(childERC20Predicate.address);
@@ -241,7 +231,7 @@ describe("ChildERC20Predicate", () => {
       ethers.utils.parseUnits(String(randomAmount))
     );
     const depositReceipt = await depositTx.wait();
-    const depositEvent = depositReceipt.events?.find((log: any) => log.event === "L2ERC20Withdraw");
+    const depositEvent = depositReceipt.events?.find((log: any) => log.event === "ERC20Withdraw");
     expect(depositEvent?.args?.rootToken).to.equal(nativeERC20RootToken);
     expect(depositEvent?.args?.childToken).to.equal(nativeERC20.address);
     expect(depositEvent?.args?.sender).to.equal(accounts[0].address);
@@ -258,7 +248,7 @@ describe("ChildERC20Predicate", () => {
       ethers.utils.parseUnits(String(randomAmount))
     );
     const depositReceipt = await depositTx.wait();
-    const depositEvent = depositReceipt.events?.find((log: any) => log.event === "L2ERC20Withdraw");
+    const depositEvent = depositReceipt.events?.find((log: any) => log.event === "ERC20Withdraw");
     expect(depositEvent?.args?.rootToken).to.equal(nativeERC20RootToken);
     expect(depositEvent?.args?.childToken).to.equal(nativeERC20.address);
     expect(depositEvent?.args?.sender).to.equal(accounts[0].address);
@@ -340,7 +330,7 @@ describe("ChildERC20Predicate", () => {
   });
 
   it("fail deposit tokens of unknown child token: wrong deposit token", async () => {
-    childERC20Predicate.connect(await ethers.getSigner(stateReceiver.address));
+    childERC20Predicate.connect(await ethers.getSigner(gateway.address));
     const stateSyncData = ethers.utils.defaultAbiCoder.encode(
       ["bytes32", "address", "address", "address", "address", "uint256"],
       [

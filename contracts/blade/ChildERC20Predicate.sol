@@ -20,54 +20,45 @@ contract ChildERC20Predicate is IChildERC20Predicate, Initializable, System {
     using SafeERC20 for IERC20;
 
     IGateway public gateway;
-    address public stateReceiver;
     address public rootERC20Predicate;
-    address public childTokenTemplate;
+    address public sourceTokenTemplate;
     bytes32 public constant DEPOSIT_SIG = keccak256("DEPOSIT");
     bytes32 public constant WITHDRAW_SIG = keccak256("WITHDRAW");
     bytes32 public constant MAP_TOKEN_SIG = keccak256("MAP_TOKEN");
 
     mapping(address => address) public rootTokenToChildToken;
 
-    event L2ERC20Deposit(
+    event ERC20Deposit(
         address indexed rootToken,
         address indexed childToken,
         address sender,
         address indexed receiver,
         uint256 amount
     );
-    event L2ERC20Withdraw(
+    event ERC20Withdraw(
         address indexed rootToken,
         address indexed childToken,
         address sender,
         address indexed receiver,
         uint256 amount
     );
-    event L2TokenMapped(address indexed rootToken, address indexed childToken);
+    event TokenMapped(address indexed rootToken, address indexed childToken);
 
     /**
      * @notice Initialization function for ChildERC20Predicate
-     * @param newGateway Address of gateway to send exit information to
-     * @param newStateReceiver Address of StateReceiver to receive deposit information from
+     * @param newGateway Address of gateway contract
      * @param newRootERC20Predicate Address of root ERC20 predicate to communicate with
-     * @param newChildTokenTemplate Address of child token implementation to deploy clones of
+     * @param newSourceTokenTemplate Address of source token implementation to deploy clones of
      * @param newNativeTokenRootAddress Address of native token on root chain
      * @dev Can only be called once. `newNativeTokenRootAddress` should be set to zero where root token does not exist.
      */
     function initialize(
         address newGateway,
-        address newStateReceiver,
         address newRootERC20Predicate,
-        address newChildTokenTemplate,
+        address newSourceTokenTemplate,
         address newNativeTokenRootAddress
     ) public virtual initializer {
-        _initialize(
-            newGateway,
-            newStateReceiver,
-            newRootERC20Predicate,
-            newChildTokenTemplate,
-            newNativeTokenRootAddress
-        );
+        _initialize(newGateway, newRootERC20Predicate, newSourceTokenTemplate, newNativeTokenRootAddress);
     }
 
     /**
@@ -77,7 +68,7 @@ contract ChildERC20Predicate is IChildERC20Predicate, Initializable, System {
      * @dev Can be extended to include other signatures for more functionality
      */
     function onStateReceive(uint256 /* id */, address sender, bytes calldata data) external {
-        require(msg.sender == stateReceiver, "ChildERC20Predicate: ONLY_STATE_RECEIVER");
+        require(msg.sender == address(gateway), "ChildERC20Predicate: ONLY_GATEWAY");
         require(sender == rootERC20Predicate, "ChildERC20Predicate: ONLY_ROOT_PREDICATE");
 
         if (bytes32(data[:32]) == DEPOSIT_SIG) {
@@ -116,35 +107,29 @@ contract ChildERC20Predicate is IChildERC20Predicate, Initializable, System {
 
     /**
      * @notice Internal initialization function for ChildERC20Predicate
-     * @param newGateway Address of gateway to send exit information to
-     * @param newStateReceiver Address of StateReceiver to receive deposit information from
+     * @param newGateway Address of gateway contract
      * @param newRootERC20Predicate Address of root ERC20 predicate to communicate with
-     * @param newChildTokenTemplate Address of child token implementation to deploy clones of
+     * @param newSourceTokenTemplate Address of source token implementation to deploy clones of
      * @param newNativeTokenRootAddress Address of native token on root chain
      * @dev Can be called multiple times.
      */
     function _initialize(
         address newGateway,
-        address newStateReceiver,
         address newRootERC20Predicate,
-        address newChildTokenTemplate,
+        address newSourceTokenTemplate,
         address newNativeTokenRootAddress
     ) internal {
         require(
-            newGateway != address(0) &&
-                newStateReceiver != address(0) &&
-                newRootERC20Predicate != address(0) &&
-                newChildTokenTemplate != address(0),
+            newGateway != address(0) && newRootERC20Predicate != address(0) && newSourceTokenTemplate != address(0),
             "ChildERC20Predicate: BAD_INITIALIZATION"
         );
         gateway = IGateway(newGateway);
-        stateReceiver = newStateReceiver;
         rootERC20Predicate = newRootERC20Predicate;
-        childTokenTemplate = newChildTokenTemplate;
+        sourceTokenTemplate = newSourceTokenTemplate;
         if (newNativeTokenRootAddress != address(0)) {
             rootTokenToChildToken[newNativeTokenRootAddress] = NATIVE_TOKEN_CONTRACT;
             // slither-disable-next-line reentrancy-events
-            emit L2TokenMapped(newNativeTokenRootAddress, NATIVE_TOKEN_CONTRACT);
+            emit TokenMapped(newNativeTokenRootAddress, NATIVE_TOKEN_CONTRACT);
         }
     }
 
@@ -173,7 +158,7 @@ contract ChildERC20Predicate is IChildERC20Predicate, Initializable, System {
         gateway.sendBridgeMsg(rootERC20Predicate, abi.encode(WITHDRAW_SIG, rootToken, msg.sender, receiver, amount));
 
         // slither-disable-next-line reentrancy-events
-        emit L2ERC20Withdraw(rootToken, address(childToken), msg.sender, receiver, amount);
+        emit ERC20Withdraw(rootToken, address(childToken), msg.sender, receiver, amount);
     }
 
     function _deposit(bytes calldata data) private {
@@ -199,7 +184,7 @@ contract ChildERC20Predicate is IChildERC20Predicate, Initializable, System {
         require(IChildERC20(childToken).mint(receiver, amount), "ChildERC20Predicate: MINT_FAILED");
 
         // slither-disable-next-line reentrancy-events
-        emit L2ERC20Deposit(depositToken, address(childToken), depositor, receiver, amount);
+        emit ERC20Deposit(depositToken, address(childToken), depositor, receiver, amount);
     }
 
     /**
@@ -214,13 +199,13 @@ contract ChildERC20Predicate is IChildERC20Predicate, Initializable, System {
         assert(rootToken != address(0)); // invariant since root predicate performs the same check
         assert(rootTokenToChildToken[rootToken] == address(0)); // invariant since root predicate performs the same check
         IChildERC20 childToken = IChildERC20(
-            Clones.cloneDeterministic(childTokenTemplate, keccak256(abi.encodePacked(rootToken)))
+            Clones.cloneDeterministic(sourceTokenTemplate, keccak256(abi.encodePacked(rootToken)))
         );
         rootTokenToChildToken[rootToken] = address(childToken);
         childToken.initialize(rootToken, name, symbol, decimals);
 
         // slither-disable-next-line reentrancy-events
-        emit L2TokenMapped(rootToken, address(childToken));
+        emit TokenMapped(rootToken, address(childToken));
     }
 
     // slither-disable-next-line unused-state,naming-convention

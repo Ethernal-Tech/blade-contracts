@@ -5,8 +5,6 @@ import {
   RootERC721Predicate__factory,
   Gateway,
   Gateway__factory,
-  ExitHelper,
-  ExitHelper__factory,
   ChildERC721,
   ChildERC721__factory,
   MockERC721,
@@ -18,7 +16,6 @@ describe("RootERC721Predicate", () => {
   let rootERC721Predicate: RootERC721Predicate,
     exitHelperRootERC721Predicate: RootERC721Predicate,
     gateway: Gateway,
-    exitHelper: ExitHelper,
     childERC721Predicate: string,
     childTokenTemplate: ChildERC721,
     rootToken: MockERC721,
@@ -32,11 +29,6 @@ describe("RootERC721Predicate", () => {
 
     await gateway.deployed();
 
-    const ExitHelper: ExitHelper__factory = await ethers.getContractFactory("ExitHelper");
-    exitHelper = await ExitHelper.deploy();
-
-    await exitHelper.deployed();
-
     childERC721Predicate = ethers.Wallet.createRandom().address;
 
     const ChildERC721: ChildERC721__factory = await ethers.getContractFactory("ChildERC721");
@@ -49,15 +41,14 @@ describe("RootERC721Predicate", () => {
 
     await rootERC721Predicate.deployed();
 
-    impersonateAccount(exitHelper.address);
-    setBalance(exitHelper.address, "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF");
-    exitHelperRootERC721Predicate = rootERC721Predicate.connect(await ethers.getSigner(exitHelper.address));
+    impersonateAccount(gateway.address);
+    setBalance(gateway.address, "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF");
+    exitHelperRootERC721Predicate = rootERC721Predicate.connect(await ethers.getSigner(gateway.address));
   });
 
   it("fail bad initialization", async () => {
     await expect(
       rootERC721Predicate.initialize(
-        "0x0000000000000000000000000000000000000000",
         "0x0000000000000000000000000000000000000000",
         "0x0000000000000000000000000000000000000000",
         "0x0000000000000000000000000000000000000000"
@@ -66,23 +57,16 @@ describe("RootERC721Predicate", () => {
   });
 
   it("initialize and validate initialization", async () => {
-    await rootERC721Predicate.initialize(
-      gateway.address,
-      exitHelper.address,
-      childERC721Predicate,
-      childTokenTemplate.address
-    );
+    await rootERC721Predicate.initialize(gateway.address, childERC721Predicate, childTokenTemplate.address);
 
     expect(await rootERC721Predicate.gateway()).to.equal(gateway.address);
-    expect(await rootERC721Predicate.exitHelper()).to.equal(exitHelper.address);
     expect(await rootERC721Predicate.childERC721Predicate()).to.equal(childERC721Predicate);
-    expect(await rootERC721Predicate.childTokenTemplate()).to.equal(childTokenTemplate.address);
+    expect(await rootERC721Predicate.destinationTokenTemplate()).to.equal(childTokenTemplate.address);
   });
 
   it("fail reinitialization", async () => {
     await expect(
       rootERC721Predicate.initialize(
-        "0x0000000000000000000000000000000000000000",
         "0x0000000000000000000000000000000000000000",
         "0x0000000000000000000000000000000000000000",
         "0x0000000000000000000000000000000000000000"
@@ -147,7 +131,7 @@ describe("RootERC721Predicate", () => {
     const mapEvent = mapReceipt?.events?.find((log: any) => log.event === "TokenMapped");
     expect(mapEvent?.args?.rootToken).to.equal(rootToken.address);
     expect(mapEvent?.args?.childToken).to.equal(childTokenAddr);
-    expect(await rootERC721Predicate.rootTokenToChildToken(rootToken.address)).to.equal(childTokenAddr);
+    expect(await rootERC721Predicate.sourceTokenToDestinationToken(rootToken.address)).to.equal(childTokenAddr);
   });
 
   it("remap token fail", async () => {
@@ -185,7 +169,7 @@ describe("RootERC721Predicate", () => {
     const depositTx = await rootERC721Predicate.deposit(tempRootToken.address, 0);
     const depositReceipt = await depositTx.wait();
     const depositEvent = depositReceipt?.events?.find((log: any) => log.event === "ERC721Deposit");
-    const childToken = await rootERC721Predicate.rootTokenToChildToken(tempRootToken.address);
+    const childToken = await rootERC721Predicate.sourceTokenToDestinationToken(tempRootToken.address);
     expect(depositEvent?.args?.rootToken).to.equal(tempRootToken.address);
     expect(depositEvent?.args?.childToken).to.equal(childToken);
     expect(depositEvent?.args?.depositor).to.equal(accounts[0].address);
@@ -199,7 +183,7 @@ describe("RootERC721Predicate", () => {
     const depositTx = await rootERC721Predicate.deposit(rootToken.address, 0);
     const depositReceipt = await depositTx.wait();
     const depositEvent = depositReceipt?.events?.find((log: any) => log.event === "ERC721Deposit");
-    const childToken = await rootERC721Predicate.rootTokenToChildToken(rootToken.address);
+    const childToken = await rootERC721Predicate.sourceTokenToDestinationToken(rootToken.address);
     expect(depositEvent?.args?.rootToken).to.equal(rootToken.address);
     expect(depositEvent?.args?.childToken).to.equal(childToken);
     expect(depositEvent?.args?.depositor).to.equal(accounts[0].address);
@@ -213,7 +197,7 @@ describe("RootERC721Predicate", () => {
     const depositTx = await rootERC721Predicate.depositTo(rootToken.address, accounts[1].address, 1);
     const depositReceipt = await depositTx.wait();
     const depositEvent = depositReceipt?.events?.find((log: any) => log.event === "ERC721Deposit");
-    const childToken = await rootERC721Predicate.rootTokenToChildToken(rootToken.address);
+    const childToken = await rootERC721Predicate.sourceTokenToDestinationToken(rootToken.address);
     expect(depositEvent?.args?.rootToken).to.equal(rootToken.address);
     expect(depositEvent?.args?.childToken).to.equal(childToken);
     expect(depositEvent?.args?.depositor).to.equal(accounts[0].address);
@@ -233,7 +217,7 @@ describe("RootERC721Predicate", () => {
     const depositTx = await rootERC721Predicate.depositBatch(rootToken.address, receiverArr, depositedBatchIds);
     const depositReceipt = await depositTx.wait();
     const depositEvent = depositReceipt?.events?.find((log: any) => log.event === "ERC721DepositBatch");
-    const childToken = await rootERC721Predicate.rootTokenToChildToken(rootToken.address);
+    const childToken = await rootERC721Predicate.sourceTokenToDestinationToken(rootToken.address);
     expect(depositEvent?.args?.rootToken).to.equal(rootToken.address);
     expect(depositEvent?.args?.childToken).to.equal(childToken);
     expect(depositEvent?.args?.depositor).to.equal(accounts[0].address);
@@ -248,7 +232,7 @@ describe("RootERC721Predicate", () => {
     const depositTx = await rootERC721Predicate.depositBatch(tempRootToken.address, [accounts[0].address], [0]);
     const depositReceipt = await depositTx.wait();
     const depositEvent = depositReceipt?.events?.find((log: any) => log.event === "ERC721DepositBatch");
-    const childToken = await rootERC721Predicate.rootTokenToChildToken(tempRootToken.address);
+    const childToken = await rootERC721Predicate.sourceTokenToDestinationToken(tempRootToken.address);
     expect(depositEvent?.args?.rootToken).to.equal(tempRootToken.address);
     expect(depositEvent?.args?.childToken).to.equal(childToken);
     expect(depositEvent?.args?.depositor).to.equal(accounts[0].address);
@@ -270,7 +254,7 @@ describe("RootERC721Predicate", () => {
     const withdrawTx = await exitHelperRootERC721Predicate.onStateReceive(0, childERC721Predicate, exitData);
     const withdrawReceipt = await withdrawTx.wait();
     const withdrawEvent = withdrawReceipt?.events?.find((log: any) => log.event === "ERC721Withdraw");
-    const childToken = await rootERC721Predicate.rootTokenToChildToken(rootToken.address);
+    const childToken = await rootERC721Predicate.sourceTokenToDestinationToken(rootToken.address);
     expect(withdrawEvent?.args?.rootToken).to.equal(rootToken.address);
     expect(withdrawEvent?.args?.childToken).to.equal(childToken);
     expect(withdrawEvent?.args?.withdrawer).to.equal(accounts[0].address);
@@ -292,7 +276,7 @@ describe("RootERC721Predicate", () => {
     const withdrawTx = await exitHelperRootERC721Predicate.onStateReceive(0, childERC721Predicate, exitData);
     const withdrawReceipt = await withdrawTx.wait();
     const withdrawEvent = withdrawReceipt?.events?.find((log: any) => log.event === "ERC721Withdraw");
-    const childToken = await rootERC721Predicate.rootTokenToChildToken(rootToken.address);
+    const childToken = await rootERC721Predicate.sourceTokenToDestinationToken(rootToken.address);
     expect(withdrawEvent?.args?.rootToken).to.equal(rootToken.address);
     expect(withdrawEvent?.args?.childToken).to.equal(childToken);
     expect(withdrawEvent?.args?.withdrawer).to.equal(accounts[0].address);
@@ -319,7 +303,7 @@ describe("RootERC721Predicate", () => {
     const withdrawTx = await exitHelperRootERC721Predicate.onStateReceive(0, childERC721Predicate, exitData);
     const withdrawReceipt = await withdrawTx.wait();
     const withdrawEvent = withdrawReceipt?.events?.find((log: any) => log.event === "ERC721WithdrawBatch");
-    const childToken = await rootERC721Predicate.rootTokenToChildToken(rootToken.address);
+    const childToken = await rootERC721Predicate.sourceTokenToDestinationToken(rootToken.address);
     expect(withdrawEvent?.args?.rootToken).to.equal(rootToken.address);
     expect(withdrawEvent?.args?.childToken).to.equal(childToken);
     expect(withdrawEvent?.args?.withdrawer).to.equal(accounts[1].address);

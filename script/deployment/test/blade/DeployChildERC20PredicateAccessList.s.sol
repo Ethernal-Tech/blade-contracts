@@ -11,9 +11,8 @@ abstract contract ChildERC20PredicateAccessListDeployer is Script {
     function deployChildERC20PredicateAccessList(
         address proxyAdmin,
         address newGateway,
-        address newStateReceiver,
         address newRootERC20Predicate,
-        address newChildTokenTemplate,
+        address newSourceTokenTemplate,
         address newNativeTokenRootAddress,
         bool newUseAllowList,
         bool newUseBlockList,
@@ -23,9 +22,8 @@ abstract contract ChildERC20PredicateAccessListDeployer is Script {
             ChildERC20PredicateAccessList.initialize,
             (
                 newGateway,
-                newStateReceiver,
                 newRootERC20Predicate,
-                newChildTokenTemplate,
+                newSourceTokenTemplate,
                 newNativeTokenRootAddress,
                 newUseAllowList,
                 newUseBlockList,
@@ -54,9 +52,8 @@ contract DeployChildERC20PredicateAccessList is ChildERC20PredicateAccessListDep
     function run(
         address proxyAdmin,
         address newGateway,
-        address newStateReceiver,
         address newRootERC20Predicate,
-        address newChildTokenTemplate,
+        address newSourceTokenTemplate,
         address newNativeTokenRootAddress,
         bool newUseAllowList,
         bool newUseBlockList,
@@ -66,9 +63,8 @@ contract DeployChildERC20PredicateAccessList is ChildERC20PredicateAccessListDep
             deployChildERC20PredicateAccessList(
                 proxyAdmin,
                 newGateway,
-                newStateReceiver,
                 newRootERC20Predicate,
-                newChildTokenTemplate,
+                newSourceTokenTemplate,
                 newNativeTokenRootAddress,
                 newUseAllowList,
                 newUseBlockList,

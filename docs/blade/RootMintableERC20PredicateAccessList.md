@@ -242,23 +242,6 @@ function childERC20Predicate() external view returns (address)
 |---|---|---|
 | _0 | address | undefined |
 
-### childTokenTemplate
-
-```solidity
-function childTokenTemplate() external view returns (address)
-```
-
-
-
-
-
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | address | undefined |
-
 ### deposit
 
 ```solidity
@@ -294,10 +277,10 @@ Function to deposit tokens from the depositor to another address on the child ch
 | receiver | address | undefined |
 | amount | uint256 | Amount to deposit |
 
-### exitHelper
+### destinationTokenTemplate
 
 ```solidity
-function exitHelper() external view returns (address)
+function destinationTokenTemplate() external view returns (address)
 ```
 
 
@@ -331,7 +314,7 @@ function gateway() external view returns (contract IGateway)
 ### initialize
 
 ```solidity
-function initialize(address newGateway, address newExitHelper, address newChildERC20Predicate, address newChildTokenTemplate, address newNativeTokenRoot) external nonpayable
+function initialize(address newGateway, address newChildERC20Predicate, address newDestinationTokenTemplate, address newNativeTokenRoot) external nonpayable
 ```
 
 Initialization function for RootERC20Predicate
@@ -342,16 +325,15 @@ Initialization function for RootERC20Predicate
 
 | Name | Type | Description |
 |---|---|---|
-| newGateway | address | Address of gateway to send deposit information to |
-| newExitHelper | address | Address of ExitHelper to receive withdrawal information from |
+| newGateway | address | Address of gateway contract |
 | newChildERC20Predicate | address | Address of child ERC20 predicate to communicate with |
-| newChildTokenTemplate | address | undefined |
-| newNativeTokenRoot | address | undefined |
+| newDestinationTokenTemplate | address | Address of destination token implementation to deploy clones of |
+| newNativeTokenRoot | address | Address of the native token |
 
 ### initialize
 
 ```solidity
-function initialize(address newGateway, address newStateReceiver, address newChildERC20Predicate, address newChildTokenTemplate, bool newUseAllowList, bool newUseBlockList, address newOwner) external nonpayable
+function initialize(address newGateway, address newChildERC20Predicate, address newTokenTemplate, bool newUseAllowList, bool newUseBlockList, address newOwner) external nonpayable
 ```
 
 
@@ -363,9 +345,8 @@ function initialize(address newGateway, address newStateReceiver, address newChi
 | Name | Type | Description |
 |---|---|---|
 | newGateway | address | undefined |
-| newStateReceiver | address | undefined |
 | newChildERC20Predicate | address | undefined |
-| newChildTokenTemplate | address | undefined |
+| newTokenTemplate | address | undefined |
 | newUseAllowList | bool | undefined |
 | newUseBlockList | bool | undefined |
 | newOwner | address | undefined |
@@ -472,28 +453,6 @@ function renounceOwnership() external nonpayable
 *Leaves the contract without owner. It will not be possible to call `onlyOwner` functions. Can only be called by the current owner. NOTE: Renouncing ownership will leave the contract without an owner, thereby disabling any functionality that is only available to the owner.*
 
 
-### rootTokenToChildToken
-
-```solidity
-function rootTokenToChildToken(address) external view returns (address)
-```
-
-
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | address | undefined |
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | address | undefined |
-
 ### setAllowList
 
 ```solidity
@@ -525,6 +484,28 @@ function setBlockList(bool newUseBlockList) external nonpayable
 | Name | Type | Description |
 |---|---|---|
 | newUseBlockList | bool | undefined |
+
+### sourceTokenToDestinationToken
+
+```solidity
+function sourceTokenToDestinationToken(address) external view returns (address)
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | address | undefined |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | address | undefined |
 
 ### transferOwnership
 

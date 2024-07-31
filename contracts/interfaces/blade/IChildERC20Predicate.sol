@@ -7,9 +7,8 @@ import "./IChildERC20.sol";
 interface IChildERC20Predicate is IStateReceiver {
     function initialize(
         address newGateway,
-        address newStateReceiver,
         address newRootERC20Predicate,
-        address newChildTokenTemplate,
+        address newSourceTokenTemplate,
         address newNativeTokenRootAddress
     ) external;
 

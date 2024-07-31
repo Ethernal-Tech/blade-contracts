@@ -65,15 +65,14 @@ describe("ChildERC721Predicate", () => {
       await ethers.getSigner("0xffffFFFfFFffffffffffffffFfFFFfffFFFfFFfE")
     );
 
-    impersonateAccount(stateReceiver.address);
-    setBalance(stateReceiver.address, "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF");
-    stateReceiverChildERC721Predicate = childERC721Predicate.connect(await ethers.getSigner(stateReceiver.address));
+    impersonateAccount(gateway.address);
+    setBalance(gateway.address, "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF");
+    stateReceiverChildERC721Predicate = childERC721Predicate.connect(await ethers.getSigner(gateway.address));
   });
 
   it("fail bad initialization", async () => {
     await expect(
       systemChildERC721Predicate.initialize(
-        "0x0000000000000000000000000000000000000000",
         "0x0000000000000000000000000000000000000000",
         "0x0000000000000000000000000000000000000000",
         "0x0000000000000000000000000000000000000000"
@@ -82,26 +81,15 @@ describe("ChildERC721Predicate", () => {
   });
 
   it("initialize and validate initialization", async () => {
-    await systemChildERC721Predicate.initialize(
-      gateway.address,
-      stateReceiver.address,
-      rootERC721Predicate,
-      childERC721.address
-    );
+    await systemChildERC721Predicate.initialize(gateway.address, rootERC721Predicate, childERC721.address);
     expect(await childERC721Predicate.gateway()).to.equal(gateway.address);
-    expect(await childERC721Predicate.stateReceiver()).to.equal(stateReceiver.address);
     expect(await childERC721Predicate.rootERC721Predicate()).to.equal(rootERC721Predicate);
-    expect(await childERC721Predicate.childTokenTemplate()).to.equal(childERC721.address);
+    expect(await childERC721Predicate.sourceTokenTemplate()).to.equal(childERC721.address);
   });
 
   it("fail reinitialization", async () => {
     await expect(
-      systemChildERC721Predicate.initialize(
-        gateway.address,
-        stateReceiver.address,
-        rootERC721Predicate,
-        childERC721.address
-      )
+      systemChildERC721Predicate.initialize(gateway.address, rootERC721Predicate, childERC721.address)
     ).to.be.revertedWith("Initializable: contract is already initialized");
   });
 
@@ -120,7 +108,7 @@ describe("ChildERC721Predicate", () => {
     );
     const mapTx = await stateReceiverChildERC721Predicate.onStateReceive(0, rootERC721Predicate, stateSyncData);
     const mapReceipt = await mapTx.wait();
-    const mapEvent = mapReceipt?.events?.find((log) => log.event === "L2TokenMapped");
+    const mapEvent = mapReceipt?.events?.find((log) => log.event === "TokenMapped");
     expect(mapEvent?.args?.rootToken).to.equal(rootToken);
     expect(mapEvent?.args?.childToken).to.equal(childTokenAddr);
     expect(await childToken.predicate()).to.equal(childERC721Predicate.address);
@@ -187,7 +175,7 @@ describe("ChildERC721Predicate", () => {
     const depositTx = await stateReceiverChildERC721Predicate.onStateReceive(0, rootERC721Predicate, stateSyncData);
     const depositReceipt = await depositTx.wait();
     stopImpersonatingAccount(stateReceiverChildERC721Predicate.address);
-    const depositEvent = depositReceipt.events?.find((log) => log.event === "L2ERC721Deposit");
+    const depositEvent = depositReceipt.events?.find((log) => log.event === "ERC721Deposit");
     expect(depositEvent?.args?.rootToken).to.equal(rootToken);
     expect(depositEvent?.args?.childToken).to.equal(childTokenAddr);
     expect(depositEvent?.args?.sender).to.equal(accounts[0].address);
@@ -210,7 +198,7 @@ describe("ChildERC721Predicate", () => {
     );
     const depositTx = await stateReceiverChildERC721Predicate.onStateReceive(0, rootERC721Predicate, stateSyncData);
     const depositReceipt = await depositTx.wait();
-    const depositEvent = depositReceipt.events?.find((log) => log.event === "L2ERC721Deposit");
+    const depositEvent = depositReceipt.events?.find((log) => log.event === "ERC721Deposit");
     expect(depositEvent?.args?.rootToken).to.equal(rootToken);
     expect(depositEvent?.args?.childToken).to.equal(childTokenAddr);
     expect(depositEvent?.args?.sender).to.equal(accounts[0].address);
@@ -238,7 +226,7 @@ describe("ChildERC721Predicate", () => {
     );
     const depositTx = await stateReceiverChildERC721Predicate.onStateReceive(0, rootERC721Predicate, stateSyncData);
     const depositReceipt = await depositTx.wait();
-    const depositEvent = depositReceipt.events?.find((log) => log.event === "L2ERC721DepositBatch");
+    const depositEvent = depositReceipt.events?.find((log) => log.event === "ERC721DepositBatch");
     expect(depositEvent?.args?.rootToken).to.equal(rootToken);
     expect(depositEvent?.args?.childToken).to.equal(childTokenAddr);
     expect(depositEvent?.args?.sender).to.equal(accounts[0].address);
@@ -249,7 +237,7 @@ describe("ChildERC721Predicate", () => {
   it("withdraw tokens from child chain with same address", async () => {
     const depositTx = await childERC721Predicate.withdraw(childTokenAddr, depositedTokenIds[0]);
     const depositReceipt = await depositTx.wait();
-    const depositEvent = depositReceipt.events?.find((log: any) => log.event === "L2ERC721Withdraw");
+    const depositEvent = depositReceipt.events?.find((log: any) => log.event === "ERC721Withdraw");
     expect(depositEvent?.args?.rootToken).to.equal(rootToken);
     expect(depositEvent?.args?.childToken).to.equal(childTokenAddr);
     expect(depositEvent?.args?.sender).to.equal(accounts[0].address);
@@ -262,7 +250,7 @@ describe("ChildERC721Predicate", () => {
       .connect(accounts[1])
       .withdrawTo(childTokenAddr, accounts[0].address, depositedTokenIds[1]);
     const depositReceipt = await depositTx.wait();
-    const depositEvent = depositReceipt.events?.find((log: any) => log.event === "L2ERC721Withdraw");
+    const depositEvent = depositReceipt.events?.find((log: any) => log.event === "ERC721Withdraw");
     expect(depositEvent?.args?.rootToken).to.equal(rootToken);
     expect(depositEvent?.args?.childToken).to.equal(childTokenAddr);
     expect(depositEvent?.args?.sender).to.equal(accounts[1].address);
@@ -286,7 +274,7 @@ describe("ChildERC721Predicate", () => {
       .connect(accounts[2])
       .withdrawBatch(childTokenAddr, receiverArr, batchDepositedTokenIds.slice(0, batchSize));
     const depositReceipt = await depositTx.wait();
-    const depositEvent = depositReceipt.events?.find((log: any) => log.event === "L2ERC721WithdrawBatch");
+    const depositEvent = depositReceipt.events?.find((log: any) => log.event === "ERC721WithdrawBatch");
     expect(depositEvent?.args?.rootToken).to.equal(rootToken);
     expect(depositEvent?.args?.childToken).to.equal(childTokenAddr);
     expect(depositEvent?.args?.sender).to.equal(accounts[2].address);

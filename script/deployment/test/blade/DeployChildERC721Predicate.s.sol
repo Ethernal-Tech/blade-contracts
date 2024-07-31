@@ -11,13 +11,12 @@ abstract contract ChildERC721PredicateDeployer is Script {
     function deployChildERC721Predicate(
         address proxyAdmin,
         address newGateway,
-        address newStateReceiver,
         address newRootERC721Predicate,
-        address newChildTokenTemplate
+        address newSourceTokenTemplate
     ) internal returns (address logicAddr, address proxyAddr) {
         bytes memory initData = abi.encodeCall(
             ChildERC721Predicate.initialize,
-            (newGateway, newStateReceiver, newRootERC721Predicate, newChildTokenTemplate)
+            (newGateway, newRootERC721Predicate, newSourceTokenTemplate)
         );
 
         vm.startBroadcast();
@@ -41,17 +40,9 @@ contract DeployChildERC721Predicate is ChildERC721PredicateDeployer {
     function run(
         address proxyAdmin,
         address newGateway,
-        address newStateReceiver,
         address newRootERC721Predicate,
-        address newChildTokenTemplate
+        address newSourceTokenTemplate
     ) external returns (address logicAddr, address proxyAddr) {
-        return
-            deployChildERC721Predicate(
-                proxyAdmin,
-                newGateway,
-                newStateReceiver,
-                newRootERC721Predicate,
-                newChildTokenTemplate
-            );
+        return deployChildERC721Predicate(proxyAdmin, newGateway, newRootERC721Predicate, newSourceTokenTemplate);
     }
 }
