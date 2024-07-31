@@ -37,11 +37,11 @@ contract RootERC1155Predicate is Initializable, ERC1155Holder, IRootERC1155Predi
     }
 
     /**
-     * @inheritdoc IL2StateReceiver
+     * @inheritdoc IStateReceiver
      * @notice Function to be used for token withdrawals
      * @dev Can be extended to include other signatures for more functionality
      */
-    function onL2StateReceive(uint256 /* id */, address sender, bytes calldata data) external {
+    function onStateReceive(uint256 /* id */, address sender, bytes calldata data) external {
         require(msg.sender == exitHelper, "RootERC1155Predicate: ONLY_EXIT_HELPER");
         require(sender == childERC1155Predicate, "RootERC1155Predicate: ONLY_CHILD_PREDICATE");
 

@@ -68,19 +68,6 @@ describe("ChildERC1155Predicate", () => {
     stateReceiverChildERC1155Predicate = childERC1155Predicate.connect(await ethers.getSigner(stateReceiver.address));
   });
 
-  it("fail initialization: unauthorized", async () => {
-    await expect(
-      childERC1155Predicate.initialize(
-        "0x0000000000000000000000000000000000000000",
-        "0x0000000000000000000000000000000000000000",
-        "0x0000000000000000000000000000000000000000",
-        "0x0000000000000000000000000000000000000000"
-      )
-    )
-      .to.be.revertedWithCustomError(childERC1155Predicate, "Unauthorized")
-      .withArgs("SYSTEMCALL");
-  });
-
   it("fail bad initialization", async () => {
     await expect(
       systemChildERC1155Predicate.initialize(

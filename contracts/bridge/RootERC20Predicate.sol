@@ -51,11 +51,11 @@ contract RootERC20Predicate is Initializable, IRootERC20Predicate {
     // slither-disable-end dead-code
 
     /**
-     * @inheritdoc IL2StateReceiver
+     * @inheritdoc IStateReceiver
      * @notice Function to be used for token withdrawals
      * @dev Can be extended to include other signatures for more functionality
      */
-    function onL2StateReceive(uint256 /* id */, address sender, bytes calldata data) external {
+    function onStateReceive(uint256 /* id */, address sender, bytes calldata data) external {
         require(msg.sender == exitHelper, "RootERC20Predicate: ONLY_EXIT_HELPER");
         require(sender == childERC20Predicate, "RootERC20Predicate: ONLY_CHILD_PREDICATE");
 

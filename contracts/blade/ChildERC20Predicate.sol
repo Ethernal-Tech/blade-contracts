@@ -19,13 +19,9 @@ import "./System.sol";
 contract ChildERC20Predicate is IChildERC20Predicate, Initializable, System {
     using SafeERC20 for IERC20;
 
-    /// @custom:security write-protection="onlySystemCall()"
     IGateway public gateway;
-    /// @custom:security write-protection="onlySystemCall()"
     address public stateReceiver;
-    /// @custom:security write-protection="onlySystemCall()"
     address public rootERC20Predicate;
-    /// @custom:security write-protection="onlySystemCall()"
     address public childTokenTemplate;
     bytes32 public constant DEPOSIT_SIG = keccak256("DEPOSIT");
     bytes32 public constant WITHDRAW_SIG = keccak256("WITHDRAW");
@@ -64,7 +60,7 @@ contract ChildERC20Predicate is IChildERC20Predicate, Initializable, System {
         address newRootERC20Predicate,
         address newChildTokenTemplate,
         address newNativeTokenRootAddress
-    ) public virtual onlySystemCall initializer {
+    ) public virtual initializer {
         _initialize(
             newGateway,
             newStateReceiver,

@@ -651,22 +651,3 @@ event OwnershipTransferred(address indexed previousOwner, address indexed newOwn
 
 
 
-## Errors
-
-### Unauthorized
-
-```solidity
-error Unauthorized(string only)
-```
-
-
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| only | string | undefined |
-
-

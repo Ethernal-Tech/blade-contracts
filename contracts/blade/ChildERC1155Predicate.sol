@@ -6,7 +6,6 @@ import "@openzeppelin/contracts/proxy/Clones.sol";
 import "../interfaces/blade/IChildERC1155Predicate.sol";
 import "../interfaces/blade/IChildERC1155.sol";
 import "../interfaces/IGateway.sol";
-import "./System.sol";
 
 /**
     @title ChildERC1155Predicate
@@ -14,14 +13,10 @@ import "./System.sol";
     @notice Enables ERC1155 token deposits and withdrawals across an arbitrary root chain and child chain
  */
 // solhint-disable reason-string
-contract ChildERC1155Predicate is IChildERC1155Predicate, Initializable, System {
-    /// @custom:security write-protection="onlySystemCall()"
+contract ChildERC1155Predicate is IChildERC1155Predicate, Initializable {
     IGateway public gateway;
-    /// @custom:security write-protection="onlySystemCall()"
     address public stateReceiver;
-    /// @custom:security write-protection="onlySystemCall()"
     address public rootERC1155Predicate;
-    /// @custom:security write-protection="onlySystemCall()"
     address public childTokenTemplate;
     bytes32 public constant DEPOSIT_SIG = keccak256("DEPOSIT");
     bytes32 public constant DEPOSIT_BATCH_SIG = keccak256("DEPOSIT_BATCH");
@@ -83,7 +78,7 @@ contract ChildERC1155Predicate is IChildERC1155Predicate, Initializable, System 
         address newStateReceiver,
         address newRootERC1155Predicate,
         address newChildTokenTemplate
-    ) public virtual onlySystemCall initializer {
+    ) public virtual initializer {
         _initialize(newGateway, newStateReceiver, newRootERC1155Predicate, newChildTokenTemplate);
     }
 

@@ -37,11 +37,11 @@ contract RootERC721Predicate is Initializable, ERC721Holder, IRootERC721Predicat
     }
 
     /**
-     * @inheritdoc IL2StateReceiver
+     * @inheritdoc IStateReceiver
      * @notice Function to be used for token withdrawals
      * @dev Can be extended to include other signatures for more functionality
      */
-    function onL2StateReceive(uint256 /* id */, address sender, bytes calldata data) external {
+    function onStateReceive(uint256 /* id */, address sender, bytes calldata data) external {
         require(msg.sender == exitHelper, "RootERC721Predicate: ONLY_EXIT_HELPER");
         require(sender == childERC721Predicate, "RootERC721Predicate: ONLY_CHILD_PREDICATE");
 

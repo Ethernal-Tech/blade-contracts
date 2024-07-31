@@ -89,20 +89,6 @@ describe("ChildERC20Predicate", () => {
     stateReceiverChildERC20Predicate = childERC20Predicate.connect(await ethers.getSigner(stateReceiver.address));
   });
 
-  it("fail initialization: unauthorized", async () => {
-    await expect(
-      childERC20Predicate.initialize(
-        "0x0000000000000000000000000000000000000000",
-        "0x0000000000000000000000000000000000000000",
-        "0x0000000000000000000000000000000000000000",
-        "0x0000000000000000000000000000000000000000",
-        "0x0000000000000000000000000000000000000000"
-      )
-    )
-      .to.be.revertedWithCustomError(childERC20Predicate, "Unauthorized")
-      .withArgs("SYSTEMCALL");
-  });
-
   it("fail bad initialization", async () => {
     await expect(
       systemChildERC20Predicate.initialize(

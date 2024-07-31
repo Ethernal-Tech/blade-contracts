@@ -351,7 +351,7 @@ Initialization function for RootERC20Predicate
 ### initialize
 
 ```solidity
-function initialize(address newGateway, address newStateReceiver, address newChildERC20Predicate, address newChildTokenTemplate, address newNativeTokenRoot, bool newUseAllowList, bool newUseBlockList, address newOwner) external nonpayable
+function initialize(address newGateway, address newStateReceiver, address newChildERC20Predicate, address newChildTokenTemplate, bool newUseAllowList, bool newUseBlockList, address newOwner) external nonpayable
 ```
 
 
@@ -366,7 +366,6 @@ function initialize(address newGateway, address newStateReceiver, address newChi
 | newStateReceiver | address | undefined |
 | newChildERC20Predicate | address | undefined |
 | newChildTokenTemplate | address | undefined |
-| newNativeTokenRoot | address | undefined |
 | newUseAllowList | bool | undefined |
 | newUseBlockList | bool | undefined |
 | newOwner | address | undefined |
@@ -410,10 +409,10 @@ Function that retrieves rootchain token that represents Supernets native token
 |---|---|---|
 | _0 | address | undefined |
 
-### onL2StateReceive
+### onStateReceive
 
 ```solidity
-function onL2StateReceive(uint256, address sender, bytes data) external nonpayable
+function onStateReceive(uint256, address sender, bytes data) external nonpayable
 ```
 
 Function to be used for token withdrawals

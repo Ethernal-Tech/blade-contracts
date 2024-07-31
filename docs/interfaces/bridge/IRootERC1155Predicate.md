@@ -88,13 +88,13 @@ Function to be used for token mapping
 |---|---|---|
 | childToken | address | Address of the mapped child token |
 
-### onL2StateReceive
+### onStateReceive
 
 ```solidity
-function onL2StateReceive(uint256 id, address sender, bytes data) external nonpayable
+function onStateReceive(uint256 id, address sender, bytes data) external nonpayable
 ```
 
-Called by exit helper when state is received from L2
+Called by gateway when state is received from source chain
 
 
 

@@ -93,13 +93,13 @@ describe("RootERC1155Predicate", () => {
 
   it("withdraw tokens fail: only exit helper", async () => {
     await expect(
-      rootERC1155Predicate.onL2StateReceive(0, "0x0000000000000000000000000000000000000000", "0x00")
+      rootERC1155Predicate.onStateReceive(0, "0x0000000000000000000000000000000000000000", "0x00")
     ).to.be.revertedWith("RootERC1155Predicate: ONLY_EXIT_HELPER");
   });
 
   it("withdraw tokens fail: only child predicate", async () => {
     await expect(
-      exitHelperRootERC1155Predicate.onL2StateReceive(0, ethers.Wallet.createRandom().address, "0x00")
+      exitHelperRootERC1155Predicate.onStateReceive(0, ethers.Wallet.createRandom().address, "0x00")
     ).to.be.revertedWith("RootERC1155Predicate: ONLY_CHILD_PREDICATE");
   });
 
@@ -114,9 +114,9 @@ describe("RootERC1155Predicate", () => {
         0,
       ]
     );
-    await expect(
-      exitHelperRootERC1155Predicate.onL2StateReceive(0, childERC1155Predicate, exitData)
-    ).to.be.revertedWith("RootERC1155Predicate: INVALID_SIGNATURE");
+    await expect(exitHelperRootERC1155Predicate.onStateReceive(0, childERC1155Predicate, exitData)).to.be.revertedWith(
+      "RootERC1155Predicate: INVALID_SIGNATURE"
+    );
   });
 
   it("withdraw tokens fail: unmapped token", async () => {
@@ -130,7 +130,7 @@ describe("RootERC1155Predicate", () => {
         0,
       ]
     );
-    await expect(exitHelperRootERC1155Predicate.onL2StateReceive(0, childERC1155Predicate, exitData)).to.be.reverted;
+    await expect(exitHelperRootERC1155Predicate.onStateReceive(0, childERC1155Predicate, exitData)).to.be.reverted;
   });
 
   it("map token success", async () => {
@@ -172,7 +172,7 @@ describe("RootERC1155Predicate", () => {
         1,
       ]
     );
-    await expect(exitHelperRootERC1155Predicate.onL2StateReceive(0, childERC1155Predicate, exitData)).to.be.reverted;
+    await expect(exitHelperRootERC1155Predicate.onStateReceive(0, childERC1155Predicate, exitData)).to.be.reverted;
   });
 
   it("deposit unmapped token: success", async () => {
@@ -261,7 +261,7 @@ describe("RootERC1155Predicate", () => {
         randomAmount,
       ]
     );
-    const withdrawTx = await exitHelperRootERC1155Predicate.onL2StateReceive(0, childERC1155Predicate, exitData);
+    const withdrawTx = await exitHelperRootERC1155Predicate.onStateReceive(0, childERC1155Predicate, exitData);
     const withdrawReceipt = await withdrawTx.wait();
     const withdrawEvent = withdrawReceipt?.events?.find((log: any) => log.event === "ERC1155Withdraw");
     const childToken = await rootERC1155Predicate.rootTokenToChildToken(rootToken.address);
@@ -287,7 +287,7 @@ describe("RootERC1155Predicate", () => {
         randomAmount,
       ]
     );
-    const withdrawTx = await exitHelperRootERC1155Predicate.onL2StateReceive(0, childERC1155Predicate, exitData);
+    const withdrawTx = await exitHelperRootERC1155Predicate.onStateReceive(0, childERC1155Predicate, exitData);
     const withdrawReceipt = await withdrawTx.wait();
     const withdrawEvent = withdrawReceipt?.events?.find((log: any) => log.event === "ERC1155Withdraw");
     const childToken = await rootERC1155Predicate.rootTokenToChildToken(rootToken.address);
@@ -314,7 +314,7 @@ describe("RootERC1155Predicate", () => {
         amounts,
       ]
     );
-    const withdrawTx = await exitHelperRootERC1155Predicate.onL2StateReceive(0, childERC1155Predicate, exitData);
+    const withdrawTx = await exitHelperRootERC1155Predicate.onStateReceive(0, childERC1155Predicate, exitData);
     const withdrawReceipt = await withdrawTx.wait();
     const withdrawEvent = withdrawReceipt?.events?.find((log: any) => log.event === "ERC1155WithdrawBatch");
     const childToken = await rootERC1155Predicate.rootTokenToChildToken(rootToken.address);

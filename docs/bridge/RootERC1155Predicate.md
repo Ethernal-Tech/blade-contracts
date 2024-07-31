@@ -312,10 +312,10 @@ function onERC1155Received(address, address, uint256, uint256, bytes) external n
 |---|---|---|
 | _0 | bytes4 | undefined |
 
-### onL2StateReceive
+### onStateReceive
 
 ```solidity
-function onL2StateReceive(uint256, address sender, bytes data) external nonpayable
+function onStateReceive(uint256, address sender, bytes data) external nonpayable
 ```
 
 Function to be used for token withdrawals

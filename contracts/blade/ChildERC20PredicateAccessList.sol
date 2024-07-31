@@ -20,7 +20,7 @@ contract ChildERC20PredicateAccessList is AccessList, ChildERC20Predicate {
         bool newUseAllowList,
         bool newUseBlockList,
         address newOwner
-    ) public virtual onlySystemCall initializer {
+    ) public virtual initializer {
         _initialize(
             newGateway,
             newStateReceiver,

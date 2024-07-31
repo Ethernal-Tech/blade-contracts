@@ -2,9 +2,9 @@
 pragma solidity 0.8.19;
 
 import "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
-import "./IL2StateReceiver.sol";
+import "./IStateReceiver.sol";
 
-interface IRootERC20Predicate is IL2StateReceiver {
+interface IRootERC20Predicate is IStateReceiver {
     struct ERC20BridgeEvent {
         address rootToken;
         address childToken;

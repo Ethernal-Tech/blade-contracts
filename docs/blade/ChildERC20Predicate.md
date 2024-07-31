@@ -456,22 +456,3 @@ event L2TokenMapped(address indexed rootToken, address indexed childToken)
 
 
 
-## Errors
-
-### Unauthorized
-
-```solidity
-error Unauthorized(string only)
-```
-
-
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| only | string | undefined |
-
-

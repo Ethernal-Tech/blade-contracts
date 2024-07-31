@@ -99,13 +99,13 @@ describe("RootERC20Predicate", () => {
 
   it("withdraw tokens fail: only exit helper", async () => {
     await expect(
-      rootERC20Predicate.onL2StateReceive(0, "0x0000000000000000000000000000000000000000", "0x00")
+      rootERC20Predicate.onStateReceive(0, "0x0000000000000000000000000000000000000000", "0x00")
     ).to.be.revertedWith("RootERC20Predicate: ONLY_EXIT_HELPER");
   });
 
   it("withdraw tokens fail: only child predicate", async () => {
     await expect(
-      exitHelperRootERC20Predicate.onL2StateReceive(0, ethers.Wallet.createRandom().address, "0x00")
+      exitHelperRootERC20Predicate.onStateReceive(0, ethers.Wallet.createRandom().address, "0x00")
     ).to.be.revertedWith("RootERC20Predicate: ONLY_CHILD_PREDICATE");
   });
 
@@ -120,7 +120,7 @@ describe("RootERC20Predicate", () => {
         0,
       ]
     );
-    await expect(exitHelperRootERC20Predicate.onL2StateReceive(0, childERC20Predicate, exitData)).to.be.revertedWith(
+    await expect(exitHelperRootERC20Predicate.onStateReceive(0, childERC20Predicate, exitData)).to.be.revertedWith(
       "RootERC20Predicate: INVALID_SIGNATURE"
     );
   });
@@ -137,7 +137,7 @@ describe("RootERC20Predicate", () => {
       ]
     );
     await expect(
-      exitHelperRootERC20Predicate.onL2StateReceive(0, childERC20Predicate, exitData)
+      exitHelperRootERC20Predicate.onStateReceive(0, childERC20Predicate, exitData)
     ).to.be.revertedWithPanic();
   });
 
@@ -180,7 +180,7 @@ describe("RootERC20Predicate", () => {
         1,
       ]
     );
-    await expect(exitHelperRootERC20Predicate.onL2StateReceive(0, childERC20Predicate, exitData)).to.be.revertedWith(
+    await expect(exitHelperRootERC20Predicate.onStateReceive(0, childERC20Predicate, exitData)).to.be.revertedWith(
       "ERC20: transfer amount exceeds balance"
     );
   });
@@ -256,7 +256,7 @@ describe("RootERC20Predicate", () => {
         ethers.utils.parseUnits(String(randomAmount)),
       ]
     );
-    const withdrawTx = await exitHelperRootERC20Predicate.onL2StateReceive(0, childERC20Predicate, exitData);
+    const withdrawTx = await exitHelperRootERC20Predicate.onStateReceive(0, childERC20Predicate, exitData);
     const withdrawReceipt = await withdrawTx.wait();
     const withdrawEvent = withdrawReceipt?.events?.find((log: any) => log.event === "ERC20Withdraw");
     const childToken = await rootERC20Predicate.rootTokenToChildToken(rootToken.address);
@@ -280,7 +280,7 @@ describe("RootERC20Predicate", () => {
         ethers.utils.parseUnits(String(randomAmount)),
       ]
     );
-    const withdrawTx = await exitHelperRootERC20Predicate.onL2StateReceive(0, childERC20Predicate, exitData);
+    const withdrawTx = await exitHelperRootERC20Predicate.onStateReceive(0, childERC20Predicate, exitData);
     const withdrawReceipt = await withdrawTx.wait();
     const withdrawEvent = withdrawReceipt?.events?.find((log: any) => log.event === "ERC20Withdraw");
     const childToken = await rootERC20Predicate.rootTokenToChildToken(rootToken.address);
