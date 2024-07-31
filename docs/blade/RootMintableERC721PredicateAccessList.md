@@ -346,6 +346,23 @@ Function to deposit tokens from the depositor to another address on the child ch
 | receiver | address | undefined |
 | tokenId | uint256 | Index of the NFT to deposit |
 
+### exitHelper
+
+```solidity
+function exitHelper() external view returns (address)
+```
+
+
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | address | undefined |
+
 ### gateway
 
 ```solidity
@@ -388,10 +405,10 @@ function initialize(address newGateway, address newStateReceiver, address newChi
 ### initialize
 
 ```solidity
-function initialize(address newGateway, address newStateReceiver, address newChildERC721Predicate, address newChildTokenTemplate) external nonpayable
+function initialize(address newGateway, address newExitHelper, address newChildERC721Predicate, address newChildTokenTemplate) external nonpayable
 ```
 
-Initialization function for RootMintableERC721Predicate
+Initialization function for RootERC721Predicate
 
 *Can only be called once.*
 
@@ -400,9 +417,9 @@ Initialization function for RootMintableERC721Predicate
 | Name | Type | Description |
 |---|---|---|
 | newGateway | address | Address of gateway to send deposit information to |
-| newStateReceiver | address | Address of StateReceiver to receive withdrawal information from |
+| newExitHelper | address | Address of ExitHelper to receive withdrawal information from |
 | newChildERC721Predicate | address | Address of child ERC721 predicate to communicate with |
-| newChildTokenTemplate | address | Address of child token template to calculate child token addresses |
+| newChildTokenTemplate | address | undefined |
 
 ### mapToken
 
@@ -451,10 +468,10 @@ function onERC721Received(address, address, uint256, bytes) external nonpayable 
 |---|---|---|
 | _0 | bytes4 | undefined |
 
-### onStateReceive
+### onL2StateReceive
 
 ```solidity
-function onStateReceive(uint256, address sender, bytes data) external nonpayable
+function onL2StateReceive(uint256, address sender, bytes data) external nonpayable
 ```
 
 Function to be used for token withdrawals
@@ -466,8 +483,8 @@ Function to be used for token withdrawals
 | Name | Type | Description |
 |---|---|---|
 | _0 | uint256 | undefined |
-| sender | address | undefined |
-| data | bytes | undefined |
+| sender | address | Address of the sender on the child chain |
+| data | bytes | Data sent by the sender |
 
 ### owner
 
@@ -568,23 +585,6 @@ function setBlockList(bool newUseBlockList) external nonpayable
 |---|---|---|
 | newUseBlockList | bool | undefined |
 
-### stateReceiver
-
-```solidity
-function stateReceiver() external view returns (address)
-```
-
-
-
-
-
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | address | undefined |
-
 ### transferOwnership
 
 ```solidity
@@ -639,26 +639,10 @@ event BlockListUsageSet(uint256 indexed block, bool indexed status)
 | block `indexed` | uint256 | undefined |
 | status `indexed` | bool | undefined |
 
-### Initialized
+### ERC721Deposit
 
 ```solidity
-event Initialized(uint8 version)
-```
-
-
-
-*Triggered when the contract has been initialized or reinitialized.*
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| version  | uint8 | undefined |
-
-### L2MintableERC721Deposit
-
-```solidity
-event L2MintableERC721Deposit(address indexed rootToken, address indexed childToken, address depositor, address indexed receiver, uint256 tokenId)
+event ERC721Deposit(address indexed rootToken, address indexed childToken, address depositor, address indexed receiver, uint256 tokenId)
 ```
 
 
@@ -675,10 +659,10 @@ event L2MintableERC721Deposit(address indexed rootToken, address indexed childTo
 | receiver `indexed` | address | undefined |
 | tokenId  | uint256 | undefined |
 
-### L2MintableERC721DepositBatch
+### ERC721DepositBatch
 
 ```solidity
-event L2MintableERC721DepositBatch(address indexed rootToken, address indexed childToken, address indexed depositor, address[] receivers, uint256[] tokenIds)
+event ERC721DepositBatch(address indexed rootToken, address indexed childToken, address indexed depositor, address[] receivers, uint256[] tokenIds)
 ```
 
 
@@ -695,10 +679,10 @@ event L2MintableERC721DepositBatch(address indexed rootToken, address indexed ch
 | receivers  | address[] | undefined |
 | tokenIds  | uint256[] | undefined |
 
-### L2MintableERC721Withdraw
+### ERC721Withdraw
 
 ```solidity
-event L2MintableERC721Withdraw(address indexed rootToken, address indexed childToken, address withdrawer, address indexed receiver, uint256 tokenId)
+event ERC721Withdraw(address indexed rootToken, address indexed childToken, address withdrawer, address indexed receiver, uint256 tokenId)
 ```
 
 
@@ -715,10 +699,10 @@ event L2MintableERC721Withdraw(address indexed rootToken, address indexed childT
 | receiver `indexed` | address | undefined |
 | tokenId  | uint256 | undefined |
 
-### L2MintableERC721WithdrawBatch
+### ERC721WithdrawBatch
 
 ```solidity
-event L2MintableERC721WithdrawBatch(address indexed rootToken, address indexed childToken, address indexed withdrawer, address[] receivers, uint256[] tokenIds)
+event ERC721WithdrawBatch(address indexed rootToken, address indexed childToken, address indexed withdrawer, address[] receivers, uint256[] tokenIds)
 ```
 
 
@@ -735,22 +719,21 @@ event L2MintableERC721WithdrawBatch(address indexed rootToken, address indexed c
 | receivers  | address[] | undefined |
 | tokenIds  | uint256[] | undefined |
 
-### L2MintableTokenMapped
+### Initialized
 
 ```solidity
-event L2MintableTokenMapped(address indexed rootToken, address indexed childToken)
+event Initialized(uint8 version)
 ```
 
 
 
-
+*Triggered when the contract has been initialized or reinitialized.*
 
 #### Parameters
 
 | Name | Type | Description |
 |---|---|---|
-| rootToken `indexed` | address | undefined |
-| childToken `indexed` | address | undefined |
+| version  | uint8 | undefined |
 
 ### OwnershipTransferStarted
 
@@ -785,6 +768,23 @@ event OwnershipTransferred(address indexed previousOwner, address indexed newOwn
 |---|---|---|
 | previousOwner `indexed` | address | undefined |
 | newOwner `indexed` | address | undefined |
+
+### TokenMapped
+
+```solidity
+event TokenMapped(address indexed rootToken, address indexed childToken)
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| rootToken `indexed` | address | undefined |
+| childToken `indexed` | address | undefined |
 
 
 

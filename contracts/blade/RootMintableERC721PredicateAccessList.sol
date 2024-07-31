@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.19;
 
-import {RootMintableERC721Predicate} from "./RootMintableERC721Predicate.sol";
+import {RootERC721Predicate} from "../bridge/RootERC721Predicate.sol";
 import {AccessList} from "../lib/AccessList.sol";
 
 /**
@@ -10,7 +10,7 @@ import {AccessList} from "../lib/AccessList.sol";
     @notice Enables child-chain origin ERC721 token deposits and withdrawals (only from allowlisted address, and not from blocklisted addresses) across an arbitrary root chain and child chain
  */
 // solhint-disable reason-string
-contract RootMintableERC721PredicateAccessList is AccessList, RootMintableERC721Predicate {
+contract RootMintableERC721PredicateAccessList is AccessList, RootERC721Predicate {
     function initialize(
         address newGateway,
         address newStateReceiver,

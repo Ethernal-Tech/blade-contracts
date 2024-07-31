@@ -101,10 +101,6 @@
     "tokenSupply_": ""
   },
 
-  "RootMintableERC20Predicate": {
-    "newChildTokenTemplate": ""
-  },
-
   "RootMintableERC20PredicateAccessList": {
     "newChildTokenTemplate": "",
     "newUseAllowList": "",
@@ -112,19 +108,11 @@
     "newOwner": ""
   },
 
-  "RootMintableERC721Predicate": {
-    "newChildTokenTemplate": ""
-  },
-
   "RootMintableERC721PredicateAccessList": {
     "newRootERC72newChildTokenTemplate1Predicate": "",
     "newUseAllowList": "",
     "newUseBlockList": "",
     "newOwner": ""
-  },
-
-  "RootMintableERC1155Predicate": {
-    "newChildTokenTemplate": ""
   },
 
   "RootMintableERC1155PredicateAccessList": {

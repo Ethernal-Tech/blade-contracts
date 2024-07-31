@@ -33,17 +33,7 @@ contract RootERC1155Predicate is Initializable, ERC1155Holder, IRootERC1155Predi
         address newChildERC1155Predicate,
         address newChildTokenTemplate
     ) external initializer {
-        require(
-            newGateway != address(0) &&
-                newExitHelper != address(0) &&
-                newChildERC1155Predicate != address(0) &&
-                newChildTokenTemplate != address(0),
-            "RootERC1155Predicate: BAD_INITIALIZATION"
-        );
-        gateway = IGateway(newGateway);
-        exitHelper = newExitHelper;
-        childERC1155Predicate = newChildERC1155Predicate;
-        childTokenTemplate = newChildTokenTemplate;
+        _initialize(newGateway, newExitHelper, newChildERC1155Predicate, newChildTokenTemplate);
     }
 
     /**
@@ -124,6 +114,7 @@ contract RootERC1155Predicate is Initializable, ERC1155Holder, IRootERC1155Predi
     }
 
     function _deposit(IERC1155MetadataURI rootToken, address receiver, uint256 tokenId, uint256 amount) private {
+        _beforeTokenDeposit();
         address childToken = _getChildToken(rootToken);
 
         rootToken.safeTransferFrom(msg.sender, address(this), tokenId, amount, "");
@@ -134,6 +125,7 @@ contract RootERC1155Predicate is Initializable, ERC1155Holder, IRootERC1155Predi
         );
         // slither-disable-next-line reentrancy-events
         emit ERC1155Deposit(address(rootToken), childToken, msg.sender, receiver, tokenId, amount);
+        _afterTokenDeposit();
     }
 
     function _depositBatch(
@@ -142,6 +134,7 @@ contract RootERC1155Predicate is Initializable, ERC1155Holder, IRootERC1155Predi
         uint256[] calldata tokenIds,
         uint256[] calldata amounts
     ) private {
+        _beforeTokenDeposit();
         address childToken = _getChildToken(rootToken);
 
         for (uint256 i = 0; i < tokenIds.length; ) {
@@ -157,6 +150,7 @@ contract RootERC1155Predicate is Initializable, ERC1155Holder, IRootERC1155Predi
         );
         // slither-disable-next-line reentrancy-events
         emit ERC1155DepositBatch(address(rootToken), childToken, msg.sender, receivers, tokenIds, amounts);
+        _afterTokenDeposit();
     }
 
     function _withdraw(bytes calldata data) private {
@@ -198,6 +192,45 @@ contract RootERC1155Predicate is Initializable, ERC1155Holder, IRootERC1155Predi
         if (childToken == address(0)) childToken = mapToken(IERC1155MetadataURI(rootToken));
         assert(childToken != address(0)); // invariant because we map the token if mapping does not exist
     }
+
+    /**
+     * @notice Initialization function for RootERC1155Predicate
+     * @param newGateway Address of Gateway contract
+     * @param newExitHelper Address of ExitHelper to receive withdrawal information from
+     * @param newChildERC1155Predicate Address of child ERC1155 predicate to communicate with
+     * @dev Can only be called once.
+     */
+    function _initialize(
+        address newGateway,
+        address newExitHelper,
+        address newChildERC1155Predicate,
+        address newChildTokenTemplate
+    ) internal {
+        require(
+            newGateway != address(0) &&
+                newExitHelper != address(0) &&
+                newChildERC1155Predicate != address(0) &&
+                newChildTokenTemplate != address(0),
+            "RootERC1155Predicate: BAD_INITIALIZATION"
+        );
+        gateway = IGateway(newGateway);
+        exitHelper = newExitHelper;
+        childERC1155Predicate = newChildERC1155Predicate;
+        childTokenTemplate = newChildTokenTemplate;
+    }
+
+    // solhint-disable no-empty-blocks
+    // slither-disable-start dead-code
+
+    function _beforeTokenDeposit() internal virtual {}
+
+    function _beforeTokenWithdraw() internal virtual {}
+
+    function _afterTokenDeposit() internal virtual {}
+
+    function _afterTokenWithdraw() internal virtual {}
+
+    // slither-disable-end dead-code
 
     // slither-disable-next-line unused-state,naming-convention
     uint256[50] private __gap;

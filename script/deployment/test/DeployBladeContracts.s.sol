@@ -19,12 +19,8 @@ import "script/deployment/test/blade/DeployEIP1559Burn.s.sol";
 import "script/deployment/test/blade/DeployGateway.s.sol";
 import "script/deployment/test/blade/validator/DeployEpochManager.s.sol";
 import "script/deployment/test/blade/DeployNativeERC20.s.sol";
-import "script/deployment/test/blade/DeployNativeERC20Mintable.s.sol";
-import "script/deployment/test/blade/DeployRootMintableERC20Predicate.s.sol";
 import "script/deployment/test/blade/DeployRootMintableERC20PredicateAccessList.s.sol";
-import "script/deployment/test/blade/DeployRootMintableERC721Predicate.s.sol";
 import "script/deployment/test/blade/DeployRootMintableERC721PredicateAccessList.s.sol";
-import "script/deployment/test/blade/DeployRootMintableERC1155Predicate.s.sol";
 import "script/deployment/test/blade/DeployRootMintableERC1155PredicateAccessList.s.sol";
 import "script/deployment/test/blade/DeployStateReceiver.s.sol";
 import "script/deployment/test/blade/DeploySystem.s.sol";
@@ -44,12 +40,8 @@ contract DeployBladeContracts is
     EIP1559BurnDeployer,
     GatewayDeployer,
     NativeERC20Deployer,
-    NativeERC20MintableDeployer,
-    RootMintableERC20PredicateDeployer,
     RootMintableERC20PredicateAccessListDeployer,
-    RootMintableERC721PredicateDeployer,
     RootMintableERC721PredicateAccessListDeployer,
-    RootMintableERC1155PredicateDeployer,
     RootMintableERC1155PredicateAccessListDeployer,
     StateReceiverDeployer,
     SystemDeployer,
@@ -83,18 +75,10 @@ contract DeployBladeContracts is
     address public gateway;
     address public nativeERC20Logic;
     address public nativeERC20Proxy;
-    address public nativeERC20MintableLogic;
-    address public nativeERC20MintableProxy;
-    address public rootMintableERC20PredicateLogic;
-    address public rootMintableERC20PredicateProxy;
     address public rootMintableERC20PredicateAccessListLogic;
     address public rootMintableERC20PredicateAccessListProxy;
-    address public rootMintableERC721PredicateLogic;
-    address public rootMintableERC721PredicateProxy;
     address public rootMintableERC721PredicateAccessListLogic;
     address public rootMintableERC721PredicateAccessListProxy;
-    address public rootMintableERC1155PredicateLogic;
-    address public rootMintableERC1155PredicateProxy;
     address public rootMintableERC1155PredicateAccessListLogic;
     address public rootMintableERC1155PredicateAccessListProxy;
     address public stateReceiver;
@@ -228,47 +212,6 @@ contract DeployBladeContracts is
             config.readUint('["NativeERC20"].tokenSupply_')
         );
 
-        (nativeERC20MintableLogic, nativeERC20MintableProxy) = deployNativeERC20Mintable(
-            proxyAdmin,
-            config.readAddress('["NativeERC20"].predicate_'),
-            config.readAddress('["NativeERC20"].owner_'),
-            config.readAddress('["NativeERC20"].rootToken_'),
-            config.readString('["NativeERC20"].name_'),
-            config.readString('["NativeERC20"].symbol_'),
-            uint8(config.readUint('["NativeERC20"].decimals_')),
-            config.readUint('["NativeERC20"].tokenSupply_')
-        );
-
-        (rootMintableERC20PredicateLogic, rootMintableERC20PredicateProxy) = deployRootMintableERC20Predicate(
-            proxyAdmin,
-            gateway,
-            stateReceiver,
-            childERC20PredicateProxy,
-            config.readAddress('["RootMintableERC20Predicate"].newChildTokenTemplate')
-        );
-
-        (
-            rootMintableERC20PredicateAccessListLogic,
-            rootMintableERC20PredicateAccessListProxy
-        ) = deployRootMintableERC20PredicateAccessList(
-            proxyAdmin,
-            gateway,
-            stateReceiver,
-            childERC20PredicateProxy,
-            config.readAddress('["RootMintableERC20PredicateAccessList"].newChildTokenTemplate'),
-            config.readBool('["RootMintableERC20PredicateAccessList"].newUseAllowList'),
-            config.readBool('["RootMintableERC20PredicateAccessList"].newUseBlockList'),
-            config.readAddress('["RootMintableERC20PredicateAccessList"].newOwner')
-        );
-
-        (rootMintableERC721PredicateLogic, rootMintableERC721PredicateProxy) = deployRootMintableERC721Predicate(
-            proxyAdmin,
-            gateway,
-            stateReceiver,
-            childERC721PredicateProxy,
-            config.readAddress('["RootMintableERC721Predicate"].newChildTokenTemplate')
-        );
-
         (
             rootMintableERC721PredicateAccessListLogic,
             rootMintableERC721PredicateAccessListProxy
@@ -281,14 +224,6 @@ contract DeployBladeContracts is
             config.readBool('["RootMintableERC721PredicateAccessList"].newUseAllowList'),
             config.readBool('["RootMintableERC721PredicateAccessList"].newUseBlockList'),
             config.readAddress('["RootMintableERC721PredicateAccessList"].newOwner')
-        );
-
-        (rootMintableERC1155PredicateLogic, rootMintableERC1155PredicateProxy) = deployRootMintableERC1155Predicate(
-            proxyAdmin,
-            gateway,
-            stateReceiver,
-            childERC1155PredicateProxy,
-            config.readAddress('["RootMintableERC1155Predicate"].newChildTokenTemplate')
         );
 
         (
