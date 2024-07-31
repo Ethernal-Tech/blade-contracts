@@ -140,10 +140,10 @@ contract RootERC20Predicate is Initializable, IRootERC20Predicate {
     }
 
     /**
-     * @notice Internal initialization function for RootMintableERC20Predicate
+     * @notice Internal initialization function for RootERC20Predicate
      * @param newGateway Address of Gateway contract
      * @param newExitHelper Address of ExitHelper to receive deposit information from
-     * @param newChildERC20Predicate Address of root ERC20 predicate to communicate with
+     * @param newChildERC20Predicate Address of destination ERC20 predicate to communicate with
      * @param newChildTokenTemplate Address of child token implementation to deploy clones of
      * @param newNativeTokenRoot Address of rootchain token that represents the native token
      * @dev Can be called multiple times.

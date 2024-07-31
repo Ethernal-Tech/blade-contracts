@@ -19,7 +19,6 @@ import "script/deployment/test/blade/DeployEIP1559Burn.s.sol";
 import "script/deployment/test/blade/DeployGateway.s.sol";
 import "script/deployment/test/blade/validator/DeployEpochManager.s.sol";
 import "script/deployment/test/blade/DeployNativeERC20.s.sol";
-import "script/deployment/test/blade/DeployNativeERC20Mintable.s.sol";
 import "script/deployment/test/blade/DeployRootMintableERC20PredicateAccessList.s.sol";
 import "script/deployment/test/blade/DeployRootMintableERC721PredicateAccessList.s.sol";
 import "script/deployment/test/blade/DeployRootMintableERC1155PredicateAccessList.s.sol";
@@ -41,7 +40,6 @@ contract DeployBladeContracts is
     EIP1559BurnDeployer,
     GatewayDeployer,
     NativeERC20Deployer,
-    NativeERC20MintableDeployer,
     RootMintableERC20PredicateAccessListDeployer,
     RootMintableERC721PredicateAccessListDeployer,
     RootMintableERC1155PredicateAccessListDeployer,
@@ -77,8 +75,6 @@ contract DeployBladeContracts is
     address public gateway;
     address public nativeERC20Logic;
     address public nativeERC20Proxy;
-    address public nativeERC20MintableLogic;
-    address public nativeERC20MintableProxy;
     address public rootMintableERC20PredicateAccessListLogic;
     address public rootMintableERC20PredicateAccessListProxy;
     address public rootMintableERC721PredicateAccessListLogic;
@@ -209,17 +205,6 @@ contract DeployBladeContracts is
         (nativeERC20Logic, nativeERC20Proxy) = deployNativeERC20(
             proxyAdmin,
             config.readAddress('["NativeERC20"].predicate_'),
-            config.readAddress('["NativeERC20"].rootToken_'),
-            config.readString('["NativeERC20"].name_'),
-            config.readString('["NativeERC20"].symbol_'),
-            uint8(config.readUint('["NativeERC20"].decimals_')),
-            config.readUint('["NativeERC20"].tokenSupply_')
-        );
-
-        (nativeERC20MintableLogic, nativeERC20MintableProxy) = deployNativeERC20Mintable(
-            proxyAdmin,
-            config.readAddress('["NativeERC20"].predicate_'),
-            config.readAddress('["NativeERC20"].owner_'),
             config.readAddress('["NativeERC20"].rootToken_'),
             config.readString('["NativeERC20"].name_'),
             config.readString('["NativeERC20"].symbol_'),

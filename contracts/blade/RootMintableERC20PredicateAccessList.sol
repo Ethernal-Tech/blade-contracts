@@ -16,12 +16,11 @@ contract RootMintableERC20PredicateAccessList is AccessList, RootERC20Predicate 
         address newStateReceiver,
         address newChildERC20Predicate,
         address newChildTokenTemplate,
-        address newNativeTokenRoot,
         bool newUseAllowList,
         bool newUseBlockList,
         address newOwner
     ) public virtual onlySystemCall initializer {
-        _initialize(newGateway, newStateReceiver, newChildERC20Predicate, newChildTokenTemplate, newNativeTokenRoot);
+        _initialize(newGateway, newStateReceiver, newChildERC20Predicate, newChildTokenTemplate, address(0));
         _initializeAccessList(newUseAllowList, newUseBlockList);
         _transferOwnership(newOwner);
     }
