@@ -295,7 +295,7 @@ describe("ChildERC721Predicate", () => {
       ]
     );
     await expect(childERC721Predicate.onStateReceive(0, rootERC721Predicate, stateSyncData)).to.be.revertedWith(
-      "ChildERC721Predicate: ONLY_STATE_RECEIVER"
+      "ChildERC721Predicate: ONLY_GATEWAY"
     );
   });
 

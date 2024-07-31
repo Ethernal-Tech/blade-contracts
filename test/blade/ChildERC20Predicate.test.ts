@@ -269,7 +269,7 @@ describe("ChildERC20Predicate", () => {
       ]
     );
     await expect(childERC20Predicate.onStateReceive(0, rootERC20Predicate, stateSyncData)).to.be.revertedWith(
-      "ChildERC20Predicate: ONLY_STATE_RECEIVER"
+      "ChildERC20Predicate: ONLY_GATEWAY"
     );
   });
 

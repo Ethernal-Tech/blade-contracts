@@ -78,7 +78,7 @@ describe("RootERC1155Predicate", () => {
   it("withdraw tokens fail: only exit helper", async () => {
     await expect(
       rootERC1155Predicate.onStateReceive(0, "0x0000000000000000000000000000000000000000", "0x00")
-    ).to.be.revertedWith("RootERC1155Predicate: ONLY_EXIT_HELPER");
+    ).to.be.revertedWith("RootERC1155Predicate: ONLY_GATEWAY");
   });
 
   it("withdraw tokens fail: only child predicate", async () => {
