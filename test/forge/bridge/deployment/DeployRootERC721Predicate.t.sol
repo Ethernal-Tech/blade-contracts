@@ -20,7 +20,6 @@ contract DeployRootERC721PredicateTest is Test {
 
     address proxyAdmin;
     address newGateway;
-    address newExitHelper;
     address newChildERC721Predicate;
     address newChildTokenTemplate;
 
@@ -29,14 +28,12 @@ contract DeployRootERC721PredicateTest is Test {
 
         proxyAdmin = makeAddr("proxyAdmin");
         newGateway = makeAddr("newGateway");
-        newExitHelper = makeAddr("newExitHelper");
         newChildERC721Predicate = makeAddr("newChildERC721Predicate");
         newChildTokenTemplate = makeAddr("newChildTokenTemplate");
 
         (logicAddr, proxyAddr) = deployer.run(
             proxyAdmin,
             newGateway,
-            newExitHelper,
             newChildERC721Predicate,
             newChildTokenTemplate
         );
@@ -56,7 +53,6 @@ contract DeployRootERC721PredicateTest is Test {
         vm.expectRevert("Initializable: contract is already initialized");
         proxyAsRootERC721Predicate.initialize(
             newGateway,
-            newExitHelper,
             newChildERC721Predicate,
             newChildTokenTemplate
         );
@@ -67,14 +63,10 @@ contract DeployRootERC721PredicateTest is Test {
         );
         assertEq(
             vm.load(address(proxyAsRootERC721Predicate), bytes32(uint(1))),
-            bytes32(bytes.concat(hex"000000000000000000000000", abi.encodePacked(newExitHelper)))
-        );
-        assertEq(
-            vm.load(address(proxyAsRootERC721Predicate), bytes32(uint(2))),
             bytes32(bytes.concat(hex"000000000000000000000000", abi.encodePacked(newChildERC721Predicate)))
         );
         assertEq(
-            vm.load(address(proxyAsRootERC721Predicate), bytes32(uint(3))),
+            vm.load(address(proxyAsRootERC721Predicate), bytes32(uint(2))),
             bytes32(bytes.concat(hex"000000000000000000000000", abi.encodePacked(newChildTokenTemplate)))
         );
     }

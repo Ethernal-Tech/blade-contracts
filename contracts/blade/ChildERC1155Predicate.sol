@@ -6,7 +6,6 @@ import "@openzeppelin/contracts/proxy/Clones.sol";
 import "../interfaces/blade/IChildERC1155Predicate.sol";
 import "../interfaces/blade/IChildERC1155.sol";
 import "../interfaces/IGateway.sol";
-import "./System.sol";
 
 /**
     @title ChildERC1155Predicate
@@ -14,15 +13,10 @@ import "./System.sol";
     @notice Enables ERC1155 token deposits and withdrawals across an arbitrary root chain and child chain
  */
 // solhint-disable reason-string
-contract ChildERC1155Predicate is IChildERC1155Predicate, Initializable, System {
-    /// @custom:security write-protection="onlySystemCall()"
+contract ChildERC1155Predicate is IChildERC1155Predicate, Initializable {
     IGateway public gateway;
-    /// @custom:security write-protection="onlySystemCall()"
-    address public stateReceiver;
-    /// @custom:security write-protection="onlySystemCall()"
     address public rootERC1155Predicate;
-    /// @custom:security write-protection="onlySystemCall()"
-    address public childTokenTemplate;
+    address public destinationTokenTemplate;
     bytes32 public constant DEPOSIT_SIG = keccak256("DEPOSIT");
     bytes32 public constant DEPOSIT_BATCH_SIG = keccak256("DEPOSIT_BATCH");
     bytes32 public constant WITHDRAW_SIG = keccak256("WITHDRAW");
@@ -31,7 +25,7 @@ contract ChildERC1155Predicate is IChildERC1155Predicate, Initializable, System 
 
     mapping(address => address) public rootTokenToChildToken;
 
-    event L2ERC1155Deposit(
+    event ERC1155Deposit(
         address indexed rootToken,
         address indexed childToken,
         address sender,
@@ -39,7 +33,7 @@ contract ChildERC1155Predicate is IChildERC1155Predicate, Initializable, System 
         uint256 tokenId,
         uint256 amount
     );
-    event L2ERC1155DepositBatch(
+    event ERC1155DepositBatch(
         address indexed rootToken,
         address indexed childToken,
         address indexed sender,
@@ -47,7 +41,7 @@ contract ChildERC1155Predicate is IChildERC1155Predicate, Initializable, System 
         uint256[] tokenIds,
         uint256[] amounts
     );
-    event L2ERC1155Withdraw(
+    event ERC1155Withdraw(
         address indexed rootToken,
         address indexed childToken,
         address sender,
@@ -55,7 +49,7 @@ contract ChildERC1155Predicate is IChildERC1155Predicate, Initializable, System 
         uint256 tokenId,
         uint256 amount
     );
-    event L2ERC1155WithdrawBatch(
+    event ERC1155WithdrawBatch(
         address indexed rootToken,
         address indexed childToken,
         address indexed sender,
@@ -63,7 +57,7 @@ contract ChildERC1155Predicate is IChildERC1155Predicate, Initializable, System 
         uint256[] tokenIds,
         uint256[] amounts
     );
-    event L2TokenMapped(address indexed rootToken, address indexed childToken);
+    event TokenMapped(address indexed rootToken, address indexed childToken);
 
     modifier onlyValidToken(IChildERC1155 childToken) {
         require(_verifyContract(childToken), "ChildERC1155Predicate: NOT_CONTRACT");
@@ -72,19 +66,17 @@ contract ChildERC1155Predicate is IChildERC1155Predicate, Initializable, System 
 
     /**
      * @notice Initialization function for ChildERC1155Predicate
-     * @param newGateway Address of gateway to send exit information to
-     * @param newStateReceiver Address of StateReceiver to receive deposit information from
+     * @param newGateway Address of gateway contract
      * @param newRootERC1155Predicate Address of root ERC1155 predicate to communicate with
-     * @param newChildTokenTemplate Address of child token implementation to deploy clones of
+     * @param newDestinationTokenTemplate Address of destination token implementation to deploy clones of
      * @dev Can only be called once.
      */
     function initialize(
         address newGateway,
-        address newStateReceiver,
         address newRootERC1155Predicate,
-        address newChildTokenTemplate
-    ) public virtual onlySystemCall initializer {
-        _initialize(newGateway, newStateReceiver, newRootERC1155Predicate, newChildTokenTemplate);
+        address newDestinationTokenTemplate
+    ) public virtual initializer {
+        _initialize(newGateway, newRootERC1155Predicate, newDestinationTokenTemplate);
     }
 
     /**
@@ -94,7 +86,7 @@ contract ChildERC1155Predicate is IChildERC1155Predicate, Initializable, System 
      * @dev Can be extended to include other signatures for more functionality
      */
     function onStateReceive(uint256 /* id */, address sender, bytes calldata data) external {
-        require(msg.sender == stateReceiver, "ChildERC1155Predicate: ONLY_STATE_RECEIVER");
+        require(msg.sender == address(gateway), "ChildERC1155Predicate: ONLY_GATEWAY");
         require(sender == rootERC1155Predicate, "ChildERC1155Predicate: ONLY_ROOT_PREDICATE");
 
         if (bytes32(data[:32]) == DEPOSIT_SIG) {
@@ -157,29 +149,25 @@ contract ChildERC1155Predicate is IChildERC1155Predicate, Initializable, System 
 
     /**
      * @notice Internal initialization function for ChildERC1155Predicate
-     * @param newGateway Address of gateway to send exit information to
-     * @param newStateReceiver Address of StateReceiver to receive deposit information from
+     * @param newGateway Address of gateway contract
      * @param newRootERC1155Predicate Address of root ERC1155 predicate to communicate with
-     * @param newChildTokenTemplate Address of child token implementation to deploy clones of
+     * @param newDestinationTokenTemplate Address of destination token implementation to deploy clones of
      * @dev Can be called multiple times.
      */
     function _initialize(
         address newGateway,
-        address newStateReceiver,
         address newRootERC1155Predicate,
-        address newChildTokenTemplate
+        address newDestinationTokenTemplate
     ) internal {
         require(
             newGateway != address(0) &&
-                newStateReceiver != address(0) &&
                 newRootERC1155Predicate != address(0) &&
-                newChildTokenTemplate != address(0),
+                newDestinationTokenTemplate != address(0),
             "ChildERC1155Predicate: BAD_INITIALIZATION"
         );
         gateway = IGateway(newGateway);
-        stateReceiver = newStateReceiver;
         rootERC1155Predicate = newRootERC1155Predicate;
-        childTokenTemplate = newChildTokenTemplate;
+        destinationTokenTemplate = newDestinationTokenTemplate;
     }
 
     // solhint-disable no-empty-blocks
@@ -214,7 +202,7 @@ contract ChildERC1155Predicate is IChildERC1155Predicate, Initializable, System 
             abi.encode(WITHDRAW_SIG, rootToken, msg.sender, receiver, tokenId, amount)
         );
         // slither-disable-next-line reentrancy-events
-        emit L2ERC1155Withdraw(rootToken, address(childToken), msg.sender, receiver, tokenId, amount);
+        emit ERC1155Withdraw(rootToken, address(childToken), msg.sender, receiver, tokenId, amount);
     }
 
     function _withdrawBatch(
@@ -243,7 +231,7 @@ contract ChildERC1155Predicate is IChildERC1155Predicate, Initializable, System 
             abi.encode(WITHDRAW_BATCH_SIG, rootToken, msg.sender, receivers, tokenIds, amounts)
         );
         // slither-disable-next-line reentrancy-events
-        emit L2ERC1155WithdrawBatch(rootToken, address(childToken), msg.sender, receivers, tokenIds, amounts);
+        emit ERC1155WithdrawBatch(rootToken, address(childToken), msg.sender, receivers, tokenIds, amounts);
     }
 
     function _deposit(bytes calldata data) private {
@@ -268,7 +256,7 @@ contract ChildERC1155Predicate is IChildERC1155Predicate, Initializable, System 
         assert(IChildERC1155(childToken).predicate() == address(this));
         require(IChildERC1155(childToken).mint(receiver, tokenId, amount), "ChildERC1155Predicate: MINT_FAILED");
         // slither-disable-next-line reentrancy-events
-        emit L2ERC1155Deposit(depositToken, address(childToken), depositor, receiver, tokenId, amount);
+        emit ERC1155Deposit(depositToken, address(childToken), depositor, receiver, tokenId, amount);
     }
 
     function _depositBatch(bytes calldata data) private {
@@ -300,7 +288,7 @@ contract ChildERC1155Predicate is IChildERC1155Predicate, Initializable, System 
             "ChildERC1155Predicate: MINT_FAILED"
         );
         // slither-disable-next-line reentrancy-events
-        emit L2ERC1155DepositBatch(depositToken, address(childToken), depositor, receivers, tokenIds, amounts);
+        emit ERC1155DepositBatch(depositToken, address(childToken), depositor, receivers, tokenIds, amounts);
     }
 
     /**
@@ -312,13 +300,13 @@ contract ChildERC1155Predicate is IChildERC1155Predicate, Initializable, System 
         assert(rootToken != address(0)); // invariant since root predicate performs the same check
         assert(rootTokenToChildToken[rootToken] == address(0)); // invariant since root predicate performs the same check
         IChildERC1155 childToken = IChildERC1155(
-            Clones.cloneDeterministic(childTokenTemplate, keccak256(abi.encodePacked(rootToken)))
+            Clones.cloneDeterministic(destinationTokenTemplate, keccak256(abi.encodePacked(rootToken)))
         );
         rootTokenToChildToken[rootToken] = address(childToken);
         childToken.initialize(rootToken, uri_);
 
         // slither-disable-next-line reentrancy-events
-        emit L2TokenMapped(rootToken, address(childToken));
+        emit TokenMapped(rootToken, address(childToken));
     }
 
     // slither does not handle try-catch blocks correctly

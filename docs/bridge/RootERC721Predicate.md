@@ -112,23 +112,6 @@ function childERC721Predicate() external view returns (address)
 |---|---|---|
 | _0 | address | undefined |
 
-### childTokenTemplate
-
-```solidity
-function childTokenTemplate() external view returns (address)
-```
-
-
-
-
-
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | address | undefined |
-
 ### deposit
 
 ```solidity
@@ -182,10 +165,10 @@ Function to deposit tokens from the depositor to another address on the child ch
 | receiver | address | undefined |
 | tokenId | uint256 | Index of the NFT to deposit |
 
-### exitHelper
+### destinationTokenTemplate
 
 ```solidity
-function exitHelper() external view returns (address)
+function destinationTokenTemplate() external view returns (address)
 ```
 
 
@@ -219,7 +202,7 @@ function gateway() external view returns (contract IGateway)
 ### initialize
 
 ```solidity
-function initialize(address newGateway, address newExitHelper, address newChildERC721Predicate, address newChildTokenTemplate) external nonpayable
+function initialize(address newGateway, address newChildERC721Predicate, address newDestinationTokenTemplate) external nonpayable
 ```
 
 Initialization function for RootERC721Predicate
@@ -230,10 +213,9 @@ Initialization function for RootERC721Predicate
 
 | Name | Type | Description |
 |---|---|---|
-| newGateway | address | Address of gateway to send deposit information to |
-| newExitHelper | address | Address of ExitHelper to receive withdrawal information from |
+| newGateway | address | Address of gateway contract |
 | newChildERC721Predicate | address | Address of child ERC721 predicate to communicate with |
-| newChildTokenTemplate | address | undefined |
+| newDestinationTokenTemplate | address | Address of destination token implementation to deploy clones of |
 
 ### mapToken
 
@@ -282,10 +264,10 @@ function onERC721Received(address, address, uint256, bytes) external nonpayable 
 |---|---|---|
 | _0 | bytes4 | undefined |
 
-### onL2StateReceive
+### onStateReceive
 
 ```solidity
-function onL2StateReceive(uint256, address sender, bytes data) external nonpayable
+function onStateReceive(uint256, address sender, bytes data) external nonpayable
 ```
 
 Function to be used for token withdrawals
@@ -300,10 +282,10 @@ Function to be used for token withdrawals
 | sender | address | Address of the sender on the child chain |
 | data | bytes | Data sent by the sender |
 
-### rootTokenToChildToken
+### sourceTokenToDestinationToken
 
 ```solidity
-function rootTokenToChildToken(address) external view returns (address)
+function sourceTokenToDestinationToken(address) external view returns (address)
 ```
 
 

@@ -7,12 +7,9 @@ import "./IStateReceiver.sol";
 interface IChildERC721Predicate is IStateReceiver {
     function initialize(
         address newGateway,
-        address newStateReceiver,
         address newRootERC721Predicate,
-        address newChildTokenTemplate
+        address newDestinationTokenTemplate
     ) external;
-
-    function onStateReceive(uint256 /* id */, address sender, bytes calldata data) external;
 
     function withdraw(IChildERC721 childToken, uint256 tokenId) external;
 

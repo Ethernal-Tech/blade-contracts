@@ -10,39 +10,37 @@ import "../interfaces/IGateway.sol";
 // solhint-disable reason-string
 contract RootERC721Predicate is Initializable, ERC721Holder, IRootERC721Predicate {
     IGateway public gateway;
-    address public exitHelper;
     address public childERC721Predicate;
-    address public childTokenTemplate;
+    address public destinationTokenTemplate;
     bytes32 public constant DEPOSIT_SIG = keccak256("DEPOSIT");
     bytes32 public constant DEPOSIT_BATCH_SIG = keccak256("DEPOSIT_BATCH");
     bytes32 public constant WITHDRAW_SIG = keccak256("WITHDRAW");
     bytes32 public constant WITHDRAW_BATCH_SIG = keccak256("WITHDRAW_BATCH");
     bytes32 public constant MAP_TOKEN_SIG = keccak256("MAP_TOKEN");
-    mapping(address => address) public rootTokenToChildToken;
+    mapping(address => address) public sourceTokenToDestinationToken;
 
     /**
      * @notice Initialization function for RootERC721Predicate
-     * @param newGateway Address of gateway to send deposit information to
-     * @param newExitHelper Address of ExitHelper to receive withdrawal information from
+     * @param newGateway Address of gateway contract
      * @param newChildERC721Predicate Address of child ERC721 predicate to communicate with
+     * @param newDestinationTokenTemplate Address of destination token implementation to deploy clones of
      * @dev Can only be called once.
      */
     function initialize(
         address newGateway,
-        address newExitHelper,
         address newChildERC721Predicate,
-        address newChildTokenTemplate
+        address newDestinationTokenTemplate
     ) external initializer {
-        _initialize(newGateway, newExitHelper, newChildERC721Predicate, newChildTokenTemplate);
+        _initialize(newGateway, newChildERC721Predicate, newDestinationTokenTemplate);
     }
 
     /**
-     * @inheritdoc IL2StateReceiver
+     * @inheritdoc IStateReceiver
      * @notice Function to be used for token withdrawals
      * @dev Can be extended to include other signatures for more functionality
      */
-    function onL2StateReceive(uint256 /* id */, address sender, bytes calldata data) external {
-        require(msg.sender == exitHelper, "RootERC721Predicate: ONLY_EXIT_HELPER");
+    function onStateReceive(uint256 /* id */, address sender, bytes calldata data) external {
+        require(msg.sender == address(gateway), "RootERC721Predicate: ONLY_GATEWAY");
         require(sender == childERC721Predicate, "RootERC721Predicate: ONLY_CHILD_PREDICATE");
 
         if (bytes32(data[:32]) == WITHDRAW_SIG) {
@@ -85,17 +83,17 @@ contract RootERC721Predicate is Initializable, ERC721Holder, IRootERC721Predicat
      */
     function mapToken(IERC721Metadata rootToken) public returns (address) {
         require(address(rootToken) != address(0), "RootERC721Predicate: INVALID_TOKEN");
-        require(rootTokenToChildToken[address(rootToken)] == address(0), "RootERC721Predicate: ALREADY_MAPPED");
+        require(sourceTokenToDestinationToken[address(rootToken)] == address(0), "RootERC721Predicate: ALREADY_MAPPED");
 
         address childPredicate = childERC721Predicate;
 
         address childToken = Clones.predictDeterministicAddress(
-            childTokenTemplate,
+            destinationTokenTemplate,
             keccak256(abi.encodePacked(rootToken)),
             childPredicate
         );
 
-        rootTokenToChildToken[address(rootToken)] = childToken;
+        sourceTokenToDestinationToken[address(rootToken)] = childToken;
 
         gateway.sendBridgeMsg(
             childPredicate,
@@ -147,7 +145,7 @@ contract RootERC721Predicate is Initializable, ERC721Holder, IRootERC721Predicat
             data,
             (address, address, address, uint256)
         );
-        address childToken = rootTokenToChildToken[rootToken];
+        address childToken = sourceTokenToDestinationToken[rootToken];
         assert(childToken != address(0)); // invariant because child predicate should have already mapped tokens
 
         IERC721Metadata(rootToken).safeTransferFrom(address(this), receiver, tokenId);
@@ -160,7 +158,7 @@ contract RootERC721Predicate is Initializable, ERC721Holder, IRootERC721Predicat
             data,
             (bytes32, address, address, address[], uint256[])
         );
-        address childToken = rootTokenToChildToken[rootToken];
+        address childToken = sourceTokenToDestinationToken[rootToken];
         assert(childToken != address(0)); // invariant because child predicate should have already mapped tokens
         for (uint256 i = 0; i < tokenIds.length; ) {
             IERC721Metadata(rootToken).safeTransferFrom(address(this), receivers[i], tokenIds[i]);
@@ -173,7 +171,7 @@ contract RootERC721Predicate is Initializable, ERC721Holder, IRootERC721Predicat
     }
 
     function _getChildToken(IERC721Metadata rootToken) private returns (address childToken) {
-        childToken = rootTokenToChildToken[address(rootToken)];
+        childToken = sourceTokenToDestinationToken[address(rootToken)];
         if (childToken == address(0)) childToken = mapToken(IERC721Metadata(rootToken));
         assert(childToken != address(0)); // invariant because we map the token if mapping does not exist
     }
@@ -194,28 +192,25 @@ contract RootERC721Predicate is Initializable, ERC721Holder, IRootERC721Predicat
 
     /**
      * @notice Initialization function for RootERC721Predicate
-     * @param newGateway Address of Gateway contract
-     * @param newExitHelper Address of ExitHelper to receive withdrawal information from
+     * @param newGateway Address of gateway contract
      * @param newChildERC721Predicate Address of child ERC721 predicate to communicate with
+     * @param newDestinationTokenTemplate Address of destination token implementation to deploy clones of
      * @dev Can only be called once.
      */
     function _initialize(
         address newGateway,
-        address newExitHelper,
         address newChildERC721Predicate,
-        address newChildTokenTemplate
+        address newDestinationTokenTemplate
     ) internal {
         require(
             newGateway != address(0) &&
-                newExitHelper != address(0) &&
                 newChildERC721Predicate != address(0) &&
-                newChildTokenTemplate != address(0),
+                newDestinationTokenTemplate != address(0),
             "RootERC721Predicate: BAD_INITIALIZATION"
         );
         gateway = IGateway(newGateway);
-        exitHelper = newExitHelper;
         childERC721Predicate = newChildERC721Predicate;
-        childTokenTemplate = newChildTokenTemplate;
+        destinationTokenTemplate = newDestinationTokenTemplate;
     }
 
     // slither-disable-next-line unused-state,naming-convention

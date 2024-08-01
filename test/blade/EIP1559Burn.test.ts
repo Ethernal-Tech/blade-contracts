@@ -22,7 +22,6 @@ import { alwaysTrueBytecode } from "../constants";
 describe("EIP1559Burn", () => {
   let eip1559Burn: EIP1559Burn,
     gateway: Gateway,
-    stateReceiver: StateReceiver,
     childERC20: ChildERC20,
     childERC20Predicate: ChildERC20Predicate,
     systemChildERC20Predicate: ChildERC20Predicate,
@@ -42,11 +41,6 @@ describe("EIP1559Burn", () => {
     gateway = await Gateway.deploy();
 
     await gateway.deployed();
-
-    const StateReceiver: StateReceiver__factory = await ethers.getContractFactory("StateReceiver");
-    stateReceiver = await StateReceiver.deploy();
-
-    await stateReceiver.deployed();
 
     rootERC20Predicate = ethers.Wallet.createRandom().address;
 
@@ -87,16 +81,15 @@ describe("EIP1559Burn", () => {
 
     await systemChildERC20Predicate.initialize(
       gateway.address,
-      stateReceiver.address,
       rootERC20Predicate,
       childERC20.address,
       nativeERC20RootToken
     );
 
-    impersonateAccount(stateReceiver.address);
-    setBalance(stateReceiver.address, "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF");
+    impersonateAccount(gateway.address);
+    setBalance(gateway.address, "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF");
 
-    stateReceiverChildERC20Predicate = childERC20Predicate.connect(await ethers.getSigner(stateReceiver.address));
+    stateReceiverChildERC20Predicate = childERC20Predicate.connect(await ethers.getSigner(gateway.address));
 
     const EIP1559Burn: EIP1559Burn__factory = await ethers.getContractFactory("EIP1559Burn");
     eip1559Burn = await EIP1559Burn.deploy();

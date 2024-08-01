@@ -84,13 +84,13 @@ Function that retrieves rootchain token that represents Supernets native token
 |---|---|---|
 | _0 | address | address Address of rootchain token (mapped to Supernets native token) |
 
-### onL2StateReceive
+### onStateReceive
 
 ```solidity
-function onL2StateReceive(uint256 id, address sender, bytes data) external nonpayable
+function onStateReceive(uint256 id, address sender, bytes data) external nonpayable
 ```
 
-Called by exit helper when state is received from L2
+Called by gateway when state is received from source chain
 
 
 

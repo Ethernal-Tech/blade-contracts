@@ -13,14 +13,13 @@ import {AccessList} from "../lib/AccessList.sol";
 contract RootMintableERC721PredicateAccessList is AccessList, RootERC721Predicate {
     function initialize(
         address newGateway,
-        address newStateReceiver,
         address newChildERC721Predicate,
-        address newChildTokenTemplate,
+        address newTokenTemplate,
         bool newUseAllowList,
         bool newUseBlockList,
         address newOwner
     ) public virtual onlySystemCall initializer {
-        _initialize(newGateway, newStateReceiver, newChildERC721Predicate, newChildTokenTemplate);
+        _initialize(newGateway, newChildERC721Predicate, newTokenTemplate);
         _initializeAccessList(newUseAllowList, newUseBlockList);
         _transferOwnership(newOwner);
     }

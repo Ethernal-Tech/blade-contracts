@@ -5,19 +5,13 @@ pragma solidity 0.8.19;
 import "forge-std/Script.sol";
 
 import "script/deployment/bridge/DeployRootERC20Predicate.s.sol";
-import "script/deployment/bridge/DeployChildMintableERC20Predicate.s.sol";
 import "script/deployment/bridge/DeployRootERC721Predicate.s.sol";
-import "script/deployment/bridge/DeployChildMintableERC721Predicate.s.sol";
 import "script/deployment/bridge/DeployRootERC1155Predicate.s.sol";
-import "script/deployment/bridge/DeployChildMintableERC1155Predicate.s.sol";
 
 contract DeployBridgeTokenContracts is
     RootERC20PredicateDeployer,
-    ChildMintableERC20PredicateDeployer,
     RootERC721PredicateDeployer,
-    ChildMintableERC721PredicateDeployer,
-    RootERC1155PredicateDeployer,
-    ChildMintableERC1155PredicateDeployer
+    RootERC1155PredicateDeployer
 {
     using stdJson for string;
 
@@ -26,67 +20,34 @@ contract DeployBridgeTokenContracts is
         returns (
             address rootERC20PredicateLogic,
             address rootERC20PredicateProxy,
-            address childMintableERC20PredicateLogic,
-            address childMintableERC20PredicateProxy,
             address rootERC721PredicateLogic,
             address rootERC721PredicateProxy,
-            address childMintableERC721PredicateLogic,
-            address childMintableERC721PredicateProxy,
             address rootERC1155PredicateLogic,
-            address rootERC1155PredicateProxy,
-            address childMintableERC1155PredicateLogic,
-            address childMintableERC1155PredicateProxy
+            address rootERC1155PredicateProxy
         )
     {
         string memory config = vm.readFile("script/deployment/bridgeTokenContractsConfig.json");
 
         (rootERC20PredicateLogic, rootERC20PredicateProxy) = deployRootERC20Predicate(
             config.readAddress('["common"].proxyAdmin'),
-            config.readAddress('["common"].stateSender'),
-            config.readAddress('["common"].exitHelper'),
+            config.readAddress('["common"].newGateway'),
             config.readAddress('["RootERC20Predicate"].newChildERC20Predicate'),
-            config.readAddress('["RootERC20Predicate"].newChildTokenTemplate'),
+            config.readAddress('["RootERC20Predicate"].newDestinationTokenTemplate'),
             config.readAddress('["RootERC20Predicate"].nativeTokenRootAddress')
-        );
-
-        (childMintableERC20PredicateLogic, childMintableERC20PredicateProxy) = deployChildMintableERC20Predicate(
-            config.readAddress('["common"].proxyAdmin'),
-            config.readAddress('["common"].stateSender'),
-            config.readAddress('["common"].exitHelper'),
-            rootERC20PredicateProxy,
-            config.readAddress('["newChildTokenTemplate"].newChildTokenTemplate')
         );
 
         (rootERC721PredicateLogic, rootERC721PredicateProxy) = deployRootERC721Predicate(
             config.readAddress('["common"].proxyAdmin'),
-            config.readAddress('["common"].stateSender'),
-            config.readAddress('["common"].exitHelper'),
+            config.readAddress('["common"].newGateway'),
             config.readAddress('["RootERC721Predicate"].newChildERC721Predicate'),
-            config.readAddress('["RootERC721Predicate"].newChildTokenTemplate')
-        );
-
-        (childMintableERC721PredicateLogic, childMintableERC721PredicateProxy) = deployChildMintableERC721Predicate(
-            config.readAddress('["common"].proxyAdmin'),
-            config.readAddress('["common"].stateSender'),
-            config.readAddress('["common"].exitHelper'),
-            rootERC721PredicateProxy,
-            config.readAddress('["ChildMintableERC721Predicate"].newChildTokenTemplate')
+            config.readAddress('["RootERC721Predicate"].newDestinationTokenTemplate')
         );
 
         (rootERC1155PredicateLogic, rootERC1155PredicateProxy) = deployRootERC1155Predicate(
             config.readAddress('["common"].proxyAdmin'),
-            config.readAddress('["common"].stateSender'),
-            config.readAddress('["common"].exitHelper'),
+            config.readAddress('["common"].newGateway'),
             config.readAddress('["RootERC1155Predicate"].newChildERC1155Predicate'),
-            config.readAddress('["RootERC1155Predicate"].newChildTokenTemplate')
-        );
-
-        (childMintableERC1155PredicateLogic, childMintableERC1155PredicateProxy) = deployChildMintableERC1155Predicate(
-            config.readAddress('["common"].proxyAdmin'),
-            config.readAddress('["common"].stateSender'),
-            config.readAddress('["common"].exitHelper'),
-            rootERC1155PredicateProxy,
-            config.readAddress('["ChildMintableERC1155Predicate"].newChildTokenTemplate')
+            config.readAddress('["RootERC1155Predicate"].newDestinationTokenTemplate')
         );
     }
 }

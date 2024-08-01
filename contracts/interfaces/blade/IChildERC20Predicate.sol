@@ -7,13 +7,10 @@ import "./IChildERC20.sol";
 interface IChildERC20Predicate is IStateReceiver {
     function initialize(
         address newGateway,
-        address newStateReceiver,
         address newRootERC20Predicate,
-        address newChildTokenTemplate,
+        address newDestinationTokenTemplate,
         address newNativeTokenRootAddress
     ) external;
-
-    function onStateReceive(uint256 /* id */, address sender, bytes calldata data) external;
 
     function withdraw(IChildERC20 childToken, uint256 amount) external;
 

@@ -12,30 +12,29 @@ contract RootERC20Predicate is Initializable, IRootERC20Predicate {
     using SafeERC20 for IERC20Metadata;
 
     IGateway public gateway;
-    address public exitHelper;
     address public childERC20Predicate;
-    address public childTokenTemplate;
+    address public destinationTokenTemplate;
     bytes32 public constant DEPOSIT_SIG = keccak256("DEPOSIT");
     bytes32 public constant WITHDRAW_SIG = keccak256("WITHDRAW");
     bytes32 public constant MAP_TOKEN_SIG = keccak256("MAP_TOKEN");
-    mapping(address => address) public rootTokenToChildToken;
+    mapping(address => address) public sourceTokenToDestinationToken;
     address public nativeTokenRoot;
 
     /**
      * @notice Initialization function for RootERC20Predicate
-     * @param newGateway Address of gateway to send deposit information to
-     * @param newExitHelper Address of ExitHelper to receive withdrawal information from
+     * @param newGateway Address of gateway contract
      * @param newChildERC20Predicate Address of child ERC20 predicate to communicate with
+     * @param newDestinationTokenTemplate Address of destination token implementation to deploy clones of
+     * @param newNativeTokenRoot Address of the native token
      * @dev Can only be called once.
      */
     function initialize(
         address newGateway,
-        address newExitHelper,
         address newChildERC20Predicate,
-        address newChildTokenTemplate,
+        address newDestinationTokenTemplate,
         address newNativeTokenRoot
     ) external initializer {
-        _initialize(newGateway, newExitHelper, newChildERC20Predicate, newChildTokenTemplate, newNativeTokenRoot);
+        _initialize(newGateway, newChildERC20Predicate, newDestinationTokenTemplate, newNativeTokenRoot);
     }
 
     // solhint-disable no-empty-blocks
@@ -51,12 +50,12 @@ contract RootERC20Predicate is Initializable, IRootERC20Predicate {
     // slither-disable-end dead-code
 
     /**
-     * @inheritdoc IL2StateReceiver
+     * @inheritdoc IStateReceiver
      * @notice Function to be used for token withdrawals
      * @dev Can be extended to include other signatures for more functionality
      */
-    function onL2StateReceive(uint256 /* id */, address sender, bytes calldata data) external {
-        require(msg.sender == exitHelper, "RootERC20Predicate: ONLY_EXIT_HELPER");
+    function onStateReceive(uint256 /* id */, address sender, bytes calldata data) external {
+        require(msg.sender == address(gateway), "RootERC20Predicate: ONLY_GATEWAY");
         require(sender == childERC20Predicate, "RootERC20Predicate: ONLY_CHILD_PREDICATE");
 
         if (bytes32(data[:32]) == WITHDRAW_SIG) {
@@ -85,17 +84,17 @@ contract RootERC20Predicate is Initializable, IRootERC20Predicate {
      */
     function mapToken(IERC20Metadata rootToken) public returns (address) {
         require(address(rootToken) != address(0), "RootERC20Predicate: INVALID_TOKEN");
-        require(rootTokenToChildToken[address(rootToken)] == address(0), "RootERC20Predicate: ALREADY_MAPPED");
+        require(sourceTokenToDestinationToken[address(rootToken)] == address(0), "RootERC20Predicate: ALREADY_MAPPED");
 
         address childPredicate = childERC20Predicate;
 
         address childToken = Clones.predictDeterministicAddress(
-            childTokenTemplate,
+            destinationTokenTemplate,
             keccak256(abi.encodePacked(rootToken)),
             childPredicate
         );
 
-        rootTokenToChildToken[address(rootToken)] = childToken;
+        sourceTokenToDestinationToken[address(rootToken)] = childToken;
 
         gateway.sendBridgeMsg(
             childPredicate,
@@ -109,7 +108,7 @@ contract RootERC20Predicate is Initializable, IRootERC20Predicate {
 
     function _deposit(IERC20Metadata rootToken, address receiver, uint256 amount) private {
         _beforeTokenDeposit();
-        address childToken = rootTokenToChildToken[address(rootToken)];
+        address childToken = sourceTokenToDestinationToken[address(rootToken)];
 
         if (childToken == address(0)) {
             childToken = mapToken(rootToken);
@@ -131,7 +130,7 @@ contract RootERC20Predicate is Initializable, IRootERC20Predicate {
             data,
             (address, address, address, uint256)
         );
-        address childToken = rootTokenToChildToken[rootToken];
+        address childToken = sourceTokenToDestinationToken[rootToken];
         assert(childToken != address(0)); // invariant because child predicate should have already mapped tokens
 
         IERC20Metadata(rootToken).safeTransfer(receiver, amount);
@@ -142,33 +141,29 @@ contract RootERC20Predicate is Initializable, IRootERC20Predicate {
     /**
      * @notice Internal initialization function for RootERC20Predicate
      * @param newGateway Address of Gateway contract
-     * @param newExitHelper Address of ExitHelper to receive deposit information from
      * @param newChildERC20Predicate Address of destination ERC20 predicate to communicate with
-     * @param newChildTokenTemplate Address of child token implementation to deploy clones of
+     * @param newDestinationTokenTemplate Address of destination token implementation to deploy clones of
      * @param newNativeTokenRoot Address of rootchain token that represents the native token
      * @dev Can be called multiple times.
      */
     function _initialize(
         address newGateway,
-        address newExitHelper,
         address newChildERC20Predicate,
-        address newChildTokenTemplate,
+        address newDestinationTokenTemplate,
         address newNativeTokenRoot
     ) internal {
         require(
             newGateway != address(0) &&
-                newExitHelper != address(0) &&
                 newChildERC20Predicate != address(0) &&
-                newChildTokenTemplate != address(0),
+                newDestinationTokenTemplate != address(0),
             "RootERC20Predicate: BAD_INITIALIZATION"
         );
         gateway = IGateway(newGateway);
-        exitHelper = newExitHelper;
         childERC20Predicate = newChildERC20Predicate;
-        childTokenTemplate = newChildTokenTemplate;
+        destinationTokenTemplate = newDestinationTokenTemplate;
         if (newNativeTokenRoot != address(0)) {
             nativeTokenRoot = newNativeTokenRoot;
-            rootTokenToChildToken[nativeTokenRoot] = 0x0000000000000000000000000000000000001010;
+            sourceTokenToDestinationToken[nativeTokenRoot] = 0x0000000000000000000000000000000000001010;
             emit TokenMapped(nativeTokenRoot, 0x0000000000000000000000000000000000001010);
         }
     }

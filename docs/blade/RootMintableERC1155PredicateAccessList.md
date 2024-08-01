@@ -276,23 +276,6 @@ function childERC1155Predicate() external view returns (address)
 |---|---|---|
 | _0 | address | undefined |
 
-### childTokenTemplate
-
-```solidity
-function childTokenTemplate() external view returns (address)
-```
-
-
-
-
-
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | address | undefined |
-
 ### deposit
 
 ```solidity
@@ -349,10 +332,10 @@ Function to deposit tokens from the depositor to another address on the child ch
 | tokenId | uint256 | Index of the NFT to deposit |
 | amount | uint256 | Amount to deposit |
 
-### exitHelper
+### destinationTokenTemplate
 
 ```solidity
-function exitHelper() external view returns (address)
+function destinationTokenTemplate() external view returns (address)
 ```
 
 
@@ -386,29 +369,7 @@ function gateway() external view returns (contract IGateway)
 ### initialize
 
 ```solidity
-function initialize(address newGateway, address newStateReceiver, address newChildERC1155Predicate, address newChildTokenTemplate, bool newUseAllowList, bool newUseBlockList, address newOwner) external nonpayable
-```
-
-
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| newGateway | address | undefined |
-| newStateReceiver | address | undefined |
-| newChildERC1155Predicate | address | undefined |
-| newChildTokenTemplate | address | undefined |
-| newUseAllowList | bool | undefined |
-| newUseBlockList | bool | undefined |
-| newOwner | address | undefined |
-
-### initialize
-
-```solidity
-function initialize(address newGateway, address newExitHelper, address newChildERC1155Predicate, address newChildTokenTemplate) external nonpayable
+function initialize(address newGateway, address newChildERC1155Predicate, address newDestinationTokenTemplate) external nonpayable
 ```
 
 Initialization function for RootERC1155Predicate
@@ -420,9 +381,29 @@ Initialization function for RootERC1155Predicate
 | Name | Type | Description |
 |---|---|---|
 | newGateway | address | Address of gateway to send deposit information to |
-| newExitHelper | address | Address of ExitHelper to receive withdrawal information from |
 | newChildERC1155Predicate | address | Address of child ERC1155 predicate to communicate with |
-| newChildTokenTemplate | address | undefined |
+| newDestinationTokenTemplate | address | Address of child token template to deploy clones of |
+
+### initialize
+
+```solidity
+function initialize(address newGateway, address newChildERC1155Predicate, address newTokenTemplate, bool newUseAllowList, bool newUseBlockList, address newOwner) external nonpayable
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| newGateway | address | undefined |
+| newChildERC1155Predicate | address | undefined |
+| newTokenTemplate | address | undefined |
+| newUseAllowList | bool | undefined |
+| newUseBlockList | bool | undefined |
+| newOwner | address | undefined |
 
 ### mapToken
 
@@ -498,10 +479,10 @@ function onERC1155Received(address, address, uint256, uint256, bytes) external n
 |---|---|---|
 | _0 | bytes4 | undefined |
 
-### onL2StateReceive
+### onStateReceive
 
 ```solidity
-function onL2StateReceive(uint256, address sender, bytes data) external nonpayable
+function onStateReceive(uint256, address sender, bytes data) external nonpayable
 ```
 
 Function to be used for token withdrawals
@@ -561,28 +542,6 @@ function renounceOwnership() external nonpayable
 *Leaves the contract without owner. It will not be possible to call `onlyOwner` functions. Can only be called by the current owner. NOTE: Renouncing ownership will leave the contract without an owner, thereby disabling any functionality that is only available to the owner.*
 
 
-### rootTokenToChildToken
-
-```solidity
-function rootTokenToChildToken(address) external view returns (address)
-```
-
-
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | address | undefined |
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | address | undefined |
-
 ### setAllowList
 
 ```solidity
@@ -614,6 +573,28 @@ function setBlockList(bool newUseBlockList) external nonpayable
 | Name | Type | Description |
 |---|---|---|
 | newUseBlockList | bool | undefined |
+
+### sourceTokenToDestinationToken
+
+```solidity
+function sourceTokenToDestinationToken(address) external view returns (address)
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | address | undefined |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | address | undefined |
 
 ### supportsInterface
 

@@ -20,7 +20,6 @@ contract DeployRootERC20PredicateTest is Test {
 
     address proxyAdmin;
     address newGateway;
-    address newExitHelper;
     address newChildERC20Predicate;
     address newChildTokenTemplate;
     address nativeTokenRootAddress;
@@ -30,7 +29,6 @@ contract DeployRootERC20PredicateTest is Test {
 
         proxyAdmin = makeAddr("proxyAdmin");
         newGateway = makeAddr("newGateway");
-        newExitHelper = makeAddr("newExitHelper");
         newChildERC20Predicate = makeAddr("newChildERC20Predicate");
         newChildTokenTemplate = makeAddr("newChildTokenTemplate");
         nativeTokenRootAddress = makeAddr("nativeTokenRootAddress");
@@ -38,7 +36,6 @@ contract DeployRootERC20PredicateTest is Test {
         (logicAddr, proxyAddr) = deployer.run(
             proxyAdmin,
             newGateway,
-            newExitHelper,
             newChildERC20Predicate,
             newChildTokenTemplate,
             nativeTokenRootAddress
@@ -59,7 +56,6 @@ contract DeployRootERC20PredicateTest is Test {
         vm.expectRevert("Initializable: contract is already initialized");
         proxyAsRootERC20Predicate.initialize(
             newGateway,
-            newExitHelper,
             newChildERC20Predicate,
             newChildTokenTemplate,
             nativeTokenRootAddress
@@ -71,18 +67,14 @@ contract DeployRootERC20PredicateTest is Test {
         );
         assertEq(
             vm.load(address(proxyAsRootERC20Predicate), bytes32(uint(1))),
-            bytes32(bytes.concat(hex"000000000000000000000000", abi.encodePacked(newExitHelper)))
-        );
-        assertEq(
-            vm.load(address(proxyAsRootERC20Predicate), bytes32(uint(2))),
             bytes32(bytes.concat(hex"000000000000000000000000", abi.encodePacked(newChildERC20Predicate)))
         );
         assertEq(
-            vm.load(address(proxyAsRootERC20Predicate), bytes32(uint(3))),
+            vm.load(address(proxyAsRootERC20Predicate), bytes32(uint(2))),
             bytes32(bytes.concat(hex"000000000000000000000000", abi.encodePacked(newChildTokenTemplate)))
         );
         assertEq(
-            proxyAsRootERC20Predicate.rootTokenToChildToken(nativeTokenRootAddress),
+            proxyAsRootERC20Predicate.sourceTokenToDestinationToken(nativeTokenRootAddress),
             address(0x0000000000000000000000000000000000001010)
         );
     }

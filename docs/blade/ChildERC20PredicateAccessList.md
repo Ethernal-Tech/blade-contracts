@@ -225,10 +225,10 @@ function acceptOwnership() external nonpayable
 *The new owner accepts the ownership transfer.*
 
 
-### childTokenTemplate
+### destinationTokenTemplate
 
 ```solidity
-function childTokenTemplate() external view returns (address)
+function destinationTokenTemplate() external view returns (address)
 ```
 
 
@@ -262,27 +262,7 @@ function gateway() external view returns (contract IGateway)
 ### initialize
 
 ```solidity
-function initialize(address newGateway, address newStateReceiver, address newRootERC20Predicate, address newChildTokenTemplate, address newNativeTokenRootAddress) external nonpayable
-```
-
-Initialization function for ChildERC20Predicate
-
-*Can only be called once. `newNativeTokenRootAddress` should be set to zero where root token does not exist.*
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| newGateway | address | Address of gateway to send exit information to |
-| newStateReceiver | address | Address of StateReceiver to receive deposit information from |
-| newRootERC20Predicate | address | Address of root ERC20 predicate to communicate with |
-| newChildTokenTemplate | address | Address of child token implementation to deploy clones of |
-| newNativeTokenRootAddress | address | Address of native token on root chain |
-
-### initialize
-
-```solidity
-function initialize(address newGateway, address newStateReceiver, address newRootERC20Predicate, address newChildTokenTemplate, address newNativeTokenRootAddress, bool newUseAllowList, bool newUseBlockList, address newOwner) external nonpayable
+function initialize(address newGateway, address newRootERC20Predicate, address newDestinationTokenTemplate, address newNativeTokenRootAddress, bool newUseAllowList, bool newUseBlockList, address newOwner) external nonpayable
 ```
 
 
@@ -294,13 +274,31 @@ function initialize(address newGateway, address newStateReceiver, address newRoo
 | Name | Type | Description |
 |---|---|---|
 | newGateway | address | undefined |
-| newStateReceiver | address | undefined |
 | newRootERC20Predicate | address | undefined |
-| newChildTokenTemplate | address | undefined |
+| newDestinationTokenTemplate | address | undefined |
 | newNativeTokenRootAddress | address | undefined |
 | newUseAllowList | bool | undefined |
 | newUseBlockList | bool | undefined |
 | newOwner | address | undefined |
+
+### initialize
+
+```solidity
+function initialize(address newGateway, address newRootERC20Predicate, address newDestinationTokenTemplate, address newNativeTokenRootAddress) external nonpayable
+```
+
+Initialization function for ChildERC20Predicate
+
+*Can only be called once. `newNativeTokenRootAddress` should be set to zero where root token does not exist.*
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| newGateway | address | Address of gateway contract |
+| newRootERC20Predicate | address | Address of root ERC20 predicate to communicate with |
+| newDestinationTokenTemplate | address | Address of destination token implementation to deploy clones of |
+| newNativeTokenRootAddress | address | Address of native token on root chain |
 
 ### onStateReceive
 
@@ -436,23 +434,6 @@ function setBlockList(bool newUseBlockList) external nonpayable
 |---|---|---|
 | newUseBlockList | bool | undefined |
 
-### stateReceiver
-
-```solidity
-function stateReceiver() external view returns (address)
-```
-
-
-
-
-
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | address | undefined |
-
 ### transferOwnership
 
 ```solidity
@@ -542,6 +523,46 @@ event BlockListUsageSet(uint256 indexed block, bool indexed status)
 | block `indexed` | uint256 | undefined |
 | status `indexed` | bool | undefined |
 
+### ERC20Deposit
+
+```solidity
+event ERC20Deposit(address indexed rootToken, address indexed childToken, address sender, address indexed receiver, uint256 amount)
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| rootToken `indexed` | address | undefined |
+| childToken `indexed` | address | undefined |
+| sender  | address | undefined |
+| receiver `indexed` | address | undefined |
+| amount  | uint256 | undefined |
+
+### ERC20Withdraw
+
+```solidity
+event ERC20Withdraw(address indexed rootToken, address indexed childToken, address sender, address indexed receiver, uint256 amount)
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| rootToken `indexed` | address | undefined |
+| childToken `indexed` | address | undefined |
+| sender  | address | undefined |
+| receiver `indexed` | address | undefined |
+| amount  | uint256 | undefined |
+
 ### Initialized
 
 ```solidity
@@ -557,63 +578,6 @@ event Initialized(uint8 version)
 | Name | Type | Description |
 |---|---|---|
 | version  | uint8 | undefined |
-
-### L2ERC20Deposit
-
-```solidity
-event L2ERC20Deposit(address indexed rootToken, address indexed childToken, address sender, address indexed receiver, uint256 amount)
-```
-
-
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| rootToken `indexed` | address | undefined |
-| childToken `indexed` | address | undefined |
-| sender  | address | undefined |
-| receiver `indexed` | address | undefined |
-| amount  | uint256 | undefined |
-
-### L2ERC20Withdraw
-
-```solidity
-event L2ERC20Withdraw(address indexed rootToken, address indexed childToken, address sender, address indexed receiver, uint256 amount)
-```
-
-
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| rootToken `indexed` | address | undefined |
-| childToken `indexed` | address | undefined |
-| sender  | address | undefined |
-| receiver `indexed` | address | undefined |
-| amount  | uint256 | undefined |
-
-### L2TokenMapped
-
-```solidity
-event L2TokenMapped(address indexed rootToken, address indexed childToken)
-```
-
-
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| rootToken `indexed` | address | undefined |
-| childToken `indexed` | address | undefined |
 
 ### OwnershipTransferStarted
 
@@ -649,14 +613,10 @@ event OwnershipTransferred(address indexed previousOwner, address indexed newOwn
 | previousOwner `indexed` | address | undefined |
 | newOwner `indexed` | address | undefined |
 
-
-
-## Errors
-
-### Unauthorized
+### TokenMapped
 
 ```solidity
-error Unauthorized(string only)
+event TokenMapped(address indexed rootToken, address indexed childToken)
 ```
 
 
@@ -667,6 +627,8 @@ error Unauthorized(string only)
 
 | Name | Type | Description |
 |---|---|---|
-| only | string | undefined |
+| rootToken `indexed` | address | undefined |
+| childToken `indexed` | address | undefined |
+
 
 

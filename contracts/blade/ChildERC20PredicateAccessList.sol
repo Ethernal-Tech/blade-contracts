@@ -13,21 +13,14 @@ import {AccessList} from "../lib/AccessList.sol";
 contract ChildERC20PredicateAccessList is AccessList, ChildERC20Predicate {
     function initialize(
         address newGateway,
-        address newStateReceiver,
         address newRootERC20Predicate,
-        address newChildTokenTemplate,
+        address newDestinationTokenTemplate,
         address newNativeTokenRootAddress,
         bool newUseAllowList,
         bool newUseBlockList,
         address newOwner
-    ) public virtual onlySystemCall initializer {
-        _initialize(
-            newGateway,
-            newStateReceiver,
-            newRootERC20Predicate,
-            newChildTokenTemplate,
-            newNativeTokenRootAddress
-        );
+    ) public virtual initializer {
+        _initialize(newGateway, newRootERC20Predicate, newDestinationTokenTemplate, newNativeTokenRootAddress);
         _initializeAccessList(newUseAllowList, newUseBlockList);
         _transferOwnership(newOwner);
     }

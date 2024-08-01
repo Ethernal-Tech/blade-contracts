@@ -11,14 +11,13 @@ abstract contract RootERC20PredicateDeployer is Script {
     function deployRootERC20Predicate(
         address proxyAdmin,
         address newGateway,
-        address newExitHelper,
         address newChildERC20Predicate,
-        address newChildTokenTemplate,
+        address newDestinationTokenTemplate,
         address nativeTokenRootAddress
     ) internal returns (address logicAddr, address proxyAddr) {
         bytes memory initData = abi.encodeCall(
             RootERC20Predicate.initialize,
-            (newGateway, newExitHelper, newChildERC20Predicate, newChildTokenTemplate, nativeTokenRootAddress)
+            (newGateway, newChildERC20Predicate, newDestinationTokenTemplate, nativeTokenRootAddress)
         );
 
         vm.startBroadcast();
@@ -42,18 +41,16 @@ contract DeployRootERC20Predicate is RootERC20PredicateDeployer {
     function run(
         address proxyAdmin,
         address newGateway,
-        address newExitHelper,
         address newChildERC20Predicate,
-        address newChildTokenTemplate,
+        address newDestinationTokenTemplate,
         address nativeTokenRootAddress
     ) external returns (address logicAddr, address proxyAddr) {
         return
             deployRootERC20Predicate(
                 proxyAdmin,
                 newGateway,
-                newExitHelper,
                 newChildERC20Predicate,
-                newChildTokenTemplate,
+                newDestinationTokenTemplate,
                 nativeTokenRootAddress
             );
     }

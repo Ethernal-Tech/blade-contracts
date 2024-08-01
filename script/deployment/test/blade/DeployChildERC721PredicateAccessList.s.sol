@@ -11,9 +11,8 @@ abstract contract ChildERC721PredicateAccessListDeployer is Script {
     function deployChildERC721PredicateAccessList(
         address proxyAdmin,
         address newGateway,
-        address newStateReceiver,
         address newRootERC721Predicate,
-        address newChildTokenTemplate,
+        address newDestinationTokenTemplate,
         bool newUseAllowList,
         bool newUseBlockList,
         address newOwner
@@ -22,9 +21,8 @@ abstract contract ChildERC721PredicateAccessListDeployer is Script {
             ChildERC721PredicateAccessList.initialize,
             (
                 newGateway,
-                newStateReceiver,
                 newRootERC721Predicate,
-                newChildTokenTemplate,
+                newDestinationTokenTemplate,
                 newUseAllowList,
                 newUseBlockList,
                 newOwner
@@ -52,9 +50,8 @@ contract DeployChildERC721PredicateAccessList is ChildERC721PredicateAccessListD
     function run(
         address proxyAdmin,
         address newGateway,
-        address newStateReceiver,
         address newRootERC721Predicate,
-        address newChildTokenTemplate,
+        address newDestinationTokenTemplate,
         bool newUseAllowList,
         bool newUseBlockList,
         address newOwner
@@ -63,9 +60,8 @@ contract DeployChildERC721PredicateAccessList is ChildERC721PredicateAccessListD
             deployChildERC721PredicateAccessList(
                 proxyAdmin,
                 newGateway,
-                newStateReceiver,
                 newRootERC721Predicate,
-                newChildTokenTemplate,
+                newDestinationTokenTemplate,
                 newUseAllowList,
                 newUseBlockList,
                 newOwner

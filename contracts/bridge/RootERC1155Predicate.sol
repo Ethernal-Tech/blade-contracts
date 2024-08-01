@@ -10,39 +10,37 @@ import "../interfaces/IGateway.sol";
 // solhint-disable reason-string
 contract RootERC1155Predicate is Initializable, ERC1155Holder, IRootERC1155Predicate {
     IGateway public gateway;
-    address public exitHelper;
     address public childERC1155Predicate;
-    address public childTokenTemplate;
+    address public destinationTokenTemplate;
     bytes32 public constant DEPOSIT_SIG = keccak256("DEPOSIT");
     bytes32 public constant DEPOSIT_BATCH_SIG = keccak256("DEPOSIT_BATCH");
     bytes32 public constant WITHDRAW_SIG = keccak256("WITHDRAW");
     bytes32 public constant WITHDRAW_BATCH_SIG = keccak256("WITHDRAW_BATCH");
     bytes32 public constant MAP_TOKEN_SIG = keccak256("MAP_TOKEN");
-    mapping(address => address) public rootTokenToChildToken;
+    mapping(address => address) public sourceTokenToDestinationToken;
 
     /**
      * @notice Initialization function for RootERC1155Predicate
      * @param newGateway Address of gateway to send deposit information to
-     * @param newExitHelper Address of ExitHelper to receive withdrawal information from
      * @param newChildERC1155Predicate Address of child ERC1155 predicate to communicate with
+     * @param newDestinationTokenTemplate Address of child token template to deploy clones of
      * @dev Can only be called once.
      */
     function initialize(
         address newGateway,
-        address newExitHelper,
         address newChildERC1155Predicate,
-        address newChildTokenTemplate
+        address newDestinationTokenTemplate
     ) external initializer {
-        _initialize(newGateway, newExitHelper, newChildERC1155Predicate, newChildTokenTemplate);
+        _initialize(newGateway, newChildERC1155Predicate, newDestinationTokenTemplate);
     }
 
     /**
-     * @inheritdoc IL2StateReceiver
+     * @inheritdoc IStateReceiver
      * @notice Function to be used for token withdrawals
      * @dev Can be extended to include other signatures for more functionality
      */
-    function onL2StateReceive(uint256 /* id */, address sender, bytes calldata data) external {
-        require(msg.sender == exitHelper, "RootERC1155Predicate: ONLY_EXIT_HELPER");
+    function onStateReceive(uint256 /* id */, address sender, bytes calldata data) external {
+        require(msg.sender == address(gateway), "RootERC1155Predicate: ONLY_GATEWAY");
         require(sender == childERC1155Predicate, "RootERC1155Predicate: ONLY_CHILD_PREDICATE");
 
         if (bytes32(data[:32]) == WITHDRAW_SIG) {
@@ -89,17 +87,20 @@ contract RootERC1155Predicate is Initializable, ERC1155Holder, IRootERC1155Predi
      */
     function mapToken(IERC1155MetadataURI rootToken) public returns (address childToken) {
         require(address(rootToken) != address(0), "RootERC1155Predicate: INVALID_TOKEN");
-        require(rootTokenToChildToken[address(rootToken)] == address(0), "RootERC1155Predicate: ALREADY_MAPPED");
+        require(
+            sourceTokenToDestinationToken[address(rootToken)] == address(0),
+            "RootERC1155Predicate: ALREADY_MAPPED"
+        );
 
         address childPredicate = childERC1155Predicate;
 
         childToken = Clones.predictDeterministicAddress(
-            childTokenTemplate,
+            destinationTokenTemplate,
             keccak256(abi.encodePacked(rootToken)),
             childPredicate
         );
 
-        rootTokenToChildToken[address(rootToken)] = childToken;
+        sourceTokenToDestinationToken[address(rootToken)] = childToken;
 
         string memory uri = "";
         // slither does not deal well with try-catch: https://github.com/crytic/slither/issues/982
@@ -158,7 +159,7 @@ contract RootERC1155Predicate is Initializable, ERC1155Holder, IRootERC1155Predi
             data,
             (address, address, address, uint256, uint256)
         );
-        address childToken = rootTokenToChildToken[rootToken];
+        address childToken = sourceTokenToDestinationToken[rootToken];
         assert(childToken != address(0)); // invariant because child predicate should have already mapped tokens
 
         IERC1155MetadataURI(rootToken).safeTransferFrom(address(this), receiver, tokenId, amount, "");
@@ -175,7 +176,7 @@ contract RootERC1155Predicate is Initializable, ERC1155Holder, IRootERC1155Predi
             uint256[] memory tokenIds,
             uint256[] memory amounts
         ) = abi.decode(data, (bytes32, address, address, address[], uint256[], uint256[]));
-        address childToken = rootTokenToChildToken[rootToken];
+        address childToken = sourceTokenToDestinationToken[rootToken];
         assert(childToken != address(0)); // invariant because child predicate should have already mapped tokens
         for (uint256 i = 0; i < tokenIds.length; ) {
             IERC1155MetadataURI(rootToken).safeTransferFrom(address(this), receivers[i], tokenIds[i], amounts[i], "");
@@ -188,7 +189,7 @@ contract RootERC1155Predicate is Initializable, ERC1155Holder, IRootERC1155Predi
     }
 
     function _getChildToken(IERC1155MetadataURI rootToken) private returns (address childToken) {
-        childToken = rootTokenToChildToken[address(rootToken)];
+        childToken = sourceTokenToDestinationToken[address(rootToken)];
         if (childToken == address(0)) childToken = mapToken(IERC1155MetadataURI(rootToken));
         assert(childToken != address(0)); // invariant because we map the token if mapping does not exist
     }
@@ -196,27 +197,24 @@ contract RootERC1155Predicate is Initializable, ERC1155Holder, IRootERC1155Predi
     /**
      * @notice Initialization function for RootERC1155Predicate
      * @param newGateway Address of Gateway contract
-     * @param newExitHelper Address of ExitHelper to receive withdrawal information from
      * @param newChildERC1155Predicate Address of child ERC1155 predicate to communicate with
+     * @param newDestinationTokenTemplate Address of child token template to deploy clones of
      * @dev Can only be called once.
      */
     function _initialize(
         address newGateway,
-        address newExitHelper,
         address newChildERC1155Predicate,
-        address newChildTokenTemplate
+        address newDestinationTokenTemplate
     ) internal {
         require(
             newGateway != address(0) &&
-                newExitHelper != address(0) &&
                 newChildERC1155Predicate != address(0) &&
-                newChildTokenTemplate != address(0),
+                newDestinationTokenTemplate != address(0),
             "RootERC1155Predicate: BAD_INITIALIZATION"
         );
         gateway = IGateway(newGateway);
-        exitHelper = newExitHelper;
         childERC1155Predicate = newChildERC1155Predicate;
-        childTokenTemplate = newChildTokenTemplate;
+        destinationTokenTemplate = newDestinationTokenTemplate;
     }
 
     // solhint-disable no-empty-blocks
