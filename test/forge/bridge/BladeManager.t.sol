@@ -3,7 +3,6 @@ pragma solidity 0.8.19;
 
 import "@utils/Test.sol";
 import "contracts/blade/Gateway.sol";
-import {ExitHelper} from "contracts/bridge/ExitHelper.sol";
 import {BladeManager, GenesisAccount} from "contracts/bridge/BladeManager.sol";
 import {MockERC20} from "contracts/mocks/MockERC20.sol";
 import {RootERC20Predicate} from "contracts/bridge/RootERC20Predicate.sol";

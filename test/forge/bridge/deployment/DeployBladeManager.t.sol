@@ -24,7 +24,6 @@ contract DeployBladeManagerTest is Test {
     address newGateway;
     address newMatic;
     address newChildValidatorSet;
-    address newExitHelper;
     address newRootERC20Predicate;
     string newDomain;
     address bob = makeAddr("bob");

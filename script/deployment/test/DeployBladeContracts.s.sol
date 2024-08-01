@@ -22,7 +22,6 @@ import "script/deployment/test/blade/DeployNativeERC20.s.sol";
 import "script/deployment/test/blade/DeployRootMintableERC20PredicateAccessList.s.sol";
 import "script/deployment/test/blade/DeployRootMintableERC721PredicateAccessList.s.sol";
 import "script/deployment/test/blade/DeployRootMintableERC1155PredicateAccessList.s.sol";
-import "script/deployment/test/blade/DeployStateReceiver.s.sol";
 import "script/deployment/test/blade/DeploySystem.s.sol";
 import "script/deployment/test/blade/staking/DeployStakeManager.s.sol";
 
@@ -43,7 +42,6 @@ contract DeployBladeContracts is
     RootMintableERC20PredicateAccessListDeployer,
     RootMintableERC721PredicateAccessListDeployer,
     RootMintableERC1155PredicateAccessListDeployer,
-    StateReceiverDeployer,
     SystemDeployer,
     StakeManagerDeployer
 {

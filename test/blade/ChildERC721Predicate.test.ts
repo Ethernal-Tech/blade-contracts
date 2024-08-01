@@ -1,12 +1,10 @@
 import { expect } from "chai";
-import { ethers, network } from "hardhat";
+import { ethers } from "hardhat";
 import {
   ChildERC721Predicate,
   ChildERC721Predicate__factory,
   Gateway,
   Gateway__factory,
-  StateReceiver,
-  StateReceiver__factory,
   ChildERC721,
   ChildERC721__factory,
 } from "../../typechain-types";
@@ -24,7 +22,6 @@ describe("ChildERC721Predicate", () => {
     systemChildERC721Predicate: ChildERC721Predicate,
     stateReceiverChildERC721Predicate: ChildERC721Predicate,
     gateway: Gateway,
-    stateReceiver: StateReceiver,
     rootERC721Predicate: string,
     childERC721: ChildERC721,
     rootToken: string,
@@ -40,11 +37,6 @@ describe("ChildERC721Predicate", () => {
     gateway = await Gateway.deploy();
 
     await gateway.deployed();
-
-    const StateReceiver: StateReceiver__factory = await ethers.getContractFactory("StateReceiver");
-    stateReceiver = await StateReceiver.deploy();
-
-    await stateReceiver.deployed();
 
     rootERC721Predicate = ethers.Wallet.createRandom().address;
 
@@ -356,7 +348,7 @@ describe("ChildERC721Predicate", () => {
   });
 
   it("fail deposit tokens of unknown child token: wrong deposit token", async () => {
-    childERC721Predicate.connect(await ethers.getSigner(stateReceiver.address));
+    childERC721Predicate.connect(await ethers.getSigner(gateway.address));
     const stateSyncData = ethers.utils.defaultAbiCoder.encode(
       ["bytes32", "address", "address", "address", "address", "uint256"],
       [

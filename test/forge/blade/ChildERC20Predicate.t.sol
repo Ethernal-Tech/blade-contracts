@@ -11,7 +11,6 @@ import "contracts/interfaces/blade/IChildERC20.sol";
 contract ChildERC20PredicateTest is Test {
     ChildERC20Predicate predicate;
     address rootERC20Predicate;
-    address stateReceiver;
     ChildERC20 tokenTemplate;
 
     address alice;

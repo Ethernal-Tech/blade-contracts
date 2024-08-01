@@ -3,16 +3,12 @@
     "proxyAdminOwner": ""
   },
 
-  "CheckpointManager": {
-    "initiator": ""
+  "BladeManager": {
+    "newRootERC20Predicate": ""
   },
 
-  "CustomSupernetManager": {
-    "newStakeManager": "",
+  "Gateway": {
     "newBls": "",
-    "newMatic": "",
-    "newChildValidatorSet": "",
-    "newRootERC20Predicate": "",
-    "newDomain": ""
+    "newBn256G2": ""
   }
 }

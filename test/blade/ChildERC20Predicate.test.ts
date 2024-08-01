@@ -5,8 +5,6 @@ import {
   ChildERC20Predicate__factory,
   Gateway,
   Gateway__factory,
-  StateReceiver,
-  StateReceiver__factory,
   ChildERC20,
   ChildERC20__factory,
   NativeERC20,

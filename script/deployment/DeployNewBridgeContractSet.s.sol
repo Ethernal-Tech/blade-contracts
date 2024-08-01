@@ -4,24 +4,23 @@ pragma solidity 0.8.19;
 
 import "forge-std/Script.sol";
 
+import {GenesisAccount} from "contracts/lib/GenesisLib.sol";
 import {ProxyAdmin} from "@openzeppelin/contracts/proxy/transparent/ProxyAdmin.sol";
 
 import "script/deployment/bridge/DeployGateway.s.sol";
-import "script/deployment/bridge/DeployCheckpointManager.s.sol";
-import "script/deployment/bridge/DeployExitHelper.s.sol";
+import "script/deployment/bridge/DeployBladeManager.s.sol";
 
-contract DeployNewBridgeContractSet is GatewayDeployer, CheckpointManagerDeployer, ExitHelperDeployer {
+contract DeployNewBridgeContractSet is GatewayDeployer, BladeManagerDeployer {
     using stdJson for string;
 
     function run()
         external
         returns (
             address proxyAdmin,
-            address gateway,
-            address checkpointManagerLogic,
-            address checkpointManagerProxy,
-            address exitHelperLogic,
-            address exitHelperProxy
+            address gatewayLogic,
+            address gatewayProxy,
+            address bladeManagerLogic,
+            address bladeManagerProxy
         )
     {
         string memory config = vm.readFile("script/deployment/bridgeContractSetConfig.json");
@@ -35,14 +34,15 @@ contract DeployNewBridgeContractSet is GatewayDeployer, CheckpointManagerDeploye
 
         proxyAdmin = address(_proxyAdmin);
 
-        gateway = deployGateway();
+        // TODO - change gateway and blade manager deployment
+        gatewayLogic = deployGateway();
 
-        // To be initialized manually later.
-        (checkpointManagerLogic, checkpointManagerProxy) = deployCheckpointManager(
-            proxyAdmin,
-            config.readAddress('["CheckpointManager"].INITIALIZER')
-        );
-
-        (exitHelperLogic, exitHelperProxy) = deployExitHelper(proxyAdmin, ICheckpointManager(checkpointManagerProxy));
+        // // To be initialized manually later.
+        // GenesisAccount[] memory validators = new GenesisAccount[](0);
+        // (bladeManagerLogic, bladeManagerProxy) = deployBladeManager(
+        //     proxyAdmin,
+        //     config.readAddress('["BladeManager"].newRootERC20Predicate'),
+        //     validators
+        // );
     }
 }
