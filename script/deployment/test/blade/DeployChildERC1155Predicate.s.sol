@@ -12,11 +12,11 @@ abstract contract ChildERC1155PredicateDeployer is Script {
         address proxyAdmin,
         address newGateway,
         address newRootERC1155Predicate,
-        address newSourceTokenTemplate
+        address newDestinationTokenTemplate
     ) internal returns (address logicAddr, address proxyAddr) {
         bytes memory initData = abi.encodeCall(
             ChildERC1155Predicate.initialize,
-            (newGateway, newRootERC1155Predicate, newSourceTokenTemplate)
+            (newGateway, newRootERC1155Predicate, newDestinationTokenTemplate)
         );
 
         vm.startBroadcast();
@@ -41,8 +41,9 @@ contract DeployChildERC1155Predicate is ChildERC1155PredicateDeployer {
         address proxyAdmin,
         address newGateway,
         address newRootERC1155Predicate,
-        address newSourceTokenTemplate
+        address newDestinationTokenTemplate
     ) external returns (address logicAddr, address proxyAddr) {
-        return deployChildERC1155Predicate(proxyAdmin, newGateway, newRootERC1155Predicate, newSourceTokenTemplate);
+        return
+            deployChildERC1155Predicate(proxyAdmin, newGateway, newRootERC1155Predicate, newDestinationTokenTemplate);
     }
 }

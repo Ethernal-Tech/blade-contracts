@@ -8,7 +8,7 @@ interface IChildERC20Predicate is IStateReceiver {
     function initialize(
         address newGateway,
         address newRootERC20Predicate,
-        address newSourceTokenTemplate,
+        address newDestinationTokenTemplate,
         address newNativeTokenRootAddress
     ) external;
 

@@ -225,6 +225,23 @@ function acceptOwnership() external nonpayable
 *The new owner accepts the ownership transfer.*
 
 
+### destinationTokenTemplate
+
+```solidity
+function destinationTokenTemplate() external view returns (address)
+```
+
+
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | address | undefined |
+
 ### gateway
 
 ```solidity
@@ -245,7 +262,7 @@ function gateway() external view returns (contract IGateway)
 ### initialize
 
 ```solidity
-function initialize(address newGateway, address newRootERC20Predicate, address newSourceTokenTemplate, address newNativeTokenRootAddress, bool newUseAllowList, bool newUseBlockList, address newOwner) external nonpayable
+function initialize(address newGateway, address newRootERC20Predicate, address newDestinationTokenTemplate, address newNativeTokenRootAddress, bool newUseAllowList, bool newUseBlockList, address newOwner) external nonpayable
 ```
 
 
@@ -258,7 +275,7 @@ function initialize(address newGateway, address newRootERC20Predicate, address n
 |---|---|---|
 | newGateway | address | undefined |
 | newRootERC20Predicate | address | undefined |
-| newSourceTokenTemplate | address | undefined |
+| newDestinationTokenTemplate | address | undefined |
 | newNativeTokenRootAddress | address | undefined |
 | newUseAllowList | bool | undefined |
 | newUseBlockList | bool | undefined |
@@ -267,7 +284,7 @@ function initialize(address newGateway, address newRootERC20Predicate, address n
 ### initialize
 
 ```solidity
-function initialize(address newGateway, address newRootERC20Predicate, address newSourceTokenTemplate, address newNativeTokenRootAddress) external nonpayable
+function initialize(address newGateway, address newRootERC20Predicate, address newDestinationTokenTemplate, address newNativeTokenRootAddress) external nonpayable
 ```
 
 Initialization function for ChildERC20Predicate
@@ -280,7 +297,7 @@ Initialization function for ChildERC20Predicate
 |---|---|---|
 | newGateway | address | Address of gateway contract |
 | newRootERC20Predicate | address | Address of root ERC20 predicate to communicate with |
-| newSourceTokenTemplate | address | Address of source token implementation to deploy clones of |
+| newDestinationTokenTemplate | address | Address of destination token implementation to deploy clones of |
 | newNativeTokenRootAddress | address | Address of native token on root chain |
 
 ### onStateReceive
@@ -416,23 +433,6 @@ function setBlockList(bool newUseBlockList) external nonpayable
 | Name | Type | Description |
 |---|---|---|
 | newUseBlockList | bool | undefined |
-
-### sourceTokenTemplate
-
-```solidity
-function sourceTokenTemplate() external view returns (address)
-```
-
-
-
-
-
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | address | undefined |
 
 ### transferOwnership
 

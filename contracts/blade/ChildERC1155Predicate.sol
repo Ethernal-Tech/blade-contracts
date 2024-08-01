@@ -16,7 +16,7 @@ import "../interfaces/IGateway.sol";
 contract ChildERC1155Predicate is IChildERC1155Predicate, Initializable {
     IGateway public gateway;
     address public rootERC1155Predicate;
-    address public sourceTokenTemplate;
+    address public destinationTokenTemplate;
     bytes32 public constant DEPOSIT_SIG = keccak256("DEPOSIT");
     bytes32 public constant DEPOSIT_BATCH_SIG = keccak256("DEPOSIT_BATCH");
     bytes32 public constant WITHDRAW_SIG = keccak256("WITHDRAW");
@@ -68,15 +68,15 @@ contract ChildERC1155Predicate is IChildERC1155Predicate, Initializable {
      * @notice Initialization function for ChildERC1155Predicate
      * @param newGateway Address of gateway contract
      * @param newRootERC1155Predicate Address of root ERC1155 predicate to communicate with
-     * @param newSourceTokenTemplate Address of source token implementation to deploy clones of
+     * @param newDestinationTokenTemplate Address of destination token implementation to deploy clones of
      * @dev Can only be called once.
      */
     function initialize(
         address newGateway,
         address newRootERC1155Predicate,
-        address newSourceTokenTemplate
+        address newDestinationTokenTemplate
     ) public virtual initializer {
-        _initialize(newGateway, newRootERC1155Predicate, newSourceTokenTemplate);
+        _initialize(newGateway, newRootERC1155Predicate, newDestinationTokenTemplate);
     }
 
     /**
@@ -151,17 +151,23 @@ contract ChildERC1155Predicate is IChildERC1155Predicate, Initializable {
      * @notice Internal initialization function for ChildERC1155Predicate
      * @param newGateway Address of gateway contract
      * @param newRootERC1155Predicate Address of root ERC1155 predicate to communicate with
-     * @param newSourceTokenTemplate Address of source token implementation to deploy clones of
+     * @param newDestinationTokenTemplate Address of destination token implementation to deploy clones of
      * @dev Can be called multiple times.
      */
-    function _initialize(address newGateway, address newRootERC1155Predicate, address newSourceTokenTemplate) internal {
+    function _initialize(
+        address newGateway,
+        address newRootERC1155Predicate,
+        address newDestinationTokenTemplate
+    ) internal {
         require(
-            newGateway != address(0) && newRootERC1155Predicate != address(0) && newSourceTokenTemplate != address(0),
+            newGateway != address(0) &&
+                newRootERC1155Predicate != address(0) &&
+                newDestinationTokenTemplate != address(0),
             "ChildERC1155Predicate: BAD_INITIALIZATION"
         );
         gateway = IGateway(newGateway);
         rootERC1155Predicate = newRootERC1155Predicate;
-        sourceTokenTemplate = newSourceTokenTemplate;
+        destinationTokenTemplate = newDestinationTokenTemplate;
     }
 
     // solhint-disable no-empty-blocks
@@ -294,7 +300,7 @@ contract ChildERC1155Predicate is IChildERC1155Predicate, Initializable {
         assert(rootToken != address(0)); // invariant since root predicate performs the same check
         assert(rootTokenToChildToken[rootToken] == address(0)); // invariant since root predicate performs the same check
         IChildERC1155 childToken = IChildERC1155(
-            Clones.cloneDeterministic(sourceTokenTemplate, keccak256(abi.encodePacked(rootToken)))
+            Clones.cloneDeterministic(destinationTokenTemplate, keccak256(abi.encodePacked(rootToken)))
         );
         rootTokenToChildToken[rootToken] = address(childToken);
         childToken.initialize(rootToken, uri_);

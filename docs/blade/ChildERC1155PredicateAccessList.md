@@ -259,6 +259,23 @@ function acceptOwnership() external nonpayable
 *The new owner accepts the ownership transfer.*
 
 
+### destinationTokenTemplate
+
+```solidity
+function destinationTokenTemplate() external view returns (address)
+```
+
+
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | address | undefined |
+
 ### gateway
 
 ```solidity
@@ -279,7 +296,7 @@ function gateway() external view returns (contract IGateway)
 ### initialize
 
 ```solidity
-function initialize(address newGateway, address newRootERC1155Predicate, address newSourceTokenTemplate) external nonpayable
+function initialize(address newGateway, address newRootERC1155Predicate, address newDestinationTokenTemplate) external nonpayable
 ```
 
 Initialization function for ChildERC1155Predicate
@@ -292,12 +309,12 @@ Initialization function for ChildERC1155Predicate
 |---|---|---|
 | newGateway | address | Address of gateway contract |
 | newRootERC1155Predicate | address | Address of root ERC1155 predicate to communicate with |
-| newSourceTokenTemplate | address | Address of source token implementation to deploy clones of |
+| newDestinationTokenTemplate | address | Address of destination token implementation to deploy clones of |
 
 ### initialize
 
 ```solidity
-function initialize(address newGateway, address newRootERC1155Predicate, address newSourceTokenTemplate, bool newUseAllowList, bool newUseBlockList, address newOwner) external nonpayable
+function initialize(address newGateway, address newRootERC1155Predicate, address newDestinationTokenTemplate, bool newUseAllowList, bool newUseBlockList, address newOwner) external nonpayable
 ```
 
 
@@ -310,7 +327,7 @@ function initialize(address newGateway, address newRootERC1155Predicate, address
 |---|---|---|
 | newGateway | address | undefined |
 | newRootERC1155Predicate | address | undefined |
-| newSourceTokenTemplate | address | undefined |
+| newDestinationTokenTemplate | address | undefined |
 | newUseAllowList | bool | undefined |
 | newUseBlockList | bool | undefined |
 | newOwner | address | undefined |
@@ -448,23 +465,6 @@ function setBlockList(bool newUseBlockList) external nonpayable
 | Name | Type | Description |
 |---|---|---|
 | newUseBlockList | bool | undefined |
-
-### sourceTokenTemplate
-
-```solidity
-function sourceTokenTemplate() external view returns (address)
-```
-
-
-
-
-
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | address | undefined |
 
 ### transferOwnership
 

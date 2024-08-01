@@ -21,7 +21,7 @@ contract ChildERC20Predicate is IChildERC20Predicate, Initializable, System {
 
     IGateway public gateway;
     address public rootERC20Predicate;
-    address public sourceTokenTemplate;
+    address public destinationTokenTemplate;
     bytes32 public constant DEPOSIT_SIG = keccak256("DEPOSIT");
     bytes32 public constant WITHDRAW_SIG = keccak256("WITHDRAW");
     bytes32 public constant MAP_TOKEN_SIG = keccak256("MAP_TOKEN");
@@ -48,17 +48,17 @@ contract ChildERC20Predicate is IChildERC20Predicate, Initializable, System {
      * @notice Initialization function for ChildERC20Predicate
      * @param newGateway Address of gateway contract
      * @param newRootERC20Predicate Address of root ERC20 predicate to communicate with
-     * @param newSourceTokenTemplate Address of source token implementation to deploy clones of
+     * @param newDestinationTokenTemplate Address of destination token implementation to deploy clones of
      * @param newNativeTokenRootAddress Address of native token on root chain
      * @dev Can only be called once. `newNativeTokenRootAddress` should be set to zero where root token does not exist.
      */
     function initialize(
         address newGateway,
         address newRootERC20Predicate,
-        address newSourceTokenTemplate,
+        address newDestinationTokenTemplate,
         address newNativeTokenRootAddress
     ) public virtual initializer {
-        _initialize(newGateway, newRootERC20Predicate, newSourceTokenTemplate, newNativeTokenRootAddress);
+        _initialize(newGateway, newRootERC20Predicate, newDestinationTokenTemplate, newNativeTokenRootAddress);
     }
 
     /**
@@ -109,23 +109,25 @@ contract ChildERC20Predicate is IChildERC20Predicate, Initializable, System {
      * @notice Internal initialization function for ChildERC20Predicate
      * @param newGateway Address of gateway contract
      * @param newRootERC20Predicate Address of root ERC20 predicate to communicate with
-     * @param newSourceTokenTemplate Address of source token implementation to deploy clones of
+     * @param newDestinationTokenTemplate Address of destination token implementation to deploy clones of
      * @param newNativeTokenRootAddress Address of native token on root chain
      * @dev Can be called multiple times.
      */
     function _initialize(
         address newGateway,
         address newRootERC20Predicate,
-        address newSourceTokenTemplate,
+        address newDestinationTokenTemplate,
         address newNativeTokenRootAddress
     ) internal {
         require(
-            newGateway != address(0) && newRootERC20Predicate != address(0) && newSourceTokenTemplate != address(0),
+            newGateway != address(0) &&
+                newRootERC20Predicate != address(0) &&
+                newDestinationTokenTemplate != address(0),
             "ChildERC20Predicate: BAD_INITIALIZATION"
         );
         gateway = IGateway(newGateway);
         rootERC20Predicate = newRootERC20Predicate;
-        sourceTokenTemplate = newSourceTokenTemplate;
+        destinationTokenTemplate = newDestinationTokenTemplate;
         if (newNativeTokenRootAddress != address(0)) {
             rootTokenToChildToken[newNativeTokenRootAddress] = NATIVE_TOKEN_CONTRACT;
             // slither-disable-next-line reentrancy-events
@@ -199,7 +201,7 @@ contract ChildERC20Predicate is IChildERC20Predicate, Initializable, System {
         assert(rootToken != address(0)); // invariant since root predicate performs the same check
         assert(rootTokenToChildToken[rootToken] == address(0)); // invariant since root predicate performs the same check
         IChildERC20 childToken = IChildERC20(
-            Clones.cloneDeterministic(sourceTokenTemplate, keccak256(abi.encodePacked(rootToken)))
+            Clones.cloneDeterministic(destinationTokenTemplate, keccak256(abi.encodePacked(rootToken)))
         );
         rootTokenToChildToken[rootToken] = address(childToken);
         childToken.initialize(rootToken, name, symbol, decimals);

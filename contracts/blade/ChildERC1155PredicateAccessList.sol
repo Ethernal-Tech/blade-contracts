@@ -14,12 +14,12 @@ contract ChildERC1155PredicateAccessList is AccessList, ChildERC1155Predicate {
     function initialize(
         address newGateway,
         address newRootERC1155Predicate,
-        address newSourceTokenTemplate,
+        address newDestinationTokenTemplate,
         bool newUseAllowList,
         bool newUseBlockList,
         address newOwner
     ) public virtual onlySystemCall initializer {
-        _initialize(newGateway, newRootERC1155Predicate, newSourceTokenTemplate);
+        _initialize(newGateway, newRootERC1155Predicate, newDestinationTokenTemplate);
         _initializeAccessList(newUseAllowList, newUseBlockList);
         _transferOwnership(newOwner);
     }

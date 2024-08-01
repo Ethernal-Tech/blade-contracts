@@ -12,12 +12,12 @@ abstract contract ChildERC20PredicateDeployer is Script {
         address proxyAdmin,
         address newGateway,
         address newRootERC20Predicate,
-        address newSourceTokenTemplate,
+        address newDestinationTokenTemplate,
         address newNativeTokenRootAddress
     ) internal returns (address logicAddr, address proxyAddr) {
         bytes memory initData = abi.encodeCall(
             ChildERC20Predicate.initialize,
-            (newGateway, newRootERC20Predicate, newSourceTokenTemplate, newNativeTokenRootAddress)
+            (newGateway, newRootERC20Predicate, newDestinationTokenTemplate, newNativeTokenRootAddress)
         );
 
         vm.startBroadcast();
@@ -43,7 +43,7 @@ contract DeployChildERC20Predicate is ChildERC20PredicateDeployer {
         address newGateway,
         address newRootERC20Predicate,
         address newChildTokenTemplate,
-        address newSourceTokenTemplate
+        address newDestinationTokenTemplate
     ) external returns (address logicAddr, address proxyAddr) {
         return
             deployChildERC20Predicate(
@@ -51,7 +51,7 @@ contract DeployChildERC20Predicate is ChildERC20PredicateDeployer {
                 newGateway,
                 newRootERC20Predicate,
                 newChildTokenTemplate,
-                newSourceTokenTemplate
+                newDestinationTokenTemplate
             );
     }
 }

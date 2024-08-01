@@ -84,7 +84,7 @@ describe("ChildERC721Predicate", () => {
     await systemChildERC721Predicate.initialize(gateway.address, rootERC721Predicate, childERC721.address);
     expect(await childERC721Predicate.gateway()).to.equal(gateway.address);
     expect(await childERC721Predicate.rootERC721Predicate()).to.equal(rootERC721Predicate);
-    expect(await childERC721Predicate.sourceTokenTemplate()).to.equal(childERC721.address);
+    expect(await childERC721Predicate.destinationTokenTemplate()).to.equal(childERC721.address);
   });
 
   it("fail reinitialization", async () => {
