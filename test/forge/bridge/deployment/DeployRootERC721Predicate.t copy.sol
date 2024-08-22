@@ -22,6 +22,7 @@ contract DeployRootERC1155PredicateTest is Test {
     address newGateway;
     address newChildERC1155Predicate;
     address newChildTokenTemplate;
+    uint256 destinationChainId;
 
     function setUp() public {
         deployer = new DeployRootERC1155Predicate();
@@ -30,12 +31,14 @@ contract DeployRootERC1155PredicateTest is Test {
         newGateway = makeAddr("newGateway");
         newChildERC1155Predicate = makeAddr("newChildERC1155Predicate");
         newChildTokenTemplate = makeAddr("newChildTokenTemplate");
+        destinationChainId = 1;
 
         (logicAddr, proxyAddr) = deployer.run(
             proxyAdmin,
             newGateway,
             newChildERC1155Predicate,
-            newChildTokenTemplate
+            newChildTokenTemplate,
+            destinationChainId
         );
         _recordProxy(proxyAddr);
     }
@@ -54,7 +57,8 @@ contract DeployRootERC1155PredicateTest is Test {
         proxyAsRootERC1155Predicate.initialize(
             newGateway,
             newChildERC1155Predicate,
-            newChildTokenTemplate
+            newChildTokenTemplate,
+            destinationChainId
         );
 
         assertEq(

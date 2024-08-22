@@ -92,14 +92,14 @@ contract GatewayStateSyncTest is GatewayInitialized {
     }
 
      function testCannotSyncState_InvalidDestinationChainId() public {
-        vm.expectRevert("EXCEEDS_MAX_LENGTH");
-        gateway.sendBridgeMsg(receiver, moreThanMaxData, 0);
+        vm.expectRevert("INVALID_DESTINATION_CHAIN_ID");
+        gateway.sendBridgeMsg(receiver, maxData, 0);
     }
 
     function testSyncState_EmitsEvent() public {
         vm.expectEmit(true, true, true, true);
-        emit BridgeMessageEvent(1, address(this), receiver, maxData);
-        gateway.sendBridgeMsg(receiver, maxData);
+        emit BridgeMessageEvent(1, address(this), receiver, maxData, 3, 1);
+        gateway.sendBridgeMsg(receiver, maxData, 1);
     }
 
     function testSyncState_IncreasesCounter() public {

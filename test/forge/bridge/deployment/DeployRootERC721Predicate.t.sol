@@ -22,6 +22,7 @@ contract DeployRootERC721PredicateTest is Test {
     address newGateway;
     address newChildERC721Predicate;
     address newChildTokenTemplate;
+    uint256 destinationChainId;
 
     function setUp() public {
         deployer = new DeployRootERC721Predicate();
@@ -30,12 +31,14 @@ contract DeployRootERC721PredicateTest is Test {
         newGateway = makeAddr("newGateway");
         newChildERC721Predicate = makeAddr("newChildERC721Predicate");
         newChildTokenTemplate = makeAddr("newChildTokenTemplate");
+        destinationChainId = 1;
 
         (logicAddr, proxyAddr) = deployer.run(
             proxyAdmin,
             newGateway,
             newChildERC721Predicate,
-            newChildTokenTemplate
+            newChildTokenTemplate,
+            destinationChainId
         );
         _recordProxy(proxyAddr);
     }
@@ -54,7 +57,8 @@ contract DeployRootERC721PredicateTest is Test {
         proxyAsRootERC721Predicate.initialize(
             newGateway,
             newChildERC721Predicate,
-            newChildTokenTemplate
+            newChildTokenTemplate,
+            destinationChainId
         );
 
         assertEq(

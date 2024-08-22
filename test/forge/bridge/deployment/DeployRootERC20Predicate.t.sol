@@ -23,6 +23,7 @@ contract DeployRootERC20PredicateTest is Test {
     address newChildERC20Predicate;
     address newChildTokenTemplate;
     address nativeTokenRootAddress;
+    uint256 destinationChainId;
 
     function setUp() public {
         deployer = new DeployRootERC20Predicate();
@@ -32,13 +33,15 @@ contract DeployRootERC20PredicateTest is Test {
         newChildERC20Predicate = makeAddr("newChildERC20Predicate");
         newChildTokenTemplate = makeAddr("newChildTokenTemplate");
         nativeTokenRootAddress = makeAddr("nativeTokenRootAddress");
+        destinationChainId = 1;
 
         (logicAddr, proxyAddr) = deployer.run(
             proxyAdmin,
             newGateway,
             newChildERC20Predicate,
             newChildTokenTemplate,
-            nativeTokenRootAddress
+            nativeTokenRootAddress,
+            destinationChainId
         );
         _recordProxy(proxyAddr);
     }
@@ -58,7 +61,8 @@ contract DeployRootERC20PredicateTest is Test {
             newGateway,
             newChildERC20Predicate,
             newChildTokenTemplate,
-            nativeTokenRootAddress
+            nativeTokenRootAddress,
+            destinationChainId
         );
 
         assertEq(

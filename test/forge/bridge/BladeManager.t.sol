@@ -53,7 +53,8 @@ contract BladeManager_PremineInitialized is Initialized {
             address(new Gateway()),
             childERC20Predicate,
             childTokenTemplate,
-            address(token)
+            address(token),
+            1
         );
     }
 
