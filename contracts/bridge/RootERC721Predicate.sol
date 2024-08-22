@@ -6,17 +6,12 @@ import "@openzeppelin/contracts/token/ERC721/utils/ERC721Holder.sol";
 import "@openzeppelin/contracts/proxy/Clones.sol";
 import "../interfaces/bridge/IRootERC721Predicate.sol";
 import "../interfaces/IGateway.sol";
+import "../lib/Predicate.sol";
 
 // solhint-disable reason-string
-contract RootERC721Predicate is Initializable, ERC721Holder, IRootERC721Predicate {
-    IGateway public gateway;
+contract RootERC721Predicate is Predicate, Initializable, ERC721Holder, IRootERC721Predicate {
     address public childERC721Predicate;
     address public destinationTokenTemplate;
-    bytes32 public constant DEPOSIT_SIG = keccak256("DEPOSIT");
-    bytes32 public constant DEPOSIT_BATCH_SIG = keccak256("DEPOSIT_BATCH");
-    bytes32 public constant WITHDRAW_SIG = keccak256("WITHDRAW");
-    bytes32 public constant WITHDRAW_BATCH_SIG = keccak256("WITHDRAW_BATCH");
-    bytes32 public constant MAP_TOKEN_SIG = keccak256("MAP_TOKEN");
     mapping(address => address) public sourceTokenToDestinationToken;
 
     /**
@@ -24,14 +19,16 @@ contract RootERC721Predicate is Initializable, ERC721Holder, IRootERC721Predicat
      * @param newGateway Address of gateway contract
      * @param newChildERC721Predicate Address of child ERC721 predicate to communicate with
      * @param newDestinationTokenTemplate Address of destination token implementation to deploy clones of
+     * @param newDestinationChainId Chain ID of destination chain
      * @dev Can only be called once.
      */
     function initialize(
         address newGateway,
         address newChildERC721Predicate,
-        address newDestinationTokenTemplate
+        address newDestinationTokenTemplate,
+        uint256 newDestinationChainId
     ) external initializer {
-        _initialize(newGateway, newChildERC721Predicate, newDestinationTokenTemplate);
+        _initialize(newGateway, newChildERC721Predicate, newDestinationTokenTemplate, newDestinationChainId);
     }
 
     /**
@@ -97,7 +94,8 @@ contract RootERC721Predicate is Initializable, ERC721Holder, IRootERC721Predicat
 
         gateway.sendBridgeMsg(
             childPredicate,
-            abi.encode(MAP_TOKEN_SIG, rootToken, rootToken.name(), rootToken.symbol())
+            abi.encode(MAP_TOKEN_SIG, rootToken, rootToken.name(), rootToken.symbol()),
+            destinationChainId
         );
         // slither-disable-next-line reentrancy-events
         emit TokenMapped(address(rootToken), childToken);
@@ -110,7 +108,11 @@ contract RootERC721Predicate is Initializable, ERC721Holder, IRootERC721Predicat
 
         rootToken.safeTransferFrom(msg.sender, address(this), tokenId);
 
-        gateway.sendBridgeMsg(childERC721Predicate, abi.encode(DEPOSIT_SIG, rootToken, msg.sender, receiver, tokenId));
+        gateway.sendBridgeMsg(
+            childERC721Predicate,
+            abi.encode(DEPOSIT_SIG, rootToken, msg.sender, receiver, tokenId),
+            destinationChainId
+        );
         // slither-disable-next-line reentrancy-events
         emit ERC721Deposit(address(rootToken), childToken, msg.sender, receiver, tokenId);
         _afterTokenDeposit();
@@ -133,7 +135,8 @@ contract RootERC721Predicate is Initializable, ERC721Holder, IRootERC721Predicat
 
         gateway.sendBridgeMsg(
             childERC721Predicate,
-            abi.encode(DEPOSIT_BATCH_SIG, rootToken, msg.sender, receivers, tokenIds)
+            abi.encode(DEPOSIT_BATCH_SIG, rootToken, msg.sender, receivers, tokenIds),
+            destinationChainId
         );
         // slither-disable-next-line reentrancy-events
         emit ERC721DepositBatch(address(rootToken), childToken, msg.sender, receivers, tokenIds);
@@ -195,13 +198,16 @@ contract RootERC721Predicate is Initializable, ERC721Holder, IRootERC721Predicat
      * @param newGateway Address of gateway contract
      * @param newChildERC721Predicate Address of child ERC721 predicate to communicate with
      * @param newDestinationTokenTemplate Address of destination token implementation to deploy clones of
+     * @param newDestinationChainId Chain ID of destination chain
      * @dev Can only be called once.
      */
     function _initialize(
         address newGateway,
         address newChildERC721Predicate,
-        address newDestinationTokenTemplate
+        address newDestinationTokenTemplate,
+        uint256 newDestinationChainId
     ) internal {
+        super._initialize(newGateway, newDestinationChainId);
         require(
             newGateway != address(0) &&
                 newChildERC721Predicate != address(0) &&

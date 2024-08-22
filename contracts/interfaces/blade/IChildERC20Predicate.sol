@@ -9,7 +9,8 @@ interface IChildERC20Predicate is IStateReceiver {
         address newGateway,
         address newRootERC20Predicate,
         address newDestinationTokenTemplate,
-        address newNativeTokenRootAddress
+        address newNativeTokenRootAddress,
+        uint256 newDestinationChainId
     ) external;
 
     function withdraw(IChildERC20 childToken, uint256 amount) external;

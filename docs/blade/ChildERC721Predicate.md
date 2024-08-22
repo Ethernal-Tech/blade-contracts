@@ -95,6 +95,23 @@ function WITHDRAW_SIG() external view returns (bytes32)
 |---|---|---|
 | _0 | bytes32 | undefined |
 
+### destinationChainId
+
+```solidity
+function destinationChainId() external view returns (uint256)
+```
+
+
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | undefined |
+
 ### destinationTokenTemplate
 
 ```solidity
@@ -132,7 +149,7 @@ function gateway() external view returns (contract IGateway)
 ### initialize
 
 ```solidity
-function initialize(address newGateway, address newRootERC721Predicate, address newDestinationTokenTemplate) external nonpayable
+function initialize(address newGateway, address newRootERC721Predicate, address newDestinationTokenTemplate, uint256 newDestinationChainId) external nonpayable
 ```
 
 Initialization function for ChildERC721Predicate
@@ -146,6 +163,7 @@ Initialization function for ChildERC721Predicate
 | newGateway | address | Address of gateway contract |
 | newRootERC721Predicate | address | Address of root ERC721 predicate to communicate with |
 | newDestinationTokenTemplate | address | Address of destination token implementation to deploy clones of |
+| newDestinationChainId | uint256 | Chain ID of destination chain |
 
 ### onStateReceive
 

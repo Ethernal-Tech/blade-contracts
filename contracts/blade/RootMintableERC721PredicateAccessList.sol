@@ -15,11 +15,12 @@ contract RootMintableERC721PredicateAccessList is AccessList, RootERC721Predicat
         address newGateway,
         address newChildERC721Predicate,
         address newTokenTemplate,
+        uint256 newDestinationChainId,
         bool newUseAllowList,
         bool newUseBlockList,
         address newOwner
     ) public virtual onlySystemCall initializer {
-        _initialize(newGateway, newChildERC721Predicate, newTokenTemplate);
+        _initialize(newGateway, newChildERC721Predicate, newTokenTemplate, newDestinationChainId);
         _initializeAccessList(newUseAllowList, newUseBlockList);
         _transferOwnership(newOwner);
     }

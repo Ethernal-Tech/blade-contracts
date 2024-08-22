@@ -367,7 +367,7 @@ function receiveBatch(BridgeMessageBatch batch, uint256[2] signature, bytes bitm
 ### sendBridgeMsg
 
 ```solidity
-function sendBridgeMsg(address receiver, bytes data) external nonpayable
+function sendBridgeMsg(address receiver, bytes data, uint256 destinationChainId) external nonpayable
 ```
 
 Generates sync state event based on receiver and data. Anyone can call this method to emit an event. Receiver on Polygon should add check based on sender.
@@ -380,6 +380,7 @@ Generates sync state event based on receiver and data. Anyone can call this meth
 |---|---|---|
 | receiver | address | Receiver address on Polygon chain |
 | data | bytes | Data to send on Polygon chain |
+| destinationChainId | uint256 | Chain id of destination chain |
 
 ### totalVotingPower
 
@@ -405,7 +406,7 @@ function totalVotingPower() external view returns (uint256)
 ### BridgeMessageEvent
 
 ```solidity
-event BridgeMessageEvent(uint256 indexed id, address indexed sender, address indexed receiver, bytes data)
+event BridgeMessageEvent(uint256 indexed id, address indexed sender, address indexed receiver, bytes data, uint256 sourceChainId, uint256 destinationChainId)
 ```
 
 
@@ -420,6 +421,8 @@ event BridgeMessageEvent(uint256 indexed id, address indexed sender, address ind
 | sender `indexed` | address | undefined |
 | receiver `indexed` | address | undefined |
 | data  | bytes | undefined |
+| sourceChainId  | uint256 | undefined |
+| destinationChainId  | uint256 | undefined |
 
 ### BridgeMessageResult
 

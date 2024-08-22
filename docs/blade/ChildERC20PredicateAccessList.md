@@ -44,6 +44,23 @@ function BLOCKLIST_PRECOMPILE() external view returns (address)
 |---|---|---|
 | _0 | address | undefined |
 
+### DEPOSIT_BATCH_SIG
+
+```solidity
+function DEPOSIT_BATCH_SIG() external view returns (bytes32)
+```
+
+
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | bytes32 | undefined |
+
 ### DEPOSIT_SIG
 
 ```solidity
@@ -197,6 +214,23 @@ function VALIDATOR_PKCHECK_PRECOMPILE_GAS() external view returns (uint256)
 |---|---|---|
 | _0 | uint256 | undefined |
 
+### WITHDRAW_BATCH_SIG
+
+```solidity
+function WITHDRAW_BATCH_SIG() external view returns (bytes32)
+```
+
+
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | bytes32 | undefined |
+
 ### WITHDRAW_SIG
 
 ```solidity
@@ -224,6 +258,23 @@ function acceptOwnership() external nonpayable
 
 *The new owner accepts the ownership transfer.*
 
+
+### destinationChainId
+
+```solidity
+function destinationChainId() external view returns (uint256)
+```
+
+
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | undefined |
 
 ### destinationTokenTemplate
 
@@ -262,7 +313,7 @@ function gateway() external view returns (contract IGateway)
 ### initialize
 
 ```solidity
-function initialize(address newGateway, address newRootERC20Predicate, address newDestinationTokenTemplate, address newNativeTokenRootAddress, bool newUseAllowList, bool newUseBlockList, address newOwner) external nonpayable
+function initialize(address newGateway, address newRootERC20Predicate, address newDestinationTokenTemplate, address newNativeTokenRootAddress, uint256 newDestinationChainId, bool newUseAllowList, bool newUseBlockList, address newOwner) external nonpayable
 ```
 
 
@@ -277,6 +328,7 @@ function initialize(address newGateway, address newRootERC20Predicate, address n
 | newRootERC20Predicate | address | undefined |
 | newDestinationTokenTemplate | address | undefined |
 | newNativeTokenRootAddress | address | undefined |
+| newDestinationChainId | uint256 | undefined |
 | newUseAllowList | bool | undefined |
 | newUseBlockList | bool | undefined |
 | newOwner | address | undefined |
@@ -284,7 +336,7 @@ function initialize(address newGateway, address newRootERC20Predicate, address n
 ### initialize
 
 ```solidity
-function initialize(address newGateway, address newRootERC20Predicate, address newDestinationTokenTemplate, address newNativeTokenRootAddress) external nonpayable
+function initialize(address newGateway, address newRootERC20Predicate, address newDestinationTokenTemplate, address newNativeTokenRootAddress, uint256 newDestinationChainId) external nonpayable
 ```
 
 Initialization function for ChildERC20Predicate
@@ -299,6 +351,7 @@ Initialization function for ChildERC20Predicate
 | newRootERC20Predicate | address | Address of root ERC20 predicate to communicate with |
 | newDestinationTokenTemplate | address | Address of destination token implementation to deploy clones of |
 | newNativeTokenRootAddress | address | Address of native token on root chain |
+| newDestinationChainId | uint256 | undefined |
 
 ### onStateReceive
 
