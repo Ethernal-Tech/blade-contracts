@@ -118,7 +118,8 @@ contract DeployBladeContracts is
             gateway,
             config.readAddress('["ChildERC20Predicate"].newRootERC20Predicate'),
             config.readAddress('["ChildERC20Predicate"].newDestinationTokenTemplate'),
-            config.readAddress('["ChildERC20Predicate"].newNativeTokenRootAddress')
+            config.readAddress('["ChildERC20Predicate"].newNativeTokenRootAddress'),
+            config.readUint('["ChildERC20Predicate"].newDestinationChainId')
         );
 
         (childERC20PredicateAccessListLogic, childERC20PredicateAccessListProxy) = deployChildERC20PredicateAccessList(
@@ -127,6 +128,7 @@ contract DeployBladeContracts is
             config.readAddress('["ChildERC20PredicateAccessList"].newRootERC20Predicate'),
             config.readAddress('["ChildERC20PredicateAccessList"].newDestinationTokenTemplate'),
             config.readAddress('["ChildERC20PredicateAccessList"].newNativeTokenRootAddress'),
+            config.readUint('["ChildERC20PredicateAccessList"].newDestinationChainId'),
             config.readBool('["ChildERC20PredicateAccessList"].newUseAllowList'),
             config.readBool('["ChildERC20PredicateAccessList"].newUseBlockList'),
             config.readAddress('["ChildERC20PredicateAccessList"].newOwner')
@@ -143,7 +145,8 @@ contract DeployBladeContracts is
             proxyAdmin,
             gateway,
             config.readAddress('["ChildERC721Predicate"].newRootERC721Predicate'),
-            config.readAddress('["ChildERC721Predicate"].newDestinationTokenTemplate')
+            config.readAddress('["ChildERC721Predicate"].newDestinationTokenTemplate'),
+            config.readUint('["ChildERC721Predicate"].newDestinationChainId')
         );
 
         (
@@ -154,6 +157,7 @@ contract DeployBladeContracts is
             gateway,
             config.readAddress('["ChildERC721PredicateAccessList"].newRootERC721Predicate'),
             config.readAddress('["ChildERC721PredicateAccessList"].newDestinationTokenTemplate'),
+            config.readUint('["ChildERC721PredicateAccessList"].newDestinationChainId'),
             config.readBool('["ChildERC721PredicateAccessList"].newUseAllowList'),
             config.readBool('["ChildERC721PredicateAccessList"].newUseBlockList'),
             config.readAddress('["ChildERC721PredicateAccessList"].newOwner')
@@ -169,7 +173,8 @@ contract DeployBladeContracts is
             proxyAdmin,
             gateway,
             config.readAddress('["ChildERC1155Predicate"].newRootERC1155Predicate'),
-            config.readAddress('["ChildERC1155Predicate"].newDestinationTokenTemplate')
+            config.readAddress('["ChildERC1155Predicate"].newDestinationTokenTemplate'),
+            config.readUint('["ChildERC1155Predicate"].newDestinationChainId')
         );
 
         (
@@ -180,6 +185,7 @@ contract DeployBladeContracts is
             gateway,
             config.readAddress('["ChildERC1155PredicateAccessList"].newRootERC1155Predicate'),
             config.readAddress('["ChildERC1155PredicateAccessList"].newDestinationTokenTemplate'),
+            config.readUint('["ChildERC1155PredicateAccessList"].newDestinationChainId'),
             config.readBool('["ChildERC1155PredicateAccessList"].newUseAllowList'),
             config.readBool('["ChildERC1155PredicateAccessList"].newUseBlockList'),
             config.readAddress('["ChildERC1155PredicateAccessList"].newOwner')
@@ -209,6 +215,7 @@ contract DeployBladeContracts is
             gateway,
             childERC721PredicateProxy,
             config.readAddress('["RootMintableERC721PredicateAccessList"].newTokenTemplate'),
+            config.readUint('["RootMintableERC721PredicateAccessList"].newDestinationChainId'),
             config.readBool('["RootMintableERC721PredicateAccessList"].newUseAllowList'),
             config.readBool('["RootMintableERC721PredicateAccessList"].newUseBlockList'),
             config.readAddress('["RootMintableERC721PredicateAccessList"].newOwner')
@@ -222,6 +229,7 @@ contract DeployBladeContracts is
             gateway,
             childERC1155PredicateProxy,
             config.readAddress('["RootMintableERC1155PredicateAccessList"].newTokenTemplate'),
+            config.readUint('["RootMintableERC1155PredicateAccessList"].newDestinationChainId'),
             config.readBool('["RootMintableERC1155PredicateAccessList"].newUseAllowList'),
             config.readBool('["RootMintableERC1155PredicateAccessList"].newUseBlockList'),
             config.readAddress('["RootMintableERC1155PredicateAccessList"].newOwner')

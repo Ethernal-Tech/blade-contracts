@@ -1,7 +1,8 @@
 {
   "common": {
     "proxyAdmin": "",
-    "newGateway": ""
+    "newGateway": "",
+    "newDestinationChainId": ""
   },
 
   "RootERC20Predicate": {

@@ -13,6 +13,7 @@ abstract contract ChildERC1155PredicateAccessListDeployer is Script {
         address newGateway,
         address newRootERC1155Predicate,
         address newDestinationTokenTemplate,
+        uint256 newDestinationChainId,
         bool newUseAllowList,
         bool newUseBlockList,
         address newOwner
@@ -23,6 +24,7 @@ abstract contract ChildERC1155PredicateAccessListDeployer is Script {
                 newGateway,
                 newRootERC1155Predicate,
                 newDestinationTokenTemplate,
+                newDestinationChainId,
                 newUseAllowList,
                 newUseBlockList,
                 newOwner
@@ -52,6 +54,7 @@ contract DeployChildERC1155PredicateAccessList is ChildERC1155PredicateAccessLis
         address newGateway,
         address newRootERC1155Predicate,
         address newDestinationTokenTemplate,
+        uint256 newDestinationChainId,
         bool newUseAllowList,
         bool newUseBlockList,
         address newOwner
@@ -62,6 +65,7 @@ contract DeployChildERC1155PredicateAccessList is ChildERC1155PredicateAccessLis
                 newGateway,
                 newRootERC1155Predicate,
                 newDestinationTokenTemplate,
+                newDestinationChainId,
                 newUseAllowList,
                 newUseBlockList,
                 newOwner

@@ -25,13 +25,15 @@
   "ChildERC20Predicate": {
     "newRootERC20Predicate": "",
     "newDestinationTokenTemplate": "",
-    "newNativeTokenRootAddress": ""
+    "newNativeTokenRootAddress": "",
+    "newDestinationChainId": ""
   },
 
   "ChildERC20PredicateAccessList": {
     "newRootERC20Predicate": "",
     "newDestinationTokenTemplate": "",
     "newNativeTokenRootAddress": "",
+    "newDestinationChainId": "",
     "newUseAllowList": "",
     "newUseBlockList": "",
     "newOwner": ""
@@ -45,12 +47,14 @@
 
   "ChildERC721Predicate": {
     "newRootERC721Predicate": "",
-    "newDestinationTokenTemplate": ""
+    "newDestinationTokenTemplate": "",
+    "newDestinationChainId": ""
   },
 
   "ChildERC721PredicateAccessList": {
     "newRootERC721Predicate": "",
     "newDestinationTokenTemplate": "",
+    "newDestinationChainId": "",
     "newUseAllowList": "",
     "newUseBlockList": "",
     "newOwner": ""
@@ -63,12 +67,14 @@
 
   "ChildERC1155Predicate": {
     "newRootERC1155Predicate": "",
-    "newDestinationTokenTemplate": ""
+    "newDestinationTokenTemplate": "",
+    "newDestinationChainId": ""
   },
 
   "ChildERC1155PredicateAccessList": {
     "newRootERC1155Predicate": "",
     "newDestinationTokenTemplate": "",
+    "newDestinationChainId": "",
     "newUseAllowList": "",
     "newUseBlockList": "",
     "newOwner": ""
@@ -103,6 +109,7 @@
 
   "RootMintableERC20PredicateAccessList": {
     "newTokenTemplate": "",
+    "newDestinationChainId": "",
     "newUseAllowList": "",
     "newUseBlockList": "",
     "newOwner": ""
@@ -110,6 +117,7 @@
 
   "RootMintableERC721PredicateAccessList": {
     "newTokenTemplate": "",
+    "newDestinationChainId": "",
     "newUseAllowList": "",
     "newUseBlockList": "",
     "newOwner": ""
@@ -117,6 +125,7 @@
 
   "RootMintableERC1155PredicateAccessList": {
     "newTokenTemplate": "",
+    "newDestinationChainId": "",
     "newUseAllowList": "",
     "newUseBlockList": "",
     "newOwner": ""

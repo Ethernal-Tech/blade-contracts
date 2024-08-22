@@ -13,13 +13,22 @@ abstract contract RootMintableERC721PredicateAccessListDeployer is Script {
         address newGateway,
         address newChildERC721Predicate,
         address newTokenTemplate,
+        uint256 newDestinationChainId,
         bool newUseAllowList,
         bool newUseBlockList,
         address newOwner
     ) internal returns (address logicAddr, address proxyAddr) {
         bytes memory initData = abi.encodeCall(
             RootMintableERC721PredicateAccessList.initialize,
-            (newGateway, newChildERC721Predicate, newTokenTemplate, newUseAllowList, newUseBlockList, newOwner)
+            (
+                newGateway,
+                newChildERC721Predicate,
+                newTokenTemplate,
+                newDestinationChainId,
+                newUseAllowList,
+                newUseBlockList,
+                newOwner
+            )
         );
 
         vm.startBroadcast();
@@ -45,6 +54,7 @@ contract DeployRootMintableERC721PredicateAccessList is RootMintableERC721Predic
         address newGateway,
         address newChildERC721Predicate,
         address newTokenTemplate,
+        uint256 newDestinationChainId,
         bool newUseAllowList,
         bool newUseBlockList,
         address newOwner
@@ -55,6 +65,7 @@ contract DeployRootMintableERC721PredicateAccessList is RootMintableERC721Predic
                 newGateway,
                 newChildERC721Predicate,
                 newTokenTemplate,
+                newDestinationChainId,
                 newUseAllowList,
                 newUseBlockList,
                 newOwner
