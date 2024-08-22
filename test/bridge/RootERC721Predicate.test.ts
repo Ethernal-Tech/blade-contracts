@@ -54,7 +54,7 @@ describe("RootERC721Predicate", () => {
         "0x0000000000000000000000000000000000000000",
         "1"
       )
-    ).to.be.revertedWith("RootERC721Predicate: BAD_INITIALIZATION");
+    ).to.be.revertedWith("Predicate: BAD_INITIALIZATION");
   });
 
   it("initialize and validate initialization", async () => {

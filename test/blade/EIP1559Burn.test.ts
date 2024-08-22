@@ -81,7 +81,8 @@ describe("EIP1559Burn", () => {
       gateway.address,
       rootERC20Predicate,
       childERC20.address,
-      nativeERC20RootToken
+      nativeERC20RootToken,
+      1
     );
 
     impersonateAccount(gateway.address);

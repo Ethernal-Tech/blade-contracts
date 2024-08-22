@@ -68,7 +68,7 @@ describe("ChildERC1155Predicate", () => {
         "0x0000000000000000000000000000000000000000",
         "1"
       )
-    ).to.be.revertedWith("ChildERC1155Predicate: BAD_INITIALIZATION");
+    ).to.be.revertedWith("Predicate: BAD_INITIALIZATION");
   });
 
   it("initialize and validate initialization", async () => {
