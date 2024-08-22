@@ -87,7 +87,8 @@ describe("ChildERC20Predicate", () => {
         "0x0000000000000000000000000000000000000000",
         "0x0000000000000000000000000000000000000000",
         "0x0000000000000000000000000000000000000000",
-        "0x0000000000000000000000000000000000000000"
+        "0x0000000000000000000000000000000000000000",
+        "1"
       )
     ).to.be.revertedWith("ChildERC20Predicate: BAD_INITIALIZATION");
   });
@@ -97,7 +98,8 @@ describe("ChildERC20Predicate", () => {
       gateway.address,
       rootERC20Predicate,
       childERC20.address,
-      nativeERC20RootToken
+      nativeERC20RootToken,
+      1
     );
     const systemNativeERC20: NativeERC20 = nativeERC20.connect(
       await ethers.getSigner("0xffffFFFfFFffffffffffffffFfFFFfffFFFfFFfE")
@@ -118,7 +120,8 @@ describe("ChildERC20Predicate", () => {
         gateway.address,
         rootERC20Predicate,
         childERC20.address,
-        nativeERC20RootToken
+        nativeERC20RootToken,
+        1
       )
     ).to.be.revertedWith("Initializable: contract is already initialized");
   });
