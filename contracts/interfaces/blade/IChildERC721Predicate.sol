@@ -8,7 +8,8 @@ interface IChildERC721Predicate is IStateReceiver {
     function initialize(
         address newGateway,
         address newRootERC721Predicate,
-        address newDestinationTokenTemplate
+        address newDestinationTokenTemplate,
+        uint256 newDestinationChainId
     ) external;
 
     function withdraw(IChildERC721 childToken, uint256 tokenId) external;

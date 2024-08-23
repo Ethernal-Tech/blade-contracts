@@ -6,17 +6,12 @@ import "@openzeppelin/contracts/token/ERC1155/utils/ERC1155Holder.sol";
 import "@openzeppelin/contracts/proxy/Clones.sol";
 import "../interfaces/bridge/IRootERC1155Predicate.sol";
 import "../interfaces/IGateway.sol";
+import "../lib/Predicate.sol";
 
 // solhint-disable reason-string
-contract RootERC1155Predicate is Initializable, ERC1155Holder, IRootERC1155Predicate {
-    IGateway public gateway;
+contract RootERC1155Predicate is Predicate, Initializable, ERC1155Holder, IRootERC1155Predicate {
     address public childERC1155Predicate;
     address public destinationTokenTemplate;
-    bytes32 public constant DEPOSIT_SIG = keccak256("DEPOSIT");
-    bytes32 public constant DEPOSIT_BATCH_SIG = keccak256("DEPOSIT_BATCH");
-    bytes32 public constant WITHDRAW_SIG = keccak256("WITHDRAW");
-    bytes32 public constant WITHDRAW_BATCH_SIG = keccak256("WITHDRAW_BATCH");
-    bytes32 public constant MAP_TOKEN_SIG = keccak256("MAP_TOKEN");
     mapping(address => address) public sourceTokenToDestinationToken;
 
     /**
@@ -24,14 +19,16 @@ contract RootERC1155Predicate is Initializable, ERC1155Holder, IRootERC1155Predi
      * @param newGateway Address of gateway to send deposit information to
      * @param newChildERC1155Predicate Address of child ERC1155 predicate to communicate with
      * @param newDestinationTokenTemplate Address of child token template to deploy clones of
+     * @param newDestinationChainId Chain ID of destination chain
      * @dev Can only be called once.
      */
     function initialize(
         address newGateway,
         address newChildERC1155Predicate,
-        address newDestinationTokenTemplate
+        address newDestinationTokenTemplate,
+        uint256 newDestinationChainId
     ) external initializer {
-        _initialize(newGateway, newChildERC1155Predicate, newDestinationTokenTemplate);
+        _initialize(newGateway, newChildERC1155Predicate, newDestinationTokenTemplate, newDestinationChainId);
     }
 
     /**
@@ -109,7 +106,7 @@ contract RootERC1155Predicate is Initializable, ERC1155Holder, IRootERC1155Predi
             uri = tokenUri;
         } catch {}
 
-        gateway.sendBridgeMsg(childPredicate, abi.encode(MAP_TOKEN_SIG, rootToken, uri));
+        gateway.sendBridgeMsg(childPredicate, abi.encode(MAP_TOKEN_SIG, rootToken, uri), destinationChainId);
         // slither-disable-next-line reentrancy-events
         emit TokenMapped(address(rootToken), childToken);
     }
@@ -122,7 +119,8 @@ contract RootERC1155Predicate is Initializable, ERC1155Holder, IRootERC1155Predi
 
         gateway.sendBridgeMsg(
             childERC1155Predicate,
-            abi.encode(DEPOSIT_SIG, rootToken, msg.sender, receiver, tokenId, amount)
+            abi.encode(DEPOSIT_SIG, rootToken, msg.sender, receiver, tokenId, amount),
+            destinationChainId
         );
         // slither-disable-next-line reentrancy-events
         emit ERC1155Deposit(address(rootToken), childToken, msg.sender, receiver, tokenId, amount);
@@ -147,7 +145,8 @@ contract RootERC1155Predicate is Initializable, ERC1155Holder, IRootERC1155Predi
 
         gateway.sendBridgeMsg(
             childERC1155Predicate,
-            abi.encode(DEPOSIT_BATCH_SIG, rootToken, msg.sender, receivers, tokenIds, amounts)
+            abi.encode(DEPOSIT_BATCH_SIG, rootToken, msg.sender, receivers, tokenIds, amounts),
+            destinationChainId
         );
         // slither-disable-next-line reentrancy-events
         emit ERC1155DepositBatch(address(rootToken), childToken, msg.sender, receivers, tokenIds, amounts);
@@ -199,20 +198,20 @@ contract RootERC1155Predicate is Initializable, ERC1155Holder, IRootERC1155Predi
      * @param newGateway Address of Gateway contract
      * @param newChildERC1155Predicate Address of child ERC1155 predicate to communicate with
      * @param newDestinationTokenTemplate Address of child token template to deploy clones of
+     * @param newDestinationChainId Chain ID of destination chain
      * @dev Can only be called once.
      */
     function _initialize(
         address newGateway,
         address newChildERC1155Predicate,
-        address newDestinationTokenTemplate
+        address newDestinationTokenTemplate,
+        uint256 newDestinationChainId
     ) internal {
+        super._initialize(newGateway, newDestinationChainId);
         require(
-            newGateway != address(0) &&
-                newChildERC1155Predicate != address(0) &&
-                newDestinationTokenTemplate != address(0),
+            newChildERC1155Predicate != address(0) && newDestinationTokenTemplate != address(0),
             "RootERC1155Predicate: BAD_INITIALIZATION"
         );
-        gateway = IGateway(newGateway);
         childERC1155Predicate = newChildERC1155Predicate;
         destinationTokenTemplate = newDestinationTokenTemplate;
     }

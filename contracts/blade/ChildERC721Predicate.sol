@@ -6,6 +6,7 @@ import "@openzeppelin/contracts/proxy/Clones.sol";
 import "../interfaces/blade/IChildERC721Predicate.sol";
 import "../interfaces/blade/IChildERC721.sol";
 import "../interfaces/IGateway.sol";
+import "../lib/Predicate.sol";
 
 /**
     @title ChildERC721Predicate
@@ -13,15 +14,9 @@ import "../interfaces/IGateway.sol";
     @notice Enables ERC721 token deposits and withdrawals across an arbitrary root chain and child chain
  */
 // solhint-disable reason-string
-contract ChildERC721Predicate is IChildERC721Predicate, Initializable {
-    IGateway public gateway;
+contract ChildERC721Predicate is IChildERC721Predicate, Predicate, Initializable {
     address public rootERC721Predicate;
     address public destinationTokenTemplate;
-    bytes32 public constant DEPOSIT_SIG = keccak256("DEPOSIT");
-    bytes32 public constant DEPOSIT_BATCH_SIG = keccak256("DEPOSIT_BATCH");
-    bytes32 public constant WITHDRAW_SIG = keccak256("WITHDRAW");
-    bytes32 public constant WITHDRAW_BATCH_SIG = keccak256("WITHDRAW_BATCH");
-    bytes32 public constant MAP_TOKEN_SIG = keccak256("MAP_TOKEN");
 
     mapping(address => address) public rootTokenToChildToken;
 
@@ -65,14 +60,16 @@ contract ChildERC721Predicate is IChildERC721Predicate, Initializable {
      * @param newGateway Address of gateway contract
      * @param newRootERC721Predicate Address of root ERC721 predicate to communicate with
      * @param newDestinationTokenTemplate Address of destination token implementation to deploy clones of
+     * @param newDestinationChainId Chain ID of destination chain
      * @dev Can only be called once. `newNativeTokenRootAddress` should be set to zero where root token does not exist.
      */
     function initialize(
         address newGateway,
         address newRootERC721Predicate,
-        address newDestinationTokenTemplate
+        address newDestinationTokenTemplate,
+        uint256 newDestinationChainId
     ) public virtual initializer {
-        _initialize(newGateway, newRootERC721Predicate, newDestinationTokenTemplate);
+        _initialize(newGateway, newRootERC721Predicate, newDestinationTokenTemplate, newDestinationChainId);
     }
 
     /**
@@ -144,20 +141,20 @@ contract ChildERC721Predicate is IChildERC721Predicate, Initializable {
      * @param newGateway Address of gateway contract
      * @param newRootERC721Predicate Address of root ERC721 predicate to communicate with
      * @param newDestinationTokenTemplate Address of destination token implementation to deploy clones of
+     * @param newDestinationChainId Chain ID of destination chain
      * @dev Can be called multiple times.
      */
     function _initialize(
         address newGateway,
         address newRootERC721Predicate,
-        address newDestinationTokenTemplate
+        address newDestinationTokenTemplate,
+        uint256 newDestinationChainId
     ) internal {
+        super._initialize(newGateway, newDestinationChainId);
         require(
-            newGateway != address(0) &&
-                newRootERC721Predicate != address(0) &&
-                newDestinationTokenTemplate != address(0),
+            newRootERC721Predicate != address(0) && newDestinationTokenTemplate != address(0),
             "ChildERC721Predicate: BAD_INITIALIZATION"
         );
-        gateway = IGateway(newGateway);
         rootERC721Predicate = newRootERC721Predicate;
         destinationTokenTemplate = newDestinationTokenTemplate;
     }
@@ -184,7 +181,11 @@ contract ChildERC721Predicate is IChildERC721Predicate, Initializable {
         assert(childToken.predicate() == address(this));
 
         require(childToken.burn(msg.sender, tokenId), "ChildERC721Predicate: BURN_FAILED");
-        gateway.sendBridgeMsg(rootERC721Predicate, abi.encode(WITHDRAW_SIG, rootToken, msg.sender, receiver, tokenId));
+        gateway.sendBridgeMsg(
+            rootERC721Predicate,
+            abi.encode(WITHDRAW_SIG, rootToken, msg.sender, receiver, tokenId),
+            destinationChainId
+        );
 
         // slither-disable-next-line reentrancy-events
         emit ERC721Withdraw(rootToken, address(childToken), msg.sender, receiver, tokenId);
@@ -207,7 +208,8 @@ contract ChildERC721Predicate is IChildERC721Predicate, Initializable {
         require(childToken.burnBatch(msg.sender, tokenIds), "ChildERC721Predicate: BURN_FAILED");
         gateway.sendBridgeMsg(
             rootERC721Predicate,
-            abi.encode(WITHDRAW_BATCH_SIG, rootToken, msg.sender, receivers, tokenIds)
+            abi.encode(WITHDRAW_BATCH_SIG, rootToken, msg.sender, receivers, tokenIds),
+            destinationChainId
         );
 
         // slither-disable-next-line reentrancy-events

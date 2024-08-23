@@ -15,11 +15,12 @@ contract RootMintableERC1155PredicateAccessList is AccessList, RootERC1155Predic
         address newGateway,
         address newChildERC1155Predicate,
         address newTokenTemplate,
+        uint256 newDestinationChainId,
         bool newUseAllowList,
         bool newUseBlockList,
         address newOwner
     ) public virtual onlySystemCall initializer {
-        _initialize(newGateway, newChildERC1155Predicate, newTokenTemplate);
+        _initialize(newGateway, newChildERC1155Predicate, newTokenTemplate, newDestinationChainId);
         _initializeAccessList(newUseAllowList, newUseBlockList);
         _transferOwnership(newOwner);
     }

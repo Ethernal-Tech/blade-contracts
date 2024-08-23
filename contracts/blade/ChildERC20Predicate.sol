@@ -9,6 +9,7 @@ import "../interfaces/blade/IChildERC20Predicate.sol";
 import "../interfaces/blade/IChildERC20.sol";
 import "../interfaces/IGateway.sol";
 import "./System.sol";
+import "../lib/Predicate.sol";
 
 /**
     @title ChildERC20Predicate
@@ -16,15 +17,11 @@ import "./System.sol";
     @notice Enables ERC20 token deposits and withdrawals across an arbitrary root chain and child chain
  */
 // solhint-disable reason-string
-contract ChildERC20Predicate is IChildERC20Predicate, Initializable, System {
+contract ChildERC20Predicate is IChildERC20Predicate, Predicate, Initializable, System {
     using SafeERC20 for IERC20;
 
-    IGateway public gateway;
     address public rootERC20Predicate;
     address public destinationTokenTemplate;
-    bytes32 public constant DEPOSIT_SIG = keccak256("DEPOSIT");
-    bytes32 public constant WITHDRAW_SIG = keccak256("WITHDRAW");
-    bytes32 public constant MAP_TOKEN_SIG = keccak256("MAP_TOKEN");
 
     mapping(address => address) public rootTokenToChildToken;
 
@@ -56,9 +53,16 @@ contract ChildERC20Predicate is IChildERC20Predicate, Initializable, System {
         address newGateway,
         address newRootERC20Predicate,
         address newDestinationTokenTemplate,
-        address newNativeTokenRootAddress
+        address newNativeTokenRootAddress,
+        uint256 newDestinationChainId
     ) public virtual initializer {
-        _initialize(newGateway, newRootERC20Predicate, newDestinationTokenTemplate, newNativeTokenRootAddress);
+        _initialize(
+            newGateway,
+            newRootERC20Predicate,
+            newDestinationTokenTemplate,
+            newNativeTokenRootAddress,
+            newDestinationChainId
+        );
     }
 
     /**
@@ -111,21 +115,21 @@ contract ChildERC20Predicate is IChildERC20Predicate, Initializable, System {
      * @param newRootERC20Predicate Address of root ERC20 predicate to communicate with
      * @param newDestinationTokenTemplate Address of destination token implementation to deploy clones of
      * @param newNativeTokenRootAddress Address of native token on root chain
+     * @param newDestinationChainId Chain ID of destination chain
      * @dev Can be called multiple times.
      */
     function _initialize(
         address newGateway,
         address newRootERC20Predicate,
         address newDestinationTokenTemplate,
-        address newNativeTokenRootAddress
+        address newNativeTokenRootAddress,
+        uint256 newDestinationChainId
     ) internal {
+        super._initialize(newGateway, newDestinationChainId);
         require(
-            newGateway != address(0) &&
-                newRootERC20Predicate != address(0) &&
-                newDestinationTokenTemplate != address(0),
+            newRootERC20Predicate != address(0) && newDestinationTokenTemplate != address(0),
             "ChildERC20Predicate: BAD_INITIALIZATION"
         );
-        gateway = IGateway(newGateway);
         rootERC20Predicate = newRootERC20Predicate;
         destinationTokenTemplate = newDestinationTokenTemplate;
         if (newNativeTokenRootAddress != address(0)) {
@@ -157,7 +161,11 @@ contract ChildERC20Predicate is IChildERC20Predicate, Initializable, System {
         assert(childToken.predicate() == address(this));
 
         require(childToken.burn(msg.sender, amount), "ChildERC20Predicate: BURN_FAILED");
-        gateway.sendBridgeMsg(rootERC20Predicate, abi.encode(WITHDRAW_SIG, rootToken, msg.sender, receiver, amount));
+        gateway.sendBridgeMsg(
+            rootERC20Predicate,
+            abi.encode(WITHDRAW_SIG, rootToken, msg.sender, receiver, amount),
+            destinationChainId
+        );
 
         // slither-disable-next-line reentrancy-events
         emit ERC20Withdraw(rootToken, address(childToken), msg.sender, receiver, amount);

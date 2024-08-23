@@ -259,6 +259,23 @@ function acceptOwnership() external nonpayable
 *The new owner accepts the ownership transfer.*
 
 
+### destinationChainId
+
+```solidity
+function destinationChainId() external view returns (uint256)
+```
+
+
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | undefined |
+
 ### destinationTokenTemplate
 
 ```solidity
@@ -296,25 +313,7 @@ function gateway() external view returns (contract IGateway)
 ### initialize
 
 ```solidity
-function initialize(address newGateway, address newRootERC1155Predicate, address newDestinationTokenTemplate) external nonpayable
-```
-
-Initialization function for ChildERC1155Predicate
-
-*Can only be called once.*
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| newGateway | address | Address of gateway contract |
-| newRootERC1155Predicate | address | Address of root ERC1155 predicate to communicate with |
-| newDestinationTokenTemplate | address | Address of destination token implementation to deploy clones of |
-
-### initialize
-
-```solidity
-function initialize(address newGateway, address newRootERC1155Predicate, address newDestinationTokenTemplate, bool newUseAllowList, bool newUseBlockList, address newOwner) external nonpayable
+function initialize(address newGateway, address newRootERC1155Predicate, address newDestinationTokenTemplate, uint256 newDestinationChainId, bool newUseAllowList, bool newUseBlockList, address newOwner) external nonpayable
 ```
 
 
@@ -328,9 +327,29 @@ function initialize(address newGateway, address newRootERC1155Predicate, address
 | newGateway | address | undefined |
 | newRootERC1155Predicate | address | undefined |
 | newDestinationTokenTemplate | address | undefined |
+| newDestinationChainId | uint256 | undefined |
 | newUseAllowList | bool | undefined |
 | newUseBlockList | bool | undefined |
 | newOwner | address | undefined |
+
+### initialize
+
+```solidity
+function initialize(address newGateway, address newRootERC1155Predicate, address newDestinationTokenTemplate, uint256 newDestinationChainId) external nonpayable
+```
+
+Initialization function for ChildERC1155Predicate
+
+*Can only be called once.*
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| newGateway | address | Address of gateway contract |
+| newRootERC1155Predicate | address | Address of root ERC1155 predicate to communicate with |
+| newDestinationTokenTemplate | address | Address of destination token implementation to deploy clones of |
+| newDestinationChainId | uint256 | Chain ID of destination chain |
 
 ### onStateReceive
 

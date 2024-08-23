@@ -83,28 +83,33 @@ contract GatewayStateSyncTest is GatewayInitialized {
 
     function testCannotSyncState_InvalidReceiver() public {
         vm.expectRevert("INVALID_RECEIVER");
-        gateway.sendBridgeMsg(address(0), "");
+        gateway.sendBridgeMsg(address(0), "", 1);
     }
 
     function testCannotSyncState_ExceedsMaxLength() public {
         vm.expectRevert("EXCEEDS_MAX_LENGTH");
-        gateway.sendBridgeMsg(receiver, moreThanMaxData);
+        gateway.sendBridgeMsg(receiver, moreThanMaxData, 1);
+    }
+
+     function testCannotSyncState_InvalidDestinationChainId() public {
+        vm.expectRevert("INVALID_DESTINATION_CHAIN_ID");
+        gateway.sendBridgeMsg(receiver, maxData, 0);
     }
 
     function testSyncState_EmitsEvent() public {
         vm.expectEmit(true, true, true, true);
-        emit BridgeMessageEvent(1, address(this), receiver, maxData);
-        gateway.sendBridgeMsg(receiver, maxData);
+        emit BridgeMessageEvent(1, address(this), receiver, maxData, 3, 1);
+        gateway.sendBridgeMsg(receiver, maxData, 1);
     }
 
     function testSyncState_IncreasesCounter() public {
-        gateway.sendBridgeMsg(receiver, maxData);
-        gateway.sendBridgeMsg(receiver, maxData);
+        gateway.sendBridgeMsg(receiver, maxData, 1);
+        gateway.sendBridgeMsg(receiver, maxData, 1);
         vm.expectRevert("EXCEEDS_MAX_LENGTH");
-        gateway.sendBridgeMsg(receiver, moreThanMaxData);
-        gateway.sendBridgeMsg(receiver, maxData);
+        gateway.sendBridgeMsg(receiver, moreThanMaxData, 1);
+        gateway.sendBridgeMsg(receiver, maxData, 1);
         vm.expectRevert("EXCEEDS_MAX_LENGTH");
-        gateway.sendBridgeMsg(receiver, moreThanMaxData);
+        gateway.sendBridgeMsg(receiver, moreThanMaxData, 1);
 
         assertEq(gateway.counter(), 3);
     }

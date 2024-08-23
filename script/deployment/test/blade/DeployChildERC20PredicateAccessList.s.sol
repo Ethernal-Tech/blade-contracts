@@ -14,6 +14,7 @@ abstract contract ChildERC20PredicateAccessListDeployer is Script {
         address newRootERC20Predicate,
         address newDestinationTokenTemplate,
         address newNativeTokenRootAddress,
+        uint256 newDestinationChainId,
         bool newUseAllowList,
         bool newUseBlockList,
         address newOwner
@@ -25,6 +26,7 @@ abstract contract ChildERC20PredicateAccessListDeployer is Script {
                 newRootERC20Predicate,
                 newDestinationTokenTemplate,
                 newNativeTokenRootAddress,
+                newDestinationChainId,
                 newUseAllowList,
                 newUseBlockList,
                 newOwner
@@ -55,6 +57,7 @@ contract DeployChildERC20PredicateAccessList is ChildERC20PredicateAccessListDep
         address newRootERC20Predicate,
         address newDestinationTokenTemplate,
         address newNativeTokenRootAddress,
+        uint256 newDestinationChainId,
         bool newUseAllowList,
         bool newUseBlockList,
         address newOwner
@@ -66,6 +69,7 @@ contract DeployChildERC20PredicateAccessList is ChildERC20PredicateAccessListDep
                 newRootERC20Predicate,
                 newDestinationTokenTemplate,
                 newNativeTokenRootAddress,
+                newDestinationChainId,
                 newUseAllowList,
                 newUseBlockList,
                 newOwner

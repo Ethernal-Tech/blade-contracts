@@ -6,17 +6,14 @@ import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/proxy/Clones.sol";
 import "../interfaces/bridge/IRootERC20Predicate.sol";
 import "../interfaces/IGateway.sol";
+import "../lib/Predicate.sol";
 
 // solhint-disable reason-string
-contract RootERC20Predicate is Initializable, IRootERC20Predicate {
+contract RootERC20Predicate is Predicate, Initializable, IRootERC20Predicate {
     using SafeERC20 for IERC20Metadata;
 
-    IGateway public gateway;
     address public childERC20Predicate;
     address public destinationTokenTemplate;
-    bytes32 public constant DEPOSIT_SIG = keccak256("DEPOSIT");
-    bytes32 public constant WITHDRAW_SIG = keccak256("WITHDRAW");
-    bytes32 public constant MAP_TOKEN_SIG = keccak256("MAP_TOKEN");
     mapping(address => address) public sourceTokenToDestinationToken;
     address public nativeTokenRoot;
 
@@ -26,15 +23,23 @@ contract RootERC20Predicate is Initializable, IRootERC20Predicate {
      * @param newChildERC20Predicate Address of child ERC20 predicate to communicate with
      * @param newDestinationTokenTemplate Address of destination token implementation to deploy clones of
      * @param newNativeTokenRoot Address of the native token
+     * @param newDestinationChainId Chain ID of destination chain
      * @dev Can only be called once.
      */
     function initialize(
         address newGateway,
         address newChildERC20Predicate,
         address newDestinationTokenTemplate,
-        address newNativeTokenRoot
+        address newNativeTokenRoot,
+        uint256 newDestinationChainId
     ) external initializer {
-        _initialize(newGateway, newChildERC20Predicate, newDestinationTokenTemplate, newNativeTokenRoot);
+        _initialize(
+            newGateway,
+            newChildERC20Predicate,
+            newDestinationTokenTemplate,
+            newNativeTokenRoot,
+            newDestinationChainId
+        );
     }
 
     // solhint-disable no-empty-blocks
@@ -98,7 +103,8 @@ contract RootERC20Predicate is Initializable, IRootERC20Predicate {
 
         gateway.sendBridgeMsg(
             childPredicate,
-            abi.encode(MAP_TOKEN_SIG, rootToken, rootToken.name(), rootToken.symbol(), rootToken.decimals())
+            abi.encode(MAP_TOKEN_SIG, rootToken, rootToken.name(), rootToken.symbol(), rootToken.decimals()),
+            destinationChainId
         );
         // slither-disable-next-line reentrancy-events
         emit TokenMapped(address(rootToken), childToken);
@@ -118,7 +124,11 @@ contract RootERC20Predicate is Initializable, IRootERC20Predicate {
 
         rootToken.safeTransferFrom(msg.sender, address(this), amount);
 
-        gateway.sendBridgeMsg(childERC20Predicate, abi.encode(DEPOSIT_SIG, rootToken, msg.sender, receiver, amount));
+        gateway.sendBridgeMsg(
+            childERC20Predicate,
+            abi.encode(DEPOSIT_SIG, rootToken, msg.sender, receiver, amount),
+            destinationChainId
+        );
         // slither-disable-next-line reentrancy-events
         emit ERC20Deposit(address(rootToken), childToken, msg.sender, receiver, amount);
 
@@ -144,21 +154,21 @@ contract RootERC20Predicate is Initializable, IRootERC20Predicate {
      * @param newChildERC20Predicate Address of destination ERC20 predicate to communicate with
      * @param newDestinationTokenTemplate Address of destination token implementation to deploy clones of
      * @param newNativeTokenRoot Address of rootchain token that represents the native token
+     * @param newDestinationChainId Chain ID of destination chain
      * @dev Can be called multiple times.
      */
     function _initialize(
         address newGateway,
         address newChildERC20Predicate,
         address newDestinationTokenTemplate,
-        address newNativeTokenRoot
+        address newNativeTokenRoot,
+        uint256 newDestinationChainId
     ) internal {
+        super._initialize(newGateway, newDestinationChainId);
         require(
-            newGateway != address(0) &&
-                newChildERC20Predicate != address(0) &&
-                newDestinationTokenTemplate != address(0),
+            newChildERC20Predicate != address(0) && newDestinationTokenTemplate != address(0),
             "RootERC20Predicate: BAD_INITIALIZATION"
         );
-        gateway = IGateway(newGateway);
         childERC20Predicate = newChildERC20Predicate;
         destinationTokenTemplate = newDestinationTokenTemplate;
         if (newNativeTokenRoot != address(0)) {

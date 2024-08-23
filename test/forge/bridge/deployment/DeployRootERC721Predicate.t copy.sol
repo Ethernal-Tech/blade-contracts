@@ -22,6 +22,7 @@ contract DeployRootERC1155PredicateTest is Test {
     address newGateway;
     address newChildERC1155Predicate;
     address newChildTokenTemplate;
+    uint256 destinationChainId;
 
     function setUp() public {
         deployer = new DeployRootERC1155Predicate();
@@ -30,12 +31,14 @@ contract DeployRootERC1155PredicateTest is Test {
         newGateway = makeAddr("newGateway");
         newChildERC1155Predicate = makeAddr("newChildERC1155Predicate");
         newChildTokenTemplate = makeAddr("newChildTokenTemplate");
+        destinationChainId = 1;
 
         (logicAddr, proxyAddr) = deployer.run(
             proxyAdmin,
             newGateway,
             newChildERC1155Predicate,
-            newChildTokenTemplate
+            newChildTokenTemplate,
+            destinationChainId
         );
         _recordProxy(proxyAddr);
     }
@@ -54,19 +57,20 @@ contract DeployRootERC1155PredicateTest is Test {
         proxyAsRootERC1155Predicate.initialize(
             newGateway,
             newChildERC1155Predicate,
-            newChildTokenTemplate
+            newChildTokenTemplate,
+            destinationChainId
         );
 
         assertEq(
             vm.load(address(proxyAsRootERC1155Predicate), bytes32(uint(0))),
-            bytes32(bytes.concat(hex"00000000000000000000", abi.encodePacked(newGateway), hex"0001"))
-        );
-        assertEq(
-            vm.load(address(proxyAsRootERC1155Predicate), bytes32(uint(1))),
-            bytes32(bytes.concat(hex"000000000000000000000000", abi.encodePacked(newChildERC1155Predicate)))
+            bytes32(bytes.concat(hex"000000000000000000000000", abi.encodePacked(newGateway)))
         );
         assertEq(
             vm.load(address(proxyAsRootERC1155Predicate), bytes32(uint(2))),
+            bytes32(bytes.concat(hex"00000000000000000000", abi.encodePacked(newChildERC1155Predicate), hex"0001"))
+        );
+        assertEq(
+            vm.load(address(proxyAsRootERC1155Predicate), bytes32(uint(3))),
             bytes32(bytes.concat(hex"000000000000000000000000", abi.encodePacked(newChildTokenTemplate)))
         );
     }

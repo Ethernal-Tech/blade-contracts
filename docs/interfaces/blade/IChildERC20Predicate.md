@@ -13,7 +13,7 @@
 ### initialize
 
 ```solidity
-function initialize(address newGateway, address newRootERC20Predicate, address newDestinationTokenTemplate, address newNativeTokenRootAddress) external nonpayable
+function initialize(address newGateway, address newRootERC20Predicate, address newDestinationTokenTemplate, address newNativeTokenRootAddress, uint256 newDestinationChainId) external nonpayable
 ```
 
 
@@ -28,6 +28,7 @@ function initialize(address newGateway, address newRootERC20Predicate, address n
 | newRootERC20Predicate | address | undefined |
 | newDestinationTokenTemplate | address | undefined |
 | newNativeTokenRootAddress | address | undefined |
+| newDestinationChainId | uint256 | undefined |
 
 ### onStateReceive
 

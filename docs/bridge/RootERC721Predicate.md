@@ -165,6 +165,23 @@ Function to deposit tokens from the depositor to another address on the child ch
 | receiver | address | undefined |
 | tokenId | uint256 | Index of the NFT to deposit |
 
+### destinationChainId
+
+```solidity
+function destinationChainId() external view returns (uint256)
+```
+
+
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | undefined |
+
 ### destinationTokenTemplate
 
 ```solidity
@@ -202,7 +219,7 @@ function gateway() external view returns (contract IGateway)
 ### initialize
 
 ```solidity
-function initialize(address newGateway, address newChildERC721Predicate, address newDestinationTokenTemplate) external nonpayable
+function initialize(address newGateway, address newChildERC721Predicate, address newDestinationTokenTemplate, uint256 newDestinationChainId) external nonpayable
 ```
 
 Initialization function for RootERC721Predicate
@@ -216,6 +233,7 @@ Initialization function for RootERC721Predicate
 | newGateway | address | Address of gateway contract |
 | newChildERC721Predicate | address | Address of child ERC721 predicate to communicate with |
 | newDestinationTokenTemplate | address | Address of destination token implementation to deploy clones of |
+| newDestinationChainId | uint256 | Chain ID of destination chain |
 
 ### mapToken
 

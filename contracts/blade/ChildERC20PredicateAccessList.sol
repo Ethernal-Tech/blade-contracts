@@ -16,11 +16,18 @@ contract ChildERC20PredicateAccessList is AccessList, ChildERC20Predicate {
         address newRootERC20Predicate,
         address newDestinationTokenTemplate,
         address newNativeTokenRootAddress,
+        uint256 newDestinationChainId,
         bool newUseAllowList,
         bool newUseBlockList,
         address newOwner
     ) public virtual initializer {
-        _initialize(newGateway, newRootERC20Predicate, newDestinationTokenTemplate, newNativeTokenRootAddress);
+        _initialize(
+            newGateway,
+            newRootERC20Predicate,
+            newDestinationTokenTemplate,
+            newNativeTokenRootAddress,
+            newDestinationChainId
+        );
         _initializeAccessList(newUseAllowList, newUseBlockList);
         _transferOwnership(newOwner);
     }

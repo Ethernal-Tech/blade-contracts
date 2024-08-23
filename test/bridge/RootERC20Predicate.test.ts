@@ -52,9 +52,10 @@ describe("RootERC20Predicate", () => {
         "0x0000000000000000000000000000000000000000",
         "0x0000000000000000000000000000000000000000",
         "0x0000000000000000000000000000000000000000",
-        "0x0000000000000000000000000000000000000000"
+        "0x0000000000000000000000000000000000000000",
+        "1"
       )
-    ).to.be.revertedWith("RootERC20Predicate: BAD_INITIALIZATION");
+    ).to.be.revertedWith("Predicate: BAD_INITIALIZATION");
   });
 
   it("initialize and validate initialization", async () => {
@@ -63,7 +64,8 @@ describe("RootERC20Predicate", () => {
       gateway.address,
       childERC20Predicate,
       childTokenTemplate.address,
-      nativeTokenRootAddress
+      nativeTokenRootAddress,
+      1
     );
 
     expect(await rootERC20Predicate.gateway()).to.equal(gateway.address);
@@ -80,7 +82,8 @@ describe("RootERC20Predicate", () => {
         "0x0000000000000000000000000000000000000000",
         "0x0000000000000000000000000000000000000000",
         "0x0000000000000000000000000000000000000000",
-        "0x0000000000000000000000000000000000000000"
+        "0x0000000000000000000000000000000000000000",
+        "1"
       )
     ).to.be.revertedWith("Initializable: contract is already initialized");
   });

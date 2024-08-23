@@ -67,13 +67,14 @@ describe("ChildERC721Predicate", () => {
       systemChildERC721Predicate.initialize(
         "0x0000000000000000000000000000000000000000",
         "0x0000000000000000000000000000000000000000",
-        "0x0000000000000000000000000000000000000000"
+        "0x0000000000000000000000000000000000000000",
+        "1"
       )
-    ).to.be.revertedWith("ChildERC721Predicate: BAD_INITIALIZATION");
+    ).to.be.revertedWith("Predicate: BAD_INITIALIZATION");
   });
 
   it("initialize and validate initialization", async () => {
-    await systemChildERC721Predicate.initialize(gateway.address, rootERC721Predicate, childERC721.address);
+    await systemChildERC721Predicate.initialize(gateway.address, rootERC721Predicate, childERC721.address, 1);
     expect(await childERC721Predicate.gateway()).to.equal(gateway.address);
     expect(await childERC721Predicate.rootERC721Predicate()).to.equal(rootERC721Predicate);
     expect(await childERC721Predicate.destinationTokenTemplate()).to.equal(childERC721.address);
@@ -81,7 +82,7 @@ describe("ChildERC721Predicate", () => {
 
   it("fail reinitialization", async () => {
     await expect(
-      systemChildERC721Predicate.initialize(gateway.address, rootERC721Predicate, childERC721.address)
+      systemChildERC721Predicate.initialize(gateway.address, rootERC721Predicate, childERC721.address, 1)
     ).to.be.revertedWith("Initializable: contract is already initialized");
   });
 

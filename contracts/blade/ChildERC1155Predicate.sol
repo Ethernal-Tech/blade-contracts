@@ -6,6 +6,7 @@ import "@openzeppelin/contracts/proxy/Clones.sol";
 import "../interfaces/blade/IChildERC1155Predicate.sol";
 import "../interfaces/blade/IChildERC1155.sol";
 import "../interfaces/IGateway.sol";
+import "../lib/Predicate.sol";
 
 /**
     @title ChildERC1155Predicate
@@ -13,15 +14,9 @@ import "../interfaces/IGateway.sol";
     @notice Enables ERC1155 token deposits and withdrawals across an arbitrary root chain and child chain
  */
 // solhint-disable reason-string
-contract ChildERC1155Predicate is IChildERC1155Predicate, Initializable {
-    IGateway public gateway;
+contract ChildERC1155Predicate is IChildERC1155Predicate, Predicate, Initializable {
     address public rootERC1155Predicate;
     address public destinationTokenTemplate;
-    bytes32 public constant DEPOSIT_SIG = keccak256("DEPOSIT");
-    bytes32 public constant DEPOSIT_BATCH_SIG = keccak256("DEPOSIT_BATCH");
-    bytes32 public constant WITHDRAW_SIG = keccak256("WITHDRAW");
-    bytes32 public constant WITHDRAW_BATCH_SIG = keccak256("WITHDRAW_BATCH");
-    bytes32 public constant MAP_TOKEN_SIG = keccak256("MAP_TOKEN");
 
     mapping(address => address) public rootTokenToChildToken;
 
@@ -69,14 +64,16 @@ contract ChildERC1155Predicate is IChildERC1155Predicate, Initializable {
      * @param newGateway Address of gateway contract
      * @param newRootERC1155Predicate Address of root ERC1155 predicate to communicate with
      * @param newDestinationTokenTemplate Address of destination token implementation to deploy clones of
+     * @param newDestinationChainId Chain ID of destination chain
      * @dev Can only be called once.
      */
     function initialize(
         address newGateway,
         address newRootERC1155Predicate,
-        address newDestinationTokenTemplate
+        address newDestinationTokenTemplate,
+        uint256 newDestinationChainId
     ) public virtual initializer {
-        _initialize(newGateway, newRootERC1155Predicate, newDestinationTokenTemplate);
+        _initialize(newGateway, newRootERC1155Predicate, newDestinationTokenTemplate, newDestinationChainId);
     }
 
     /**
@@ -152,20 +149,20 @@ contract ChildERC1155Predicate is IChildERC1155Predicate, Initializable {
      * @param newGateway Address of gateway contract
      * @param newRootERC1155Predicate Address of root ERC1155 predicate to communicate with
      * @param newDestinationTokenTemplate Address of destination token implementation to deploy clones of
+     * @param newDestinationChainId Chain ID of destination chain
      * @dev Can be called multiple times.
      */
     function _initialize(
         address newGateway,
         address newRootERC1155Predicate,
-        address newDestinationTokenTemplate
+        address newDestinationTokenTemplate,
+        uint256 newDestinationChainId
     ) internal {
+        super._initialize(newGateway, newDestinationChainId);
         require(
-            newGateway != address(0) &&
-                newRootERC1155Predicate != address(0) &&
-                newDestinationTokenTemplate != address(0),
+            newRootERC1155Predicate != address(0) && newDestinationTokenTemplate != address(0),
             "ChildERC1155Predicate: BAD_INITIALIZATION"
         );
-        gateway = IGateway(newGateway);
         rootERC1155Predicate = newRootERC1155Predicate;
         destinationTokenTemplate = newDestinationTokenTemplate;
     }
@@ -199,7 +196,8 @@ contract ChildERC1155Predicate is IChildERC1155Predicate, Initializable {
         require(childToken.burn(msg.sender, tokenId, amount), "ChildERC1155Predicate: BURN_FAILED");
         gateway.sendBridgeMsg(
             rootERC1155Predicate,
-            abi.encode(WITHDRAW_SIG, rootToken, msg.sender, receiver, tokenId, amount)
+            abi.encode(WITHDRAW_SIG, rootToken, msg.sender, receiver, tokenId, amount),
+            destinationChainId
         );
         // slither-disable-next-line reentrancy-events
         emit ERC1155Withdraw(rootToken, address(childToken), msg.sender, receiver, tokenId, amount);
@@ -228,7 +226,8 @@ contract ChildERC1155Predicate is IChildERC1155Predicate, Initializable {
 
         gateway.sendBridgeMsg(
             rootERC1155Predicate,
-            abi.encode(WITHDRAW_BATCH_SIG, rootToken, msg.sender, receivers, tokenIds, amounts)
+            abi.encode(WITHDRAW_BATCH_SIG, rootToken, msg.sender, receivers, tokenIds, amounts),
+            destinationChainId
         );
         // slither-disable-next-line reentrancy-events
         emit ERC1155WithdrawBatch(rootToken, address(childToken), msg.sender, receivers, tokenIds, amounts);

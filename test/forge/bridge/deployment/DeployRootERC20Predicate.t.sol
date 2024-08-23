@@ -23,6 +23,7 @@ contract DeployRootERC20PredicateTest is Test {
     address newChildERC20Predicate;
     address newChildTokenTemplate;
     address nativeTokenRootAddress;
+    uint256 destinationChainId;
 
     function setUp() public {
         deployer = new DeployRootERC20Predicate();
@@ -32,13 +33,15 @@ contract DeployRootERC20PredicateTest is Test {
         newChildERC20Predicate = makeAddr("newChildERC20Predicate");
         newChildTokenTemplate = makeAddr("newChildTokenTemplate");
         nativeTokenRootAddress = makeAddr("nativeTokenRootAddress");
+        destinationChainId = 1;
 
         (logicAddr, proxyAddr) = deployer.run(
             proxyAdmin,
             newGateway,
             newChildERC20Predicate,
             newChildTokenTemplate,
-            nativeTokenRootAddress
+            nativeTokenRootAddress,
+            destinationChainId
         );
         _recordProxy(proxyAddr);
     }
@@ -58,19 +61,20 @@ contract DeployRootERC20PredicateTest is Test {
             newGateway,
             newChildERC20Predicate,
             newChildTokenTemplate,
-            nativeTokenRootAddress
+            nativeTokenRootAddress,
+            destinationChainId
         );
 
         assertEq(
             vm.load(address(proxyAsRootERC20Predicate), bytes32(uint(0))),
-            bytes32(bytes.concat(hex"00000000000000000000", abi.encodePacked(newGateway), hex"0001"))
-        );
-        assertEq(
-            vm.load(address(proxyAsRootERC20Predicate), bytes32(uint(1))),
-            bytes32(bytes.concat(hex"000000000000000000000000", abi.encodePacked(newChildERC20Predicate)))
+            bytes32(bytes.concat(hex"000000000000000000000000", abi.encodePacked(newGateway)))
         );
         assertEq(
             vm.load(address(proxyAsRootERC20Predicate), bytes32(uint(2))),
+            bytes32(bytes.concat(hex"00000000000000000000", abi.encodePacked(newChildERC20Predicate), hex"0001"))
+        );
+        assertEq(
+            vm.load(address(proxyAsRootERC20Predicate), bytes32(uint(3))),
             bytes32(bytes.concat(hex"000000000000000000000000", abi.encodePacked(newChildTokenTemplate)))
         );
         assertEq(

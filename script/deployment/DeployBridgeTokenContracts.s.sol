@@ -33,21 +33,24 @@ contract DeployBridgeTokenContracts is
             config.readAddress('["common"].newGateway'),
             config.readAddress('["RootERC20Predicate"].newChildERC20Predicate'),
             config.readAddress('["RootERC20Predicate"].newDestinationTokenTemplate'),
-            config.readAddress('["RootERC20Predicate"].nativeTokenRootAddress')
+            config.readAddress('["RootERC20Predicate"].nativeTokenRootAddress'),
+            config.readUint('["RootERC20Predicate"].newDestinationChainId')
         );
 
         (rootERC721PredicateLogic, rootERC721PredicateProxy) = deployRootERC721Predicate(
             config.readAddress('["common"].proxyAdmin'),
             config.readAddress('["common"].newGateway'),
             config.readAddress('["RootERC721Predicate"].newChildERC721Predicate'),
-            config.readAddress('["RootERC721Predicate"].newDestinationTokenTemplate')
+            config.readAddress('["RootERC721Predicate"].newDestinationTokenTemplate'),
+            config.readUint('["RootERC20Predicate"].newDestinationChainId')
         );
 
         (rootERC1155PredicateLogic, rootERC1155PredicateProxy) = deployRootERC1155Predicate(
             config.readAddress('["common"].proxyAdmin'),
             config.readAddress('["common"].newGateway'),
             config.readAddress('["RootERC1155Predicate"].newChildERC1155Predicate'),
-            config.readAddress('["RootERC1155Predicate"].newDestinationTokenTemplate')
+            config.readAddress('["RootERC1155Predicate"].newDestinationTokenTemplate'),
+            config.readUint('["RootERC20Predicate"].newDestinationChainId')
         );
     }
 }

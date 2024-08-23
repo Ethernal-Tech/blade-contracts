@@ -13,6 +13,7 @@ abstract contract ChildERC721PredicateAccessListDeployer is Script {
         address newGateway,
         address newRootERC721Predicate,
         address newDestinationTokenTemplate,
+        uint256 newDestinationChainId,
         bool newUseAllowList,
         bool newUseBlockList,
         address newOwner
@@ -23,6 +24,7 @@ abstract contract ChildERC721PredicateAccessListDeployer is Script {
                 newGateway,
                 newRootERC721Predicate,
                 newDestinationTokenTemplate,
+                newDestinationChainId,
                 newUseAllowList,
                 newUseBlockList,
                 newOwner
@@ -52,6 +54,7 @@ contract DeployChildERC721PredicateAccessList is ChildERC721PredicateAccessListD
         address newGateway,
         address newRootERC721Predicate,
         address newDestinationTokenTemplate,
+        uint256 newDestinationChainId,
         bool newUseAllowList,
         bool newUseBlockList,
         address newOwner
@@ -62,6 +65,7 @@ contract DeployChildERC721PredicateAccessList is ChildERC721PredicateAccessListD
                 newGateway,
                 newRootERC721Predicate,
                 newDestinationTokenTemplate,
+                newDestinationChainId,
                 newUseAllowList,
                 newUseBlockList,
                 newOwner
