@@ -348,6 +348,28 @@ function initialize(contract IBLS newBls, contract IBN256G2 newBn256G2, Validato
 | newBn256G2 | contract IBN256G2 | undefined |
 | validators | Validator[] | undefined |
 
+### lastCommitted
+
+```solidity
+function lastCommitted(uint256) external view returns (uint256)
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | undefined |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | undefined |
+
 ### totalVotingPower
 
 ```solidity
