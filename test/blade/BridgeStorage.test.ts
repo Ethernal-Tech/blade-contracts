@@ -399,7 +399,7 @@ describe("BridgeStorage", () => {
 
     msgs = [
       {
-        id: 1,
+        id: 3,
         sourceChainId: 1,
         destinationChainId: destinationChainId,
         sender: ethers.constants.AddressZero,
@@ -407,7 +407,7 @@ describe("BridgeStorage", () => {
         payload: ethers.constants.HashZero,
       },
       {
-        id: 2,
+        id: 4,
         sourceChainId: sourceChainId,
         destinationChainId: destinationChainId,
         sender: ethers.constants.AddressZero,
