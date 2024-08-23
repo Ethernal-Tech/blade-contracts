@@ -63,14 +63,14 @@ contract DeployRootERC721PredicateTest is Test {
 
         assertEq(
             vm.load(address(proxyAsRootERC721Predicate), bytes32(uint(0))),
-            bytes32(bytes.concat(hex"00000000000000000000", abi.encodePacked(newGateway), hex"0001"))
-        );
-        assertEq(
-            vm.load(address(proxyAsRootERC721Predicate), bytes32(uint(1))),
-            bytes32(bytes.concat(hex"000000000000000000000000", abi.encodePacked(newChildERC721Predicate)))
+            bytes32(bytes.concat(hex"000000000000000000000000", abi.encodePacked(newGateway)))
         );
         assertEq(
             vm.load(address(proxyAsRootERC721Predicate), bytes32(uint(2))),
+            bytes32(bytes.concat(hex"00000000000000000000", abi.encodePacked(newChildERC721Predicate), hex"0001"))
+        );
+        assertEq(
+            vm.load(address(proxyAsRootERC721Predicate), bytes32(uint(3))),
             bytes32(bytes.concat(hex"000000000000000000000000", abi.encodePacked(newChildTokenTemplate)))
         );
     }
