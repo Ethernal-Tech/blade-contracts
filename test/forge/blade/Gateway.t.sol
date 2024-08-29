@@ -98,7 +98,7 @@ contract GatewayStateSyncTest is GatewayInitialized {
 
     function testSyncState_EmitsEvent() public {
         vm.expectEmit(true, true, true, true);
-        emit BridgeMessageEvent(1, address(this), receiver, maxData, 3, 1);
+        emit BridgeMsg(1, address(this), receiver, maxData, 3, 1);
         gateway.sendBridgeMsg(receiver, maxData, 1);
     }
 

@@ -403,27 +403,6 @@ function totalVotingPower() external view returns (uint256)
 
 ## Events
 
-### BridgeMessageEvent
-
-```solidity
-event BridgeMessageEvent(uint256 indexed id, address indexed sender, address indexed receiver, bytes data, uint256 sourceChainId, uint256 destinationChainId)
-```
-
-
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| id `indexed` | uint256 | undefined |
-| sender `indexed` | address | undefined |
-| receiver `indexed` | address | undefined |
-| data  | bytes | undefined |
-| sourceChainId  | uint256 | undefined |
-| destinationChainId  | uint256 | undefined |
-
 ### BridgeMessageResult
 
 ```solidity
@@ -441,6 +420,27 @@ event BridgeMessageResult(uint256 indexed counter, bool indexed status, bytes me
 | counter `indexed` | uint256 | undefined |
 | status `indexed` | bool | undefined |
 | message  | bytes | undefined |
+
+### BridgeMsg
+
+```solidity
+event BridgeMsg(uint256 indexed id, address indexed sender, address indexed receiver, bytes data, uint256 sourceChainId, uint256 destinationChainId)
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| id `indexed` | uint256 | undefined |
+| sender `indexed` | address | undefined |
+| receiver `indexed` | address | undefined |
+| data  | bytes | undefined |
+| sourceChainId  | uint256 | undefined |
+| destinationChainId  | uint256 | undefined |
 
 ### Initialized
 

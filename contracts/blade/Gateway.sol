@@ -14,7 +14,7 @@ contract Gateway is ValidatorSetStorage, IGateway {
 
     event BridgeMessageResult(uint256 indexed counter, bool indexed status, bytes message);
 
-    event BridgeMessageEvent(
+    event BridgeMsg(
         uint256 indexed id,
         address indexed sender,
         address indexed receiver,
@@ -42,7 +42,7 @@ contract Gateway is ValidatorSetStorage, IGateway {
         require(destinationChainId != 0, "INVALID_DESTINATION_CHAIN_ID");
 
         // State sync id will start with 1
-        emit BridgeMessageEvent(++counter, msg.sender, receiver, data, block.chainid, destinationChainId);
+        emit BridgeMsg(++counter, msg.sender, receiver, data, block.chainid, destinationChainId);
     }
 
     /**
