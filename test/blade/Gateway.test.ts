@@ -80,7 +80,7 @@ describe("Gateway", () => {
     const receipt = await tx.wait();
     expect(receipt.events?.length).to.equals(1);
 
-    const event = receipt.events?.find((log) => log.event === "BridgeMessageEvent");
+    const event = receipt.events?.find((log) => log.event === "BridgeMsg");
     expect(event?.args?.id).to.equal(1);
     expect(event?.args?.sender).to.equal(sender);
     expect(event?.args?.receiver).to.equal(receiver);
