@@ -36,7 +36,7 @@ contract BridgeStorage is ValidatorSetStorage {
      */
     function _verifyBatch(BridgeMessageBatch calldata batch) private {
         require(batch.messages.length > 0, "EMPTY_BATCH");
-        require(lastCommitted[batch.destinationChainId] + 1 == batch.messages[0].id, "INVALID_LAST_COMMITTED");
+        require(lastCommitted[batch.sourceChainId] + 1 == batch.messages[0].id, "INVALID_LAST_COMMITTED");
 
         for (uint256 i = 0; i < batch.messages.length; ) {
             BridgeMessage memory message = batch.messages[i];
@@ -47,7 +47,7 @@ contract BridgeStorage is ValidatorSetStorage {
             }
         }
 
-        lastCommitted[batch.destinationChainId] = batch.messages[batch.messages.length - 1].id;
+        lastCommitted[batch.sourceChainId] = batch.messages[batch.messages.length - 1].id;
     }
 
     // slither-disable-next-line unused-state,naming-convention
