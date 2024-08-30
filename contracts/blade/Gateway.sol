@@ -15,18 +15,18 @@ contract Gateway is ValidatorSetStorage, IGateway {
     event BridgeMessageResult(
         uint256 indexed counter,
         bool indexed status,
-        bytes message,
         uint256 sourceChainID,
-        uint256 destinationChainID
+        uint256 destinationChainID,
+        bytes message
     );
 
     event BridgeMsg(
         uint256 indexed id,
         address indexed sender,
         address indexed receiver,
-        bytes data,
         uint256 sourceChainId,
-        uint256 destinationChainId
+        uint256 destinationChainId,
+        bytes data
     );
 
     /**
@@ -48,7 +48,7 @@ contract Gateway is ValidatorSetStorage, IGateway {
         require(destinationChainId != 0, "INVALID_DESTINATION_CHAIN_ID");
 
         // State sync id will start with 1
-        emit BridgeMsg(++counter, msg.sender, receiver, data, block.chainid, destinationChainId);
+        emit BridgeMsg(++counter, msg.sender, receiver, block.chainid, destinationChainId, data);
     }
 
     /**
@@ -101,7 +101,7 @@ contract Gateway is ValidatorSetStorage, IGateway {
         require(!processedEvents[message.id], "DestinationGateway: BRIDGE_MESSAGE_IS_ALREADY_PROCESSED");
         // Skip transaction if client has added flag, or receiver has no code
         if (message.receiver.code.length == 0) {
-            emit BridgeMessageResult(message.id, false, "", message.sourceChainId, message.destinationChainId);
+            emit BridgeMessageResult(message.id, false, message.sourceChainId, message.destinationChainId, "");
             return;
         }
 
@@ -122,7 +122,7 @@ contract Gateway is ValidatorSetStorage, IGateway {
 
         // emit a ResultEvent indicating whether invocation of bridge message was successful or not
         // slither-disable-next-line reentrancy-events
-        emit BridgeMessageResult(message.id, success, returnData, message.sourceChainId, message.destinationChainId);
+        emit BridgeMessageResult(message.id, success, message.sourceChainId, message.destinationChainId, returnData);
     }
 
     // slither-disable-next-line unused-state,naming-convention

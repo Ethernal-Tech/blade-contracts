@@ -98,7 +98,7 @@ contract GatewayStateSyncTest is GatewayInitialized {
 
     function testSyncState_EmitsEvent() public {
         vm.expectEmit(true, true, true, true);
-        emit BridgeMsg(1, address(this), receiver, maxData, 3, 1);
+        emit BridgeMsg(1, address(this), receiver, 3, 1, maxData);
         gateway.sendBridgeMsg(receiver, maxData, 1);
     }
 
@@ -141,9 +141,9 @@ contract GatewayReceiveBatchTests is GatewayInitialized {
         BridgeMessageBatch memory batch = BridgeMessageBatch({messages: msgs, sourceChainId: 2, destinationChainId: 3});
 
         vm.expectEmit();
-        emit BridgeMessageResult(1, false, bytes(""), 2, 3);
+        emit BridgeMessageResult(1, false, 2, 3, bytes(""));
         vm.expectEmit();
-        emit BridgeMessageResult(2, false, bytes(""), 2, 3);
+        emit BridgeMessageResult(2, false, 2, 3, bytes(""));
         gateway.receiveBatch(batch, aggMessagePoints[3], bitmaps[3]);
     }
 }
