@@ -12,7 +12,13 @@ contract Gateway is ValidatorSetStorage, IGateway {
     // slither-disable-next-line protected-vars
     mapping(uint256 => bool) public processedEvents;
 
-    event BridgeMessageResult(uint256 indexed counter, bool indexed status, bytes message);
+    event BridgeMessageResult(
+        uint256 indexed counter,
+        bool indexed status,
+        bytes message,
+        uint256 sourceChainID,
+        uint256 destinationChainID
+    );
 
     event BridgeMsg(
         uint256 indexed id,
@@ -95,7 +101,7 @@ contract Gateway is ValidatorSetStorage, IGateway {
         require(!processedEvents[message.id], "DestinationGateway: BRIDGE_MESSAGE_IS_ALREADY_PROCESSED");
         // Skip transaction if client has added flag, or receiver has no code
         if (message.receiver.code.length == 0) {
-            emit BridgeMessageResult(message.id, false, "");
+            emit BridgeMessageResult(message.id, false, "", message.sourceChainId, message.destinationChainId);
             return;
         }
 
@@ -116,7 +122,7 @@ contract Gateway is ValidatorSetStorage, IGateway {
 
         // emit a ResultEvent indicating whether invocation of bridge message was successful or not
         // slither-disable-next-line reentrancy-events
-        emit BridgeMessageResult(message.id, success, returnData);
+        emit BridgeMessageResult(message.id, success, returnData, message.sourceChainId, message.destinationChainId);
     }
 
     // slither-disable-next-line unused-state,naming-convention
