@@ -14,6 +14,8 @@ contract BridgeStorage is ValidatorSetStorage {
     /**
      * @notice commits new batch
      * @param batch new batch
+     * @param signature signature of the signed batch
+     * @param bitmap bitmap of the signed batch
      */
     function commitBatch(
         BridgeMessageBatch calldata batch,
@@ -28,6 +30,28 @@ contract BridgeStorage is ValidatorSetStorage {
         batches[batchCounter++] = batch;
 
         emit NewBatch(batchCounter - 1);
+    }
+
+    /**
+     * @notice commits new batches
+     * @param newBatches new batches
+     * @param signature signature of the signed batches array
+     * @param bitmap bitmap of the signed batches
+     */
+    function commitBatches(
+        BridgeMessageBatch[] calldata newBatches,
+        uint256[2] calldata signature,
+        bytes calldata bitmap
+    ) external onlySystemCall {
+        bytes memory hash = abi.encode(keccak256(abi.encode(newBatches)));
+        verifySignature(bls.hashToPoint(DOMAIN_BRIDGE, hash), signature, bitmap);
+
+        for (uint256 i = 0; i < newBatches.length; i++) {
+            _verifyBatch(newBatches[i]);
+
+            batches[batchCounter++] = newBatches[i];
+            emit NewBatch(batchCounter - 1);
+        }
     }
 
     /**
