@@ -46,11 +46,16 @@ contract BridgeStorage is ValidatorSetStorage {
         bytes memory hash = abi.encode(keccak256(abi.encode(newBatches)));
         verifySignature(bls.hashToPoint(DOMAIN_BRIDGE, hash), signature, bitmap);
 
+        uint256 counter = batchCounter;
         for (uint256 i = 0; i < newBatches.length; i++) {
             _verifyBatch(newBatches[i]);
 
-            batches[batchCounter++] = newBatches[i];
-            emit NewBatch(batchCounter - 1);
+            batches[counter] = newBatches[i];
+            emit NewBatch(counter);
+
+            unchecked {
+                ++counter;
+            }
         }
     }
 
