@@ -255,24 +255,6 @@ function commitBatch(BridgeMessageBatch batch, uint256[2] signature, bytes bitma
 | signature | uint256[2] | undefined |
 | bitmap | bytes | undefined |
 
-### commitBatches
-
-```solidity
-function commitBatches(BridgeMessageBatch[] newBatches, uint256[2] signature, bytes bitmap) external nonpayable
-```
-
-
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| newBatches | BridgeMessageBatch[] | undefined |
-| signature | uint256[2] | undefined |
-| bitmap | bytes | undefined |
-
 ### commitValidatorSet
 
 ```solidity
