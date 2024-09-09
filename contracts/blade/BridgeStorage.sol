@@ -6,6 +6,7 @@ import "./ValidatorSetStorage.sol";
 contract BridgeStorage is ValidatorSetStorage {
     mapping(uint256 => BridgeMessageBatch) public batches;
     mapping(uint256 => uint256) public lastCommitted;
+    mapping(uint256 => uint256) public lastCommittedInternal;
     /// @custom:security write-protection="onlySystemCall()"
     uint256 public batchCounter;
 
@@ -47,7 +48,11 @@ contract BridgeStorage is ValidatorSetStorage {
             }
         }
 
-        lastCommitted[batch.sourceChainId] = batch.messages[batch.messages.length - 1].id;
+        if (batch.sourceChainId == block.chainid) {
+            lastCommittedInternal[batch.destinationChainId] = batch.messages[batch.messages.length - 1].id;
+        } else {
+            lastCommitted[batch.sourceChainId] = batch.messages[batch.messages.length - 1].id;
+        }
     }
 
     // slither-disable-next-line unused-state,naming-convention
