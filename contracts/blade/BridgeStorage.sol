@@ -48,9 +48,9 @@ contract BridgeStorage is ValidatorSetStorage {
             }
         }
 
-        if (batch.sourceChainId == block.chainid){
+        if (batch.sourceChainId == block.chainid) {
             lastCommittedInternal[batch.destinationChainId] = batch.messages[batch.messages.length - 1].id;
-        }else{
+        } else {
             lastCommitted[batch.sourceChainId] = batch.messages[batch.messages.length - 1].id;
         }
     }
