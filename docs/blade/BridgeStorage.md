@@ -370,6 +370,28 @@ function lastCommitted(uint256) external view returns (uint256)
 |---|---|---|
 | _0 | uint256 | undefined |
 
+### lastCommittedInternal
+
+```solidity
+function lastCommittedInternal(uint256) external view returns (uint256)
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | undefined |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | undefined |
+
 ### totalVotingPower
 
 ```solidity
