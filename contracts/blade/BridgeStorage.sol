@@ -48,6 +48,8 @@ contract BridgeStorage is ValidatorSetStorage {
     /**
      * @notice commits new batch
      * @param batch new batch
+     * @param signature aggregated signature of validators that signed the new batch
+     * @param bitmap bitmap of which validators signed the message
      */
     function commitBatch(
         BridgeMessageBatch calldata batch,

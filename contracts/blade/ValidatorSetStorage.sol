@@ -129,6 +129,14 @@ contract ValidatorSetStorage is IValidatorSetStorage, Initializable, System {
         return uint8(bitmap[byteNumber]) & (1 << bitNumber) > 0;
     }
 
+    /**
+     * @notice Commits a new validator set by verifying its signature and setting it in the storage.
+     * @dev This function requires that the new validator set is non-empty and verifies its signature before updating the validator set.
+     * @param newValidatorSet The array of validators to be set as the new validator set
+     * @param signature The aggregated signature of the validators that signed the new validator set
+     * @param bitmap The bitmap representing which validators signed the new validator set
+     * Emits a `NewValidatorSet` event after successfully setting the new validator set.
+     */
     function _commitValidatorSet(
         Validator[] calldata newValidatorSet,
         uint256[2] calldata signature,
