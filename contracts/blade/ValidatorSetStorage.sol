@@ -38,16 +38,8 @@ contract ValidatorSetStorage is IValidatorSetStorage, Initializable, System {
         Validator[] calldata newValidatorSet,
         uint256[2] calldata signature,
         bytes calldata bitmap
-    ) external onlySystemCall {
-        require(newValidatorSet.length > 0, "EMPTY_VALIDATOR_SET");
-
-        bytes memory hash = abi.encode(keccak256(abi.encode(newValidatorSet)));
-
-        verifySignature(bls.hashToPoint(DOMAIN_VALIDATOR_SET, hash), signature, bitmap);
-
-        _setNewValidatorSet(newValidatorSet);
-
-        emit NewValidatorSet(newValidatorSet);
+    ) external virtual onlySystemCall {
+        _commitValidatorSet(newValidatorSet, signature, bitmap);
     }
 
     /**
@@ -135,5 +127,21 @@ contract ValidatorSetStorage is IValidatorSetStorage, Initializable, System {
 
         // Get the value of the bit at the given 'index' in a byte.
         return uint8(bitmap[byteNumber]) & (1 << bitNumber) > 0;
+    }
+
+    function _commitValidatorSet(
+        Validator[] calldata newValidatorSet,
+        uint256[2] calldata signature,
+        bytes calldata bitmap
+    ) internal {
+        require(newValidatorSet.length > 0, "EMPTY_VALIDATOR_SET");
+
+        bytes memory hash = abi.encode(keccak256(abi.encode(newValidatorSet)));
+
+        verifySignature(bls.hashToPoint(DOMAIN_VALIDATOR_SET, hash), signature, bitmap);
+
+        _setNewValidatorSet(newValidatorSet);
+
+        emit NewValidatorSet(newValidatorSet);
     }
 }

@@ -44,6 +44,28 @@ struct BridgeMessageBatch {
     uint256 destinationChainId;
 }
 
+/**
+ * @param batch batch that is signed
+ * @param signature aggregated signature of validators that signed the batch
+ * @param bitmap bitmap of which validators signed the message
+ */
+struct SignedBridgeMessageBatch {
+    BridgeMessageBatch batch;
+    uint256[2] signature;
+    bytes bitmap;
+}
+
+/**
+ * @param newValidatorSet new validator set
+ * @param signature aggregated signature of validators that signed the new validator set
+ * @param bitmap bitmap of which validators signed the message
+ */
+struct SignedValidatorSet {
+    Validator[] newValidatorSet;
+    uint256[2] signature;
+    bytes bitmap;
+}
+
 interface IValidatorSetStorage {
     event NewValidatorSet(Validator[] newValidatorSet);
 

@@ -149,7 +149,7 @@ function batchCounter() external view returns (uint256)
 ### batches
 
 ```solidity
-function batches(uint256) external view returns (uint256 sourceChainId, uint256 destinationChainId)
+function batches(uint256) external view returns (struct BridgeMessageBatch batch, bytes bitmap)
 ```
 
 
@@ -166,8 +166,8 @@ function batches(uint256) external view returns (uint256 sourceChainId, uint256 
 
 | Name | Type | Description |
 |---|---|---|
-| sourceChainId | uint256 | undefined |
-| destinationChainId | uint256 | undefined |
+| batch | BridgeMessageBatch | undefined |
+| bitmap | bytes | undefined |
 
 ### bls
 
@@ -237,6 +237,28 @@ function commitValidatorSet(Validator[] newValidatorSet, uint256[2] signature, b
 |---|---|---|
 | newValidatorSet | Validator[] | undefined |
 | signature | uint256[2] | undefined |
+| bitmap | bytes | undefined |
+
+### commitedValidatorSets
+
+```solidity
+function commitedValidatorSets(uint256) external view returns (bytes bitmap)
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | undefined |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
 | bitmap | bytes | undefined |
 
 ### currentValidatorSet
@@ -362,6 +384,23 @@ function lastCommittedInternal(uint256) external view returns (uint256)
 
 ```solidity
 function totalVotingPower() external view returns (uint256)
+```
+
+
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | undefined |
+
+### validatorSetCounter
+
+```solidity
+function validatorSetCounter() external view returns (uint256)
 ```
 
 

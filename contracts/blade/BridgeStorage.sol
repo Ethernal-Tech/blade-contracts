@@ -4,13 +4,43 @@ pragma solidity ^0.8.19;
 import "./ValidatorSetStorage.sol";
 
 contract BridgeStorage is ValidatorSetStorage {
-    mapping(uint256 => BridgeMessageBatch) public batches;
+    mapping(uint256 => SignedBridgeMessageBatch) public batches;
+    mapping(uint256 => SignedValidatorSet) public commitedValidatorSets;
     mapping(uint256 => uint256) public lastCommitted;
     mapping(uint256 => uint256) public lastCommittedInternal;
     /// @custom:security write-protection="onlySystemCall()"
     uint256 public batchCounter;
+    /// @custom:security write-protection="onlySystemCall()"
+    uint256 public validatorSetCounter;
 
     event NewBatch(uint256 id);
+
+    /**
+     * @notice commits new validator set
+     * @param newValidatorSet new validator set
+     * @param signature aggregated signature of validators that signed the new validator set
+     * @param bitmap bitmap of which validators signed the message
+     */
+    function commitValidatorSet(
+        Validator[] calldata newValidatorSet,
+        uint256[2] calldata signature,
+        bytes calldata bitmap
+    ) external override onlySystemCall {
+        _commitValidatorSet(newValidatorSet, signature, bitmap);
+
+        SignedValidatorSet storage signedValidatorSet = commitedValidatorSets[validatorSetCounter];
+        signedValidatorSet.signature = signature;
+        signedValidatorSet.bitmap = bitmap;
+
+        for (uint256 i = 0; i < newValidatorSet.length; ) {
+            signedValidatorSet.newValidatorSet[i] = newValidatorSet[i];
+            unchecked {
+                ++i;
+            }
+        }
+
+        validatorSetCounter++;
+    }
 
     /**
      * @notice commits new batch
@@ -26,9 +56,14 @@ contract BridgeStorage is ValidatorSetStorage {
         bytes memory hash = abi.encode(keccak256(abi.encode(batch)));
         verifySignature(bls.hashToPoint(DOMAIN_BRIDGE, hash), signature, bitmap);
 
-        batches[batchCounter++] = batch;
+        SignedBridgeMessageBatch storage signedBatch = batches[batchCounter];
+        signedBatch.batch = batch;
+        signedBatch.signature = signature;
+        signedBatch.bitmap = bitmap;
 
-        emit NewBatch(batchCounter - 1);
+        emit NewBatch(batchCounter);
+
+        batchCounter++;
     }
 
     /**
