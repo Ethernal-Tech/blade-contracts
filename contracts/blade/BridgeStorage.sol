@@ -13,7 +13,8 @@ contract BridgeStorage is ValidatorSetStorage {
     /// @custom:security write-protection="onlySystemCall()"
     uint256 public validatorSetCounter;
 
-    event NewBatch(uint256 id);
+    event NewBatch(uint256 indexed id);
+    event NewValidatorSetStored(uint256 indexed id);
 
     /**
      * @notice commits new validator set
@@ -38,6 +39,8 @@ contract BridgeStorage is ValidatorSetStorage {
                 ++i;
             }
         }
+
+        emit NewValidatorSetStored(validatorSetCounter);
 
         validatorSetCounter++;
     }
