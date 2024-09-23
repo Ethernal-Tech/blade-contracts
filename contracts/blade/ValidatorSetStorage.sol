@@ -38,16 +38,8 @@ contract ValidatorSetStorage is IValidatorSetStorage, Initializable, System {
         Validator[] calldata newValidatorSet,
         uint256[2] calldata signature,
         bytes calldata bitmap
-    ) external onlySystemCall {
-        require(newValidatorSet.length > 0, "EMPTY_VALIDATOR_SET");
-
-        bytes memory hash = abi.encode(keccak256(abi.encode(newValidatorSet)));
-
-        verifySignature(bls.hashToPoint(DOMAIN_VALIDATOR_SET, hash), signature, bitmap);
-
-        _setNewValidatorSet(newValidatorSet);
-
-        emit NewValidatorSet(newValidatorSet);
+    ) external virtual onlySystemCall {
+        _commitValidatorSet(newValidatorSet, signature, bitmap);
     }
 
     /**
@@ -135,5 +127,29 @@ contract ValidatorSetStorage is IValidatorSetStorage, Initializable, System {
 
         // Get the value of the bit at the given 'index' in a byte.
         return uint8(bitmap[byteNumber]) & (1 << bitNumber) > 0;
+    }
+
+    /**
+     * @notice Commits a new validator set by verifying its signature and setting it in the storage.
+     * @dev This function requires that the new validator set is non-empty and verifies its signature before updating the validator set.
+     * @param newValidatorSet The array of validators to be set as the new validator set
+     * @param signature The aggregated signature of the validators that signed the new validator set
+     * @param bitmap The bitmap representing which validators signed the new validator set
+     * Emits a `NewValidatorSet` event after successfully setting the new validator set.
+     */
+    function _commitValidatorSet(
+        Validator[] calldata newValidatorSet,
+        uint256[2] calldata signature,
+        bytes calldata bitmap
+    ) internal {
+        require(newValidatorSet.length > 0, "EMPTY_VALIDATOR_SET");
+
+        bytes memory hash = abi.encode(keccak256(abi.encode(newValidatorSet)));
+
+        verifySignature(bls.hashToPoint(DOMAIN_VALIDATOR_SET, hash), signature, bitmap);
+
+        _setNewValidatorSet(newValidatorSet);
+
+        emit NewValidatorSet(newValidatorSet);
     }
 }
