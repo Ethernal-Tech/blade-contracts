@@ -174,7 +174,10 @@ contract ChildERC721Predicate is IChildERC721Predicate, Predicate, Initializable
     function _withdraw(IChildERC721 childToken, address receiver, uint256 tokenId) private onlyValidToken(childToken) {
         address rootToken = childToken.rootToken();
 
-        require(sourceTokenToDestinationToken[rootToken] == address(childToken), "ChildERC721Predicate: UNMAPPED_TOKEN");
+        require(
+            sourceTokenToDestinationToken[rootToken] == address(childToken),
+            "ChildERC721Predicate: UNMAPPED_TOKEN"
+        );
         // a mapped token should never have root token unset
         assert(rootToken != address(0));
         // a mapped token should never have predicate unset
@@ -198,7 +201,10 @@ contract ChildERC721Predicate is IChildERC721Predicate, Predicate, Initializable
     ) private onlyValidToken(childToken) {
         address rootToken = childToken.rootToken();
 
-        require(sourceTokenToDestinationToken[rootToken] == address(childToken), "ChildERC721Predicate: UNMAPPED_TOKEN");
+        require(
+            sourceTokenToDestinationToken[rootToken] == address(childToken),
+            "ChildERC721Predicate: UNMAPPED_TOKEN"
+        );
         // a mapped token should never have root token unset
         assert(rootToken != address(0));
         // a mapped token should never have predicate unset

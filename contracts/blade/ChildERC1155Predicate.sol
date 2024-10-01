@@ -187,7 +187,10 @@ contract ChildERC1155Predicate is IChildERC1155Predicate, Predicate, Initializab
     ) private onlyValidToken(childToken) {
         address rootToken = childToken.rootToken();
 
-        require(sourceTokenToDestinationToken[rootToken] == address(childToken), "ChildERC1155Predicate: UNMAPPED_TOKEN");
+        require(
+            sourceTokenToDestinationToken[rootToken] == address(childToken),
+            "ChildERC1155Predicate: UNMAPPED_TOKEN"
+        );
         // a mapped token should never have root token unset
         assert(rootToken != address(0));
         // a mapped token should never have predicate unset
@@ -211,7 +214,10 @@ contract ChildERC1155Predicate is IChildERC1155Predicate, Predicate, Initializab
     ) private onlyValidToken(childToken) {
         address rootToken = childToken.rootToken();
 
-        require(sourceTokenToDestinationToken[rootToken] == address(childToken), "ChildERC1155Predicate: UNMAPPED_TOKEN");
+        require(
+            sourceTokenToDestinationToken[rootToken] == address(childToken),
+            "ChildERC1155Predicate: UNMAPPED_TOKEN"
+        );
         // a mapped token should never have root token unset
         assert(rootToken != address(0));
         // a mapped token should never have predicate unset
