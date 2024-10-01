@@ -109,7 +109,7 @@ describe("ChildERC20Predicate", () => {
     expect(await childERC20Predicate.gateway()).to.equal(gateway.address);
     expect(await childERC20Predicate.rootERC20Predicate()).to.equal(rootERC20Predicate);
     expect(await childERC20Predicate.destinationTokenTemplate()).to.equal(childERC20.address);
-    expect(await childERC20Predicate.rootTokenToChildToken(nativeERC20RootToken)).to.equal(
+    expect(await childERC20Predicate.sourceTokenToDestinationToken(nativeERC20RootToken)).to.equal(
       "0x0000000000000000000000000000000000001010"
     );
   });

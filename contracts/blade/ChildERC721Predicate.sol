@@ -18,7 +18,7 @@ contract ChildERC721Predicate is IChildERC721Predicate, Predicate, Initializable
     address public rootERC721Predicate;
     address public destinationTokenTemplate;
 
-    mapping(address => address) public rootTokenToChildToken;
+    mapping(address => address) public sourceTokenToDestinationToken;
 
     event ERC721Deposit(
         address indexed rootToken,
@@ -174,7 +174,7 @@ contract ChildERC721Predicate is IChildERC721Predicate, Predicate, Initializable
     function _withdraw(IChildERC721 childToken, address receiver, uint256 tokenId) private onlyValidToken(childToken) {
         address rootToken = childToken.rootToken();
 
-        require(rootTokenToChildToken[rootToken] == address(childToken), "ChildERC721Predicate: UNMAPPED_TOKEN");
+        require(sourceTokenToDestinationToken[rootToken] == address(childToken), "ChildERC721Predicate: UNMAPPED_TOKEN");
         // a mapped token should never have root token unset
         assert(rootToken != address(0));
         // a mapped token should never have predicate unset
@@ -198,7 +198,7 @@ contract ChildERC721Predicate is IChildERC721Predicate, Predicate, Initializable
     ) private onlyValidToken(childToken) {
         address rootToken = childToken.rootToken();
 
-        require(rootTokenToChildToken[rootToken] == address(childToken), "ChildERC721Predicate: UNMAPPED_TOKEN");
+        require(sourceTokenToDestinationToken[rootToken] == address(childToken), "ChildERC721Predicate: UNMAPPED_TOKEN");
         // a mapped token should never have root token unset
         assert(rootToken != address(0));
         // a mapped token should never have predicate unset
@@ -222,7 +222,7 @@ contract ChildERC721Predicate is IChildERC721Predicate, Predicate, Initializable
             (address, address, address, uint256)
         );
 
-        IChildERC721 childToken = IChildERC721(rootTokenToChildToken[depositToken]);
+        IChildERC721 childToken = IChildERC721(sourceTokenToDestinationToken[depositToken]);
 
         require(address(childToken) != address(0), "ChildERC721Predicate: UNMAPPED_TOKEN");
         // a mapped token should always pass specifications
@@ -247,7 +247,7 @@ contract ChildERC721Predicate is IChildERC721Predicate, Predicate, Initializable
             (bytes32, address, address, address[], uint256[])
         );
 
-        IChildERC721 childToken = IChildERC721(rootTokenToChildToken[depositToken]);
+        IChildERC721 childToken = IChildERC721(sourceTokenToDestinationToken[depositToken]);
 
         require(address(childToken) != address(0), "ChildERC721Predicate: UNMAPPED_TOKEN");
         // a mapped token should always pass specifications
@@ -276,11 +276,11 @@ contract ChildERC721Predicate is IChildERC721Predicate, Predicate, Initializable
             (bytes32, address, string, string)
         );
         assert(rootToken != address(0)); // invariant since root predicate performs the same check
-        assert(rootTokenToChildToken[rootToken] == address(0)); // invariant since root predicate performs the same check
+        assert(sourceTokenToDestinationToken[rootToken] == address(0)); // invariant since root predicate performs the same check
         IChildERC721 childToken = IChildERC721(
             Clones.cloneDeterministic(destinationTokenTemplate, keccak256(abi.encodePacked(rootToken)))
         );
-        rootTokenToChildToken[rootToken] = address(childToken);
+        sourceTokenToDestinationToken[rootToken] = address(childToken);
         childToken.initialize(rootToken, name, symbol);
 
         // slither-disable-next-line reentrancy-events

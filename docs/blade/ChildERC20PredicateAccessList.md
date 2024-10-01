@@ -399,28 +399,6 @@ function rootERC20Predicate() external view returns (address)
 |---|---|---|
 | _0 | address | undefined |
 
-### rootTokenToChildToken
-
-```solidity
-function rootTokenToChildToken(address) external view returns (address)
-```
-
-
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | address | undefined |
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | address | undefined |
-
 ### setAllowList
 
 ```solidity
@@ -452,6 +430,28 @@ function setBlockList(bool newUseBlockList) external nonpayable
 | Name | Type | Description |
 |---|---|---|
 | newUseBlockList | bool | undefined |
+
+### sourceTokenToDestinationToken
+
+```solidity
+function sourceTokenToDestinationToken(address) external view returns (address)
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | address | undefined |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | address | undefined |
 
 ### transferOwnership
 
