@@ -200,10 +200,10 @@ function rootERC721Predicate() external view returns (address)
 |---|---|---|
 | _0 | address | undefined |
 
-### rootTokenToChildToken
+### sourceTokenToDestinationToken
 
 ```solidity
-function rootTokenToChildToken(address) external view returns (address)
+function sourceTokenToDestinationToken(address) external view returns (address)
 ```
 
 

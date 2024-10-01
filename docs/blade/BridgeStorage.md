@@ -437,7 +437,7 @@ event Initialized(uint8 version)
 ### NewBatch
 
 ```solidity
-event NewBatch(uint256 id)
+event NewBatch(uint256 indexed id)
 ```
 
 
@@ -448,7 +448,7 @@ event NewBatch(uint256 id)
 
 | Name | Type | Description |
 |---|---|---|
-| id  | uint256 | undefined |
+| id `indexed` | uint256 | undefined |
 
 ### NewValidatorSet
 
@@ -465,6 +465,22 @@ event NewValidatorSet(Validator[] newValidatorSet)
 | Name | Type | Description |
 |---|---|---|
 | newValidatorSet  | Validator[] | undefined |
+
+### NewValidatorSetStored
+
+```solidity
+event NewValidatorSetStored(uint256 indexed id)
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| id `indexed` | uint256 | undefined |
 
 
 

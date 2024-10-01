@@ -23,7 +23,7 @@ contract ChildERC20Predicate is IChildERC20Predicate, Predicate, Initializable, 
     address public rootERC20Predicate;
     address public destinationTokenTemplate;
 
-    mapping(address => address) public rootTokenToChildToken;
+    mapping(address => address) public sourceTokenToDestinationToken;
 
     event ERC20Deposit(
         address indexed rootToken,
@@ -133,7 +133,7 @@ contract ChildERC20Predicate is IChildERC20Predicate, Predicate, Initializable, 
         rootERC20Predicate = newRootERC20Predicate;
         destinationTokenTemplate = newDestinationTokenTemplate;
         if (newNativeTokenRootAddress != address(0)) {
-            rootTokenToChildToken[newNativeTokenRootAddress] = NATIVE_TOKEN_CONTRACT;
+            sourceTokenToDestinationToken[newNativeTokenRootAddress] = NATIVE_TOKEN_CONTRACT;
             // slither-disable-next-line reentrancy-events
             emit TokenMapped(newNativeTokenRootAddress, NATIVE_TOKEN_CONTRACT);
         }
@@ -154,7 +154,7 @@ contract ChildERC20Predicate is IChildERC20Predicate, Predicate, Initializable, 
 
         address rootToken = childToken.rootToken();
 
-        require(rootTokenToChildToken[rootToken] == address(childToken), "ChildERC20Predicate: UNMAPPED_TOKEN");
+        require(sourceTokenToDestinationToken[rootToken] == address(childToken), "ChildERC20Predicate: UNMAPPED_TOKEN");
         // a mapped token should never have root token unset
         assert(rootToken != address(0));
         // a mapped token should never have predicate unset
@@ -177,7 +177,7 @@ contract ChildERC20Predicate is IChildERC20Predicate, Predicate, Initializable, 
             (address, address, address, uint256)
         );
 
-        IChildERC20 childToken = IChildERC20(rootTokenToChildToken[depositToken]);
+        IChildERC20 childToken = IChildERC20(sourceTokenToDestinationToken[depositToken]);
 
         require(address(childToken) != address(0), "ChildERC20Predicate: UNMAPPED_TOKEN");
         assert(address(childToken).code.length != 0);
@@ -207,11 +207,11 @@ contract ChildERC20Predicate is IChildERC20Predicate, Predicate, Initializable, 
             (bytes32, address, string, string, uint8)
         );
         assert(rootToken != address(0)); // invariant since root predicate performs the same check
-        assert(rootTokenToChildToken[rootToken] == address(0)); // invariant since root predicate performs the same check
+        assert(sourceTokenToDestinationToken[rootToken] == address(0)); // invariant since root predicate performs the same check
         IChildERC20 childToken = IChildERC20(
             Clones.cloneDeterministic(destinationTokenTemplate, keccak256(abi.encodePacked(rootToken)))
         );
-        rootTokenToChildToken[rootToken] = address(childToken);
+        sourceTokenToDestinationToken[rootToken] = address(childToken);
         childToken.initialize(rootToken, name, symbol, decimals);
 
         // slither-disable-next-line reentrancy-events
