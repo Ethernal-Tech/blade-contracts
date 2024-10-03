@@ -95,6 +95,22 @@ contract BridgeStorage is ValidatorSetStorage {
         }
     }
 
+    /**
+     * @notice Returns the committed batch based on provided id
+     * @param id batch id
+     */
+    function getCommittedBatch(uint256 id) external view returns (SignedBridgeMessageBatch memory) {
+        return batches[id];
+    }
+
+    /**
+     * @notice Returns the committed validator set based on provided id
+     * @param id validator set id
+     */
+    function getCommittedValidatorSet(uint256 id) external view returns (SignedValidatorSet memory) {
+        return commitedValidatorSets[id];
+    }
+
     // slither-disable-next-line unused-state,naming-convention
     uint256[50] private __gap;
 }
