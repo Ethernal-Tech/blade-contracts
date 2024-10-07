@@ -65,7 +65,7 @@ contract Gateway is ValidatorSetStorage, IGateway {
     ) external {
         _verifyBatch(batch);
 
-        bytes memory hash = abi.encode(keccak256(abi.encode(batch)));
+        bytes memory hash = abi.encode(keccak256(abi.encode(batch.messages, batch.sourceChainId, batch.destinationChainId)));
         verifySignature(bls.hashToPoint(DOMAIN_BRIDGE, hash), signature, bitmap);
 
         uint256 length = batch.messages.length;
