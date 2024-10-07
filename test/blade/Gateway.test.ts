@@ -205,9 +205,11 @@ describe("Gateway", () => {
     const messageOfBatch = ethers.utils.keccak256(
       ethers.utils.defaultAbiCoder.encode(
         [
-          "tuple(tuple(uint256 id, uint256 sourceChainId, uint256 destinationChainId, address sender, address receiver, bytes payload)[] messages, uint256 sourceChainId, uint256 destinationChainId)",
+          "tuple(uint256 id, uint256 sourceChainId, uint256 destinationChainId, address sender, address receiver, bytes payload)[]",
+          "uint256",
+          "uint256",
         ],
-        [batch]
+        [batch.messages, batch.sourceChainId, batch.destinationChainId]
       )
     );
 
@@ -275,9 +277,11 @@ describe("Gateway", () => {
     const messageOfBatch = ethers.utils.keccak256(
       ethers.utils.defaultAbiCoder.encode(
         [
-          "tuple(tuple(uint256 id, uint256 sourceChainId, uint256 destinationChainId, address sender, address receiver, bytes payload)[] messages, uint256 sourceChainId, uint256 destinationChainId)",
+          "tuple(uint256 id, uint256 sourceChainId, uint256 destinationChainId, address sender, address receiver, bytes payload)[]",
+          "uint256",
+          "uint256",
         ],
-        [batch]
+        [batch.messages, batch.sourceChainId, batch.destinationChainId]
       )
     );
 
@@ -345,9 +349,11 @@ describe("Gateway", () => {
     const messageOfBatch = ethers.utils.keccak256(
       ethers.utils.defaultAbiCoder.encode(
         [
-          "tuple(tuple(uint256 id, uint256 sourceChainId, uint256 destinationChainId, address sender, address receiver, bytes payload)[] messages, uint256 sourceChainId, uint256 destinationChainId)",
+          "tuple(uint256 id, uint256 sourceChainId, uint256 destinationChainId, address sender, address receiver, bytes payload)[]",
+          "uint256",
+          "uint256",
         ],
-        [batch]
+        [batch.messages, batch.sourceChainId, batch.destinationChainId]
       )
     );
 
