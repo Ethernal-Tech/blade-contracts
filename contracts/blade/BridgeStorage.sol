@@ -58,7 +58,9 @@ contract BridgeStorage is ValidatorSetStorage {
     ) external onlySystemCall {
         _verifyBatch(batch);
 
-        bytes memory hash = abi.encode(keccak256(abi.encode(batch.messages, batch.sourceChainId, batch.destinationChainId)));
+        bytes memory hash = abi.encode(
+            keccak256(abi.encode(batch.messages, batch.sourceChainId, batch.destinationChainId))
+        );
         verifySignature(bls.hashToPoint(DOMAIN_BRIDGE, hash), signature, bitmap);
 
         SignedBridgeMessageBatch storage signedBatch = batches[batchCounter];
