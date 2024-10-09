@@ -48,25 +48,19 @@ contract BridgeStorage is ValidatorSetStorage {
     /**
      * @notice commits new batch
      * @param batch new batch
-     * @param signature aggregated signature of validators that signed the new batch
-     * @param bitmap bitmap of which validators signed the message
      */
-    function commitBatch(
-        BridgeMessageBatch calldata batch,
-        uint256[2] calldata signature,
-        bytes calldata bitmap
-    ) external onlySystemCall {
+    function commitBatch(SignedBridgeMessageBatch calldata batch) external onlySystemCall {
         _verifyBatch(batch);
 
         bytes memory hash = abi.encode(
-            keccak256(abi.encode(batch.messages, batch.sourceChainId, batch.destinationChainId))
+            keccak256(
+                abi.encode(batch.rootHash, batch.startId, batch.endId, batch.sourceChainId, batch.destinationChainId)
+            )
         );
-        verifySignature(bls.hashToPoint(DOMAIN_BRIDGE, hash), signature, bitmap);
 
-        SignedBridgeMessageBatch storage signedBatch = batches[batchCounter];
-        signedBatch.batch = batch;
-        signedBatch.signature = signature;
-        signedBatch.bitmap = bitmap;
+        verifySignature(bls.hashToPoint(DOMAIN_BRIDGE, hash), batch.signature, batch.bitmap);
+
+        batches[batchCounter] = batch;
 
         emit NewBatch(batchCounter);
 
@@ -77,23 +71,14 @@ contract BridgeStorage is ValidatorSetStorage {
      * @notice Internal function that verifies the batch
      * @param batch batch to verify
      */
-    function _verifyBatch(BridgeMessageBatch calldata batch) private {
-        require(batch.messages.length > 0, "EMPTY_BATCH");
-        require(lastCommitted[batch.sourceChainId] + 1 == batch.messages[0].id, "INVALID_LAST_COMMITTED");
-
-        for (uint256 i = 0; i < batch.messages.length; ) {
-            BridgeMessage memory message = batch.messages[i];
-            require(message.sourceChainId == batch.sourceChainId, "INVALID_SOURCE_CHAIN_ID");
-            require(message.destinationChainId == batch.destinationChainId, "INVALID_DESTINATION_CHAIN_ID");
-            unchecked {
-                ++i;
-            }
-        }
+    function _verifyBatch(SignedBridgeMessageBatch calldata batch) private {
+        require(batch.rootHash == bytes32(0), "EMPTY_BATCH");
+        require(lastCommitted[batch.sourceChainId] + 1 == batch.startId, "INVALID_LAST_COMMITTED");
 
         if (batch.sourceChainId == block.chainid) {
-            lastCommittedInternal[batch.destinationChainId] = batch.messages[batch.messages.length - 1].id;
+            lastCommittedInternal[batch.destinationChainId] = batch.endId;
         } else {
-            lastCommitted[batch.sourceChainId] = batch.messages[batch.messages.length - 1].id;
+            lastCommitted[batch.sourceChainId] = batch.endId;
         }
     }
 

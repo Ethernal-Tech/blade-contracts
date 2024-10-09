@@ -149,7 +149,7 @@ function batchCounter() external view returns (uint256)
 ### batches
 
 ```solidity
-function batches(uint256) external view returns (struct BridgeMessageBatch batch, bytes bitmap)
+function batches(uint256) external view returns (bytes32 rootHash, uint256 startId, uint256 endId, uint256 sourceChainId, uint256 destinationChainId, bytes bitmap)
 ```
 
 
@@ -166,7 +166,11 @@ function batches(uint256) external view returns (struct BridgeMessageBatch batch
 
 | Name | Type | Description |
 |---|---|---|
-| batch | BridgeMessageBatch | undefined |
+| rootHash | bytes32 | undefined |
+| startId | uint256 | undefined |
+| endId | uint256 | undefined |
+| sourceChainId | uint256 | undefined |
+| destinationChainId | uint256 | undefined |
 | bitmap | bytes | undefined |
 
 ### bls
@@ -206,7 +210,7 @@ function bn256G2() external view returns (contract IBN256G2)
 ### commitBatch
 
 ```solidity
-function commitBatch(BridgeMessageBatch batch, uint256[2] signature, bytes bitmap) external nonpayable
+function commitBatch(SignedBridgeMessageBatch batch) external nonpayable
 ```
 
 
@@ -217,9 +221,7 @@ function commitBatch(BridgeMessageBatch batch, uint256[2] signature, bytes bitma
 
 | Name | Type | Description |
 |---|---|---|
-| batch | BridgeMessageBatch | undefined |
-| signature | uint256[2] | undefined |
-| bitmap | bytes | undefined |
+| batch | SignedBridgeMessageBatch | undefined |
 
 ### commitValidatorSet
 

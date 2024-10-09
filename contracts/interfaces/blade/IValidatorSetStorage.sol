@@ -34,23 +34,20 @@ struct BridgeMessage {
 }
 
 /**
- * @param messages list of all messages in batch
- * @param sourceChainId id of chain which is source of batch
- * @param destinationChainId id of chain which is destination of batch
- */
-struct BridgeMessageBatch {
-    BridgeMessage[] messages;
-    uint256 sourceChainId;
-    uint256 destinationChainId;
-}
-
-/**
- * @param batch batch that is signed
+ * @param rootHash root hash of the batch
+ * @param startId start id of the batch
+ * @param endId end id of the batch
+ * @param sourceChainId id of source chain
+ * @param destinationChainId id of destination chain
  * @param signature aggregated signature of validators that signed the batch
  * @param bitmap bitmap of which validators signed the message
  */
 struct SignedBridgeMessageBatch {
-    BridgeMessageBatch batch;
+    bytes32 rootHash;
+    uint256 startId;
+    uint256 endId;
+    uint256 sourceChainId;
+    uint256 destinationChainId;
     uint256[2] signature;
     bytes bitmap;
 }

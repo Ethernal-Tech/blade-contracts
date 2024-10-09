@@ -3,7 +3,7 @@ pragma solidity 0.8.19;
 
 import "@utils/Test.sol";
 import {Gateway} from "contracts/blade/Gateway.sol";
-import {Validator, BridgeMessage, BridgeMessageBatch, DOMAIN_BRIDGE} from "contracts/interfaces/blade/IValidatorSetStorage.sol";
+import {Validator, BridgeMessage, SignedBridgeMessageBatch, DOMAIN_BRIDGE} from "contracts/interfaces/blade/IValidatorSetStorage.sol";
 import {BLS} from "contracts/common/BLS.sol";
 import {BN256G2} from "contracts/common/BN256G2.sol";
 import {System} from "contracts/blade/System.sol";
@@ -117,33 +117,25 @@ contract GatewayStateSyncTest is GatewayInitialized {
 
 contract GatewayReceiveBatchTests is GatewayInitialized {
     function testReceiveBatch_InvalidSignature() public {
-        BridgeMessageBatch memory batch = BridgeMessageBatch({messages: msgs, sourceChainId: 2, destinationChainId: 3});
-
         vm.expectRevert("SIGNATURE_VERIFICATION_FAILED");
-        gateway.receiveBatch(batch, aggMessagePoints[0], bitmaps[0]);
+        gateway.receiveBatch(msgs, aggMessagePoints[0], bitmaps[0]);
     }
 
     function testReceiveBatch_EmptyBitmap() public {
-        BridgeMessageBatch memory batch = BridgeMessageBatch({messages: msgs, sourceChainId: 2, destinationChainId: 3});
-
         vm.expectRevert("BITMAP_IS_EMPTY");
-        gateway.receiveBatch(batch, aggMessagePoints[1], bitmaps[1]);
+        gateway.receiveBatch(msgs, aggMessagePoints[1], bitmaps[1]);
     }
 
     function testReceiveBatch_NotEnoughPower() public {
-        BridgeMessageBatch memory batch = BridgeMessageBatch({messages: msgs, sourceChainId: 2, destinationChainId: 3});
-
         vm.expectRevert("INSUFFICIENT_VOTING_POWER");
-        gateway.receiveBatch(batch, aggMessagePoints[2], bitmaps[2]);
+        gateway.receiveBatch(msgs, aggMessagePoints[2], bitmaps[2]);
     }
 
     function testReceiveBatch_Success() public {
-        BridgeMessageBatch memory batch = BridgeMessageBatch({messages: msgs, sourceChainId: 2, destinationChainId: 3});
-
         vm.expectEmit();
         emit BridgeMessageResult(1, false, 2, 3, bytes(""));
         vm.expectEmit();
         emit BridgeMessageResult(2, false, 2, 3, bytes(""));
-        gateway.receiveBatch(batch, aggMessagePoints[3], bitmaps[3]);
+        gateway.receiveBatch(msgs, aggMessagePoints[3], bitmaps[3]);
     }
 }
