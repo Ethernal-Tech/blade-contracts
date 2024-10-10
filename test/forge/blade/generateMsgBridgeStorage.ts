@@ -1,5 +1,6 @@
 import { ethers } from "hardhat";
 import * as mcl from "../../../ts/mcl";
+import { SignedBridgeMessageBatchStruct } from "../../../typechain-types/contracts/blade/BridgeStorage";
 const input = process.argv[2];
 
 const sourceChainId = 2;
@@ -38,11 +39,6 @@ let msgs = [
     payload: ethers.utils.id("2233"),
   },
 ];
-let batch = {
-  messages: msgs,
-  sourceChainId: sourceChainId,
-  destinationChainId: destinationChainId,
-};
 
 async function generateMsg() {
   const input = process.argv[2];
@@ -129,15 +125,28 @@ function generateSignature1() {
   const bitmapStr = "00";
 
   const bitmap = `0x${bitmapStr}`;
+
+  const encodedMessage1 = ethers.utils.defaultAbiCoder.encode(
+    [
+      "tuple(uint256 id, uint256 sourceChainId, uint256 destinationChainId, address sender, address receiver, bytes payload)",
+    ],
+    [msgs[0]]
+  );
+  const hash1 = ethers.utils.keccak256(encodedMessage1);
+
+  const encodedMessage2 = ethers.utils.defaultAbiCoder.encode(
+    [
+      "tuple(uint256 id, uint256 sourceChainId, uint256 destinationChainId, address sender, address receiver, bytes payload)",
+    ],
+    [msgs[1]]
+  );
+  const hash2 = ethers.utils.keccak256(encodedMessage2);
+
+  const concatenatedHashes = ethers.utils.hexConcat([hash1, hash2]);
+  const root = ethers.utils.keccak256(concatenatedHashes);
+
   const message = ethers.utils.keccak256(
-    ethers.utils.defaultAbiCoder.encode(
-      [
-        "tuple(uint256 id, uint256 sourceChainId, uint256 destinationChainId, address sender, address receiver, bytes payload)[]",
-        "uint256",
-        "uint256",
-      ],
-      [batch.messages, batch.sourceChainId, batch.destinationChainId]
-    )
+    ethers.utils.defaultAbiCoder.encode(["bytes32", "uint256", "uint256", "uint256", "uint256"], [root, 1, 2, 2, 3])
   );
 
   const signatures: mcl.Signature[] = [];
@@ -173,17 +182,29 @@ function generateSignature2() {
   const bitmapStr = "01";
 
   const bitmap = `0x${bitmapStr}`;
-  const message = ethers.utils.keccak256(
-    ethers.utils.defaultAbiCoder.encode(
-      [
-        "tuple(uint256 id, uint256 sourceChainId, uint256 destinationChainId, address sender, address receiver, bytes payload)[]",
-        "uint256",
-        "uint256",
-      ],
-      [batch.messages, batch.sourceChainId, batch.destinationChainId]
-    )
-  );
 
+  const encodedMessage1 = ethers.utils.defaultAbiCoder.encode(
+    [
+      "tuple(uint256 id, uint256 sourceChainId, uint256 destinationChainId, address sender, address receiver, bytes payload)",
+    ],
+    [msgs[0]]
+  );
+  const hash1 = ethers.utils.keccak256(encodedMessage1);
+
+  const encodedMessage2 = ethers.utils.defaultAbiCoder.encode(
+    [
+      "tuple(uint256 id, uint256 sourceChainId, uint256 destinationChainId, address sender, address receiver, bytes payload)",
+    ],
+    [msgs[1]]
+  );
+  const hash2 = ethers.utils.keccak256(encodedMessage2);
+
+  const concatenatedHashes = ethers.utils.hexConcat([hash1, hash2]);
+  const root = ethers.utils.keccak256(concatenatedHashes);
+
+  const message = ethers.utils.keccak256(
+    ethers.utils.defaultAbiCoder.encode(["bytes32", "uint256", "uint256", "uint256", "uint256"], [root, 1, 2, 2, 3])
+  );
   const signatures: mcl.Signature[] = [];
   let flag = false;
 
@@ -218,15 +239,27 @@ function generateSignature3() {
 
   const bitmap = `0x${bitmapStr}`;
 
+  const encodedMessage1 = ethers.utils.defaultAbiCoder.encode(
+    [
+      "tuple(uint256 id, uint256 sourceChainId, uint256 destinationChainId, address sender, address receiver, bytes payload)",
+    ],
+    [msgs[0]]
+  );
+  const hash1 = ethers.utils.keccak256(encodedMessage1);
+
+  const encodedMessage2 = ethers.utils.defaultAbiCoder.encode(
+    [
+      "tuple(uint256 id, uint256 sourceChainId, uint256 destinationChainId, address sender, address receiver, bytes payload)",
+    ],
+    [msgs[1]]
+  );
+  const hash2 = ethers.utils.keccak256(encodedMessage2);
+
+  const concatenatedHashes = ethers.utils.hexConcat([hash1, hash2]);
+  const root = ethers.utils.keccak256(concatenatedHashes);
+
   const message = ethers.utils.keccak256(
-    ethers.utils.defaultAbiCoder.encode(
-      [
-        "tuple(uint256 id, uint256 sourceChainId, uint256 destinationChainId, address sender, address receiver, bytes payload)[]",
-        "uint256",
-        "uint256",
-      ],
-      [batch.messages, batch.sourceChainId, batch.destinationChainId]
-    )
+    ethers.utils.defaultAbiCoder.encode(["bytes32", "uint256", "uint256", "uint256", "uint256"], [root, 1, 2, 2, 3])
   );
 
   const signatures: mcl.Signature[] = [];

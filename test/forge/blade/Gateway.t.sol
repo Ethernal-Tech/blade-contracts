@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.19;
+pragma solidity ^0.8.19;
 
 import "@utils/Test.sol";
 import {Gateway} from "contracts/blade/Gateway.sol";
@@ -91,7 +91,7 @@ contract GatewayStateSyncTest is GatewayInitialized {
         gateway.sendBridgeMsg(receiver, moreThanMaxData, 1);
     }
 
-     function testCannotSyncState_InvalidDestinationChainId() public {
+    function testCannotSyncState_InvalidDestinationChainId() public {
         vm.expectRevert("INVALID_DESTINATION_CHAIN_ID");
         gateway.sendBridgeMsg(receiver, maxData, 0);
     }
