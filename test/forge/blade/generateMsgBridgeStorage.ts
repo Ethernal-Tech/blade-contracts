@@ -1,6 +1,5 @@
 import { ethers } from "hardhat";
 import * as mcl from "../../../ts/mcl";
-import { SignedBridgeMessageBatchStruct } from "../../../typechain-types/contracts/blade/BridgeStorage";
 const input = process.argv[2];
 
 const sourceChainId = 2;
