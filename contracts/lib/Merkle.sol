@@ -1,8 +1,15 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.19;
 
+/**
+ * @title Merkle tree Lib
+ * @notice merkle tree helper functions
+ */
 library Merkle {
-    // Helper function to compute the Merkle Root from an array of already hashed leaves
+    /**
+     * @notice helper function to compute the Merkle Root from an array of already hashed leaves
+     * @param leaves hashed leaves of the merkle tree
+     */
     function computeMerkleRoot(bytes32[] memory leaves) internal pure returns (bytes32) {
         if (leaves.length == 1) {
             return leaves[0]; // If there's only one leaf, it is the root
