@@ -3,6 +3,7 @@ pragma solidity ^0.8.19;
 
 import "./ValidatorSetStorage.sol";
 import "../interfaces/IGateway.sol";
+import "../lib/Merkle.sol";
 
 contract Gateway is ValidatorSetStorage, IGateway {
     uint256 public constant MAX_LENGTH = 2048;
@@ -54,25 +55,32 @@ contract Gateway is ValidatorSetStorage, IGateway {
     /**
      * @notice receives the batch of messages and executes them
      * @param batch batch of messages
-     * @param signature the aggregated signature submitted by the proposer
-     * @param bitmap bitmap of which validators signed the message
      */
     // slither-disable-next-line protected-vars
     function receiveBatch(
-        BridgeMessageBatch calldata batch,
+        BridgeMessage[] calldata batch,
         uint256[2] calldata signature,
         bytes calldata bitmap
     ) external {
         _verifyBatch(batch);
 
         bytes memory hash = abi.encode(
-            keccak256(abi.encode(batch.messages, batch.sourceChainId, batch.destinationChainId))
+            keccak256(
+                abi.encode(
+                    calculateMerkleRoot(batch),
+                    batch[0].id,
+                    batch[batch.length - 1].id,
+                    batch[0].sourceChainId,
+                    batch[0].destinationChainId
+                )
+            )
         );
+
         verifySignature(bls.hashToPoint(DOMAIN_BRIDGE, hash), signature, bitmap);
 
-        uint256 length = batch.messages.length;
+        uint256 length = batch.length;
         for (uint256 i = 0; i < length; ) {
-            _executeBridgeMessage(batch.messages[i]);
+            _executeBridgeMessage(batch[i]);
 
             unchecked {
                 ++i;
@@ -84,14 +92,15 @@ contract Gateway is ValidatorSetStorage, IGateway {
      * @notice Internal function that verifies the batch
      * @param batch batch to verify
      */
-    function _verifyBatch(BridgeMessageBatch calldata batch) private view {
-        require(batch.messages.length > 0, "EMPTY_BATCH");
+    function _verifyBatch(BridgeMessage[] calldata batch) private view {
+        require(batch.length > 0, "EMPTY_BATCH");
 
         uint256 destinationChainId = block.chainid;
-        require(batch.destinationChainId == destinationChainId, "INVALID_DESTINATION_CHAIN_ID");
-        for (uint256 i = 0; i < batch.messages.length; ) {
-            BridgeMessage memory message = batch.messages[i];
-            require(message.sourceChainId == batch.sourceChainId, "INVALID_SOURCE_CHAIN_ID");
+        uint256 sourceChainId = batch[0].sourceChainId;
+
+        for (uint256 i = 0; i < batch.length; ) {
+            BridgeMessage memory message = batch[i];
+            require(message.sourceChainId == sourceChainId, "INVALID_SOURCE_CHAIN_ID");
             require(message.destinationChainId == destinationChainId, "INVALID_DESTINATION_CHAIN_ID");
             unchecked {
                 ++i;
@@ -125,6 +134,21 @@ contract Gateway is ValidatorSetStorage, IGateway {
         // emit a ResultEvent indicating whether invocation of bridge message was successful or not
         // slither-disable-next-line reentrancy-events
         emit BridgeMessageResult(message.id, success, message.sourceChainId, message.destinationChainId, returnData);
+    }
+
+    // Function to calculate Merkle Root from an array of BridgeMessages
+    function calculateMerkleRoot(BridgeMessage[] memory messages) internal pure returns (bytes32) {
+        require(messages.length > 0, "No messages provided");
+
+        // Convert the BridgeMessages to their keccak256 hashes (this will be the actual leaves)
+        bytes32[] memory leaves = new bytes32[](messages.length);
+
+        for (uint256 i = 0; i < messages.length; i++) {
+            leaves[i] = keccak256(abi.encode(messages[i]));
+        }
+
+        // Pass the leaves to compute the Merkle root
+        return Merkle.computeMerkleRoot(leaves);
     }
 
     // slither-disable-next-line unused-state,naming-convention
