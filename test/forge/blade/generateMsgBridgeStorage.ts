@@ -126,18 +126,14 @@ function generateSignature1() {
   const bitmap = `0x${bitmapStr}`;
 
   const encodedMessage1 = ethers.utils.defaultAbiCoder.encode(
-    [
-      "tuple(uint256 id, uint256 sourceChainId, uint256 destinationChainId, address sender, address receiver, bytes payload)",
-    ],
-    [msgs[0]]
+    ["uint256", "uint256", "uint256", "address", "address", "bytes"],
+    [msgs[0].id, msgs[0].sourceChainId, msgs[0].destinationChainId, msgs[0].sender, msgs[0].receiver, msgs[0].payload]
   );
   const hash1 = ethers.utils.keccak256(encodedMessage1);
 
   const encodedMessage2 = ethers.utils.defaultAbiCoder.encode(
-    [
-      "tuple(uint256 id, uint256 sourceChainId, uint256 destinationChainId, address sender, address receiver, bytes payload)",
-    ],
-    [msgs[1]]
+    ["uint256", "uint256", "uint256", "address", "address", "bytes"],
+    [msgs[1].id, msgs[1].sourceChainId, msgs[1].destinationChainId, msgs[1].sender, msgs[1].receiver, msgs[1].payload]
   );
   const hash2 = ethers.utils.keccak256(encodedMessage2);
 
@@ -183,18 +179,14 @@ function generateSignature2() {
   const bitmap = `0x${bitmapStr}`;
 
   const encodedMessage1 = ethers.utils.defaultAbiCoder.encode(
-    [
-      "tuple(uint256 id, uint256 sourceChainId, uint256 destinationChainId, address sender, address receiver, bytes payload)",
-    ],
-    [msgs[0]]
+    ["uint256", "uint256", "uint256", "address", "address", "bytes"],
+    [msgs[0].id, msgs[0].sourceChainId, msgs[0].destinationChainId, msgs[0].sender, msgs[0].receiver, msgs[0].payload]
   );
   const hash1 = ethers.utils.keccak256(encodedMessage1);
 
   const encodedMessage2 = ethers.utils.defaultAbiCoder.encode(
-    [
-      "tuple(uint256 id, uint256 sourceChainId, uint256 destinationChainId, address sender, address receiver, bytes payload)",
-    ],
-    [msgs[1]]
+    ["uint256", "uint256", "uint256", "address", "address", "bytes"],
+    [msgs[1].id, msgs[1].sourceChainId, msgs[1].destinationChainId, msgs[1].sender, msgs[1].receiver, msgs[1].payload]
   );
   const hash2 = ethers.utils.keccak256(encodedMessage2);
 
@@ -239,18 +231,14 @@ function generateSignature3() {
   const bitmap = `0x${bitmapStr}`;
 
   const encodedMessage1 = ethers.utils.defaultAbiCoder.encode(
-    [
-      "tuple(uint256 id, uint256 sourceChainId, uint256 destinationChainId, address sender, address receiver, bytes payload)",
-    ],
-    [msgs[0]]
+    ["uint256", "uint256", "uint256", "address", "address", "bytes"],
+    [msgs[0].id, msgs[0].sourceChainId, msgs[0].destinationChainId, msgs[0].sender, msgs[0].receiver, msgs[0].payload]
   );
   const hash1 = ethers.utils.keccak256(encodedMessage1);
 
   const encodedMessage2 = ethers.utils.defaultAbiCoder.encode(
-    [
-      "tuple(uint256 id, uint256 sourceChainId, uint256 destinationChainId, address sender, address receiver, bytes payload)",
-    ],
-    [msgs[1]]
+    ["uint256", "uint256", "uint256", "address", "address", "bytes"],
+    [msgs[1].id, msgs[1].sourceChainId, msgs[1].destinationChainId, msgs[1].sender, msgs[1].receiver, msgs[1].payload]
   );
   const hash2 = ethers.utils.keccak256(encodedMessage2);
 
