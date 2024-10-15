@@ -144,7 +144,16 @@ contract Gateway is ValidatorSetStorage, IGateway {
         bytes32[] memory leaves = new bytes32[](messages.length);
 
         for (uint256 i = 0; i < messages.length; i++) {
-            leaves[i] = keccak256(abi.encode(messages[i]));
+            leaves[i] = keccak256(
+                abi.encode(
+                    messages[i].id,
+                    messages[i].sourceChainId,
+                    messages[i].destinationChainId,
+                    messages[i].sender,
+                    messages[i].receiver,
+                    messages[i].payload
+                )
+            );
         }
 
         // Pass the leaves to compute the Merkle root

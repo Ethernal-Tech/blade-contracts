@@ -53,7 +53,16 @@ abstract contract BridgeStorageTest is Test, System, BridgeStorage {
         bytes32[] memory leaves = new bytes32[](messageTmp.length);
         for (uint256 i = 0; i < messageTmp.length; i++) {
             msgs.push(messageTmp[i]);
-            leaves[i] = keccak256(abi.encode(messageTmp[i]));
+            leaves[i] = keccak256(
+                abi.encode(
+                    messageTmp[i].id,
+                    messageTmp[i].sourceChainId,
+                    messageTmp[i].destinationChainId,
+                    messageTmp[i].sender,
+                    messageTmp[i].receiver,
+                    messageTmp[i].payload
+                )
+            );
         }
 
         rootHash = Merkle.computeMerkleRoot(leaves);
