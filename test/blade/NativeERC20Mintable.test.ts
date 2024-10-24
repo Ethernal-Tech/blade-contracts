@@ -49,11 +49,11 @@ describe("NativeERC20Mintable", () => {
     });
 
     await hre.network.provider.send("hardhat_setCode", [
-      "0x0000000000000000000000000000000000001010",
+      "0x0000000000000000000000000000000000000106",
       await hre.network.provider.send("eth_getCode", [nativeERC20.address]), // NativeERC20 genesis contract
     ]);
 
-    nativeERC20 = nativeERC20.attach("0x0000000000000000000000000000000000001010");
+    nativeERC20 = nativeERC20.attach("0x0000000000000000000000000000000000000106");
 
     systemNativeERC20 = nativeERC20.connect(await ethers.getSigner("0xffffFFFfFFffffffffffffffFfFFFfffFFFfFFfE"));
 

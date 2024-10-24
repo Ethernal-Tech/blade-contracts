@@ -72,7 +72,7 @@ describe("RootERC20Predicate", () => {
     expect(await rootERC20Predicate.childERC20Predicate()).to.equal(childERC20Predicate);
     expect(await rootERC20Predicate.destinationTokenTemplate()).to.equal(childTokenTemplate.address);
     expect(await rootERC20Predicate.sourceTokenToDestinationToken(nativeTokenRootAddress)).to.equal(
-      "0x0000000000000000000000000000000000001010"
+      "0x0000000000000000000000000000000000000106"
     );
   });
 
