@@ -13,7 +13,7 @@ import "../interfaces/blade/IChildERC20Predicate.sol";
 contract EIP1559Burn is Initializable {
     IChildERC20Predicate public childERC20Predicate;
     address public burnDestination;
-    IChildERC20 private constant _NATIVE_TOKEN = IChildERC20(0x0000000000000000000000000000000000001010);
+    IChildERC20 private constant _NATIVE_TOKEN = IChildERC20(0x0000000000000000000000000000000000000106);
 
     event NativeTokenBurnt(address indexed burner, uint256 amount);
 
