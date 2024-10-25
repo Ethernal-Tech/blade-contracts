@@ -11,6 +11,7 @@ import {
   MockNativeERC20Transfer__factory,
 } from "../../typechain-types";
 import { alwaysFalseBytecode, alwaysRevertBytecode, alwaysTrueBytecode } from "../constants";
+const nativeERC20TokenAddress = "0x0000000000000000000000000000000000000106";
 
 describe("NativeERC20Mintable", () => {
   let nativeERC20: NativeERC20Mintable,
@@ -49,11 +50,11 @@ describe("NativeERC20Mintable", () => {
     });
 
     await hre.network.provider.send("hardhat_setCode", [
-      "0x0000000000000000000000000000000000000106",
+      nativeERC20TokenAddress,
       await hre.network.provider.send("eth_getCode", [nativeERC20.address]), // NativeERC20 genesis contract
     ]);
 
-    nativeERC20 = nativeERC20.attach("0x0000000000000000000000000000000000000106");
+    nativeERC20 = nativeERC20.attach(nativeERC20TokenAddress);
 
     systemNativeERC20 = nativeERC20.connect(await ethers.getSigner("0xffffFFFfFFffffffffffffffFfFFFfffFFFfFFfE"));
 

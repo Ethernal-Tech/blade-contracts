@@ -19,6 +19,7 @@ import {
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { smock } from "@defi-wonderland/smock";
 import { alwaysTrueBytecode } from "../constants";
+const nativeERC20TokenAddress = "0x0000000000000000000000000000000000000106";
 
 describe("ChildERC20Predicate", () => {
   let childERC20Predicate: ChildERC20Predicate,
@@ -58,10 +59,7 @@ describe("ChildERC20Predicate", () => {
 
     await tempNativeERC20.deployed();
 
-    await setCode(
-      "0x0000000000000000000000000000000000000106",
-      await network.provider.send("eth_getCode", [tempNativeERC20.address])
-    ); // Mock genesis NativeERC20 deployment
+    await setCode(nativeERC20TokenAddress, await network.provider.send("eth_getCode", [tempNativeERC20.address])); // Mock genesis NativeERC20 deployment
 
     nativeERC20 = NativeERC20.attach("0x0000000000000000000000000000000000000106") as NativeERC20;
 
@@ -110,7 +108,7 @@ describe("ChildERC20Predicate", () => {
     expect(await childERC20Predicate.rootERC20Predicate()).to.equal(rootERC20Predicate);
     expect(await childERC20Predicate.destinationTokenTemplate()).to.equal(childERC20.address);
     expect(await childERC20Predicate.sourceTokenToDestinationToken(nativeERC20RootToken)).to.equal(
-      "0x0000000000000000000000000000000000000106"
+      nativeERC20TokenAddress
     );
   });
 
@@ -391,7 +389,7 @@ describe("ChildERC20Predicate", () => {
       ]
     );
     const fakeNativeERC20 = await smock.fake<NativeERC20>("NativeERC20", {
-      address: "0x0000000000000000000000000000000000000106",
+      address: nativeERC20TokenAddress,
     });
     fakeNativeERC20.rootToken.returns(nativeERC20RootToken);
     fakeNativeERC20.predicate.returns(stateReceiverChildERC20Predicate.address);
@@ -404,7 +402,7 @@ describe("ChildERC20Predicate", () => {
 
   it("fail withdraw tokens: burn failed", async () => {
     const fakeNativeERC20 = await smock.fake<NativeERC20>("NativeERC20", {
-      address: "0x0000000000000000000000000000000000000106",
+      address: nativeERC20TokenAddress,
     });
     fakeNativeERC20.rootToken.returns(nativeERC20RootToken);
     fakeNativeERC20.predicate.returns(stateReceiverChildERC20Predicate.address);

@@ -16,6 +16,7 @@ import {
 } from "../../typechain-types";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { alwaysTrueBytecode } from "../constants";
+const nativeERC20TokenAddress = "0x0000000000000000000000000000000000000106";
 
 describe("EIP1559Burn", () => {
   let eip1559Burn: EIP1559Burn,
@@ -59,12 +60,9 @@ describe("EIP1559Burn", () => {
 
     await tempNativeERC20.deployed();
 
-    await setCode(
-      "0x0000000000000000000000000000000000000106",
-      await network.provider.send("eth_getCode", [tempNativeERC20.address])
-    ); // Mock genesis NativeERC20 deployment
+    await setCode(nativeERC20TokenAddress, await network.provider.send("eth_getCode", [tempNativeERC20.address])); // Mock genesis NativeERC20 deployment
 
-    nativeERC20 = NativeERC20.attach("0x0000000000000000000000000000000000000106") as NativeERC20;
+    nativeERC20 = NativeERC20.attach(nativeERC20TokenAddress) as NativeERC20;
 
     await setCode("0x0000000000000000000000000000000000002020", alwaysTrueBytecode); // Mock NATIVE_TRANSFER_PRECOMPILE
 
