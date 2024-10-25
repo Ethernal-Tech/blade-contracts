@@ -7,10 +7,9 @@ import "@openzeppelin/contracts/proxy/Clones.sol";
 import "../interfaces/bridge/IRootERC20Predicate.sol";
 import "../interfaces/IGateway.sol";
 import "../lib/Predicate.sol";
-import "../blade/System.sol";
 
 // solhint-disable reason-string
-contract RootERC20Predicate is Predicate, Initializable, IRootERC20Predicate, System {
+contract RootERC20Predicate is Predicate, Initializable, IRootERC20Predicate{
     using SafeERC20 for IERC20Metadata;
 
     address public childERC20Predicate;
@@ -174,8 +173,8 @@ contract RootERC20Predicate is Predicate, Initializable, IRootERC20Predicate, Sy
         destinationTokenTemplate = newDestinationTokenTemplate;
         if (newNativeTokenRoot != address(0)) {
             nativeTokenRoot = newNativeTokenRoot;
-            sourceTokenToDestinationToken[nativeTokenRoot] = NATIVE_TOKEN_CONTRACT;
-            emit TokenMapped(nativeTokenRoot, NATIVE_TOKEN_CONTRACT);
+            sourceTokenToDestinationToken[nativeTokenRoot] = 0x0000000000000000000000000000000000000106;
+            emit TokenMapped(nativeTokenRoot, 0x0000000000000000000000000000000000000106);
         }
     }
 
