@@ -79,7 +79,7 @@ contract DeployRootERC20PredicateTest is Test {
         );
         assertEq(
             proxyAsRootERC20Predicate.sourceTokenToDestinationToken(nativeTokenRootAddress),
-            address(0x0000000000000000000000000000000000001010)
+            address(0x0000000000000000000000000000000000000106)
         );
     }
 

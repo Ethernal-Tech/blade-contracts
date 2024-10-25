@@ -173,8 +173,8 @@ contract RootERC20Predicate is Predicate, Initializable, IRootERC20Predicate {
         destinationTokenTemplate = newDestinationTokenTemplate;
         if (newNativeTokenRoot != address(0)) {
             nativeTokenRoot = newNativeTokenRoot;
-            sourceTokenToDestinationToken[nativeTokenRoot] = 0x0000000000000000000000000000000000001010;
-            emit TokenMapped(nativeTokenRoot, 0x0000000000000000000000000000000000001010);
+            sourceTokenToDestinationToken[nativeTokenRoot] = 0x0000000000000000000000000000000000000106;
+            emit TokenMapped(nativeTokenRoot, 0x0000000000000000000000000000000000000106);
         }
     }
 

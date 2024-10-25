@@ -18,7 +18,7 @@ contract System {
     uint256 public constant READ_ADDRESSLIST_GAS = 5000;
 
     // genesis contracts
-    address public constant NATIVE_TOKEN_CONTRACT = 0x0000000000000000000000000000000000001010;
+    address public constant NATIVE_TOKEN_CONTRACT = 0x0000000000000000000000000000000000000106;
 
     modifier onlySystemCall() {
         if (msg.sender != SYSTEM) revert Unauthorized("SYSTEMCALL");
