@@ -9,7 +9,7 @@ import "../interfaces/IGateway.sol";
 import "../lib/Predicate.sol";
 
 // solhint-disable reason-string
-contract RootERC20Predicate is Predicate, Initializable, IRootERC20Predicate{
+contract RootERC20Predicate is Predicate, Initializable, IRootERC20Predicate {
     using SafeERC20 for IERC20Metadata;
 
     address public childERC20Predicate;
