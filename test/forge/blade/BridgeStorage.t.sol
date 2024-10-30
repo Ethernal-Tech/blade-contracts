@@ -93,6 +93,8 @@ contract BridgeStorageUnitialized is BridgeStorageTest {
 contract BridgeStorageCommitBatchTests is BridgeStorageInitialized {
     function testCommitBatch_InvalidSignature() public {
         SignedBridgeMessageBatch memory batch = SignedBridgeMessageBatch({
+            threshold: 0,
+            isRollback: false,
             rootHash: rootHash,
             startId: msgs[0].id,
             endId: msgs[msgs.length - 1].id,
@@ -108,6 +110,8 @@ contract BridgeStorageCommitBatchTests is BridgeStorageInitialized {
 
     function testCommitBatch_EmptyBitmap() public {
         SignedBridgeMessageBatch memory batch = SignedBridgeMessageBatch({
+            threshold: 0,
+            isRollback: false,
             rootHash: rootHash,
             startId: msgs[0].id,
             endId: msgs[msgs.length - 1].id,
@@ -123,6 +127,8 @@ contract BridgeStorageCommitBatchTests is BridgeStorageInitialized {
 
     function testCommitBatch_NotEnoughPower() public {
         SignedBridgeMessageBatch memory batch = SignedBridgeMessageBatch({
+            threshold: 0,
+            isRollback: false,
             rootHash: rootHash,
             startId: msgs[0].id,
             endId: msgs[msgs.length - 1].id,
@@ -138,6 +144,8 @@ contract BridgeStorageCommitBatchTests is BridgeStorageInitialized {
 
     function testCommitBatch_Success() public {
         SignedBridgeMessageBatch memory batch = SignedBridgeMessageBatch({
+            threshold: 0,
+            isRollback: false,
             rootHash: rootHash,
             startId: msgs[0].id,
             endId: msgs[msgs.length - 1].id,
