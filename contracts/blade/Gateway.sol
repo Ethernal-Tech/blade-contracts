@@ -69,10 +69,10 @@ contract Gateway is ValidatorSetStorage, IGateway {
                     signedBridgeBatch.threshold,
                     signedBridgeBatch.isRollback,
                     calculateMerkleRoot(batchMessages),
-                    batchMessages[0].id,
-                    batchMessages[batchMessages.length - 1].id,
-                    batchMessages[0].sourceChainId,
-                    batchMessages[0].destinationChainId
+                    signedBridgeBatch.startId,
+                    signedBridgeBatch.endId,
+                    signedBridgeBatch.sourceChainId,
+                    signedBridgeBatch.destinationChainId
                 )
             )
         );
