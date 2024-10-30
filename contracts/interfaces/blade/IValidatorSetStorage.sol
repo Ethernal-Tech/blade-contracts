@@ -43,6 +43,8 @@ struct BridgeMessage {
  * @param bitmap bitmap of which validators signed the message
  */
 struct SignedBridgeMessageBatch {
+    uint256 threshold;
+    bool isRollback;
     bytes32 rootHash;
     uint256 startId;
     uint256 endId;
