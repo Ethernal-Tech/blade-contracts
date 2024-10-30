@@ -156,8 +156,8 @@ describe("BridgeStorage", () => {
 
     const messageOfBatch = ethers.utils.keccak256(
       ethers.utils.defaultAbiCoder.encode(
-        ["bytes32", "uint256", "uint256", "uint256", "uint256"],
-        [batch.rootHash, batch.startId, batch.endId, batch.sourceChainId, batch.destinationChainId]
+        ["uint256","bool","bytes32", "uint256", "uint256", "uint256", "uint256"],
+        [batch.threshold, batch.isRollback, batch.rootHash, batch.startId, batch.endId, batch.sourceChainId, batch.destinationChainId]
       )
     );
 
@@ -211,8 +211,8 @@ describe("BridgeStorage", () => {
 
     const messageOfBatch = ethers.utils.keccak256(
       ethers.utils.defaultAbiCoder.encode(
-        ["bytes32", "uint256", "uint256", "uint256", "uint256"],
-        [batch.rootHash, batch.startId, batch.endId, batch.sourceChainId, batch.destinationChainId]
+        ["uint256", "bool","bytes32", "uint256", "uint256", "uint256", "uint256"],
+        [batch.threshold, batch.isRollback, batch.rootHash, batch.startId, batch.endId, batch.sourceChainId, batch.destinationChainId]
       )
     );
 
@@ -266,8 +266,8 @@ describe("BridgeStorage", () => {
 
     const messageOfBatch = ethers.utils.keccak256(
       ethers.utils.defaultAbiCoder.encode(
-        ["bytes32", "uint256", "uint256", "uint256", "uint256"],
-        [batch.rootHash, batch.startId, batch.endId, batch.sourceChainId, batch.destinationChainId]
+        ["uint256", "bool","bytes32", "uint256", "uint256", "uint256", "uint256"],
+        [batch.threshold, batch.isRollback, batch.rootHash, batch.startId, batch.endId, batch.sourceChainId, batch.destinationChainId]
       )
     );
 

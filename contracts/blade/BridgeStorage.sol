@@ -54,7 +54,7 @@ contract BridgeStorage is ValidatorSetStorage {
 
         bytes memory hash = abi.encode(
             keccak256(
-                abi.encode(batch.rootHash, batch.startId, batch.endId, batch.sourceChainId, batch.destinationChainId)
+                abi.encode(batch.threshold, batch.isRollback, batch.rootHash, batch.startId, batch.endId, batch.sourceChainId, batch.destinationChainId)
             )
         );
 
