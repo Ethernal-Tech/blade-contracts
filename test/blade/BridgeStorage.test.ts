@@ -253,7 +253,7 @@ describe("BridgeStorage", () => {
     const bitmap = `0x${bitmapStr}`;
 
     const batch: SignedBridgeMessageBatchStruct = {
-      threshold:0,
+      threshold: 0,
       isRollback: false,
       rootHash: "0x1555ad6149fc39abc7852aad5c3df6b9df7964ac90ffbbcf6206b1eda846c881",
       startId: 1,
