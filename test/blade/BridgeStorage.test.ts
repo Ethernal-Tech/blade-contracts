@@ -156,7 +156,7 @@ describe("BridgeStorage", () => {
 
     const messageOfBatch = ethers.utils.keccak256(
       ethers.utils.defaultAbiCoder.encode(
-        ["bytes32", "uint256", "uint256", "uint256", "uint256", "uint256", "bool",],
+        ["bytes32", "uint256", "uint256", "uint256", "uint256", "uint256", "bool"],
         [
           batch.rootHash,
           batch.startId,
@@ -282,7 +282,7 @@ describe("BridgeStorage", () => {
 
     const messageOfBatch = ethers.utils.keccak256(
       ethers.utils.defaultAbiCoder.encode(
-        ["bytes32", "uint256", "uint256", "uint256", "uint256","uint256", "bool"],
+        ["bytes32", "uint256", "uint256", "uint256", "uint256", "uint256", "bool"],
         [
           batch.rootHash,
           batch.startId,
