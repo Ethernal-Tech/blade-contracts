@@ -119,15 +119,15 @@ contract GatewayStateSyncTest is GatewayInitialized {
 contract GatewayReceiveBatchTests is GatewayInitialized {
     function testReceiveBatch_InvalidSignature() public {
         SignedBridgeMessageBatch memory batch = SignedBridgeMessageBatch({
-            threshold: 0,
-            isRollback: false,
             rootHash: 0,
             startId: msgs[0].id,
             endId: msgs[msgs.length - 1].id,
             sourceChainId: 2,
             destinationChainId: 3,
             signature: aggMessagePoints[0],
-            bitmap: bitmaps[0]
+            bitmap: bitmaps[0],
+            threshold: 0,
+            isRollback: false
         });
 
         vm.expectRevert("SIGNATURE_VERIFICATION_FAILED");
@@ -136,15 +136,15 @@ contract GatewayReceiveBatchTests is GatewayInitialized {
 
     function testReceiveBatch_EmptyBitmap() public {
         SignedBridgeMessageBatch memory batch = SignedBridgeMessageBatch({
-            threshold: 0,
-            isRollback: false,
             rootHash: 0,
             startId: msgs[0].id,
             endId: msgs[msgs.length - 1].id,
             sourceChainId: 2,
             destinationChainId: 3,
             signature: aggMessagePoints[1],
-            bitmap: bitmaps[1]
+            bitmap: bitmaps[1],
+            threshold: 0,
+            isRollback: false
         });
 
         vm.expectRevert("BITMAP_IS_EMPTY");
@@ -153,15 +153,15 @@ contract GatewayReceiveBatchTests is GatewayInitialized {
 
     function testReceiveBatch_NotEnoughPower() public {
         SignedBridgeMessageBatch memory batch = SignedBridgeMessageBatch({
-            threshold: 0,
-            isRollback: false,
             rootHash: 0,
             startId: msgs[0].id,
             endId: msgs[msgs.length - 1].id,
             sourceChainId: 2,
             destinationChainId: 3,
             signature: aggMessagePoints[2],
-            bitmap: bitmaps[2]
+            bitmap: bitmaps[2],
+            threshold: 0,
+            isRollback: false
         });
 
         vm.expectRevert("INSUFFICIENT_VOTING_POWER");
@@ -170,15 +170,15 @@ contract GatewayReceiveBatchTests is GatewayInitialized {
 
     function testReceiveBatch_Success() public {
         SignedBridgeMessageBatch memory batch = SignedBridgeMessageBatch({
-            threshold: 0,
-            isRollback: false,
             rootHash: 0,
             startId: msgs[0].id,
             endId: msgs[msgs.length - 1].id,
             sourceChainId: 2,
             destinationChainId: 3,
             signature: aggMessagePoints[3],
-            bitmap: bitmaps[3]
+            bitmap: bitmaps[3],
+            threshold: 0,
+            isRollback: false
         });
 
 

@@ -226,15 +226,15 @@ describe("Gateway", () => {
 
     const messageOfBatch = ethers.utils.keccak256(
       ethers.utils.defaultAbiCoder.encode(
-        ["uint256", "bool", "bytes32", "uint256", "uint256", "uint256", "uint256"],
+        ["bytes32", "uint256", "uint256", "uint256", "uint256", "uint256", "bool"],
         [
-          batch.threshold,
-          batch.isRollback,
           batch.rootHash,
           batch.startId,
           batch.endId,
           batch.sourceChainId,
           batch.destinationChainId,
+          batch.threshold,
+          batch.isRollback
         ]
       )
     );
@@ -325,15 +325,15 @@ describe("Gateway", () => {
 
     const messageOfBatch = ethers.utils.keccak256(
       ethers.utils.defaultAbiCoder.encode(
-        ["uint256", "bool", "bytes32", "uint256", "uint256", "uint256", "uint256"],
+        ["bytes32", "uint256", "uint256", "uint256", "uint256","uint256", "bool"],
         [
-          batch.threshold,
-          batch.isRollback,
           batch.rootHash,
           batch.startId,
           batch.endId,
           batch.sourceChainId,
           batch.destinationChainId,
+          batch.threshold,
+          batch.isRollback
         ]
       )
     );
@@ -423,15 +423,15 @@ describe("Gateway", () => {
 
     const messageOfBatch = ethers.utils.keccak256(
       ethers.utils.defaultAbiCoder.encode(
-        ["uint256", "bool", "bytes32", "uint256", "uint256", "uint256", "uint256"],
+        ["bytes32", "uint256", "uint256", "uint256", "uint256","uint256", "bool"],
         [
-          batch.threshold,
-          batch.isRollback,
           batch.rootHash,
           batch.startId,
           batch.endId,
           batch.sourceChainId,
           batch.destinationChainId,
+          batch.threshold,
+          batch.isRollback
         ]
       )
     );

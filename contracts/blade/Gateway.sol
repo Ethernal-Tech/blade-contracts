@@ -66,13 +66,13 @@ contract Gateway is ValidatorSetStorage, IGateway {
         bytes memory hash = abi.encode(
             keccak256(
                 abi.encode(
-                    signedBridgeBatch.threshold,
-                    signedBridgeBatch.isRollback,
                     calculateMerkleRoot(batchMessages),
                     signedBridgeBatch.startId,
                     signedBridgeBatch.endId,
                     signedBridgeBatch.sourceChainId,
-                    signedBridgeBatch.destinationChainId
+                    signedBridgeBatch.destinationChainId,
+                    signedBridgeBatch.threshold,
+                    signedBridgeBatch.isRollback
                 )
             )
         );
