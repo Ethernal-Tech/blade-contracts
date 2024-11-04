@@ -65,7 +65,12 @@ contract RootERC20Predicate is Predicate, Initializable, IRootERC20Predicate {
 
         if (bytes32(data[:32]) == WITHDRAW_SIG) {
             _withdraw(data[32:]);
-        } else {
+        } else if (bytes32(data[:32]) == DEPOSIT_SIG){
+            _withdraw(data[32:]);
+        } else if (bytes32(data[:32]) == MAP_TOKEN_SIG){
+            _unMapToken(data[32:]);
+        }
+        else {
             revert("RootERC20Predicate: INVALID_SIGNATURE");
         }
     }
@@ -89,7 +94,7 @@ contract RootERC20Predicate is Predicate, Initializable, IRootERC20Predicate {
      */
     function mapToken(IERC20Metadata rootToken) public returns (address) {
         require(address(rootToken) != address(0), "RootERC20Predicate: INVALID_TOKEN");
-        require(sourceTokenToDestinationToken[address(rootToken)] == address(0), "RootERC20Predicate: ALREADY_MAPPED");
+        require(sourceTokenToDestinationToken[address(rootToken)] == address(0), "RootERC20Predicate: TOKEN IS ALREADY UNMAPPED");
 
         address childPredicate = childERC20Predicate;
 
@@ -110,6 +115,19 @@ contract RootERC20Predicate is Predicate, Initializable, IRootERC20Predicate {
         emit TokenMapped(address(rootToken), childToken);
 
         return childToken;
+    }
+
+    function _unMapToken(bytes calldata data) private{
+        (address rootToken, , , ) = abi.decode(
+            data,
+            (address, address, address, uint256)
+        );
+        require(address(rootToken) != address(0), "RootERC20Predicate: INVALID_TOKEN");
+        require(sourceTokenToDestinationToken[address(rootToken)] != address(0));
+
+        sourceTokenToDestinationToken[rootToken] = address(0);
+
+        emit TokenUnMapped(rootToken);
     }
 
     function _deposit(IERC20Metadata rootToken, address receiver, uint256 amount) private {

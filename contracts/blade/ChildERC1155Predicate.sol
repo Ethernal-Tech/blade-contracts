@@ -86,11 +86,11 @@ contract ChildERC1155Predicate is IChildERC1155Predicate, Predicate, Initializab
         require(msg.sender == address(gateway), "ChildERC1155Predicate: ONLY_GATEWAY");
         require(sender == rootERC1155Predicate, "ChildERC1155Predicate: ONLY_ROOT_PREDICATE");
 
-        if (bytes32(data[:32]) == DEPOSIT_SIG) {
+        if (bytes32(data[:32]) == DEPOSIT_SIG || bytes32(data[:32]) == WITHDRAW_SIG) {
             _beforeTokenDeposit();
             _deposit(data[32:]);
             _afterTokenDeposit();
-        } else if (bytes32(data[:32]) == DEPOSIT_BATCH_SIG) {
+        } else if (bytes32(data[:32]) == DEPOSIT_BATCH_SIG || bytes32(data[:32]) == WITHDRAW_BATCH_SIG) {
             _beforeTokenDeposit();
             _depositBatch(data);
             _afterTokenDeposit();

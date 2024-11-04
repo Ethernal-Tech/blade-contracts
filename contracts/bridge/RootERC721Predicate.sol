@@ -40,11 +40,13 @@ contract RootERC721Predicate is Predicate, Initializable, ERC721Holder, IRootERC
         require(msg.sender == address(gateway), "RootERC721Predicate: ONLY_GATEWAY");
         require(sender == childERC721Predicate, "RootERC721Predicate: ONLY_CHILD_PREDICATE");
 
-        if (bytes32(data[:32]) == WITHDRAW_SIG) {
+        if (bytes32(data[:32]) == WITHDRAW_SIG || bytes32(data[:32]) == DEPOSIT_SIG) {
             _withdraw(data[32:]);
-        } else if (bytes32(data[:32]) == WITHDRAW_BATCH_SIG) {
+        } else if (bytes32(data[:32]) == WITHDRAW_BATCH_SIG || bytes32(data[:32]) == DEPOSIT_BATCH_SIG) {
             _withdrawBatch(data);
-        } else {
+        } else if (bytes32(data[:32]) == MAP_TOKEN_SIG){
+            _unMapToken(data[32:]);
+        }else{
             revert("RootERC721Predicate: INVALID_SIGNATURE");
         }
     }
@@ -100,6 +102,19 @@ contract RootERC721Predicate is Predicate, Initializable, ERC721Holder, IRootERC
         // slither-disable-next-line reentrancy-events
         emit TokenMapped(address(rootToken), childToken);
         return childToken;
+    }
+
+    function _unMapToken(bytes calldata data) private{
+        (address rootToken, , , ) = abi.decode(
+            data,
+            (address, address, address, uint256)
+        );
+        require(address(rootToken) != address(0), "RootERC721Predicate: TOKEN IS ALREADY UNMAPPED");
+        require(sourceTokenToDestinationToken[address(rootToken)] != address(0));
+
+        sourceTokenToDestinationToken[rootToken] = address(0);
+
+        emit TokenUnMapped(rootToken);
     }
 
     function _deposit(IERC721Metadata rootToken, address receiver, uint256 tokenId) private {

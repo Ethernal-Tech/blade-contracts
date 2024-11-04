@@ -75,7 +75,7 @@ contract ChildERC20Predicate is IChildERC20Predicate, Predicate, Initializable, 
         require(msg.sender == address(gateway), "ChildERC20Predicate: ONLY_GATEWAY");
         require(sender == rootERC20Predicate, "ChildERC20Predicate: ONLY_ROOT_PREDICATE");
 
-        if (bytes32(data[:32]) == DEPOSIT_SIG) {
+        if (bytes32(data[:32]) == DEPOSIT_SIG || bytes32(data[:32]) == WITHDRAW_SIG) {
             _beforeTokenDeposit();
             _deposit(data[32:]);
             _afterTokenDeposit();

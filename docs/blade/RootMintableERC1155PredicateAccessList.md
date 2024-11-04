@@ -808,6 +808,22 @@ event TokenMapped(address indexed rootToken, address indexed childToken)
 | rootToken `indexed` | address | undefined |
 | childToken `indexed` | address | undefined |
 
+### TokenUnMapped
+
+```solidity
+event TokenUnMapped(address indexed rootToken)
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| rootToken `indexed` | address | undefined |
+
 
 
 ## Errors

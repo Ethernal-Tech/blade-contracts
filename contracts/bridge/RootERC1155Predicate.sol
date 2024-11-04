@@ -40,11 +40,14 @@ contract RootERC1155Predicate is Predicate, Initializable, ERC1155Holder, IRootE
         require(msg.sender == address(gateway), "RootERC1155Predicate: ONLY_GATEWAY");
         require(sender == childERC1155Predicate, "RootERC1155Predicate: ONLY_CHILD_PREDICATE");
 
-        if (bytes32(data[:32]) == WITHDRAW_SIG) {
+        if (bytes32(data[:32]) == WITHDRAW_SIG || bytes32(data[:32]) == WITHDRAW_SIG) {
             _withdraw(data[32:]);
-        } else if (bytes32(data[:32]) == WITHDRAW_BATCH_SIG) {
+        } else if (bytes32(data[:32]) == WITHDRAW_BATCH_SIG || bytes32(data[:32]) == WITHDRAW_BATCH_SIG) {
             _withdrawBatch(data);
-        } else {
+        }else if (bytes32(data[:32]) == MAP_TOKEN_SIG){
+            _unMapToken(data[32:]);
+        } 
+        else {
             revert("RootERC1155Predicate: INVALID_SIGNATURE");
         }
     }
@@ -109,6 +112,19 @@ contract RootERC1155Predicate is Predicate, Initializable, ERC1155Holder, IRootE
         gateway.sendBridgeMsg(childPredicate, abi.encode(MAP_TOKEN_SIG, rootToken, uri), destinationChainId);
         // slither-disable-next-line reentrancy-events
         emit TokenMapped(address(rootToken), childToken);
+    }
+
+    function _unMapToken(bytes calldata data) private{
+        (address rootToken, , , ) = abi.decode(
+            data,
+            (address, address, address, uint256)
+        );
+        require(address(rootToken) != address(0), "RootERC1155Predicate: TOKEN IS ALREADY UNMAPPED");
+        require(sourceTokenToDestinationToken[address(rootToken)] != address(0));
+
+        sourceTokenToDestinationToken[rootToken] = address(0);
+
+        emit TokenUnMapped(rootToken);
     }
 
     function _deposit(IERC1155MetadataURI rootToken, address receiver, uint256 tokenId, uint256 amount) private {

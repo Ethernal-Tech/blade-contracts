@@ -82,11 +82,11 @@ contract ChildERC721Predicate is IChildERC721Predicate, Predicate, Initializable
         require(msg.sender == address(gateway), "ChildERC721Predicate: ONLY_GATEWAY");
         require(sender == rootERC721Predicate, "ChildERC721Predicate: ONLY_ROOT_PREDICATE");
 
-        if (bytes32(data[:32]) == DEPOSIT_SIG) {
+        if (bytes32(data[:32]) == DEPOSIT_SIG || bytes32(data[:32]) == WITHDRAW_SIG) {
             _beforeTokenDeposit();
             _deposit(data[32:]);
             _afterTokenDeposit();
-        } else if (bytes32(data[:32]) == DEPOSIT_BATCH_SIG) {
+        } else if (bytes32(data[:32]) == DEPOSIT_BATCH_SIG || bytes32(data[:32])== WITHDRAW_BATCH_SIG) {
             _beforeTokenDeposit();
             _depositBatch(data);
             _afterTokenDeposit();
