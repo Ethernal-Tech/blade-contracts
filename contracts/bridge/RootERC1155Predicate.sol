@@ -116,7 +116,10 @@ contract RootERC1155Predicate is Predicate, Initializable, ERC1155Holder, IRootE
     function _unMapToken(bytes calldata data) private {
         (address rootToken, , , ) = abi.decode(data, (address, address, address, uint256));
         require(address(rootToken) != address(0), "RootERC1155Predicate: INVALID_TOKEN");
-        require(sourceTokenToDestinationToken[address(rootToken)] != address(0),"RootERC1155Predicate: TOKEN_IS_ALREADY_UNMAPPED");
+        require(
+            sourceTokenToDestinationToken[address(rootToken)] != address(0),
+            "RootERC1155Predicate: TOKEN_IS_ALREADY_UNMAPPED"
+        );
 
         sourceTokenToDestinationToken[rootToken] = address(0);
 
