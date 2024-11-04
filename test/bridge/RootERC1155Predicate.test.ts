@@ -311,4 +311,56 @@ describe("RootERC1155Predicate", () => {
     expect(withdrawEvent?.args?.tokenIds).to.deep.equal(ids);
     expect(withdrawEvent?.args?.amounts).to.deep.equal(amounts);
   });
+
+  it("unMapToken: revert invalid token", async () => {
+    const mappedData = ethers.utils.defaultAbiCoder.encode(
+      ["bytes32", "address", "address", "address", "uint256"],
+      [
+        ethers.utils.solidityKeccak256(["string"], ["MAP_TOKEN"]),
+        "0x0000000000000000000000000000000000000000",
+        accounts[0].address,
+        accounts[0].address,
+        1,
+      ]
+    );
+
+    await expect(
+      exitHelperRootERC1155Predicate.onStateReceive(0, childERC1155Predicate, mappedData)
+    ).to.be.revertedWith("RootERC1155Predicate: INVALID_TOKEN");
+  });
+
+  it("unMapToken: token unmapped", async () => {
+    const mappedData = ethers.utils.defaultAbiCoder.encode(
+      ["bytes32", "address", "address", "address", "uint256"],
+      [
+        ethers.utils.solidityKeccak256(["string"], ["MAP_TOKEN"]),
+        "0x0000000000000000000000000000000000000001",
+        accounts[0].address,
+        accounts[0].address,
+        1,
+      ]
+    );
+
+    await expect(
+      exitHelperRootERC1155Predicate.onStateReceive(0, childERC1155Predicate, mappedData)
+    ).to.be.revertedWith("RootERC1155Predicate: TOKEN_IS_ALREADY_UNMAPPED");
+  });
+
+  it("unMapToken: success", async () => {
+    const mappedData = ethers.utils.defaultAbiCoder.encode(
+      ["bytes32", "address", "address", "address", "uint256"],
+      [
+        ethers.utils.solidityKeccak256(["string"], ["MAP_TOKEN"]),
+        rootToken.address,
+        accounts[0].address,
+        accounts[0].address,
+        1,
+      ]
+    );
+
+    const withdrawTx = await exitHelperRootERC1155Predicate.onStateReceive(0, childERC1155Predicate, mappedData);
+    const withdrawReceipt = await withdrawTx.wait();
+    const withdrawEvent = withdrawReceipt?.events?.find((log: any) => log.event === "TokenUnMapped");
+    expect(withdrawEvent?.args?.rootToken).to.equal(rootToken.address);
+  });
 });

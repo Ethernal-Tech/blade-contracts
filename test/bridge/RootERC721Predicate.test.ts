@@ -312,4 +312,56 @@ describe("RootERC721Predicate", () => {
     expect(withdrawEvent?.args?.receivers).to.deep.equal(receiverArr);
     expect(withdrawEvent?.args?.tokenIds).to.deep.equal(depositedBatchIds.slice(0, batchSize));
   });
+
+  it("unMapToken: revert invalid token", async () => {
+    const mappedData = ethers.utils.defaultAbiCoder.encode(
+      ["bytes32", "address", "address", "address", "uint256"],
+      [
+        ethers.utils.solidityKeccak256(["string"], ["MAP_TOKEN"]),
+        "0x0000000000000000000000000000000000000000",
+        accounts[0].address,
+        accounts[0].address,
+        1,
+      ]
+    );
+
+    await expect(exitHelperRootERC721Predicate.onStateReceive(0, childERC721Predicate, mappedData)).to.be.revertedWith(
+      "RootERC721Predicate: INVALID_TOKEN"
+    );
+  });
+
+  it("unMapToken: token unmapped", async () => {
+    const mappedData = ethers.utils.defaultAbiCoder.encode(
+      ["bytes32", "address", "address", "address", "uint256"],
+      [
+        ethers.utils.solidityKeccak256(["string"], ["MAP_TOKEN"]),
+        "0x0000000000000000000000000000000000000001",
+        accounts[0].address,
+        accounts[0].address,
+        1,
+      ]
+    );
+
+    await expect(exitHelperRootERC721Predicate.onStateReceive(0, childERC721Predicate, mappedData)).to.be.revertedWith(
+      "RootERC721Predicate: TOKEN_IS_ALREADY_UNMAPPED"
+    );
+  });
+
+  it("unMapToken: success", async () => {
+    const mappedData = ethers.utils.defaultAbiCoder.encode(
+      ["bytes32", "address", "address", "address", "uint256"],
+      [
+        ethers.utils.solidityKeccak256(["string"], ["MAP_TOKEN"]),
+        rootToken.address,
+        accounts[0].address,
+        accounts[0].address,
+        1,
+      ]
+    );
+
+    const withdrawTx = await exitHelperRootERC721Predicate.onStateReceive(0, childERC721Predicate, mappedData);
+    const withdrawReceipt = await withdrawTx.wait();
+    const withdrawEvent = withdrawReceipt?.events?.find((log: any) => log.event === "TokenUnMapped");
+    expect(withdrawEvent?.args?.rootToken).to.equal(rootToken.address);
+  });
 });

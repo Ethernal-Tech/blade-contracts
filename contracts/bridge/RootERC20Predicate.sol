@@ -121,8 +121,8 @@ contract RootERC20Predicate is Predicate, Initializable, IRootERC20Predicate {
 
     function _unMapToken(bytes calldata data) private {
         (address rootToken, , , ) = abi.decode(data, (address, address, address, uint256));
-        require(address(rootToken) != address(0), "RootERC20Predicate: TOKEN_IS_ALREADY_UNMAPPED");
-        require(sourceTokenToDestinationToken[address(rootToken)] != address(0));
+        require(address(rootToken) != address(0), "RootERC20Predicate: INVALID_TOKEN");
+        require(sourceTokenToDestinationToken[address(rootToken)] != address(0), "RootERC20Predicate: TOKEN_IS_ALREADY_UNMAPPED");
 
         sourceTokenToDestinationToken[rootToken] = address(0);
 
