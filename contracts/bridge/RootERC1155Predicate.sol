@@ -44,10 +44,9 @@ contract RootERC1155Predicate is Predicate, Initializable, ERC1155Holder, IRootE
             _withdraw(data[32:]);
         } else if (bytes32(data[:32]) == WITHDRAW_BATCH_SIG || bytes32(data[:32]) == WITHDRAW_BATCH_SIG) {
             _withdrawBatch(data);
-        }else if (bytes32(data[:32]) == MAP_TOKEN_SIG){
+        } else if (bytes32(data[:32]) == MAP_TOKEN_SIG) {
             _unMapToken(data[32:]);
-        } 
-        else {
+        } else {
             revert("RootERC1155Predicate: INVALID_SIGNATURE");
         }
     }
@@ -114,11 +113,8 @@ contract RootERC1155Predicate is Predicate, Initializable, ERC1155Holder, IRootE
         emit TokenMapped(address(rootToken), childToken);
     }
 
-    function _unMapToken(bytes calldata data) private{
-        (address rootToken, , , ) = abi.decode(
-            data,
-            (address, address, address, uint256)
-        );
+    function _unMapToken(bytes calldata data) private {
+        (address rootToken, , , ) = abi.decode(data, (address, address, address, uint256));
         require(address(rootToken) != address(0), "RootERC1155Predicate: TOKEN IS ALREADY UNMAPPED");
         require(sourceTokenToDestinationToken[address(rootToken)] != address(0));
 
