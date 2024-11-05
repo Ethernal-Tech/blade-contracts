@@ -130,7 +130,7 @@ contract Gateway is ValidatorSetStorage, IGateway {
         );
 
         // if bridge message fails, revert flag
-        if (!success) processedEvents[message.id] = false;
+        if (!success) revert("Gateway: BATCH_ROLLBACK");
 
         // emit a ResultEvent indicating whether invocation of bridge message was successful or not
         // slither-disable-next-line reentrancy-events
