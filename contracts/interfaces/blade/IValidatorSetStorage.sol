@@ -50,6 +50,8 @@ struct SignedBridgeMessageBatch {
     uint256 destinationChainId;
     uint256[2] signature;
     bytes bitmap;
+    uint256 threshold;
+    bool isRollback;
 }
 
 /**

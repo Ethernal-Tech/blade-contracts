@@ -17,6 +17,7 @@ abstract contract GatewayTest is Test, System, Gateway {
     address receiver;
     bytes maxData;
     bytes moreThanMaxData;
+    bytes32 rootHash;
 
     function setUp() public virtual {
         bls = new BLS();
@@ -117,25 +118,74 @@ contract GatewayStateSyncTest is GatewayInitialized {
 
 contract GatewayReceiveBatchTests is GatewayInitialized {
     function testReceiveBatch_InvalidSignature() public {
+        SignedBridgeMessageBatch memory batch = SignedBridgeMessageBatch({
+            rootHash: 0,
+            startId: msgs[0].id,
+            endId: msgs[msgs.length - 1].id,
+            sourceChainId: 2,
+            destinationChainId: 3,
+            signature: aggMessagePoints[0],
+            bitmap: bitmaps[0],
+            threshold: 0,
+            isRollback: false
+        });
+
         vm.expectRevert("SIGNATURE_VERIFICATION_FAILED");
-        gateway.receiveBatch(msgs, aggMessagePoints[0], bitmaps[0]);
+        gateway.receiveBatch(msgs, batch);
     }
 
     function testReceiveBatch_EmptyBitmap() public {
+        SignedBridgeMessageBatch memory batch = SignedBridgeMessageBatch({
+            rootHash: 0,
+            startId: msgs[0].id,
+            endId: msgs[msgs.length - 1].id,
+            sourceChainId: 2,
+            destinationChainId: 3,
+            signature: aggMessagePoints[1],
+            bitmap: bitmaps[1],
+            threshold: 0,
+            isRollback: false
+        });
+
         vm.expectRevert("BITMAP_IS_EMPTY");
-        gateway.receiveBatch(msgs, aggMessagePoints[1], bitmaps[1]);
+        gateway.receiveBatch(msgs, batch);
     }
 
     function testReceiveBatch_NotEnoughPower() public {
+        SignedBridgeMessageBatch memory batch = SignedBridgeMessageBatch({
+            rootHash: 0,
+            startId: msgs[0].id,
+            endId: msgs[msgs.length - 1].id,
+            sourceChainId: 2,
+            destinationChainId: 3,
+            signature: aggMessagePoints[2],
+            bitmap: bitmaps[2],
+            threshold: 0,
+            isRollback: false
+        });
+
         vm.expectRevert("INSUFFICIENT_VOTING_POWER");
-        gateway.receiveBatch(msgs, aggMessagePoints[2], bitmaps[2]);
+        gateway.receiveBatch(msgs, batch);
     }
 
     function testReceiveBatch_Success() public {
+        SignedBridgeMessageBatch memory batch = SignedBridgeMessageBatch({
+            rootHash: 0,
+            startId: msgs[0].id,
+            endId: msgs[msgs.length - 1].id,
+            sourceChainId: 2,
+            destinationChainId: 3,
+            signature: aggMessagePoints[3],
+            bitmap: bitmaps[3],
+            threshold: 0,
+            isRollback: false
+        });
+
+
         vm.expectEmit();
         emit BridgeMessageResult(1, false, 2, 3, bytes(""));
         vm.expectEmit();
         emit BridgeMessageResult(2, false, 2, 3, bytes(""));
-        gateway.receiveBatch(msgs, aggMessagePoints[3], bitmaps[3]);
+        gateway.receiveBatch(msgs, batch);
     }
 }

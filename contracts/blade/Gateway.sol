@@ -54,33 +54,34 @@ contract Gateway is ValidatorSetStorage, IGateway {
 
     /**
      * @notice receives the batch of messages and executes them
-     * @param batch batch of messages
+     * @param batchMessages batch of messages
      */
     // slither-disable-next-line protected-vars
     function receiveBatch(
-        BridgeMessage[] calldata batch,
-        uint256[2] calldata signature,
-        bytes calldata bitmap
+        BridgeMessage[] calldata batchMessages,
+        SignedBridgeMessageBatch calldata signedBridgeBatch
     ) external {
-        _verifyBatch(batch);
+        _verifyBatch(batchMessages);
 
         bytes memory hash = abi.encode(
             keccak256(
                 abi.encode(
-                    calculateMerkleRoot(batch),
-                    batch[0].id,
-                    batch[batch.length - 1].id,
-                    batch[0].sourceChainId,
-                    batch[0].destinationChainId
+                    calculateMerkleRoot(batchMessages),
+                    signedBridgeBatch.startId,
+                    signedBridgeBatch.endId,
+                    signedBridgeBatch.sourceChainId,
+                    signedBridgeBatch.destinationChainId,
+                    signedBridgeBatch.threshold,
+                    signedBridgeBatch.isRollback
                 )
             )
         );
 
-        verifySignature(bls.hashToPoint(DOMAIN_BRIDGE, hash), signature, bitmap);
+        verifySignature(bls.hashToPoint(DOMAIN_BRIDGE, hash), signedBridgeBatch.signature, signedBridgeBatch.bitmap);
 
-        uint256 length = batch.length;
+        uint256 length = batchMessages.length;
         for (uint256 i = 0; i < length; ) {
-            _executeBridgeMessage(batch[i]);
+            _executeBridgeMessage(batchMessages[i]);
 
             unchecked {
                 ++i;
