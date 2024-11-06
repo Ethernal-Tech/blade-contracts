@@ -41,7 +41,7 @@ contract RootERC1155Predicate is Predicate, Initializable, ERC1155Holder, IRootE
         require(sender == childERC1155Predicate, "RootERC1155Predicate: ONLY_CHILD_PREDICATE");
 
         if (bytes32(data[:32]) == WITHDRAW_SIG || bytes32(data[:32]) == WITHDRAW_SIG) {
-            _withdraw(data[32:]);
+            _withdraw(data);
         } else if (bytes32(data[:32]) == WITHDRAW_BATCH_SIG || bytes32(data[:32]) == WITHDRAW_BATCH_SIG) {
             _withdrawBatch(data);
         } else if (bytes32(data[:32]) == MAP_TOKEN_SIG) {
@@ -58,7 +58,7 @@ contract RootERC1155Predicate is Predicate, Initializable, ERC1155Holder, IRootE
      */
     function onStateRollback(uint256 /* id */, address sender, bytes calldata data) external {
         require(msg.sender == address(gateway), "RootERC1155Predicate: ONLY_GATEWAY");
-        require(sender == address(this), "RootERC1155Predicate: ONLY_CHILD_PREDICATE");
+        require(sender == address(this), "RootERC1155Predicate: ONLY_ROOT_PREDICATE");
 
         if (bytes32(data[:32]) == DEPOSIT_SIG) {
             _withdraw(data[32:]);
