@@ -183,9 +183,9 @@ contract GatewayReceiveBatchTests is GatewayInitialized {
 
 
         vm.expectEmit();
-        emit BridgeMessageResult(1, false, 2, 3, bytes(""));
+        emit BridgeMessageResult(1, false, 2, 3, bytes(""), false);
         vm.expectEmit();
-        emit BridgeMessageResult(2, false, 2, 3, bytes(""));
+        emit BridgeMessageResult(2, false, 2, 3, bytes(""), false);
         gateway.receiveBatch(msgs, batch);
     }
 }
