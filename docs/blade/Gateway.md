@@ -371,7 +371,7 @@ function totalVotingPower() external view returns (uint256)
 ### BridgeMessageResult
 
 ```solidity
-event BridgeMessageResult(uint256 indexed counter, bool indexed status, uint256 sourceChainID, uint256 destinationChainID, bytes message)
+event BridgeMessageResult(uint256 indexed counter, bool indexed status, uint256 sourceChainID, uint256 destinationChainID, bytes message, bool isRollback)
 ```
 
 
@@ -387,6 +387,7 @@ event BridgeMessageResult(uint256 indexed counter, bool indexed status, uint256 
 | sourceChainID  | uint256 | undefined |
 | destinationChainID  | uint256 | undefined |
 | message  | bytes | undefined |
+| isRollback  | bool | undefined |
 
 ### BridgeMsg
 

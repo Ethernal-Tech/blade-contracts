@@ -28,6 +28,24 @@ function onStateReceive(uint256 counter, address sender, bytes data) external no
 | sender | address | undefined |
 | data | bytes | undefined |
 
+### onStateRollback
+
+```solidity
+function onStateRollback(uint256 id, address sender, bytes data) external nonpayable
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| id | uint256 | undefined |
+| sender | address | undefined |
+| data | bytes | undefined |
+
 
 
 

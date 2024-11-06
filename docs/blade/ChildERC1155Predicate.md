@@ -183,6 +183,24 @@ Function to be used for token deposits
 | sender | address | Address of the sender on the root chain |
 | data | bytes | Data sent by the sender |
 
+### onStateRollback
+
+```solidity
+function onStateRollback(uint256, address sender, bytes data) external nonpayable
+```
+
+Function to be used for token deposits for rollback
+
+*Can be extended to include other signatures for more functionality*
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | undefined |
+| sender | address | Address of the sender on the child chain |
+| data | bytes | Data sent by the sender |
+
 ### rootERC1155Predicate
 
 ```solidity
