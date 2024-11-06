@@ -325,9 +325,9 @@ describe("RootERC721Predicate", () => {
       ]
     );
 
-    await expect(exitHelperRootERC721Predicate.onStateRollback(0, exitHelperRootERC721Predicate.address, mappedData)).to.be.revertedWith(
-      "RootERC721Predicate: INVALID_TOKEN"
-    );
+    await expect(
+      exitHelperRootERC721Predicate.onStateRollback(0, exitHelperRootERC721Predicate.address, mappedData)
+    ).to.be.revertedWith("RootERC721Predicate: INVALID_TOKEN");
   });
 
   it("unMapToken: token unmapped", async () => {
@@ -342,9 +342,9 @@ describe("RootERC721Predicate", () => {
       ]
     );
 
-    await expect(exitHelperRootERC721Predicate.onStateRollback(0, exitHelperRootERC721Predicate.address, mappedData)).to.be.revertedWith(
-      "RootERC721Predicate: TOKEN_IS_ALREADY_UNMAPPED"
-    );
+    await expect(
+      exitHelperRootERC721Predicate.onStateRollback(0, exitHelperRootERC721Predicate.address, mappedData)
+    ).to.be.revertedWith("RootERC721Predicate: TOKEN_IS_ALREADY_UNMAPPED");
   });
 
   it("unMapToken: success", async () => {
@@ -359,7 +359,11 @@ describe("RootERC721Predicate", () => {
       ]
     );
 
-    const withdrawTx = await exitHelperRootERC721Predicate.onStateRollback(0, exitHelperRootERC721Predicate.address, mappedData);
+    const withdrawTx = await exitHelperRootERC721Predicate.onStateRollback(
+      0,
+      exitHelperRootERC721Predicate.address,
+      mappedData
+    );
     const withdrawReceipt = await withdrawTx.wait();
     const withdrawEvent = withdrawReceipt?.events?.find((log: any) => log.event === "TokenUnMapped");
     expect(withdrawEvent?.args?.rootToken).to.equal(rootToken.address);
@@ -394,8 +398,8 @@ describe("RootERC721Predicate", () => {
       ]
     );
 
-    await expect(exitHelperRootERC721Predicate.onStateRollback(0, "0x0000000000000000000000000000000000000000", mappedData)).to.be.revertedWith(
-      "RootERC721Predicate: ONLY_ROOT_PREDICATE"
-    );
+    await expect(
+      exitHelperRootERC721Predicate.onStateRollback(0, "0x0000000000000000000000000000000000000000", mappedData)
+    ).to.be.revertedWith("RootERC721Predicate: ONLY_ROOT_PREDICATE");
   });
 });

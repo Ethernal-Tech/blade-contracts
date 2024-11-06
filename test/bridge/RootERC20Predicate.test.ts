@@ -294,9 +294,9 @@ describe("RootERC20Predicate", () => {
       ]
     );
 
-    await expect(exitHelperRootERC20Predicate.onStateRollback(0, exitHelperRootERC20Predicate.address, mappedData)).to.be.revertedWith(
-      "RootERC20Predicate: INVALID_TOKEN"
-    );
+    await expect(
+      exitHelperRootERC20Predicate.onStateRollback(0, exitHelperRootERC20Predicate.address, mappedData)
+    ).to.be.revertedWith("RootERC20Predicate: INVALID_TOKEN");
   });
 
   it("unMapToken: token unmapped", async () => {
@@ -311,9 +311,9 @@ describe("RootERC20Predicate", () => {
       ]
     );
 
-    await expect(exitHelperRootERC20Predicate.onStateRollback(0, exitHelperRootERC20Predicate.address, mappedData)).to.be.revertedWith(
-      "RootERC20Predicate: TOKEN_IS_ALREADY_UNMAPPED"
-    );
+    await expect(
+      exitHelperRootERC20Predicate.onStateRollback(0, exitHelperRootERC20Predicate.address, mappedData)
+    ).to.be.revertedWith("RootERC20Predicate: TOKEN_IS_ALREADY_UNMAPPED");
   });
 
   it("unMapToken: success", async () => {
@@ -328,7 +328,11 @@ describe("RootERC20Predicate", () => {
       ]
     );
 
-    const withdrawTx = await exitHelperRootERC20Predicate.onStateRollback(0, exitHelperRootERC20Predicate.address, mappedData);
+    const withdrawTx = await exitHelperRootERC20Predicate.onStateRollback(
+      0,
+      exitHelperRootERC20Predicate.address,
+      mappedData
+    );
     const withdrawReceipt = await withdrawTx.wait();
     const withdrawEvent = withdrawReceipt?.events?.find((log: any) => log.event === "TokenUnMapped");
     expect(withdrawEvent?.args?.rootToken).to.equal(rootToken.address);
@@ -363,9 +367,8 @@ describe("RootERC20Predicate", () => {
       ]
     );
 
-    await expect(exitHelperRootERC20Predicate.onStateRollback(0, "0x0000000000000000000000000000000000000000", mappedData)).to.be.revertedWith(
-      "RootERC20Predicate: ONLY_ROOT_PREDICATE"
-    );
+    await expect(
+      exitHelperRootERC20Predicate.onStateRollback(0, "0x0000000000000000000000000000000000000000", mappedData)
+    ).to.be.revertedWith("RootERC20Predicate: ONLY_ROOT_PREDICATE");
   });
-
 });

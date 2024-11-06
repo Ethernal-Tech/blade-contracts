@@ -424,9 +424,9 @@ describe("ChildERC20Predicate", () => {
       ]
     );
 
-    await expect(stateReceiverChildERC20Predicate.onStateRollback(0, stateReceiverChildERC20Predicate.address, mappedData)).to.be.revertedWith(
-      "ChildERC20Predicate: UNMAPPED_TOKEN"
-    );
+    await expect(
+      stateReceiverChildERC20Predicate.onStateRollback(0, stateReceiverChildERC20Predicate.address, mappedData)
+    ).to.be.revertedWith("ChildERC20Predicate: UNMAPPED_TOKEN");
   });
 
   it("OnStateRollback: failed only_gateway", async () => {
@@ -441,9 +441,9 @@ describe("ChildERC20Predicate", () => {
       ]
     );
 
-    await expect(systemChildERC20Predicate.onStateRollback(0, systemChildERC20Predicate.address, mappedData)).to.be.revertedWith(
-      "ChildERC20Predicate: ONLY_GATEWAY"
-    );
+    await expect(
+      systemChildERC20Predicate.onStateRollback(0, systemChildERC20Predicate.address, mappedData)
+    ).to.be.revertedWith("ChildERC20Predicate: ONLY_GATEWAY");
   });
 
   it("OnStateRollback: failed only_child_predicate", async () => {
@@ -458,8 +458,8 @@ describe("ChildERC20Predicate", () => {
       ]
     );
 
-    await expect(stateReceiverChildERC20Predicate.onStateRollback(0, "0x0000000000000000000000000000000000000000", mappedData)).to.be.revertedWith(
-      "ChildERC20Predicate: ONLY_CHILD_PREDICATE"
-    );
+    await expect(
+      stateReceiverChildERC20Predicate.onStateRollback(0, "0x0000000000000000000000000000000000000000", mappedData)
+    ).to.be.revertedWith("ChildERC20Predicate: ONLY_CHILD_PREDICATE");
   });
 });

@@ -358,7 +358,11 @@ describe("RootERC1155Predicate", () => {
       ]
     );
 
-    const withdrawTx = await exitHelperRootERC1155Predicate.onStateRollback(0, exitHelperRootERC1155Predicate.address, mappedData);
+    const withdrawTx = await exitHelperRootERC1155Predicate.onStateRollback(
+      0,
+      exitHelperRootERC1155Predicate.address,
+      mappedData
+    );
     const withdrawReceipt = await withdrawTx.wait();
     const withdrawEvent = withdrawReceipt?.events?.find((log: any) => log.event === "TokenUnMapped");
     expect(withdrawEvent?.args?.rootToken).to.equal(rootToken.address);
@@ -393,8 +397,8 @@ describe("RootERC1155Predicate", () => {
       ]
     );
 
-    await expect(exitHelperRootERC1155Predicate.onStateRollback(0, "0x0000000000000000000000000000000000000000", mappedData)).to.be.revertedWith(
-      "RootERC1155Predicate: ONLY_ROOT_PREDICATE"
-    );
+    await expect(
+      exitHelperRootERC1155Predicate.onStateRollback(0, "0x0000000000000000000000000000000000000000", mappedData)
+    ).to.be.revertedWith("RootERC1155Predicate: ONLY_ROOT_PREDICATE");
   });
 });

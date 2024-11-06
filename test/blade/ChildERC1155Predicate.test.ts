@@ -496,9 +496,9 @@ describe("ChildERC1155Predicate", () => {
       ]
     );
 
-    await expect(systemChildERC1155Predicate.onStateRollback(0, systemChildERC1155Predicate.address, mappedData)).to.be.revertedWith(
-      "ChildERC1155Predicate: ONLY_GATEWAY"
-    );
+    await expect(
+      systemChildERC1155Predicate.onStateRollback(0, systemChildERC1155Predicate.address, mappedData)
+    ).to.be.revertedWith("ChildERC1155Predicate: ONLY_GATEWAY");
   });
 
   it("OnStateRollback: failed only_child_predicate", async () => {
@@ -513,8 +513,8 @@ describe("ChildERC1155Predicate", () => {
       ]
     );
 
-    await expect(stateReceiverChildERC1155Predicate.onStateRollback(0, "0x0000000000000000000000000000000000000000", mappedData)).to.be.revertedWith(
-      "ChildERC1155Predicate: ONLY_CHILD_PREDICATE"
-    );
+    await expect(
+      stateReceiverChildERC1155Predicate.onStateRollback(0, "0x0000000000000000000000000000000000000000", mappedData)
+    ).to.be.revertedWith("ChildERC1155Predicate: ONLY_CHILD_PREDICATE");
   });
 });
