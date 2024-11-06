@@ -325,7 +325,7 @@ describe("RootERC721Predicate", () => {
       ]
     );
 
-    await expect(exitHelperRootERC721Predicate.onStateReceive(0, childERC721Predicate, mappedData)).to.be.revertedWith(
+    await expect(exitHelperRootERC721Predicate.onStateRollback(0, exitHelperRootERC721Predicate.address, mappedData)).to.be.revertedWith(
       "RootERC721Predicate: INVALID_TOKEN"
     );
   });
@@ -342,7 +342,7 @@ describe("RootERC721Predicate", () => {
       ]
     );
 
-    await expect(exitHelperRootERC721Predicate.onStateReceive(0, childERC721Predicate, mappedData)).to.be.revertedWith(
+    await expect(exitHelperRootERC721Predicate.onStateRollback(0, exitHelperRootERC721Predicate.address, mappedData)).to.be.revertedWith(
       "RootERC721Predicate: TOKEN_IS_ALREADY_UNMAPPED"
     );
   });
@@ -359,9 +359,43 @@ describe("RootERC721Predicate", () => {
       ]
     );
 
-    const withdrawTx = await exitHelperRootERC721Predicate.onStateReceive(0, childERC721Predicate, mappedData);
+    const withdrawTx = await exitHelperRootERC721Predicate.onStateRollback(0, exitHelperRootERC721Predicate.address, mappedData);
     const withdrawReceipt = await withdrawTx.wait();
     const withdrawEvent = withdrawReceipt?.events?.find((log: any) => log.event === "TokenUnMapped");
     expect(withdrawEvent?.args?.rootToken).to.equal(rootToken.address);
+  });
+
+  it("OnStateRollback: failed only_gateway", async () => {
+    const mappedData = ethers.utils.defaultAbiCoder.encode(
+      ["bytes32", "address", "address", "address", "uint256"],
+      [
+        ethers.utils.solidityKeccak256(["string"], ["DEPOSIT"]),
+        "0x0000000000000000000000000000000000000000",
+        accounts[0].address,
+        accounts[0].address,
+        1,
+      ]
+    );
+
+    await expect(rootERC721Predicate.onStateRollback(0, rootERC721Predicate.address, mappedData)).to.be.revertedWith(
+      "RootERC721Predicate: ONLY_GATEWAY"
+    );
+  });
+
+  it("OnStateRollback: failed only_child_predicate", async () => {
+    const mappedData = ethers.utils.defaultAbiCoder.encode(
+      ["bytes32", "address", "address", "address", "uint256"],
+      [
+        ethers.utils.solidityKeccak256(["string"], ["WITHDRAW"]),
+        "0x0000000000000000000000000000000000000001",
+        accounts[0].address,
+        accounts[0].address,
+        1,
+      ]
+    );
+
+    await expect(exitHelperRootERC721Predicate.onStateRollback(0, "0x0000000000000000000000000000000000000000", mappedData)).to.be.revertedWith(
+      "RootERC721Predicate: ONLY_ROOT_PREDICATE"
+    );
   });
 });

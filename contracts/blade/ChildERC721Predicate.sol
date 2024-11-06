@@ -90,6 +90,8 @@ contract ChildERC721Predicate is IChildERC721Predicate, Predicate, Initializable
             _beforeTokenDeposit();
             _depositBatch(data);
             _afterTokenDeposit();
+        } else if (bytes32(data[:32]) == MAP_TOKEN_SIG) {
+            _mapToken(data);
         } else {
             revert("ChildERC721Predicate: INVALID_SIGNATURE");
         }

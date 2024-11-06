@@ -55,8 +55,8 @@ contract RootERC721Predicate is Predicate, Initializable, ERC721Holder, IRootERC
      * @dev Can be extended to include other signatures for more functionality
      */
     function onStateRollback(uint256 /*  id */, address sender, bytes calldata data) external {
-        require(msg.sender == address(gateway), "RootERC20Predicate: ONLY_GATEWAY");
-        require(sender == address(this), "RootERC20Predicate: ONLY_ROOT_PREDICATE");
+        require(msg.sender == address(gateway), "RootERC721Predicate: ONLY_GATEWAY");
+        require(sender == address(this), "RootERC721Predicate: ONLY_ROOT_PREDICATE");
 
         if (bytes32(data[:32]) == DEPOSIT_SIG) {
             _withdraw(data);
@@ -65,7 +65,7 @@ contract RootERC721Predicate is Predicate, Initializable, ERC721Holder, IRootERC
         } else if (bytes32(data[:32]) == MAP_TOKEN_SIG) {
             _unMapToken(data[32:]);
         } else {
-            revert("RootERC20Predicate: INVALID_SIGNATURE");
+            revert("RootERC721Predicate: INVALID_SIGNATURE");
         }
     }
 
