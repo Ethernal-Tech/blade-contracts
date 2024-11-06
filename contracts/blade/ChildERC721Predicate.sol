@@ -82,16 +82,37 @@ contract ChildERC721Predicate is IChildERC721Predicate, Predicate, Initializable
         require(msg.sender == address(gateway), "ChildERC721Predicate: ONLY_GATEWAY");
         require(sender == rootERC721Predicate, "ChildERC721Predicate: ONLY_ROOT_PREDICATE");
 
-        if (bytes32(data[:32]) == DEPOSIT_SIG || bytes32(data[:32]) == WITHDRAW_SIG) {
+        if (bytes32(data[:32]) == DEPOSIT_SIG) {
             _beforeTokenDeposit();
-            _deposit(data[32:]);
+            _deposit(data);
             _afterTokenDeposit();
-        } else if (bytes32(data[:32]) == DEPOSIT_BATCH_SIG || bytes32(data[:32]) == WITHDRAW_BATCH_SIG) {
+        } else if (bytes32(data[:32]) == DEPOSIT_BATCH_SIG) {
             _beforeTokenDeposit();
             _depositBatch(data);
             _afterTokenDeposit();
-        } else if (bytes32(data[:32]) == MAP_TOKEN_SIG) {
-            _mapToken(data);
+        } else {
+            revert("ChildERC721Predicate: INVALID_SIGNATURE");
+        }
+    }
+
+    /**
+     * @notice Function to be used for token deposits for rollback
+     * @param sender Address of the sender on the chain chain
+     * @param data Data sent by the sender
+     * @dev Can be extended to include other signatures for more functionality
+     */
+    function onStateRollback(uint256 /* id */, address sender, bytes calldata data) external {
+        require(msg.sender == address(gateway), "ChildERC721Predicate: ONLY_GATEWAY");
+        require(sender == address(this), "ChildERC721Predicate: ONLY_CHILD_PREDICATE");
+
+        if (bytes32(data[:32]) == WITHDRAW_SIG) {
+            _beforeTokenDeposit();
+            _deposit(data);
+            _afterTokenDeposit();
+        } else if (bytes32(data[:32]) == WITHDRAW_BATCH_SIG) {
+            _beforeTokenDeposit();
+            _depositBatch(data);
+            _afterTokenDeposit();
         } else {
             revert("ChildERC721Predicate: INVALID_SIGNATURE");
         }
@@ -223,9 +244,9 @@ contract ChildERC721Predicate is IChildERC721Predicate, Predicate, Initializable
     }
 
     function _deposit(bytes calldata data) private {
-        (address depositToken, address depositor, address receiver, uint256 tokenId) = abi.decode(
+        (bytes32 sig, address depositToken, address depositor, address receiver, uint256 tokenId) = abi.decode(
             data,
-            (address, address, address, uint256)
+            (bytes32, address, address, address, uint256)
         );
 
         IChildERC721 childToken = IChildERC721(sourceTokenToDestinationToken[depositToken]);
@@ -242,16 +263,24 @@ contract ChildERC721Predicate is IChildERC721Predicate, Predicate, Initializable
         assert(rootToken != address(0));
         // a mapped token should never have predicate unset
         assert(IChildERC721(childToken).predicate() == address(this));
-        require(IChildERC721(childToken).mint(receiver, tokenId), "ChildERC721Predicate: MINT_FAILED");
+
+        if (sig == DEPOSIT_SIG) {
+            require(IChildERC721(childToken).mint(receiver, tokenId), "ChildERC721Predicate: MINT_FAILED");
+        } else {
+            require(IChildERC721(childToken).mint(depositor, tokenId), "ChildERC721Predicate: MINT_FAILED");
+        }
         // slither-disable-next-line reentrancy-events
         emit ERC721Deposit(depositToken, address(childToken), depositor, receiver, tokenId);
     }
 
     function _depositBatch(bytes calldata data) private {
-        (, address depositToken, address depositor, address[] memory receivers, uint256[] memory tokenIds) = abi.decode(
-            data,
-            (bytes32, address, address, address[], uint256[])
-        );
+        (
+            bytes32 sig,
+            address depositToken,
+            address depositor,
+            address[] memory receivers,
+            uint256[] memory tokenIds
+        ) = abi.decode(data, (bytes32, address, address, address[], uint256[]));
 
         IChildERC721 childToken = IChildERC721(sourceTokenToDestinationToken[depositToken]);
 
@@ -267,7 +296,18 @@ contract ChildERC721Predicate is IChildERC721Predicate, Predicate, Initializable
         assert(rootToken != address(0));
         // a mapped token should never have predicate unset
         assert(IChildERC721(childToken).predicate() == address(this));
-        require(IChildERC721(childToken).mintBatch(receivers, tokenIds), "ChildERC721Predicate: MINT_FAILED");
+        if (sig == DEPOSIT_BATCH_SIG) {
+            require(IChildERC721(childToken).mintBatch(receivers, tokenIds), "ChildERC721Predicate: MINT_FAILED");
+        } else {
+            address[] memory depositors = new address[](tokenIds.length);
+
+            for (uint i = 0; i < tokenIds.length; i++) {
+                depositors[i] = depositor;
+            }
+
+            require(IChildERC721(childToken).mintBatch(depositors, tokenIds), "ChildERC721Predicate: MINT_FAILED");
+        }
+
         // slither-disable-next-line reentrancy-events
         emit ERC721DepositBatch(depositToken, address(childToken), depositor, receivers, tokenIds);
     }

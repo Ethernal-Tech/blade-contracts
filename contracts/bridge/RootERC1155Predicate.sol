@@ -52,6 +52,26 @@ contract RootERC1155Predicate is Predicate, Initializable, ERC1155Holder, IRootE
     }
 
     /**
+     * @inheritdoc IStateReceiver
+     * @notice Function to be used for token withdrawals for rollback
+     * @dev Can be extended to include other signatures for more functionality
+     */
+    function onStateRollback(uint256 /* id */, address sender, bytes calldata data) external {
+        require(msg.sender == address(gateway), "RootERC1155Predicate: ONLY_GATEWAY");
+        require(sender == address(this), "RootERC1155Predicate: ONLY_CHILD_PREDICATE");
+
+        if (bytes32(data[:32]) == DEPOSIT_SIG) {
+            _withdraw(data[32:]);
+        } else if (bytes32(data[:32]) == DEPOSIT_BATCH_SIG) {
+            _withdrawBatch(data);
+        } else if (bytes32(data[:32]) == MAP_TOKEN_SIG) {
+            _unMapToken(data[32:]);
+        } else {
+            revert("RootERC1155Predicate: INVALID_SIGNATURE");
+        }
+    }
+
+    /**
      * @inheritdoc IRootERC1155Predicate
      */
     function deposit(IERC1155MetadataURI rootToken, uint256 tokenId, uint256 amount) external {
@@ -169,21 +189,23 @@ contract RootERC1155Predicate is Predicate, Initializable, ERC1155Holder, IRootE
     }
 
     function _withdraw(bytes calldata data) private {
-        (address rootToken, address withdrawer, address receiver, uint256 tokenId, uint256 amount) = abi.decode(
-            data,
-            (address, address, address, uint256, uint256)
-        );
+        (bytes32 sig, address rootToken, address withdrawer, address receiver, uint256 tokenId, uint256 amount) = abi
+            .decode(data, (bytes32, address, address, address, uint256, uint256));
         address childToken = sourceTokenToDestinationToken[rootToken];
         assert(childToken != address(0)); // invariant because child predicate should have already mapped tokens
 
-        IERC1155MetadataURI(rootToken).safeTransferFrom(address(this), receiver, tokenId, amount, "");
+        if (sig == WITHDRAW_SIG) {
+            IERC1155MetadataURI(rootToken).safeTransferFrom(address(this), receiver, tokenId, amount, "");
+        } else {
+            IERC1155MetadataURI(rootToken).safeTransferFrom(address(this), withdrawer, tokenId, amount, "");
+        }
         // slither-disable-next-line reentrancy-events
         emit ERC1155Withdraw(address(rootToken), childToken, withdrawer, receiver, tokenId, amount);
     }
 
     function _withdrawBatch(bytes calldata data) private {
         (
-            ,
+            bytes32 sig,
             address rootToken,
             address withdrawer,
             address[] memory receivers,
@@ -192,10 +214,25 @@ contract RootERC1155Predicate is Predicate, Initializable, ERC1155Holder, IRootE
         ) = abi.decode(data, (bytes32, address, address, address[], uint256[], uint256[]));
         address childToken = sourceTokenToDestinationToken[rootToken];
         assert(childToken != address(0)); // invariant because child predicate should have already mapped tokens
-        for (uint256 i = 0; i < tokenIds.length; ) {
-            IERC1155MetadataURI(rootToken).safeTransferFrom(address(this), receivers[i], tokenIds[i], amounts[i], "");
-            unchecked {
-                ++i;
+        if (sig == WITHDRAW_SIG) {
+            for (uint256 i = 0; i < tokenIds.length; ) {
+                IERC1155MetadataURI(rootToken).safeTransferFrom(
+                    address(this),
+                    receivers[i],
+                    tokenIds[i],
+                    amounts[i],
+                    ""
+                );
+                unchecked {
+                    ++i;
+                }
+            }
+        } else {
+            for (uint256 i = 0; i < tokenIds.length; ) {
+                IERC1155MetadataURI(rootToken).safeTransferFrom(address(this), withdrawer, tokenIds[i], amounts[i], "");
+                unchecked {
+                    ++i;
+                }
             }
         }
         // slither-disable-next-line reentrancy-events

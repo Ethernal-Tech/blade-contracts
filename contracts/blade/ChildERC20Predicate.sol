@@ -77,10 +77,29 @@ contract ChildERC20Predicate is IChildERC20Predicate, Predicate, Initializable, 
 
         if (bytes32(data[:32]) == DEPOSIT_SIG || bytes32(data[:32]) == WITHDRAW_SIG) {
             _beforeTokenDeposit();
-            _deposit(data[32:]);
+            _deposit(data);
             _afterTokenDeposit();
         } else if (bytes32(data[:32]) == MAP_TOKEN_SIG) {
             _mapToken(data);
+        } else {
+            revert("ChildERC20Predicate: INVALID_SIGNATURE");
+        }
+    }
+
+    /**
+     * @notice Function to be used for token deposits for rollback
+     * @param sender Address of the sender on the child chain
+     * @param data Data sent by the sender
+     * @dev Can be extended to include other signatures for more functionality
+     */
+    function onStateRollback(uint256 /* id */, address sender, bytes calldata data) external {
+        require(msg.sender == address(gateway), "ChildERC20Predicate: ONLY_GATEWAY");
+        require(sender == address(this), "ChildERC20Predicate: ONLY_CHILD_PREDICATE");
+
+        if (bytes32(data[:32]) == WITHDRAW_SIG) {
+            _beforeTokenDeposit();
+            _deposit(data);
+            _afterTokenDeposit();
         } else {
             revert("ChildERC20Predicate: INVALID_SIGNATURE");
         }
@@ -172,9 +191,9 @@ contract ChildERC20Predicate is IChildERC20Predicate, Predicate, Initializable, 
     }
 
     function _deposit(bytes calldata data) private {
-        (address depositToken, address depositor, address receiver, uint256 amount) = abi.decode(
+        (bytes32 sig, address depositToken, address depositor, address receiver, uint256 amount) = abi.decode(
             data,
-            (address, address, address, uint256)
+            (bytes32, address, address, address, uint256)
         );
 
         IChildERC20 childToken = IChildERC20(sourceTokenToDestinationToken[depositToken]);
@@ -191,7 +210,11 @@ contract ChildERC20Predicate is IChildERC20Predicate, Predicate, Initializable, 
         // a mapped token should never have predicate unset
         assert(IChildERC20(childToken).predicate() == address(this));
 
-        require(IChildERC20(childToken).mint(receiver, amount), "ChildERC20Predicate: MINT_FAILED");
+        if (sig == DEPOSIT_SIG) {
+            require(IChildERC20(childToken).mint(receiver, amount), "ChildERC20Predicate: MINT_FAILED");
+        } else {
+            require(IChildERC20(childToken).mint(depositor, amount), "ChildERC20Predicate: MINT_FAILED");
+        }
 
         // slither-disable-next-line reentrancy-events
         emit ERC20Deposit(depositToken, address(childToken), depositor, receiver, amount);

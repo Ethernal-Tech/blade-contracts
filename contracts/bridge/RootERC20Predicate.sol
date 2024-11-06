@@ -64,9 +64,23 @@ contract RootERC20Predicate is Predicate, Initializable, IRootERC20Predicate {
         require(sender == childERC20Predicate, "RootERC20Predicate: ONLY_CHILD_PREDICATE");
 
         if (bytes32(data[:32]) == WITHDRAW_SIG) {
-            _withdraw(data[32:]);
-        } else if (bytes32(data[:32]) == DEPOSIT_SIG) {
-            _withdraw(data[32:]);
+            _withdraw(data);
+        } else {
+            revert("RootERC20Predicate: INVALID_SIGNATURE");
+        }
+    }
+
+    /**
+     * @inheritdoc IStateReceiver
+     * @notice Function to be used for token withdrawals for rollback
+     * @dev Can be extended to include other signatures for more functionality
+     */
+    function onStateRollback(uint256 /*  id */, address sender, bytes calldata data) external {
+        require(msg.sender == address(gateway), "RootERC20Predicate: ONLY_GATEWAY");
+        require(sender == address(this), "RootERC20Predicate: ONLY_ROOT_PREDICATE");
+
+        if (bytes32(data[:32]) == DEPOSIT_SIG) {
+            _withdraw(data);
         } else if (bytes32(data[:32]) == MAP_TOKEN_SIG) {
             _unMapToken(data[32:]);
         } else {
@@ -153,14 +167,19 @@ contract RootERC20Predicate is Predicate, Initializable, IRootERC20Predicate {
     }
 
     function _withdraw(bytes calldata data) private {
-        (address rootToken, address withdrawer, address receiver, uint256 amount) = abi.decode(
+        (bytes32 sig, address rootToken, address withdrawer, address receiver, uint256 amount) = abi.decode(
             data,
-            (address, address, address, uint256)
+            (bytes32, address, address, address, uint256)
         );
         address childToken = sourceTokenToDestinationToken[rootToken];
         assert(childToken != address(0)); // invariant because child predicate should have already mapped tokens
 
-        IERC20Metadata(rootToken).safeTransfer(receiver, amount);
+        if (sig == DEPOSIT_SIG) {
+            IERC20Metadata(rootToken).safeTransfer(receiver, amount);
+        } else {
+            IERC20Metadata(rootToken).safeTransfer(withdrawer, amount);
+        }
+
         // slither-disable-next-line reentrancy-events
         emit ERC20Withdraw(address(rootToken), childToken, withdrawer, receiver, amount);
     }

@@ -86,16 +86,39 @@ contract ChildERC1155Predicate is IChildERC1155Predicate, Predicate, Initializab
         require(msg.sender == address(gateway), "ChildERC1155Predicate: ONLY_GATEWAY");
         require(sender == rootERC1155Predicate, "ChildERC1155Predicate: ONLY_ROOT_PREDICATE");
 
-        if (bytes32(data[:32]) == DEPOSIT_SIG || bytes32(data[:32]) == WITHDRAW_SIG) {
+        if (bytes32(data[:32]) == DEPOSIT_SIG) {
             _beforeTokenDeposit();
-            _deposit(data[32:]);
+            _deposit(data);
             _afterTokenDeposit();
-        } else if (bytes32(data[:32]) == DEPOSIT_BATCH_SIG || bytes32(data[:32]) == WITHDRAW_BATCH_SIG) {
+        } else if (bytes32(data[:32]) == DEPOSIT_BATCH_SIG) {
             _beforeTokenDeposit();
             _depositBatch(data);
             _afterTokenDeposit();
         } else if (bytes32(data[:32]) == MAP_TOKEN_SIG) {
             _mapToken(data);
+        } else {
+            revert("ChildERC1155Predicate: INVALID_SIGNATURE");
+        }
+    }
+
+    /**
+     * @notice Function to be used for token deposits for rollback
+     * @param sender Address of the sender on the child chain
+     * @param data Data sent by the sender
+     * @dev Can be extended to include other signatures for more functionality
+     */
+    function onStateRollback(uint256 /* id */, address sender, bytes calldata data) external {
+        require(msg.sender == address(gateway), "ChildERC1155Predicate: ONLY_GATEWAY");
+        require(sender == address(this), "ChildERC1155Predicate: ONLY_CHILD_PREDICATE");
+
+        if (bytes32(data[:32]) == WITHDRAW_SIG) {
+            _beforeTokenDeposit();
+            _deposit(data);
+            _afterTokenDeposit();
+        } else if (bytes32(data[:32]) == WITHDRAW_BATCH_SIG) {
+            _beforeTokenDeposit();
+            _depositBatch(data);
+            _afterTokenDeposit();
         } else {
             revert("ChildERC1155Predicate: INVALID_SIGNATURE");
         }
@@ -240,10 +263,8 @@ contract ChildERC1155Predicate is IChildERC1155Predicate, Predicate, Initializab
     }
 
     function _deposit(bytes calldata data) private {
-        (address depositToken, address depositor, address receiver, uint256 tokenId, uint256 amount) = abi.decode(
-            data,
-            (address, address, address, uint256, uint256)
-        );
+        (bytes32 sig, address depositToken, address depositor, address receiver, uint256 tokenId, uint256 amount) = abi
+            .decode(data, (bytes32, address, address, address, uint256, uint256));
 
         IChildERC1155 childToken = IChildERC1155(sourceTokenToDestinationToken[depositToken]);
 
@@ -259,14 +280,19 @@ contract ChildERC1155Predicate is IChildERC1155Predicate, Predicate, Initializab
         assert(rootToken != address(0));
         // a mapped token should never have predicate unset
         assert(IChildERC1155(childToken).predicate() == address(this));
-        require(IChildERC1155(childToken).mint(receiver, tokenId, amount), "ChildERC1155Predicate: MINT_FAILED");
+
+        if (sig == DEPOSIT_SIG) {
+            require(IChildERC1155(childToken).mint(receiver, tokenId, amount), "ChildERC1155Predicate: MINT_FAILED");
+        } else {
+            require(IChildERC1155(childToken).mint(depositor, tokenId, amount), "ChildERC1155Predicate: MINT_FAILED");
+        }
         // slither-disable-next-line reentrancy-events
         emit ERC1155Deposit(depositToken, address(childToken), depositor, receiver, tokenId, amount);
     }
 
     function _depositBatch(bytes calldata data) private {
         (
-            ,
+            bytes32 sig,
             address depositToken,
             address depositor,
             address[] memory receivers,
@@ -288,10 +314,23 @@ contract ChildERC1155Predicate is IChildERC1155Predicate, Predicate, Initializab
         assert(rootToken != address(0));
         // a mapped token should never have predicate unset
         assert(IChildERC1155(childToken).predicate() == address(this));
-        require(
-            IChildERC1155(childToken).mintBatch(receivers, tokenIds, amounts),
-            "ChildERC1155Predicate: MINT_FAILED"
-        );
+        if (sig == DEPOSIT_BATCH_SIG) {
+            require(
+                IChildERC1155(childToken).mintBatch(receivers, tokenIds, amounts),
+                "ChildERC1155Predicate: MINT_FAILED"
+            );
+        } else {
+            address[] memory depositors = new address[](tokenIds.length);
+
+            for (uint i = 0; i < tokenIds.length; i++) {
+                depositors[i] = depositor;
+            }
+
+            require(
+                IChildERC1155(childToken).mintBatch(depositors, tokenIds, amounts),
+                "ChildERC1155Predicate: MINT_FAILED"
+            );
+        }
         // slither-disable-next-line reentrancy-events
         emit ERC1155DepositBatch(depositToken, address(childToken), depositor, receivers, tokenIds, amounts);
     }

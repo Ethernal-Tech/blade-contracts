@@ -40,14 +40,32 @@ contract RootERC721Predicate is Predicate, Initializable, ERC721Holder, IRootERC
         require(msg.sender == address(gateway), "RootERC721Predicate: ONLY_GATEWAY");
         require(sender == childERC721Predicate, "RootERC721Predicate: ONLY_CHILD_PREDICATE");
 
-        if (bytes32(data[:32]) == WITHDRAW_SIG || bytes32(data[:32]) == DEPOSIT_SIG) {
-            _withdraw(data[32:]);
-        } else if (bytes32(data[:32]) == WITHDRAW_BATCH_SIG || bytes32(data[:32]) == DEPOSIT_BATCH_SIG) {
+        if (bytes32(data[:32]) == WITHDRAW_SIG) {
+            _withdraw(data);
+        } else if (bytes32(data[:32]) == WITHDRAW_BATCH_SIG) {
+            _withdrawBatch(data);
+        } else {
+            revert("RootERC721Predicate: INVALID_SIGNATURE");
+        }
+    }
+
+    /**
+     * @inheritdoc IStateReceiver
+     * @notice Function to be used for token withdrawals for rollback
+     * @dev Can be extended to include other signatures for more functionality
+     */
+    function onStateRollback(uint256 /*  id */, address sender, bytes calldata data) external {
+        require(msg.sender == address(gateway), "RootERC20Predicate: ONLY_GATEWAY");
+        require(sender == address(this), "RootERC20Predicate: ONLY_ROOT_PREDICATE");
+
+        if (bytes32(data[:32]) == DEPOSIT_SIG) {
+            _withdraw(data);
+        } else if (bytes32(data[:32]) == DEPOSIT_BATCH_SIG) {
             _withdrawBatch(data);
         } else if (bytes32(data[:32]) == MAP_TOKEN_SIG) {
             _unMapToken(data[32:]);
         } else {
-            revert("RootERC721Predicate: INVALID_SIGNATURE");
+            revert("RootERC20Predicate: INVALID_SIGNATURE");
         }
     }
 
@@ -159,29 +177,45 @@ contract RootERC721Predicate is Predicate, Initializable, ERC721Holder, IRootERC
     }
 
     function _withdraw(bytes calldata data) private {
-        (address rootToken, address withdrawer, address receiver, uint256 tokenId) = abi.decode(
+        (bytes32 sig, address rootToken, address withdrawer, address receiver, uint256 tokenId) = abi.decode(
             data,
-            (address, address, address, uint256)
+            (bytes32, address, address, address, uint256)
         );
         address childToken = sourceTokenToDestinationToken[rootToken];
         assert(childToken != address(0)); // invariant because child predicate should have already mapped tokens
 
-        IERC721Metadata(rootToken).safeTransferFrom(address(this), receiver, tokenId);
+        if (sig == WITHDRAW_SIG) {
+            IERC721Metadata(rootToken).safeTransferFrom(address(this), receiver, tokenId);
+        } else {
+            IERC721Metadata(rootToken).safeTransferFrom(address(this), withdrawer, tokenId);
+        }
         // slither-disable-next-line reentrancy-events
         emit ERC721Withdraw(address(rootToken), childToken, withdrawer, receiver, tokenId);
     }
 
     function _withdrawBatch(bytes calldata data) private {
-        (, address rootToken, address withdrawer, address[] memory receivers, uint256[] memory tokenIds) = abi.decode(
-            data,
-            (bytes32, address, address, address[], uint256[])
-        );
+        (
+            bytes32 sig,
+            address rootToken,
+            address withdrawer,
+            address[] memory receivers,
+            uint256[] memory tokenIds
+        ) = abi.decode(data, (bytes32, address, address, address[], uint256[]));
         address childToken = sourceTokenToDestinationToken[rootToken];
         assert(childToken != address(0)); // invariant because child predicate should have already mapped tokens
-        for (uint256 i = 0; i < tokenIds.length; ) {
-            IERC721Metadata(rootToken).safeTransferFrom(address(this), receivers[i], tokenIds[i]);
-            unchecked {
-                ++i;
+        if (sig == WITHDRAW_BATCH_SIG)
+            for (uint256 i = 0; i < tokenIds.length; ) {
+                IERC721Metadata(rootToken).safeTransferFrom(address(this), receivers[i], tokenIds[i]);
+                unchecked {
+                    ++i;
+                }
+            }
+        else {
+            for (uint256 i = 0; i < tokenIds.length; ) {
+                IERC721Metadata(rootToken).safeTransferFrom(address(this), withdrawer, tokenIds[i]);
+                unchecked {
+                    ++i;
+                }
             }
         }
         // slither-disable-next-line reentrancy-events

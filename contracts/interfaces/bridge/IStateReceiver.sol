@@ -8,4 +8,11 @@ interface IStateReceiver {
      * @param data Data sent by the sender
      */
     function onStateReceive(uint256 id, address sender, bytes calldata data) external;
+
+    /**
+     * @notice Called by gateway when state is received from source chain
+     * @param sender Address of the sender on the root chain
+     * @param data Data sent by the sender
+     */
+    function onStateRollback(uint256 id, address sender, bytes calldata data) external;
 }
