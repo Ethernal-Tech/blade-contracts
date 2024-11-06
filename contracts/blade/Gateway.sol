@@ -18,7 +18,8 @@ contract Gateway is ValidatorSetStorage, IGateway {
         bool indexed status,
         uint256 sourceChainID,
         uint256 destinationChainID,
-        bytes message
+        bytes message,
+        bool isRollback
     );
 
     event BridgeMsg(
@@ -81,7 +82,7 @@ contract Gateway is ValidatorSetStorage, IGateway {
 
         uint256 length = batchMessages.length;
         for (uint256 i = 0; i < length; ) {
-            _executeBridgeMessage(batchMessages[i]);
+            _executeBridgeMessage(batchMessages[i], signedBridgeBatch.isRollback);
 
             unchecked {
                 ++i;
@@ -109,32 +110,67 @@ contract Gateway is ValidatorSetStorage, IGateway {
         }
     }
 
-    function _executeBridgeMessage(BridgeMessage calldata message) private {
+    function _executeBridgeMessage(BridgeMessage calldata message, bool isRollback) private {
         require(!processedEvents[message.id], "DestinationGateway: BRIDGE_MESSAGE_IS_ALREADY_PROCESSED");
         // Skip transaction if client has added flag, or receiver has no code
         if (message.receiver.code.length == 0) {
-            emit BridgeMessageResult(message.id, false, message.sourceChainId, message.destinationChainId, "");
+            emit BridgeMessageResult(
+                message.id,
+                false,
+                message.sourceChainId,
+                message.destinationChainId,
+                "",
+                isRollback
+            );
             return;
         }
 
         processedEvents[message.id] = true;
+        if (!isRollback) {
+            // slither-disable-next-line calls-loop,low-level-calls,reentrancy-no-eth
+            (bool success, bytes memory returnData) = message.receiver.call(
+                abi.encodeWithSignature(
+                    "onStateReceive(uint256,address,bytes)",
+                    message.id,
+                    message.sender,
+                    message.payload
+                )
+            );
+            // if bridge message fails, revert
+            if (!success) revert("Gateway: BATCH_ROLLBACK");
 
-        // slither-disable-next-line calls-loop,low-level-calls,reentrancy-no-eth
-        (bool success, bytes memory returnData) = message.receiver.call(
-            abi.encodeWithSignature(
-                "onStateReceive(uint256,address,bytes)",
+            // emit a ResultEvent indicating whether invocation of bridge message was successful
+            // slither-disable-next-line reentrancy-events
+            emit BridgeMessageResult(
                 message.id,
-                message.sender,
-                message.payload
-            )
-        );
+                success,
+                message.sourceChainId,
+                message.destinationChainId,
+                returnData,
+                isRollback
+            );
+        } else {
+            // slither-disable-next-line calls-loop,low-level-calls,reentrancy-no-eth
+            (bool success, bytes memory returnData) = message.receiver.call(
+                abi.encodeWithSignature(
+                    "onStateRollback(uint256,address,bytes)",
+                    message.id,
+                    message.sender,
+                    message.payload
+                )
+            );
 
-        // if bridge message fails, revert flag
-        if (!success) revert("Gateway: BATCH_ROLLBACK");
-
-        // emit a ResultEvent indicating whether invocation of bridge message was successful or not
-        // slither-disable-next-line reentrancy-events
-        emit BridgeMessageResult(message.id, success, message.sourceChainId, message.destinationChainId, returnData);
+            // emit a ResultEvent indicating whether invocation of bridge rollback message was successful or not
+            // slither-disable-next-line reentrancy-events
+            emit BridgeMessageResult(
+                message.id,
+                success,
+                message.sourceChainId,
+                message.destinationChainId,
+                returnData,
+                isRollback
+            );
+        }
     }
 
     // Function to calculate Merkle Root from an array of BridgeMessages
