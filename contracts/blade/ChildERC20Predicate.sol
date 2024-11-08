@@ -77,7 +77,7 @@ contract ChildERC20Predicate is IChildERC20Predicate, Predicate, Initializable, 
 
         if (bytes32(data[:32]) == DEPOSIT_SIG || bytes32(data[:32]) == WITHDRAW_SIG) {
             _beforeTokenDeposit();
-            _deposit(data);
+            _deposit(data[32:]);
             _afterTokenDeposit();
         } else if (bytes32(data[:32]) == MAP_TOKEN_SIG) {
             _mapToken(data);
@@ -98,7 +98,7 @@ contract ChildERC20Predicate is IChildERC20Predicate, Predicate, Initializable, 
 
         if (bytes32(data[:32]) == WITHDRAW_SIG) {
             _beforeTokenDeposit();
-            _deposit(data);
+            _depositRollback(data[32:]);
             _afterTokenDeposit();
         } else {
             revert("ChildERC20Predicate: INVALID_SIGNATURE");
@@ -191,11 +191,35 @@ contract ChildERC20Predicate is IChildERC20Predicate, Predicate, Initializable, 
     }
 
     function _deposit(bytes calldata data) private {
-        (bytes32 sig, address depositToken, address depositor, address receiver, uint256 amount) = abi.decode(
+        (address depositToken, address depositor, address receiver, uint256 amount) = abi.decode(
             data,
-            (bytes32, address, address, address, uint256)
+            (address, address, address, uint256)
         );
 
+        address childToken = _getChildToken(depositToken);
+
+        _depositInternal(childToken, receiver, amount);
+
+        // slither-disable-next-line reentrancy-events
+        emit ERC20Deposit(depositToken, address(childToken), depositor, receiver, amount);
+    }
+
+    function _depositRollback(bytes calldata data) private {
+        (address depositToken, address depositor, , uint256 amount) = abi.decode(
+            data,
+            (address, address, address, uint256)
+        );
+
+        address childToken = _getChildToken(depositToken);
+
+        _depositInternal(childToken, depositor, amount);
+    }
+
+    function _depositInternal(address childToken, address receiver, uint256 amount) private {
+        require(IChildERC20(childToken).mint(receiver, amount), "ChildERC20Predicate: MINT_FAILED");
+    }
+
+    function _getChildToken(address depositToken) private view returns (address) {
         IChildERC20 childToken = IChildERC20(sourceTokenToDestinationToken[depositToken]);
 
         require(address(childToken) != address(0), "ChildERC20Predicate: UNMAPPED_TOKEN");
@@ -210,14 +234,7 @@ contract ChildERC20Predicate is IChildERC20Predicate, Predicate, Initializable, 
         // a mapped token should never have predicate unset
         assert(IChildERC20(childToken).predicate() == address(this));
 
-        if (sig == DEPOSIT_SIG) {
-            require(IChildERC20(childToken).mint(receiver, amount), "ChildERC20Predicate: MINT_FAILED");
-        } else {
-            require(IChildERC20(childToken).mint(depositor, amount), "ChildERC20Predicate: MINT_FAILED");
-        }
-
-        // slither-disable-next-line reentrancy-events
-        emit ERC20Deposit(depositToken, address(childToken), depositor, receiver, amount);
+        return address(childToken);
     }
 
     /**
