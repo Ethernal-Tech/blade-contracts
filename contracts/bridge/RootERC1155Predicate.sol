@@ -43,7 +43,7 @@ contract RootERC1155Predicate is Predicate, Initializable, ERC1155Holder, IRootE
         if (bytes32(data[:32]) == WITHDRAW_SIG || bytes32(data[:32]) == WITHDRAW_SIG) {
             _withdraw(data[32:]);
         } else if (bytes32(data[:32]) == WITHDRAW_BATCH_SIG || bytes32(data[:32]) == WITHDRAW_BATCH_SIG) {
-            _withdrawBatch(data[32:]);
+            _withdrawBatch(data);
         } else if (bytes32(data[:32]) == MAP_TOKEN_SIG) {
             _unMapToken(data[32:]);
         } else {
@@ -63,7 +63,7 @@ contract RootERC1155Predicate is Predicate, Initializable, ERC1155Holder, IRootE
         if (bytes32(data[:32]) == DEPOSIT_SIG) {
             _withdraw(data[32:]);
         } else if (bytes32(data[:32]) == DEPOSIT_BATCH_SIG) {
-            _withdrawBatch(data[32:]);
+            _withdrawBatch(data);
         } else if (bytes32(data[:32]) == MAP_TOKEN_SIG) {
             _unMapToken(data[32:]);
         } else {
@@ -218,12 +218,13 @@ contract RootERC1155Predicate is Predicate, Initializable, ERC1155Holder, IRootE
 
     function _withdrawBatch(bytes calldata data) private {
         (
+            ,
             address rootToken,
             address withdrawer,
             address[] memory receivers,
             uint256[] memory tokenIds,
             uint256[] memory amounts
-        ) = abi.decode(data, (address, address, address[], uint256[], uint256[]));
+        ) = abi.decode(data, (bytes32, address, address, address[], uint256[], uint256[]));
         address childToken = _getChildTokenWithdraw(rootToken);
 
         for (uint256 i = 0; i < tokenIds.length; ) {
