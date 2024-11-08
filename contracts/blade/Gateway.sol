@@ -82,7 +82,11 @@ contract Gateway is ValidatorSetStorage, IGateway {
 
         uint256 length = batchMessages.length;
         for (uint256 i = 0; i < length; ) {
-            _executeBridgeMessage(batchMessages[i], signedBridgeBatch.isRollback);
+            if (!signedBridgeBatch.isRollback) {
+                _executeBridgeMessage(batchMessages[i]);
+            } else {
+                _executeRollbackBridgeMessage(batchMessages[i]);
+            }
 
             unchecked {
                 ++i;
@@ -110,67 +114,67 @@ contract Gateway is ValidatorSetStorage, IGateway {
         }
     }
 
-    function _executeBridgeMessage(BridgeMessage calldata message, bool isRollback) private {
+    function _executeBridgeMessage(BridgeMessage calldata message) private {
         require(!processedEvents[message.id], "DestinationGateway: BRIDGE_MESSAGE_IS_ALREADY_PROCESSED");
         // Skip transaction if client has added flag, or receiver has no code
         if (message.receiver.code.length == 0) {
-            emit BridgeMessageResult(
-                message.id,
-                false,
-                message.sourceChainId,
-                message.destinationChainId,
-                "",
-                isRollback
-            );
+            emit BridgeMessageResult(message.id, false, message.sourceChainId, message.destinationChainId, "", false);
             return;
         }
 
         processedEvents[message.id] = true;
-        if (!isRollback) {
-            // slither-disable-next-line calls-loop,low-level-calls,reentrancy-no-eth
-            (bool success, bytes memory returnData) = message.receiver.call(
-                abi.encodeWithSignature(
-                    "onStateReceive(uint256,address,bytes)",
-                    message.id,
-                    message.sender,
-                    message.payload
-                )
-            );
-            // if bridge message fails, revert
-            if (!success) revert("Gateway: BATCH_ROLLBACK");
 
-            // emit a ResultEvent indicating whether invocation of bridge message was successful
-            // slither-disable-next-line reentrancy-events
-            emit BridgeMessageResult(
+        // slither-disable-next-line calls-loop,low-level-calls,reentrancy-no-eth
+        (bool success, bytes memory returnData) = message.receiver.call(
+            abi.encodeWithSignature(
+                "onStateReceive(uint256,address,bytes)",
                 message.id,
-                success,
-                message.sourceChainId,
-                message.destinationChainId,
-                returnData,
-                isRollback
-            );
-        } else {
-            // slither-disable-next-line calls-loop,low-level-calls,reentrancy-no-eth
-            (bool success, bytes memory returnData) = message.receiver.call(
-                abi.encodeWithSignature(
-                    "onStateRollback(uint256,address,bytes)",
-                    message.id,
-                    message.sender,
-                    message.payload
-                )
-            );
+                message.sender,
+                message.payload
+            )
+        );
+        // if bridge message fails, revert
+        if (!success) revert("Gateway: BATCH_ROLLBACK");
 
-            // emit a ResultEvent indicating whether invocation of bridge rollback message was successful or not
-            // slither-disable-next-line reentrancy-events
-            emit BridgeMessageResult(
-                message.id,
-                success,
-                message.sourceChainId,
-                message.destinationChainId,
-                returnData,
-                isRollback
-            );
+        // emit a ResultEvent indicating whether invocation of bridge message was successful
+        // slither-disable-next-line reentrancy-events
+        emit BridgeMessageResult(
+            message.id,
+            success,
+            message.sourceChainId,
+            message.destinationChainId,
+            returnData,
+            false
+        );
+    }
+
+    function _executeRollbackBridgeMessage(BridgeMessage calldata message) private {
+        // Skip transaction if client has added flag, or receiver has no code
+        if (message.receiver.code.length == 0) {
+            emit BridgeMessageResult(message.id, false, message.sourceChainId, message.destinationChainId, "", true);
+            return;
         }
+
+        // slither-disable-next-line calls-loop,low-level-calls,reentrancy-no-eth
+        (bool success, bytes memory returnData) = message.receiver.call(
+            abi.encodeWithSignature(
+                "onStateRollback(uint256,address,bytes)",
+                message.id,
+                message.sender,
+                message.payload
+            )
+        );
+
+        // emit a ResultEvent indicating whether invocation of bridge rollback message was successful or not
+        // slither-disable-next-line reentrancy-events
+        emit BridgeMessageResult(
+            message.id,
+            success,
+            message.sourceChainId,
+            message.destinationChainId,
+            returnData,
+            true
+        );
     }
 
     // Function to calculate Merkle Root from an array of BridgeMessages
