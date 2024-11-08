@@ -61,9 +61,9 @@ contract RootERC1155Predicate is Predicate, Initializable, ERC1155Holder, IRootE
         require(sender == address(this), "RootERC1155Predicate: ONLY_ROOT_PREDICATE");
 
         if (bytes32(data[:32]) == DEPOSIT_SIG) {
-            _withdraw(data[32:]);
+            _withdrawRollback(data[32:]);
         } else if (bytes32(data[:32]) == DEPOSIT_BATCH_SIG) {
-            _withdrawBatch(data);
+            _withdrawBatchRollback(data);
         } else if (bytes32(data[:32]) == MAP_TOKEN_SIG) {
             _unMapToken(data[32:]);
         } else {
