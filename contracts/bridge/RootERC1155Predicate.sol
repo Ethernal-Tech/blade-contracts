@@ -41,9 +41,9 @@ contract RootERC1155Predicate is Predicate, Initializable, ERC1155Holder, IRootE
         require(sender == childERC1155Predicate, "RootERC1155Predicate: ONLY_CHILD_PREDICATE");
 
         if (bytes32(data[:32]) == WITHDRAW_SIG || bytes32(data[:32]) == WITHDRAW_SIG) {
-            _withdraw(data);
+            _withdraw(data[32:]);
         } else if (bytes32(data[:32]) == WITHDRAW_BATCH_SIG || bytes32(data[:32]) == WITHDRAW_BATCH_SIG) {
-            _withdrawBatch(data);
+            _withdrawBatch(data[32:]);
         } else if (bytes32(data[:32]) == MAP_TOKEN_SIG) {
             _unMapToken(data[32:]);
         } else {
@@ -63,7 +63,7 @@ contract RootERC1155Predicate is Predicate, Initializable, ERC1155Holder, IRootE
         if (bytes32(data[:32]) == DEPOSIT_SIG) {
             _withdraw(data[32:]);
         } else if (bytes32(data[:32]) == DEPOSIT_BATCH_SIG) {
-            _withdrawBatch(data);
+            _withdrawBatch(data[32:]);
         } else if (bytes32(data[:32]) == MAP_TOKEN_SIG) {
             _unMapToken(data[32:]);
         } else {
@@ -189,60 +189,78 @@ contract RootERC1155Predicate is Predicate, Initializable, ERC1155Holder, IRootE
     }
 
     function _withdraw(bytes calldata data) private {
-        (bytes32 sig, address rootToken, address withdrawer, address receiver, uint256 tokenId, uint256 amount) = abi
-            .decode(data, (bytes32, address, address, address, uint256, uint256));
-        address childToken = sourceTokenToDestinationToken[rootToken];
-        assert(childToken != address(0)); // invariant because child predicate should have already mapped tokens
+        (address rootToken, address withdrawer, address receiver, uint256 tokenId, uint256 amount) = abi.decode(
+            data,
+            (address, address, address, uint256, uint256)
+        );
 
-        if (sig == WITHDRAW_SIG) {
-            IERC1155MetadataURI(rootToken).safeTransferFrom(address(this), receiver, tokenId, amount, "");
-        } else {
-            IERC1155MetadataURI(rootToken).safeTransferFrom(address(this), withdrawer, tokenId, amount, "");
-        }
+        address childToken = _getChildTokenWithdraw(rootToken);
+
+        _withdrawInternal(rootToken, receiver, tokenId, amount);
         // slither-disable-next-line reentrancy-events
         emit ERC1155Withdraw(address(rootToken), childToken, withdrawer, receiver, tokenId, amount);
     }
 
+    function _withdrawRollback(bytes calldata data) private {
+        (address rootToken, address depositor, , uint256 tokenId, uint256 amount) = abi.decode(
+            data,
+            (address, address, address, uint256, uint256)
+        );
+
+        _getChildTokenWithdraw(rootToken);
+
+        _withdrawInternal(rootToken, depositor, tokenId, amount);
+    }
+
+    function _withdrawInternal(address rootToken, address receiver, uint256 tokenId, uint256 amount) private {
+        IERC1155MetadataURI(rootToken).safeTransferFrom(address(this), receiver, tokenId, amount, "");
+    }
+
     function _withdrawBatch(bytes calldata data) private {
         (
-            bytes32 sig,
             address rootToken,
             address withdrawer,
             address[] memory receivers,
             uint256[] memory tokenIds,
             uint256[] memory amounts
-        ) = abi.decode(data, (bytes32, address, address, address[], uint256[], uint256[]));
-        address childToken = sourceTokenToDestinationToken[rootToken];
-        assert(childToken != address(0)); // invariant because child predicate should have already mapped tokens
-        if (sig == WITHDRAW_SIG) {
-            for (uint256 i = 0; i < tokenIds.length; ) {
-                IERC1155MetadataURI(rootToken).safeTransferFrom(
-                    address(this),
-                    receivers[i],
-                    tokenIds[i],
-                    amounts[i],
-                    ""
-                );
-                unchecked {
-                    ++i;
-                }
-            }
-        } else {
-            for (uint256 i = 0; i < tokenIds.length; ) {
-                IERC1155MetadataURI(rootToken).safeTransferFrom(address(this), withdrawer, tokenIds[i], amounts[i], "");
-                unchecked {
-                    ++i;
-                }
+        ) = abi.decode(data, (address, address, address[], uint256[], uint256[]));
+        address childToken = _getChildTokenWithdraw(rootToken);
+
+        for (uint256 i = 0; i < tokenIds.length; ) {
+            _withdrawInternal(rootToken, receivers[i], tokenIds[i], amounts[i]);
+            unchecked {
+                ++i;
             }
         }
+
         // slither-disable-next-line reentrancy-events
         emit ERC1155WithdrawBatch(address(rootToken), childToken, withdrawer, receivers, tokenIds, amounts);
+    }
+
+    function _withdrawBatchRollback(bytes calldata data) private {
+        (address rootToken, address depositor, , uint256[] memory tokenIds, uint256[] memory amounts) = abi.decode(
+            data,
+            (address, address, address[], uint256[], uint256[])
+        );
+
+        _getChildTokenWithdraw(rootToken);
+        for (uint256 i = 0; i < tokenIds.length; ) {
+            _withdrawInternal(rootToken, depositor, tokenIds[i], amounts[i]);
+            unchecked {
+                ++i;
+            }
+        }
     }
 
     function _getChildToken(IERC1155MetadataURI rootToken) private returns (address childToken) {
         childToken = sourceTokenToDestinationToken[address(rootToken)];
         if (childToken == address(0)) childToken = mapToken(IERC1155MetadataURI(rootToken));
         assert(childToken != address(0)); // invariant because we map the token if mapping does not exist
+    }
+
+    function _getChildTokenWithdraw(address rootToken) private view returns (address childToken) {
+        childToken = sourceTokenToDestinationToken[address(rootToken)];
+        assert(childToken != address(0));
     }
 
     /**

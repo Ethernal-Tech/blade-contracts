@@ -41,9 +41,9 @@ contract RootERC721Predicate is Predicate, Initializable, ERC721Holder, IRootERC
         require(sender == childERC721Predicate, "RootERC721Predicate: ONLY_CHILD_PREDICATE");
 
         if (bytes32(data[:32]) == WITHDRAW_SIG) {
-            _withdraw(data);
+            _withdraw(data[32:]);
         } else if (bytes32(data[:32]) == WITHDRAW_BATCH_SIG) {
-            _withdrawBatch(data);
+            _withdrawBatch(data[32:]);
         } else {
             revert("RootERC721Predicate: INVALID_SIGNATURE");
         }
@@ -59,9 +59,9 @@ contract RootERC721Predicate is Predicate, Initializable, ERC721Holder, IRootERC
         require(sender == address(this), "RootERC721Predicate: ONLY_ROOT_PREDICATE");
 
         if (bytes32(data[:32]) == DEPOSIT_SIG) {
-            _withdraw(data);
+            _withdrawRollback(data[32:]);
         } else if (bytes32(data[:32]) == DEPOSIT_BATCH_SIG) {
-            _withdrawBatch(data);
+            _withdrawBatchRollback(data[32:]);
         } else if (bytes32(data[:32]) == MAP_TOKEN_SIG) {
             _unMapToken(data[32:]);
         } else {
@@ -177,55 +177,77 @@ contract RootERC721Predicate is Predicate, Initializable, ERC721Holder, IRootERC
     }
 
     function _withdraw(bytes calldata data) private {
-        (bytes32 sig, address rootToken, address withdrawer, address receiver, uint256 tokenId) = abi.decode(
+        (address rootToken, address withdrawer, address receiver, uint256 tokenId) = abi.decode(
             data,
-            (bytes32, address, address, address, uint256)
+            (address, address, address, uint256)
         );
-        address childToken = sourceTokenToDestinationToken[rootToken];
-        assert(childToken != address(0)); // invariant because child predicate should have already mapped tokens
 
-        if (sig == WITHDRAW_SIG) {
-            IERC721Metadata(rootToken).safeTransferFrom(address(this), receiver, tokenId);
-        } else {
-            IERC721Metadata(rootToken).safeTransferFrom(address(this), withdrawer, tokenId);
-        }
+        address childToken = _getChildTokenWithdraw(rootToken);
+
+        _withdrawInternal(rootToken, receiver, tokenId);
+
         // slither-disable-next-line reentrancy-events
         emit ERC721Withdraw(address(rootToken), childToken, withdrawer, receiver, tokenId);
     }
 
+    function _withdrawRollback(bytes calldata data) private {
+        (address rootToken, address depositor, , uint256 tokenId) = abi.decode(
+            data,
+            (address, address, address, uint256)
+        );
+
+        _getChildTokenWithdraw(rootToken);
+
+        _withdrawInternal(rootToken, depositor, tokenId);
+    }
+
+    function _withdrawInternal(address rootToken, address receiver, uint256 tokenId) private {
+        IERC721Metadata(rootToken).safeTransferFrom(address(this), receiver, tokenId);
+    }
+
     function _withdrawBatch(bytes calldata data) private {
-        (
-            bytes32 sig,
-            address rootToken,
-            address withdrawer,
-            address[] memory receivers,
-            uint256[] memory tokenIds
-        ) = abi.decode(data, (bytes32, address, address, address[], uint256[]));
-        address childToken = sourceTokenToDestinationToken[rootToken];
-        assert(childToken != address(0)); // invariant because child predicate should have already mapped tokens
-        if (sig == WITHDRAW_BATCH_SIG)
-            for (uint256 i = 0; i < tokenIds.length; ) {
-                IERC721Metadata(rootToken).safeTransferFrom(address(this), receivers[i], tokenIds[i]);
-                unchecked {
-                    ++i;
-                }
-            }
-        else {
-            for (uint256 i = 0; i < tokenIds.length; ) {
-                IERC721Metadata(rootToken).safeTransferFrom(address(this), withdrawer, tokenIds[i]);
-                unchecked {
-                    ++i;
-                }
+        (address rootToken, address withdrawer, address[] memory receivers, uint256[] memory tokenIds) = abi.decode(
+            data,
+            (address, address, address[], uint256[])
+        );
+
+        address childToken = _getChildTokenWithdraw(rootToken);
+        for (uint256 i = 0; i < tokenIds.length; ) {
+            _withdrawInternal(rootToken, receivers[i], tokenIds[i]);
+            unchecked {
+                ++i;
             }
         }
+
         // slither-disable-next-line reentrancy-events
         emit ERC721WithdrawBatch(address(rootToken), childToken, withdrawer, receivers, tokenIds);
+    }
+
+    function _withdrawBatchRollback(bytes calldata data) private {
+        (address rootToken, address depositor, , uint256[] memory tokenIds) = abi.decode(
+            data,
+            (address, address, address[], uint256[])
+        );
+
+        _getChildTokenWithdraw(rootToken);
+
+        for (uint256 i = 0; i < tokenIds.length; ) {
+            _withdrawInternal(rootToken, depositor, tokenIds[i]);
+            unchecked {
+                ++i;
+            }
+        }
     }
 
     function _getChildToken(IERC721Metadata rootToken) private returns (address childToken) {
         childToken = sourceTokenToDestinationToken[address(rootToken)];
         if (childToken == address(0)) childToken = mapToken(IERC721Metadata(rootToken));
         assert(childToken != address(0)); // invariant because we map the token if mapping does not exist
+    }
+
+    function _getChildTokenWithdraw(address rootToken) private view returns (address childToken) {
+        childToken = sourceTokenToDestinationToken[address(rootToken)];
+        assert(childToken != address(0));
     }
 
     // solhint-disable no-empty-blocks
