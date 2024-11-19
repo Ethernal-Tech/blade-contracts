@@ -99,24 +99,20 @@ contract ChildERC721Predicate is IChildERC721Predicate, Predicate, Initializable
 
     /**
      * @notice Function to be used for token deposits for rollback
-     * @param sender Address of the sender on the chain chain
+     * @param sender Address of the sender on the child chain
      * @param data Data sent by the sender
      * @dev Can be extended to include other signatures for more functionality
      */
     function onStateRollback(uint256 /* id */, address sender, bytes calldata data) external {
-        require(msg.sender == address(gateway), "ChildERC721Predicate: ONLY_GATEWAY");
-        require(sender == address(this), "ChildERC721Predicate: ONLY_CHILD_PREDICATE");
+        require(msg.sender == address(gateway), "ChildERC20Predicate: ONLY_GATEWAY");
+        require(sender == address(this), "ChildERC20Predicate: ONLY_CHILD_PREDICATE");
 
         if (bytes32(data[:32]) == WITHDRAW_SIG) {
             _beforeTokenDeposit();
-            _depositRollback(data[32:]);
-            _afterTokenDeposit();
-        } else if (bytes32(data[:32]) == WITHDRAW_BATCH_SIG) {
-            _beforeTokenDeposit();
-            _depositBatchRollback(data);
+            _withdrawRollback(data[32:]);
             _afterTokenDeposit();
         } else {
-            revert("ChildERC721Predicate: INVALID_SIGNATURE");
+            revert("ChildERC20Predicate: INVALID_SIGNATURE");
         }
     }
 
@@ -245,63 +241,40 @@ contract ChildERC721Predicate is IChildERC721Predicate, Predicate, Initializable
         emit ERC721WithdrawBatch(rootToken, address(childToken), msg.sender, receivers, tokenIds);
     }
 
+    function _withdrawRollback(bytes calldata data) private{
+        (address depositToken, address depositor, , uint256 tokenId) = abi.decode(
+            data,
+            (address, address, address, uint256)
+        );
+
+        _depositInternal(depositToken, depositor, depositor, tokenId);
+    }
+
     function _deposit(bytes calldata data) private {
         (address depositToken, address depositor, address receiver, uint256 tokenId) = abi.decode(
             data,
             (address, address, address, uint256)
         );
 
-        address childToken = _getChildToken(depositToken);
-
-        _depositInternal(childToken, receiver, tokenId);
-
-        // slither-disable-next-line reentrancy-events
-        emit ERC721Deposit(depositToken, address(childToken), depositor, receiver, tokenId);
+        _depositInternal(depositToken, depositor, receiver, tokenId);
     }
 
-    function _depositRollback(bytes calldata data) private {
-        (address depositToken, address depositor, , uint256 tokenId) = abi.decode(
-            data,
-            (address, address, address, uint256)
-        );
-
-        address childToken = _getChildToken(depositToken);
-
-        _depositInternal(childToken, depositor, tokenId);
-    }
-
-    function _depositInternal(address childToken, address receiver, uint256 tokenId) private {
-        require(IChildERC721(childToken).mint(receiver, tokenId), "ChildERC721Predicate: MINT_FAILED");
-    }
-
-    function _depositBatch(bytes calldata data) private {
-        (, address depositToken, address depositor, address[] memory receivers, uint256[] memory tokenIds) = abi.decode(
+    function _withdrawBatchRollbach (bytes calldata data) private {
+        (, address depositToken, address withdrawer, , uint256[] memory tokenIds) = abi.decode(
             data,
             (bytes32, address, address, address[], uint256[])
         );
 
-        address childToken = _getChildToken(depositToken);
+        address[] memory withdrawers = new address[](tokenIds.length);
 
-        require(IChildERC721(childToken).mintBatch(receivers, tokenIds), "ChildERC721Predicate: MINT_FAILED");
-
-        // slither-disable-next-line reentrancy-events
-        emit ERC721DepositBatch(depositToken, address(childToken), depositor, receivers, tokenIds);
-    }
-
-    function _depositBatchRollback(bytes calldata data) private {
-        (, address depositToken, address depositor, , uint256[] memory tokenIds) = abi.decode(
-            data,
-            (bytes32, address, address, address[], uint256[])
-        );
-
-        address childToken = _getChildToken(depositToken);
-
-        for (uint256 i = 0; i < tokenIds.length; i++) {
-            _depositInternal(childToken, depositor, tokenIds[i]);
+        for (uint256 i = 0; i< tokenIds.length; i++){
+            withdrawers[i] = withdrawer;
         }
+
+        _depositBatchInternal(depositToken, withdrawer, withdrawers, tokenIds);
     }
 
-    function _getChildToken(address depositToken) private view returns (address) {
+    function _depositInternal(address depositToken, address depositor, address receiver, uint256 tokenId) private{
         IChildERC721 childToken = IChildERC721(sourceTokenToDestinationToken[depositToken]);
 
         require(address(childToken) != address(0), "ChildERC721Predicate: UNMAPPED_TOKEN");
@@ -316,8 +289,38 @@ contract ChildERC721Predicate is IChildERC721Predicate, Predicate, Initializable
         assert(rootToken != address(0));
         // a mapped token should never have predicate unset
         assert(IChildERC721(childToken).predicate() == address(this));
+        require(IChildERC721(childToken).mint(receiver, tokenId), "ChildERC721Predicate: MINT_FAILED");
+        // slither-disable-next-line reentrancy-events
+        emit ERC721Deposit(depositToken, address(childToken), depositor, receiver, tokenId);
+    }
 
-        return address(childToken);
+    function _depositBatch(bytes calldata data) private {
+        (, address depositToken, address depositor, address[] memory receivers, uint256[] memory tokenIds) = abi.decode(
+            data,
+            (bytes32, address, address, address[], uint256[])
+        );
+
+        _depositBatchInternal(depositToken, depositor, receivers, tokenIds);
+    }
+
+    function _depositBatchInternal(address depositToken, address depositor, address[] memory receivers, uint256[] memory tokenIds) private{
+        IChildERC721 childToken = IChildERC721(sourceTokenToDestinationToken[depositToken]);
+
+        require(address(childToken) != address(0), "ChildERC721Predicate: UNMAPPED_TOKEN");
+        // a mapped token should always pass specifications
+        assert(_verifyContract(childToken));
+
+        address rootToken = IChildERC721(childToken).rootToken();
+
+        // a mapped token should match deposited token
+        assert(rootToken == depositToken);
+        // a mapped token should never have root token unset
+        assert(rootToken != address(0));
+        // a mapped token should never have predicate unset
+        assert(IChildERC721(childToken).predicate() == address(this));
+        require(IChildERC721(childToken).mintBatch(receivers, tokenIds), "ChildERC721Predicate: MINT_FAILED");
+        // slither-disable-next-line reentrancy-events
+        emit ERC721DepositBatch(depositToken, address(childToken), depositor, receivers, tokenIds);
     }
 
     /**

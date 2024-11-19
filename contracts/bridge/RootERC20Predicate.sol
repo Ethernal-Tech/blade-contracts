@@ -70,7 +70,7 @@ contract RootERC20Predicate is Predicate, Initializable, IRootERC20Predicate {
         }
     }
 
-    /**
+        /**
      * @inheritdoc IStateReceiver
      * @notice Function to be used for token withdrawals for rollback
      * @dev Can be extended to include other signatures for more functionality
@@ -80,7 +80,7 @@ contract RootERC20Predicate is Predicate, Initializable, IRootERC20Predicate {
         require(sender == address(this), "RootERC20Predicate: ONLY_ROOT_PREDICATE");
 
         if (bytes32(data[:32]) == DEPOSIT_SIG) {
-            _withdrawRollback(data[32:]);
+            _depositRollback(data[32:]);
         } else if (bytes32(data[:32]) == MAP_TOKEN_SIG) {
             _unMapToken(data[32:]);
         } else {
@@ -130,19 +130,6 @@ contract RootERC20Predicate is Predicate, Initializable, IRootERC20Predicate {
         return childToken;
     }
 
-    function _unMapToken(bytes calldata data) private {
-        (address rootToken, , , ) = abi.decode(data, (address, address, address, uint256));
-        require(address(rootToken) != address(0), "RootERC20Predicate: INVALID_TOKEN");
-        require(
-            sourceTokenToDestinationToken[address(rootToken)] != address(0),
-            "RootERC20Predicate: TOKEN_IS_ALREADY_UNMAPPED"
-        );
-
-        sourceTokenToDestinationToken[rootToken] = address(0);
-
-        emit TokenUnMapped(rootToken);
-    }
-
     function _deposit(IERC20Metadata rootToken, address receiver, uint256 amount) private {
         _beforeTokenDeposit();
         address childToken = sourceTokenToDestinationToken[address(rootToken)];
@@ -166,38 +153,44 @@ contract RootERC20Predicate is Predicate, Initializable, IRootERC20Predicate {
         _afterTokenDeposit();
     }
 
+    function _depositRollback(bytes calldata data) private {
+        (address rootToken, address depositor, , uint256 amount) = abi.decode(
+            data,
+            (address, address, address, uint256)
+        );
+
+        _withdrawInternal(rootToken, depositor, depositor, amount);
+    }
+
     function _withdraw(bytes calldata data) private {
         (address rootToken, address withdrawer, address receiver, uint256 amount) = abi.decode(
             data,
             (address, address, address, uint256)
         );
 
-        address childToken = _getChildTokenWithdraw(rootToken);
+        _withdrawInternal(rootToken, withdrawer, receiver, amount);
+    }
 
-        _wtihdrawInternal(rootToken, receiver, amount);
+    function _withdrawInternal(address rootToken, address withdrawer, address receiver, uint256 amount) private{
+        address childToken = sourceTokenToDestinationToken[rootToken];
+        assert(childToken != address(0)); // invariant because child predicate should have already mapped tokens
 
+        IERC20Metadata(rootToken).safeTransfer(receiver, amount);
         // slither-disable-next-line reentrancy-events
         emit ERC20Withdraw(address(rootToken), childToken, withdrawer, receiver, amount);
-    }
+    } 
 
-    function _withdrawRollback(bytes calldata data) private {
-        (address rootToken, address depositor, , uint256 amount) = abi.decode(
-            data,
-            (address, address, address, uint256)
+    function _unMapToken(bytes calldata data) private {
+        (address rootToken, , , ) = abi.decode(data, (address, address, address, uint256));
+        require(address(rootToken) != address(0), "RootERC20Predicate: INVALID_TOKEN");
+        require(
+            sourceTokenToDestinationToken[address(rootToken)] != address(0),
+            "RootERC20Predicate: TOKEN_IS_ALREADY_UNMAPPED"
         );
 
-        _getChildTokenWithdraw(rootToken);
+        sourceTokenToDestinationToken[rootToken] = address(0);
 
-        _wtihdrawInternal(rootToken, depositor, amount);
-    }
-
-    function _wtihdrawInternal(address rootToken, address receiver, uint256 amount) private {
-        IERC20Metadata(rootToken).safeTransfer(receiver, amount);
-    }
-
-    function _getChildTokenWithdraw(address rootToken) private view returns (address childToken) {
-        childToken = sourceTokenToDestinationToken[address(rootToken)];
-        assert(childToken != address(0));
+        emit TokenUnMapped(rootToken);
     }
 
     /**
