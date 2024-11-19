@@ -111,7 +111,7 @@ contract ChildERC721Predicate is IChildERC721Predicate, Predicate, Initializable
             _beforeTokenDeposit();
             _withdrawRollback(data[32:]);
             _afterTokenDeposit();
-        } else if (bytes32(data[:32]) == WITHDRAW_BATCH_SIG){
+        } else if (bytes32(data[:32]) == WITHDRAW_BATCH_SIG) {
             _beforeTokenDeposit();
             _withdrawBatchRollback(data);
             _afterTokenDeposit();
