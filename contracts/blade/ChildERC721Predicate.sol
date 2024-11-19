@@ -111,8 +111,12 @@ contract ChildERC721Predicate is IChildERC721Predicate, Predicate, Initializable
             _beforeTokenDeposit();
             _withdrawRollback(data[32:]);
             _afterTokenDeposit();
+        } else if (bytes32(data[:32]) == WITHDRAW_BATCH_SIG){
+            _beforeTokenDeposit();
+            _withdrawBatchRollback(data);
+            _afterTokenDeposit();
         } else {
-            revert("ChildERC20Predicate: INVALID_SIGNATURE");
+            revert("ChildERC721Predicate: INVALID_SIGNATURE");
         }
     }
 
@@ -242,12 +246,12 @@ contract ChildERC721Predicate is IChildERC721Predicate, Predicate, Initializable
     }
 
     function _withdrawRollback(bytes calldata data) private {
-        (address depositToken, address depositor, , uint256 tokenId) = abi.decode(
+        (address depositToken, address sender, address receiver, uint256 tokenId) = abi.decode(
             data,
             (address, address, address, uint256)
         );
 
-        _depositInternal(depositToken, depositor, depositor, tokenId);
+        _depositInternal(depositToken, receiver, sender, tokenId);
     }
 
     function _deposit(bytes calldata data) private {
@@ -259,7 +263,7 @@ contract ChildERC721Predicate is IChildERC721Predicate, Predicate, Initializable
         _depositInternal(depositToken, depositor, receiver, tokenId);
     }
 
-    function _withdrawBatchRollbach(bytes calldata data) private {
+    function _withdrawBatchRollback(bytes calldata data) private {
         (, address depositToken, address withdrawer, , uint256[] memory tokenIds) = abi.decode(
             data,
             (bytes32, address, address, address[], uint256[])

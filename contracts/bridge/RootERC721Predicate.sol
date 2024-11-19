@@ -177,12 +177,12 @@ contract RootERC721Predicate is Predicate, Initializable, ERC721Holder, IRootERC
     }
 
     function _depositRollback(bytes calldata data) private {
-        (address rootToken, address depositor, , uint256 tokenId) = abi.decode(
+        (address rootToken, address sender, address receiver, uint256 tokenId) = abi.decode(
             data,
             (address, address, address, uint256)
         );
 
-        _withdrawInternal(rootToken, depositor, depositor, tokenId);
+        _withdrawInternal(rootToken, receiver, sender, tokenId);
     }
 
     function _withdraw(bytes calldata data) private {

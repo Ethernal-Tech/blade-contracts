@@ -263,12 +263,12 @@ contract ChildERC1155Predicate is IChildERC1155Predicate, Predicate, Initializab
     }
 
     function _withdrawRollback(bytes calldata data) private {
-        (address depositToken, address withdrawer, , uint256 tokenId, uint256 amount) = abi.decode(
+        (address depositToken, address sender, address receiver, uint256 tokenId, uint256 amount) = abi.decode(
             data,
             (address, address, address, uint256, uint256)
         );
 
-        _depositInternal(depositToken, withdrawer, withdrawer, tokenId, amount);
+        _depositInternal(depositToken, receiver, sender, tokenId, amount);
     }
 
     function _deposit(bytes calldata data) private {

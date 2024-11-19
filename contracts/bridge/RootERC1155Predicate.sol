@@ -187,12 +187,12 @@ contract RootERC1155Predicate is Predicate, Initializable, ERC1155Holder, IRootE
     }
 
     function _depositRollback(bytes calldata data) private {
-        (address rootToken, address depositor, , uint256 tokenId, uint256 amount) = abi.decode(
+        (address rootToken, address sender, address receiver, uint256 tokenId, uint256 amount) = abi.decode(
             data,
             (address, address, address, uint256, uint256)
         );
 
-        _withdrawInternal(rootToken, depositor, depositor, tokenId, amount);
+        _withdrawInternal(rootToken, receiver, sender, tokenId, amount);
     }
 
     function _withdraw(bytes calldata data) private {

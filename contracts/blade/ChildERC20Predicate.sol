@@ -191,12 +191,12 @@ contract ChildERC20Predicate is IChildERC20Predicate, Predicate, Initializable, 
     }
 
     function _withdrawRollback(bytes calldata data) private {
-        (address depositToken, address depositor, , uint256 amount) = abi.decode(
+        (address depositToken, address sender,address receiver, uint256 amount) = abi.decode(
             data,
             (address, address, address, uint256)
         );
 
-        _depositInternal(depositToken, depositor, depositor, amount);
+        _depositInternal(depositToken, receiver, sender, amount);
     }
 
     function _deposit(bytes calldata data) private {

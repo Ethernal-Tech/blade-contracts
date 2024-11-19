@@ -154,12 +154,12 @@ contract RootERC20Predicate is Predicate, Initializable, IRootERC20Predicate {
     }
 
     function _depositRollback(bytes calldata data) private {
-        (address rootToken, address depositor, , uint256 amount) = abi.decode(
+        (address rootToken, address sender, address receiver, uint256 amount) = abi.decode(
             data,
             (address, address, address, uint256)
         );
 
-        _withdrawInternal(rootToken, depositor, depositor, amount);
+        _withdrawInternal(rootToken, receiver, sender, amount);
     }
 
     function _withdraw(bytes calldata data) private {
