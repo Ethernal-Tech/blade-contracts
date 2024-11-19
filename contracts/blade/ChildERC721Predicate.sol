@@ -104,8 +104,8 @@ contract ChildERC721Predicate is IChildERC721Predicate, Predicate, Initializable
      * @dev Can be extended to include other signatures for more functionality
      */
     function onStateRollback(uint256 /* id */, address sender, bytes calldata data) external {
-        require(msg.sender == address(gateway), "ChildERC20Predicate: ONLY_GATEWAY");
-        require(sender == address(this), "ChildERC20Predicate: ONLY_CHILD_PREDICATE");
+        require(msg.sender == address(gateway), "ChildERC721Predicate: ONLY_GATEWAY");
+        require(sender == address(this), "ChildERC721Predicate: ONLY_CHILD_PREDICATE");
 
         if (bytes32(data[:32]) == WITHDRAW_SIG) {
             _beforeTokenDeposit();
