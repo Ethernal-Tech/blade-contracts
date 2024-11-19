@@ -31,6 +31,14 @@ contract Gateway is ValidatorSetStorage, IGateway {
         bytes data
     );
 
+    event BridgeBatchResult(
+        uint256 startId,
+        uint256 endId,
+        uint256 sourceChainId,
+        uint256 destinationChainId,
+        bool isRollback
+    );
+
     /**
      *
      * @notice Generates sync state event based on receiver and data.
@@ -92,6 +100,14 @@ contract Gateway is ValidatorSetStorage, IGateway {
                 ++i;
             }
         }
+
+        emit BridgeBatchResult(
+            signedBridgeBatch.startId,
+            signedBridgeBatch.endId,
+            signedBridgeBatch.sourceChainId,
+            signedBridgeBatch.destinationChainId,
+            signedBridgeBatch.isRollback
+        );
     }
 
     /**
@@ -117,10 +133,8 @@ contract Gateway is ValidatorSetStorage, IGateway {
     function _executeBridgeMessage(BridgeMessage calldata message) private {
         require(!processedEvents[message.id], "DestinationGateway: BRIDGE_MESSAGE_IS_ALREADY_PROCESSED");
         // Skip transaction if client has added flag, or receiver has no code
-        if (message.receiver.code.length == 0) {
-            emit BridgeMessageResult(message.id, false, message.sourceChainId, message.destinationChainId, "", false);
-            return;
-        }
+        // Skip transaction if client has added flag, or receiver has no code
+        require(message.receiver.code.length != 0, "receiver has no code");
 
         processedEvents[message.id] = true;
 
@@ -134,7 +148,7 @@ contract Gateway is ValidatorSetStorage, IGateway {
             )
         );
         // if bridge message fails, revert
-        if (!success) revert("Gateway: BATCH_ROLLBACK");
+        require(success, "Gateway: BATCH_ROLLBACK");
 
         // emit a ResultEvent indicating whether invocation of bridge message was successful
         // slither-disable-next-line reentrancy-events
@@ -150,10 +164,7 @@ contract Gateway is ValidatorSetStorage, IGateway {
 
     function _executeRollbackBridgeMessage(BridgeMessage calldata message) private {
         // Skip transaction if client has added flag, or receiver has no code
-        if (message.receiver.code.length == 0) {
-            emit BridgeMessageResult(message.id, false, message.sourceChainId, message.destinationChainId, "", true);
-            return;
-        }
+        require(message.receiver.code.length != 0, "receiver has no code");
 
         // slither-disable-next-line calls-loop,low-level-calls,reentrancy-no-eth
         (bool success, bytes memory returnData) = message.receiver.call(
