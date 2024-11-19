@@ -241,7 +241,7 @@ contract ChildERC721Predicate is IChildERC721Predicate, Predicate, Initializable
         emit ERC721WithdrawBatch(rootToken, address(childToken), msg.sender, receivers, tokenIds);
     }
 
-    function _withdrawRollback(bytes calldata data) private{
+    function _withdrawRollback(bytes calldata data) private {
         (address depositToken, address depositor, , uint256 tokenId) = abi.decode(
             data,
             (address, address, address, uint256)
@@ -259,7 +259,7 @@ contract ChildERC721Predicate is IChildERC721Predicate, Predicate, Initializable
         _depositInternal(depositToken, depositor, receiver, tokenId);
     }
 
-    function _withdrawBatchRollbach (bytes calldata data) private {
+    function _withdrawBatchRollbach(bytes calldata data) private {
         (, address depositToken, address withdrawer, , uint256[] memory tokenIds) = abi.decode(
             data,
             (bytes32, address, address, address[], uint256[])
@@ -267,14 +267,14 @@ contract ChildERC721Predicate is IChildERC721Predicate, Predicate, Initializable
 
         address[] memory withdrawers = new address[](tokenIds.length);
 
-        for (uint256 i = 0; i< tokenIds.length; i++){
+        for (uint256 i = 0; i < tokenIds.length; i++) {
             withdrawers[i] = withdrawer;
         }
 
         _depositBatchInternal(depositToken, withdrawer, withdrawers, tokenIds);
     }
 
-    function _depositInternal(address depositToken, address depositor, address receiver, uint256 tokenId) private{
+    function _depositInternal(address depositToken, address depositor, address receiver, uint256 tokenId) private {
         IChildERC721 childToken = IChildERC721(sourceTokenToDestinationToken[depositToken]);
 
         require(address(childToken) != address(0), "ChildERC721Predicate: UNMAPPED_TOKEN");
@@ -303,7 +303,12 @@ contract ChildERC721Predicate is IChildERC721Predicate, Predicate, Initializable
         _depositBatchInternal(depositToken, depositor, receivers, tokenIds);
     }
 
-    function _depositBatchInternal(address depositToken, address depositor, address[] memory receivers, uint256[] memory tokenIds) private{
+    function _depositBatchInternal(
+        address depositToken,
+        address depositor,
+        address[] memory receivers,
+        uint256[] memory tokenIds
+    ) private {
         IChildERC721 childToken = IChildERC721(sourceTokenToDestinationToken[depositToken]);
 
         require(address(childToken) != address(0), "ChildERC721Predicate: UNMAPPED_TOKEN");

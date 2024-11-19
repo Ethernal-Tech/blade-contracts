@@ -49,7 +49,7 @@ contract RootERC721Predicate is Predicate, Initializable, ERC721Holder, IRootERC
         }
     }
 
-        /**
+    /**
      * @inheritdoc IStateReceiver
      * @notice Function to be used for token withdrawals for rollback
      * @dev Can be extended to include other signatures for more functionality
@@ -176,13 +176,13 @@ contract RootERC721Predicate is Predicate, Initializable, ERC721Holder, IRootERC
         _afterTokenDeposit();
     }
 
-    function _depositRollback(bytes calldata data) private{
+    function _depositRollback(bytes calldata data) private {
         (address rootToken, address depositor, , uint256 tokenId) = abi.decode(
             data,
             (address, address, address, uint256)
         );
 
-        _withdrawInternal(rootToken, depositor, depositor,tokenId);
+        _withdrawInternal(rootToken, depositor, depositor, tokenId);
     }
 
     function _withdraw(bytes calldata data) private {
@@ -194,7 +194,7 @@ contract RootERC721Predicate is Predicate, Initializable, ERC721Holder, IRootERC
         _withdrawInternal(rootToken, withdrawer, receiver, tokenId);
     }
 
-    function _withdrawInternal(address rootToken, address withdrawer, address receiver, uint256 tokenId) private{
+    function _withdrawInternal(address rootToken, address withdrawer, address receiver, uint256 tokenId) private {
         address childToken = sourceTokenToDestinationToken[rootToken];
         assert(childToken != address(0)); // invariant because child predicate should have already mapped tokens
 
@@ -203,19 +203,19 @@ contract RootERC721Predicate is Predicate, Initializable, ERC721Holder, IRootERC
         emit ERC721Withdraw(address(rootToken), childToken, withdrawer, receiver, tokenId);
     }
 
-    function _depositBatchRollback(bytes calldata data) private{
-                (, address rootToken, address depositor, , uint256[] memory tokenIds) = abi.decode(
+    function _depositBatchRollback(bytes calldata data) private {
+        (, address rootToken, address depositor, , uint256[] memory tokenIds) = abi.decode(
             data,
             (bytes32, address, address, address[], uint256[])
         );
 
-    address[] memory depositors = new address[](tokenIds.length);
+        address[] memory depositors = new address[](tokenIds.length);
 
-    for (uint256 i = 0; i< tokenIds.length; i++){
-        depositors[i] = depositor;
-    }
+        for (uint256 i = 0; i < tokenIds.length; i++) {
+            depositors[i] = depositor;
+        }
 
-    _withdrawBatchInternal(rootToken, depositor, depositors, tokenIds);
+        _withdrawBatchInternal(rootToken, depositor, depositors, tokenIds);
     }
 
     function _withdrawBatch(bytes calldata data) private {
@@ -227,7 +227,12 @@ contract RootERC721Predicate is Predicate, Initializable, ERC721Holder, IRootERC
         _withdrawBatchInternal(rootToken, withdrawer, receivers, tokenIds);
     }
 
-    function _withdrawBatchInternal(address rootToken, address withdrawer, address[] memory receivers, uint256[] memory tokenIds) private {
+    function _withdrawBatchInternal(
+        address rootToken,
+        address withdrawer,
+        address[] memory receivers,
+        uint256[] memory tokenIds
+    ) private {
         address childToken = sourceTokenToDestinationToken[rootToken];
         assert(childToken != address(0)); // invariant because child predicate should have already mapped tokens
         for (uint256 i = 0; i < tokenIds.length; ) {

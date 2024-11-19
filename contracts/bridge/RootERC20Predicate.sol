@@ -70,7 +70,7 @@ contract RootERC20Predicate is Predicate, Initializable, IRootERC20Predicate {
         }
     }
 
-        /**
+    /**
      * @inheritdoc IStateReceiver
      * @notice Function to be used for token withdrawals for rollback
      * @dev Can be extended to include other signatures for more functionality
@@ -171,14 +171,14 @@ contract RootERC20Predicate is Predicate, Initializable, IRootERC20Predicate {
         _withdrawInternal(rootToken, withdrawer, receiver, amount);
     }
 
-    function _withdrawInternal(address rootToken, address withdrawer, address receiver, uint256 amount) private{
+    function _withdrawInternal(address rootToken, address withdrawer, address receiver, uint256 amount) private {
         address childToken = sourceTokenToDestinationToken[rootToken];
         assert(childToken != address(0)); // invariant because child predicate should have already mapped tokens
 
         IERC20Metadata(rootToken).safeTransfer(receiver, amount);
         // slither-disable-next-line reentrancy-events
         emit ERC20Withdraw(address(rootToken), childToken, withdrawer, receiver, amount);
-    } 
+    }
 
     function _unMapToken(bytes calldata data) private {
         (address rootToken, , , ) = abi.decode(data, (address, address, address, uint256));

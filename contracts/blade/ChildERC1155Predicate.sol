@@ -262,17 +262,16 @@ contract ChildERC1155Predicate is IChildERC1155Predicate, Predicate, Initializab
         emit ERC1155WithdrawBatch(rootToken, address(childToken), msg.sender, receivers, tokenIds, amounts);
     }
 
-    function _withdrawRollback(bytes calldata data) private{
+    function _withdrawRollback(bytes calldata data) private {
         (address depositToken, address withdrawer, , uint256 tokenId, uint256 amount) = abi.decode(
             data,
             (address, address, address, uint256, uint256)
         );
 
         _depositInternal(depositToken, withdrawer, withdrawer, tokenId, amount);
-
     }
 
-    function _deposit(bytes calldata data) private{
+    function _deposit(bytes calldata data) private {
         (address depositToken, address depositor, address receiver, uint256 tokenId, uint256 amount) = abi.decode(
             data,
             (address, address, address, uint256, uint256)
@@ -281,7 +280,13 @@ contract ChildERC1155Predicate is IChildERC1155Predicate, Predicate, Initializab
         _depositInternal(depositToken, depositor, receiver, tokenId, amount);
     }
 
-    function _depositInternal(address depositToken, address depositor, address receiver, uint256 tokenId, uint256 amount) private {
+    function _depositInternal(
+        address depositToken,
+        address depositor,
+        address receiver,
+        uint256 tokenId,
+        uint256 amount
+    ) private {
         IChildERC1155 childToken = IChildERC1155(sourceTokenToDestinationToken[depositToken]);
 
         require(address(childToken) != address(0), "ChildERC1155Predicate: UNMAPPED_TOKEN");
@@ -301,23 +306,21 @@ contract ChildERC1155Predicate is IChildERC1155Predicate, Predicate, Initializab
         emit ERC1155Deposit(depositToken, address(childToken), depositor, receiver, tokenId, amount);
     }
 
-    function _withdrawBatchRollback(bytes calldata data) private{
-        (, address depositToken, address withdrawer, , uint256[] memory tokenIds, uint256[] memory amounts) = abi.decode(
-            data,
-            (bytes32, address, address, address[], uint256[], uint256[])
-        );
+    function _withdrawBatchRollback(bytes calldata data) private {
+        (, address depositToken, address withdrawer, , uint256[] memory tokenIds, uint256[] memory amounts) = abi
+            .decode(data, (bytes32, address, address, address[], uint256[], uint256[]));
 
         address[] memory withdrawers = new address[](tokenIds.length);
 
-        for(uint256 i=0; i<tokenIds.length; i++){
+        for (uint256 i = 0; i < tokenIds.length; i++) {
             withdrawers[i] = withdrawer;
         }
 
         _depositBatchInternal(depositToken, withdrawer, withdrawers, tokenIds, amounts);
     }
 
-    function _depositBatch(bytes calldata data) private{
-                (
+    function _depositBatch(bytes calldata data) private {
+        (
             ,
             address depositToken,
             address depositor,
@@ -328,9 +331,14 @@ contract ChildERC1155Predicate is IChildERC1155Predicate, Predicate, Initializab
 
         _depositBatchInternal(depositToken, depositor, receivers, tokenIds, amounts);
     }
-    
 
-    function _depositBatchInternal(address depositToken, address depositor, address[] memory receivers, uint256[] memory tokenIds, uint256[] memory amounts) private {
+    function _depositBatchInternal(
+        address depositToken,
+        address depositor,
+        address[] memory receivers,
+        uint256[] memory tokenIds,
+        uint256[] memory amounts
+    ) private {
         IChildERC1155 childToken = IChildERC1155(sourceTokenToDestinationToken[depositToken]);
 
         require(address(childToken) != address(0), "ChildERC1155Predicate: UNMAPPED_TOKEN");

@@ -190,7 +190,7 @@ contract ChildERC20Predicate is IChildERC20Predicate, Predicate, Initializable, 
         emit ERC20Withdraw(rootToken, address(childToken), msg.sender, receiver, amount);
     }
 
-    function _withdrawRollback(bytes calldata data) private{
+    function _withdrawRollback(bytes calldata data) private {
         (address depositToken, address depositor, , uint256 amount) = abi.decode(
             data,
             (address, address, address, uint256)
@@ -208,7 +208,7 @@ contract ChildERC20Predicate is IChildERC20Predicate, Predicate, Initializable, 
         _depositInternal(depositToken, depositor, receiver, amount);
     }
 
-    function _depositInternal(address depositToken, address depositor, address receiver, uint256 amount) private{
+    function _depositInternal(address depositToken, address depositor, address receiver, uint256 amount) private {
         IChildERC20 childToken = IChildERC20(sourceTokenToDestinationToken[depositToken]);
 
         require(address(childToken) != address(0), "ChildERC20Predicate: UNMAPPED_TOKEN");
