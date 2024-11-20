@@ -1,5 +1,6 @@
 import { ethers } from "hardhat";
 import * as mcl from "../../../ts/mcl";
+import { ChildERC20Predicate } from "../../../typechain-types";
 const input = process.argv[2];
 
 const sourceChainId = 2;
@@ -10,6 +11,7 @@ const destinationChainId = 3;
 
 let domain: any;
 
+let childERC20Predicate: ChildERC20Predicate
 let validatorSecretKeys: any[] = [];
 const validatorSetSize = Math.floor(Math.random() * (5 - 1) + 8); // Randomly pick 8 - 12
 let aggMessagePoints: mcl.MessagePoint[] = [];
@@ -38,6 +40,12 @@ let msgs = [
     payload: ethers.utils.id("2233"),
   },
 ];
+
+async function deploy() {
+  const ChildERC20Predicate = await ethers.getContractFactory("ChildERC20Predicate");
+  childERC20Predicate = await ChildERC20Predicate.deploy();
+  await childERC20Predicate.deployed();
+}
 
 async function generateMsg() {
   const input = process.argv[2];
@@ -232,13 +240,13 @@ function generateSignature3() {
 
   const encodedMessage1 = ethers.utils.defaultAbiCoder.encode(
     ["uint256", "uint256", "uint256", "address", "address", "bytes"],
-    [msgs[0].id, msgs[0].sourceChainId, msgs[0].destinationChainId, msgs[0].sender, msgs[0].receiver, msgs[0].payload]
+    [msgs[0].id, msgs[0].sourceChainId, msgs[0].destinationChainId, msgs[0].sender, childERC20Predicate.address, msgs[0].payload]
   );
   const hash1 = ethers.utils.keccak256(encodedMessage1);
 
   const encodedMessage2 = ethers.utils.defaultAbiCoder.encode(
     ["uint256", "uint256", "uint256", "address", "address", "bytes"],
-    [msgs[1].id, msgs[1].sourceChainId, msgs[1].destinationChainId, msgs[1].sender, msgs[1].receiver, msgs[1].payload]
+    [msgs[1].id, msgs[1].sourceChainId, msgs[1].destinationChainId, msgs[1].sender, childERC20Predicate.address, msgs[1].payload]
   );
   const hash2 = ethers.utils.keccak256(encodedMessage2);
 
@@ -278,4 +286,5 @@ function generateSignature3() {
   aggVotingPowers.push(aggVotingPower);
 }
 
+deploy();
 generateMsg();
