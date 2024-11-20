@@ -1,6 +1,5 @@
 import { ethers } from "hardhat";
 import * as mcl from "../../../ts/mcl";
-import { ChildERC20Predicate } from "../../../typechain-types";
 const input = process.argv[2];
 
 const sourceChainId = 2;
@@ -11,7 +10,6 @@ const destinationChainId = 3;
 
 let domain: any;
 
-let childERC20Predicate: ChildERC20Predicate
 let validatorSecretKeys: any[] = [];
 const validatorSetSize = Math.floor(Math.random() * (5 - 1) + 8); // Randomly pick 8 - 12
 let aggMessagePoints: mcl.MessagePoint[] = [];
