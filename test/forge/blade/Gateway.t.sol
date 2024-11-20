@@ -168,7 +168,7 @@ contract GatewayReceiveBatchTests is GatewayInitialized {
         gateway.receiveBatch(msgs, batch);
     }
 
-    function testReceiveBatch_Success() public {
+    function testReceiveBatch_SuccessSignature() public {
         SignedBridgeMessageBatch memory batch = SignedBridgeMessageBatch({
             rootHash: 0,
             startId: msgs[0].id,
@@ -182,10 +182,7 @@ contract GatewayReceiveBatchTests is GatewayInitialized {
         });
 
 
-        vm.expectEmit();
-        emit BridgeMessageResult(1, false, 2, 3, bytes(""), false);
-        vm.expectEmit();
-        emit BridgeMessageResult(2, false, 2, 3, bytes(""), false);
+        vm.expectRevert("Gateway: BATCH_ROLLBACK");
         gateway.receiveBatch(msgs, batch);
     }
 }
