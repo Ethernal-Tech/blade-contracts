@@ -181,8 +181,7 @@ contract GatewayReceiveBatchTests is GatewayInitialized {
             isRollback: false
         });
 
-
-        vm.expectRevert("Gateway: BATCH_ROLLBACK");
+        vm.expectRevert("receiver has no code");
         gateway.receiveBatch(msgs, batch);
     }
 }

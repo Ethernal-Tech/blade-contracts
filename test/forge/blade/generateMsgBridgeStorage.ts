@@ -41,12 +41,6 @@ let msgs = [
   },
 ];
 
-async function deploy() {
-  const ChildERC20Predicate = await ethers.getContractFactory("ChildERC20Predicate");
-  childERC20Predicate = await ChildERC20Predicate.deploy();
-  await childERC20Predicate.deployed();
-}
-
 async function generateMsg() {
   const input = process.argv[2];
   const data = ethers.utils.defaultAbiCoder.decode(["bytes32"], input);
@@ -240,13 +234,13 @@ function generateSignature3() {
 
   const encodedMessage1 = ethers.utils.defaultAbiCoder.encode(
     ["uint256", "uint256", "uint256", "address", "address", "bytes"],
-    [msgs[0].id, msgs[0].sourceChainId, msgs[0].destinationChainId, msgs[0].sender, childERC20Predicate.address, msgs[0].payload]
+    [msgs[0].id, msgs[0].sourceChainId, msgs[0].destinationChainId, msgs[0].sender, msgs[0].receiver, msgs[0].payload]
   );
   const hash1 = ethers.utils.keccak256(encodedMessage1);
 
   const encodedMessage2 = ethers.utils.defaultAbiCoder.encode(
     ["uint256", "uint256", "uint256", "address", "address", "bytes"],
-    [msgs[1].id, msgs[1].sourceChainId, msgs[1].destinationChainId, msgs[1].sender, childERC20Predicate.address, msgs[1].payload]
+    [msgs[1].id, msgs[1].sourceChainId, msgs[1].destinationChainId, msgs[1].sender, msgs[0].receiver, msgs[1].payload]
   );
   const hash2 = ethers.utils.keccak256(encodedMessage2);
 
@@ -286,5 +280,4 @@ function generateSignature3() {
   aggVotingPowers.push(aggVotingPower);
 }
 
-deploy();
 generateMsg();
