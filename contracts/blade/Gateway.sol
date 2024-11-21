@@ -89,15 +89,21 @@ contract Gateway is ValidatorSetStorage, IGateway {
         verifySignature(bls.hashToPoint(DOMAIN_BRIDGE, hash), signedBridgeBatch.signature, signedBridgeBatch.bitmap);
 
         uint256 length = batchMessages.length;
-        for (uint256 i = 0; i < length; ) {
-            if (!signedBridgeBatch.isRollback) {
+        if (!signedBridgeBatch.isRollback) {
+            for (uint256 i = 0; i < length; ) {
                 _executeBridgeMessage(batchMessages[i]);
-            } else {
-                _executeRollbackBridgeMessage(batchMessages[i]);
-            }
 
-            unchecked {
-                ++i;
+                unchecked {
+                    ++i;
+                }
+            }
+        } else {
+            for (uint256 i = 0; i < length; ) {
+                _executeRollbackBridgeMessage(batchMessages[i]);
+
+                unchecked {
+                    ++i;
+                }
             }
         }
 

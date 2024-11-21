@@ -82,12 +82,14 @@ contract BridgeStorage is ValidatorSetStorage {
     function _verifyBatch(SignedBridgeMessageBatch calldata batch) private {
         require(batch.rootHash != bytes32(0), "EMPTY_BATCH");
 
-        if (batch.sourceChainId == block.chainid) {
-            require(lastCommittedInternal[batch.destinationChainId] + 1 == batch.startId, "INVALID_LAST_COMMITTED");
-            lastCommittedInternal[batch.destinationChainId] = batch.endId;
-        } else {
-            require(lastCommitted[batch.sourceChainId] + 1 == batch.startId, "INVALID_LAST_COMMITTED");
-            lastCommitted[batch.sourceChainId] = batch.endId;
+        if (!batch.isRollback) {
+            if (batch.sourceChainId == block.chainid) {
+                require(lastCommittedInternal[batch.destinationChainId] + 1 == batch.startId, "INVALID_LAST_COMMITTED");
+                lastCommittedInternal[batch.destinationChainId] = batch.endId;
+            } else {
+                require(lastCommitted[batch.sourceChainId] + 1 == batch.startId, "INVALID_LAST_COMMITTED");
+                lastCommitted[batch.sourceChainId] = batch.endId;
+            }
         }
     }
 
