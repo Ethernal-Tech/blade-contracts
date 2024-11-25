@@ -109,6 +109,7 @@ contract Gateway is ValidatorSetStorage, IGateway {
             }
         }
 
+        // slither-disable-next-line reentrancy-events
         emit BridgeBatchResult(
             signedBridgeBatch.startId,
             signedBridgeBatch.endId,

@@ -151,7 +151,7 @@ contract BridgeStorageCommitBatchTests is BridgeStorageInitialized {
             destinationChainId: 3,
             signature: aggMessagePoints[3],
             bitmap: bitmaps[3],
-            threshold: 0,
+            threshold: 1000,
             isRollback: false
         });
 
