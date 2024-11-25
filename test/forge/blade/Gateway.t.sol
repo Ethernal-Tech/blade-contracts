@@ -126,7 +126,7 @@ contract GatewayReceiveBatchTests is GatewayInitialized {
             destinationChainId: 3,
             signature: aggMessagePoints[0],
             bitmap: bitmaps[0],
-            threshold: 0,
+            threshold: 1000,
             isRollback: false
         });
 
@@ -143,7 +143,7 @@ contract GatewayReceiveBatchTests is GatewayInitialized {
             destinationChainId: 3,
             signature: aggMessagePoints[1],
             bitmap: bitmaps[1],
-            threshold: 0,
+            threshold: 1000,
             isRollback: false
         });
 
@@ -160,7 +160,7 @@ contract GatewayReceiveBatchTests is GatewayInitialized {
             destinationChainId: 3,
             signature: aggMessagePoints[2],
             bitmap: bitmaps[2],
-            threshold: 0,
+            threshold: 1000,
             isRollback: false
         });
 
@@ -177,7 +177,7 @@ contract GatewayReceiveBatchTests is GatewayInitialized {
             destinationChainId: 3,
             signature: aggMessagePoints[3],
             bitmap: bitmaps[3],
-            threshold: 0,
+            threshold: 1000,
             isRollback: false
         });
 

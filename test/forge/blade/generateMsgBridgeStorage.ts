@@ -141,7 +141,7 @@ function generateSignature1() {
   const root = ethers.utils.keccak256(concatenatedHashes);
 
   const message = ethers.utils.keccak256(
-    ethers.utils.defaultAbiCoder.encode(["bytes32", "uint256", "uint256", "uint256", "uint256", "uint256", "bool"], [root, 1, 2, 2, 3,0,false])
+    ethers.utils.defaultAbiCoder.encode(["bytes32", "uint256", "uint256", "uint256", "uint256", "uint256", "bool"], [root, 1, 2, 2, 3,1000,false])
   );
 
   const signatures: mcl.Signature[] = [];
@@ -194,7 +194,7 @@ function generateSignature2() {
   const root = ethers.utils.keccak256(concatenatedHashes);
 
   const message = ethers.utils.keccak256(
-    ethers.utils.defaultAbiCoder.encode(["bytes32", "uint256", "uint256", "uint256", "uint256", "uint256","bool"], [root, 1, 2, 2, 3, 0, false])
+    ethers.utils.defaultAbiCoder.encode(["bytes32", "uint256", "uint256", "uint256", "uint256", "uint256","bool"], [root, 1, 2, 2, 3, 1000, false])
   );
   const signatures: mcl.Signature[] = [];
   let flag = false;
@@ -246,7 +246,7 @@ function generateSignature3() {
   const root = ethers.utils.keccak256(concatenatedHashes);
 
   const message = ethers.utils.keccak256(
-    ethers.utils.defaultAbiCoder.encode(["bytes32", "uint256", "uint256", "uint256", "uint256","uint256","bool",], [root, 1, 2, 2, 3,0,false])
+    ethers.utils.defaultAbiCoder.encode(["bytes32", "uint256", "uint256", "uint256", "uint256","uint256","bool",], [root, 1, 2, 2, 3,1000,false])
   );
 
   const signatures: mcl.Signature[] = [];

@@ -400,7 +400,7 @@ describe("Gateway", () => {
       },
     ];
     var batch: SignedBridgeMessageBatchStruct = {
-      threshold: 0,
+      threshold: 1000,
       isRollback: false,
       rootHash: "",
       startId: 1,
