@@ -81,8 +81,14 @@ contract BridgeStorage is ValidatorSetStorage {
      */
     function _verifyBatch(SignedBridgeMessageBatch calldata batch) private {
         require(batch.rootHash != bytes32(0), "EMPTY_BATCH");
+        require(batch.sourceChainId != batch.destinationChainId, "sourceChainId and destinationChainId not equal");
 
         if (!batch.isRollback) {
+            _verifyRegularBatch(batch);
+        }
+    }
+
+    function _verifyRegularBatch(SignedBridgeMessageBatch calldata batch) private{
             if (batch.sourceChainId == block.chainid) {
                 require(lastCommittedInternal[batch.destinationChainId] + 1 == batch.startId, "INVALID_LAST_COMMITTED");
                 lastCommittedInternal[batch.destinationChainId] = batch.endId;
@@ -90,7 +96,6 @@ contract BridgeStorage is ValidatorSetStorage {
                 require(lastCommitted[batch.sourceChainId] + 1 == batch.startId, "INVALID_LAST_COMMITTED");
                 lastCommitted[batch.sourceChainId] = batch.endId;
             }
-        }
     }
 
     /**
