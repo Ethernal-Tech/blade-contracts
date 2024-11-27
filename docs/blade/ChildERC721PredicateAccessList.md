@@ -350,7 +350,7 @@ Function to be used for token deposits for rollback
 | Name | Type | Description |
 |---|---|---|
 | _0 | uint256 | undefined |
-| sender | address | Address of the sender on the chain chain |
+| sender | address | Address of the sender on the child chain |
 | data | bytes | Data sent by the sender |
 
 ### owner

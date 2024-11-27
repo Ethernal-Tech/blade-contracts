@@ -368,6 +368,26 @@ function totalVotingPower() external view returns (uint256)
 
 ## Events
 
+### BridgeBatchResult
+
+```solidity
+event BridgeBatchResult(uint256 startId, uint256 endId, uint256 sourceChainId, uint256 destinationChainId, bool isRollback)
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| startId  | uint256 | undefined |
+| endId  | uint256 | undefined |
+| sourceChainId  | uint256 | undefined |
+| destinationChainId  | uint256 | undefined |
+| isRollback  | bool | undefined |
+
 ### BridgeMessageResult
 
 ```solidity
