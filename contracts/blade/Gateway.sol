@@ -18,8 +18,7 @@ contract Gateway is ValidatorSetStorage, IGateway {
         bool indexed status,
         uint256 sourceChainID,
         uint256 destinationChainID,
-        bytes message,
-        bool isRollback
+        bytes message
     );
 
     event BridgeMsg(
@@ -167,8 +166,7 @@ contract Gateway is ValidatorSetStorage, IGateway {
             success,
             message.sourceChainId,
             message.destinationChainId,
-            returnData,
-            false
+            returnData
         );
     }
 
@@ -193,8 +191,7 @@ contract Gateway is ValidatorSetStorage, IGateway {
             success,
             message.sourceChainId,
             message.destinationChainId,
-            returnData,
-            true
+            returnData
         );
     }
 
