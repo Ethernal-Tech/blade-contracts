@@ -24,6 +24,8 @@ contract EpochManager is IEpochManager, System, Initializable {
     mapping(address => uint256) public pendingRewards;
     mapping(uint256 => uint256) public epochEndingBlocks;
 
+    string private _version = "V2";
+
     function initialize(
         address newStakeManager,
         address newRewardToken,
@@ -41,6 +43,14 @@ contract EpochManager is IEpochManager, System, Initializable {
         rewardWallet = newRewardWallet;
 
         currentEpochId = 1;
+    }
+
+    function setVersion(string memory version) external virtual {
+        _version = version;
+    }
+
+    function getVersion() external view virtual returns (string memory) {
+        return _version;
     }
 
     /**

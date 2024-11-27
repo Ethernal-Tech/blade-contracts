@@ -262,6 +262,23 @@ function epochs(uint256) external view returns (uint256 startBlock, uint256 endB
 | endBlock | uint256 | undefined |
 | epochRoot | bytes32 | undefined |
 
+### getVersion
+
+```solidity
+function getVersion() external view returns (string)
+```
+
+
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | string | undefined |
+
 ### initialize
 
 ```solidity
@@ -375,6 +392,22 @@ function rewardWallet() external view returns (address)
 | Name | Type | Description |
 |---|---|---|
 | _0 | address | undefined |
+
+### setVersion
+
+```solidity
+function setVersion(string version) external nonpayable
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| version | string | undefined |
 
 ### stakeManager
 
