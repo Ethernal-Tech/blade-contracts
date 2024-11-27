@@ -33,8 +33,9 @@ async function main() {
   expect(BigNumber.from(v1Address)).equal(BigNumber.from(implAddress));
 
   // get TUP contract & call with admin for upgrade
+  const data = myContract.interface.encodeFunctionData("setVersion", ["V2-upgrade"]);
   const tup = await ethers.getContractAt(TUP.abi, proxyAddress);
-  const txn = await tup.connect(proxyAdmin).upgradeTo(myContract.address);
+  const txn = await tup.connect(proxyAdmin).upgradeToAndCall(myContract.address, data);
   await txn.wait();
 
   // check v2 implementation address
@@ -46,7 +47,7 @@ async function main() {
   console.log("Proxy call getVersion after upgrade -> %s", await proxy.connect(user).getVersion());
 
   // proxy set/get version
-  const txn1 = await proxy.connect(user).setVersion("V2");
+  const txn1 = await proxy.connect(user).setVersion("V2-setter");
   await txn1.wait();
   console.log("Proxy call getVersion after setting -> %s", await proxy.connect(user).getVersion());
 }
