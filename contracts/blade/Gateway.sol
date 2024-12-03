@@ -12,6 +12,7 @@ contract Gateway is ValidatorSetStorage, IGateway {
     /// @custom:security write-protection="onlySystemCall()"
     // slither-disable-next-line protected-vars
     mapping(uint256 => bool) public processedEvents;
+    mapping(uint256 => bool) public processedEventsRollback;
 
     event BridgeMessageResult(
         uint256 indexed counter,
@@ -142,7 +143,7 @@ contract Gateway is ValidatorSetStorage, IGateway {
 
     function _executeBridgeMessage(BridgeMessage calldata message) private {
         require(!processedEvents[message.id], "DestinationGateway: BRIDGE_MESSAGE_IS_ALREADY_PROCESSED");
-        // Skip transaction if client has added flag, or receiver has no code
+        // revert transaction if client has added flag, or receiver has no code
         require(message.receiver.code.length != 0, "receiver has no code");
 
         processedEvents[message.id] = true;
@@ -161,18 +162,18 @@ contract Gateway is ValidatorSetStorage, IGateway {
 
         // emit a ResultEvent indicating whether invocation of bridge message was successful
         // slither-disable-next-line reentrancy-events
-        emit BridgeMessageResult(
-            message.id,
-            success,
-            message.sourceChainId,
-            message.destinationChainId,
-            returnData
-        );
+        emit BridgeMessageResult(message.id, success, message.sourceChainId, message.destinationChainId, returnData);
     }
 
     function _executeRollbackBridgeMessage(BridgeMessage calldata message) private {
-        // Skip transaction if client has added flag, or receiver has no code
+        require(
+            !processedEventsRollback[message.id],
+            "DestinationGateway: ROLLBACK_BRIDGE_MESSAGE_IS_ALREADY_PROCESSED"
+        );
+        // revert transaction if client has added flag, or receiver has no code
         require(message.receiver.code.length != 0, "receiver has no code");
+
+        processedEventsRollback[message.id] = true;
 
         // slither-disable-next-line calls-loop,low-level-calls,reentrancy-no-eth
         (bool success, bytes memory returnData) = message.receiver.call(
@@ -186,13 +187,7 @@ contract Gateway is ValidatorSetStorage, IGateway {
 
         // emit a ResultEvent indicating whether invocation of bridge rollback message was successful or not
         // slither-disable-next-line reentrancy-events
-        emit BridgeMessageResult(
-            message.id,
-            success,
-            message.sourceChainId,
-            message.destinationChainId,
-            returnData
-        );
+        emit BridgeMessageResult(message.id, success, message.sourceChainId, message.destinationChainId, returnData);
     }
 
     // Function to calculate Merkle Root from an array of BridgeMessages
