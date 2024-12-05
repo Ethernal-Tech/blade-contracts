@@ -50,7 +50,11 @@ contract BridgeStorage is ValidatorSetStorage {
      * @param batch new batch
      */
     function commitBatch(SignedBridgeMessageBatch calldata batch) external onlySystemCall {
-        _verifyBatch(batch);
+        if (batch.isRollback) {
+            _verifyRollbackBatch(batch);
+        } else {
+            _verifyRegularBatch(batch);
+        }
 
         bytes memory hash = abi.encode(
             keccak256(
@@ -76,19 +80,12 @@ contract BridgeStorage is ValidatorSetStorage {
     }
 
     /**
-     * @notice Internal function that verifies the batch
+     * @notice Internal function that verifies the regular batch
      * @param batch batch to verify
      */
-    function _verifyBatch(SignedBridgeMessageBatch calldata batch) private {
+    function _verifyRegularBatch(SignedBridgeMessageBatch calldata batch) private {
         require(batch.rootHash != bytes32(0), "EMPTY_BATCH");
         require(batch.sourceChainId != batch.destinationChainId, "sourceChainId and destinationChainId not equal");
-
-        if (!batch.isRollback) {
-            _verifyRegularBatch(batch);
-        }
-    }
-
-    function _verifyRegularBatch(SignedBridgeMessageBatch calldata batch) private {
         if (batch.sourceChainId == block.chainid) {
             require(lastCommittedInternal[batch.destinationChainId] + 1 == batch.startId, "INVALID_LAST_COMMITTED");
             lastCommittedInternal[batch.destinationChainId] = batch.endId;
@@ -96,6 +93,15 @@ contract BridgeStorage is ValidatorSetStorage {
             require(lastCommitted[batch.sourceChainId] + 1 == batch.startId, "INVALID_LAST_COMMITTED");
             lastCommitted[batch.sourceChainId] = batch.endId;
         }
+    }
+
+    /**
+     * @notice Internal function that verifies the rollback batch
+     * @param batch batch to verify
+     */
+    function _verifyRollbackBatch(SignedBridgeMessageBatch calldata batch) private {
+        require(batch.rootHash != bytes32(0), "EMPTY_BATCH");
+        require(batch.sourceChainId != batch.destinationChainId, "sourceChainId and destinationChainId not equal");
     }
 
     /**

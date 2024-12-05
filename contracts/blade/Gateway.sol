@@ -92,10 +92,6 @@ contract Gateway is ValidatorSetStorage, IGateway {
 
         verifySignature(bls.hashToPoint(DOMAIN_BRIDGE, hash), signedBridgeBatch.signature, signedBridgeBatch.bitmap);
 
-        if (block.number > signedBridgeBatch.threshold && !signedBridgeBatch.isRollback) {
-            revert("block number is bigger than threshold");
-        }
-
         uint256 length = batchMessages.length;
         if (!signedBridgeBatch.isRollback) {
             for (uint256 i = 0; i < length; ) {
