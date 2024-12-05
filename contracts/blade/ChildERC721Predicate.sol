@@ -98,6 +98,29 @@ contract ChildERC721Predicate is IChildERC721Predicate, Predicate, Initializable
     }
 
     /**
+     * @notice Function to be used for token deposits for rollback
+     * @param sender Address of the sender on the child chain
+     * @param data Data sent by the sender
+     * @dev Can be extended to include other signatures for more functionality
+     */
+    function onStateRollback(uint256 /* id */, address sender, bytes calldata data) external {
+        require(msg.sender == address(gateway), "ChildERC721Predicate: ONLY_GATEWAY");
+        require(sender == address(this), "ChildERC721Predicate: ONLY_CHILD_PREDICATE");
+
+        if (bytes32(data[:32]) == WITHDRAW_SIG) {
+            _beforeTokenDeposit();
+            _withdrawRollback(data[32:]);
+            _afterTokenDeposit();
+        } else if (bytes32(data[:32]) == WITHDRAW_BATCH_SIG) {
+            _beforeTokenDeposit();
+            _withdrawBatchRollback(data);
+            _afterTokenDeposit();
+        } else {
+            revert("ChildERC721Predicate: INVALID_SIGNATURE");
+        }
+    }
+
+    /**
      * @notice Function to withdraw tokens from the withdrawer to themselves on the root chain
      * @param childToken Address of the child token being withdrawn
      * @param tokenId index of the NFT to withdraw
@@ -222,12 +245,40 @@ contract ChildERC721Predicate is IChildERC721Predicate, Predicate, Initializable
         emit ERC721WithdrawBatch(rootToken, address(childToken), msg.sender, receivers, tokenIds);
     }
 
+    function _withdrawRollback(bytes calldata data) private {
+        (address depositToken, address sender, address receiver, uint256 tokenId) = abi.decode(
+            data,
+            (address, address, address, uint256)
+        );
+
+        _depositInternal(depositToken, receiver, sender, tokenId);
+    }
+
     function _deposit(bytes calldata data) private {
         (address depositToken, address depositor, address receiver, uint256 tokenId) = abi.decode(
             data,
             (address, address, address, uint256)
         );
 
+        _depositInternal(depositToken, depositor, receiver, tokenId);
+    }
+
+    function _withdrawBatchRollback(bytes calldata data) private {
+        (, address depositToken, address withdrawer, , uint256[] memory tokenIds) = abi.decode(
+            data,
+            (bytes32, address, address, address[], uint256[])
+        );
+
+        address[] memory withdrawers = new address[](tokenIds.length);
+
+        for (uint256 i = 0; i < tokenIds.length; i++) {
+            withdrawers[i] = withdrawer;
+        }
+
+        _depositBatchInternal(depositToken, withdrawer, withdrawers, tokenIds);
+    }
+
+    function _depositInternal(address depositToken, address depositor, address receiver, uint256 tokenId) private {
         IChildERC721 childToken = IChildERC721(sourceTokenToDestinationToken[depositToken]);
 
         require(address(childToken) != address(0), "ChildERC721Predicate: UNMAPPED_TOKEN");
@@ -253,6 +304,15 @@ contract ChildERC721Predicate is IChildERC721Predicate, Predicate, Initializable
             (bytes32, address, address, address[], uint256[])
         );
 
+        _depositBatchInternal(depositToken, depositor, receivers, tokenIds);
+    }
+
+    function _depositBatchInternal(
+        address depositToken,
+        address depositor,
+        address[] memory receivers,
+        uint256[] memory tokenIds
+    ) private {
         IChildERC721 childToken = IChildERC721(sourceTokenToDestinationToken[depositToken]);
 
         require(address(childToken) != address(0), "ChildERC721Predicate: UNMAPPED_TOKEN");

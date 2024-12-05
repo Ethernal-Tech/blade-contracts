@@ -483,4 +483,38 @@ describe("ChildERC1155Predicate", () => {
       "ChildERC1155Predicate: NOT_CONTRACT"
     );
   });
+
+  it("OnStateRollback: failed only_gateway", async () => {
+    const mappedData = ethers.utils.defaultAbiCoder.encode(
+      ["bytes32", "address", "address", "address", "uint256"],
+      [
+        ethers.utils.solidityKeccak256(["string"], ["WITHDRAW"]),
+        "0x0000000000000000000000000000000000000000",
+        accounts[0].address,
+        accounts[0].address,
+        1,
+      ]
+    );
+
+    await expect(
+      systemChildERC1155Predicate.onStateRollback(0, systemChildERC1155Predicate.address, mappedData)
+    ).to.be.revertedWith("ChildERC1155Predicate: ONLY_GATEWAY");
+  });
+
+  it("OnStateRollback: failed only_child_predicate", async () => {
+    const mappedData = ethers.utils.defaultAbiCoder.encode(
+      ["bytes32", "address", "address", "address", "uint256"],
+      [
+        ethers.utils.solidityKeccak256(["string"], ["WITHDRAW"]),
+        "0x0000000000000000000000000000000000000001",
+        accounts[0].address,
+        accounts[0].address,
+        1,
+      ]
+    );
+
+    await expect(
+      stateReceiverChildERC1155Predicate.onStateRollback(0, "0x0000000000000000000000000000000000000000", mappedData)
+    ).to.be.revertedWith("ChildERC1155Predicate: ONLY_CHILD_PREDICATE");
+  });
 });

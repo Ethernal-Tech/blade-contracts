@@ -50,6 +50,26 @@ contract RootERC721Predicate is Predicate, Initializable, ERC721Holder, IRootERC
     }
 
     /**
+     * @inheritdoc IStateReceiver
+     * @notice Function to be used for token withdrawals for rollback
+     * @dev Can be extended to include other signatures for more functionality
+     */
+    function onStateRollback(uint256 /*  id */, address sender, bytes calldata data) external {
+        require(msg.sender == address(gateway), "RootERC721Predicate: ONLY_GATEWAY");
+        require(sender == address(this), "RootERC721Predicate: ONLY_ROOT_PREDICATE");
+
+        if (bytes32(data[:32]) == DEPOSIT_SIG) {
+            _depositRollback(data[32:]);
+        } else if (bytes32(data[:32]) == DEPOSIT_BATCH_SIG) {
+            _depositBatchRollback(data);
+        } else if (bytes32(data[:32]) == MAP_TOKEN_SIG) {
+            _unMapToken(data[32:]);
+        } else {
+            revert("RootERC721Predicate: INVALID_SIGNATURE");
+        }
+    }
+
+    /**
      * @inheritdoc IRootERC721Predicate
      */
     function deposit(IERC721Metadata rootToken, uint256 tokenId) external {
@@ -102,6 +122,19 @@ contract RootERC721Predicate is Predicate, Initializable, ERC721Holder, IRootERC
         return childToken;
     }
 
+    function _unMapToken(bytes calldata data) private {
+        (address rootToken, , , ) = abi.decode(data, (address, address, address, uint256));
+        require(address(rootToken) != address(0), "RootERC721Predicate: INVALID_TOKEN");
+        require(
+            sourceTokenToDestinationToken[address(rootToken)] != address(0),
+            "RootERC721Predicate: TOKEN_IS_ALREADY_UNMAPPED"
+        );
+
+        sourceTokenToDestinationToken[rootToken] = address(0);
+
+        emit TokenUnMapped(rootToken);
+    }
+
     function _deposit(IERC721Metadata rootToken, address receiver, uint256 tokenId) private {
         _beforeTokenDeposit();
         address childToken = _getChildToken(rootToken);
@@ -143,11 +176,25 @@ contract RootERC721Predicate is Predicate, Initializable, ERC721Holder, IRootERC
         _afterTokenDeposit();
     }
 
+    function _depositRollback(bytes calldata data) private {
+        (address rootToken, address sender, address receiver, uint256 tokenId) = abi.decode(
+            data,
+            (address, address, address, uint256)
+        );
+
+        _withdrawInternal(rootToken, receiver, sender, tokenId);
+    }
+
     function _withdraw(bytes calldata data) private {
         (address rootToken, address withdrawer, address receiver, uint256 tokenId) = abi.decode(
             data,
             (address, address, address, uint256)
         );
+
+        _withdrawInternal(rootToken, withdrawer, receiver, tokenId);
+    }
+
+    function _withdrawInternal(address rootToken, address withdrawer, address receiver, uint256 tokenId) private {
         address childToken = sourceTokenToDestinationToken[rootToken];
         assert(childToken != address(0)); // invariant because child predicate should have already mapped tokens
 
@@ -156,11 +203,36 @@ contract RootERC721Predicate is Predicate, Initializable, ERC721Holder, IRootERC
         emit ERC721Withdraw(address(rootToken), childToken, withdrawer, receiver, tokenId);
     }
 
+    function _depositBatchRollback(bytes calldata data) private {
+        (, address rootToken, address depositor, , uint256[] memory tokenIds) = abi.decode(
+            data,
+            (bytes32, address, address, address[], uint256[])
+        );
+
+        address[] memory depositors = new address[](tokenIds.length);
+
+        for (uint256 i = 0; i < tokenIds.length; i++) {
+            depositors[i] = depositor;
+        }
+
+        _withdrawBatchInternal(rootToken, depositor, depositors, tokenIds);
+    }
+
     function _withdrawBatch(bytes calldata data) private {
         (, address rootToken, address withdrawer, address[] memory receivers, uint256[] memory tokenIds) = abi.decode(
             data,
             (bytes32, address, address, address[], uint256[])
         );
+
+        _withdrawBatchInternal(rootToken, withdrawer, receivers, tokenIds);
+    }
+
+    function _withdrawBatchInternal(
+        address rootToken,
+        address withdrawer,
+        address[] memory receivers,
+        uint256[] memory tokenIds
+    ) private {
         address childToken = sourceTokenToDestinationToken[rootToken];
         assert(childToken != address(0)); // invariant because child predicate should have already mapped tokens
         for (uint256 i = 0; i < tokenIds.length; ) {

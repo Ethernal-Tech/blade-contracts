@@ -27,6 +27,7 @@ interface IRootERC20Predicate is IStateReceiver {
         uint256 amount
     );
     event TokenMapped(address indexed rootToken, address indexed childToken);
+    event TokenUnMapped(address indexed rootToken);
 
     /**
      * @notice Function to deposit tokens from the depositor to themselves on the child chain

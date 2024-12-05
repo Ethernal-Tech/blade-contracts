@@ -106,6 +106,24 @@ Called by gateway when state is received from source chain
 | sender | address | Address of the sender on the child chain |
 | data | bytes | Data sent by the sender |
 
+### onStateRollback
+
+```solidity
+function onStateRollback(uint256 id, address sender, bytes data) external nonpayable
+```
+
+Called by gateway when state is received from source chain
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| id | uint256 | undefined |
+| sender | address | Address of the sender on the root chain |
+| data | bytes | Data sent by the sender |
+
 
 
 ## Events
@@ -210,6 +228,22 @@ event TokenMapped(address indexed rootToken, address indexed childToken)
 |---|---|---|
 | rootToken `indexed` | address | undefined |
 | childToken `indexed` | address | undefined |
+
+### TokenUnMapped
+
+```solidity
+event TokenUnMapped(address indexed rootToken)
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| rootToken `indexed` | address | undefined |
 
 
 

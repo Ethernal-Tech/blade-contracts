@@ -1,7 +1,7 @@
 import { expect } from "chai";
 import * as hre from "hardhat";
 import { ethers } from "hardhat";
-import { BLS, BN256G2, Gateway } from "../../typechain-types";
+import { BLS, BN256G2, ChildERC20Predicate, Gateway } from "../../typechain-types";
 import * as mcl from "../../ts/mcl";
 import { SignedBridgeMessageBatchStruct } from "../../typechain-types/contracts/blade/Gateway";
 
@@ -16,6 +16,7 @@ describe("Gateway", () => {
     bn256G2: BN256G2,
     validatorSetSize: number,
     validatorSecretKeys: any[],
+    childERC20Predicate: ChildERC20Predicate,
     validatorSet: any[],
     accounts: any[]; // we use any so we can access address directly from object
   before(async () => {
@@ -25,6 +26,10 @@ describe("Gateway", () => {
     const DestinationGateway = await ethers.getContractFactory("Gateway");
     gateway = (await DestinationGateway.deploy()) as Gateway;
     await gateway.deployed();
+
+    const ChildERC20Predicate = await ethers.getContractFactory("ChildERC20Predicate");
+    childERC20Predicate = await ChildERC20Predicate.deploy();
+    await childERC20Predicate.deployed();
 
     const BLS = await ethers.getContractFactory("BLS");
     bls = (await BLS.deploy()) as BLS;
@@ -369,7 +374,7 @@ describe("Gateway", () => {
     await expect(gateway.receiveBatch(msgs, batch)).to.be.revertedWith("INSUFFICIENT_VOTING_POWER");
   });
 
-  it("Gateway receiveBatch success", async () => {
+  it("Gateway receiveBatch success signature", async () => {
     msgs = [];
 
     const bitmapStr = "ffff";
@@ -382,7 +387,7 @@ describe("Gateway", () => {
         sourceChainId: 2,
         destinationChainId: 3,
         sender: ethers.constants.AddressZero,
-        receiver: ethers.constants.AddressZero,
+        receiver: childERC20Predicate.address,
         payload: ethers.constants.HashZero,
       },
       {
@@ -390,12 +395,12 @@ describe("Gateway", () => {
         sourceChainId: 2,
         destinationChainId: 3,
         sender: ethers.constants.AddressZero,
-        receiver: ethers.constants.AddressZero,
+        receiver: childERC20Predicate.address,
         payload: ethers.constants.HashZero,
       },
     ];
     var batch: SignedBridgeMessageBatchStruct = {
-      threshold: 0,
+      threshold: 1000,
       isRollback: false,
       rootHash: "",
       startId: 1,
@@ -464,9 +469,6 @@ describe("Gateway", () => {
 
     batch.signature = aggMessagePoint;
 
-    const firstTx = await gateway.receiveBatch(msgs, batch);
-    const firstReceipt = await firstTx.wait();
-    const firstLogs = firstReceipt?.events?.filter((log) => log.event === "BridgeMessageResult") as any[];
-    expect(firstLogs).to.exist;
+    await expect(gateway.receiveBatch(msgs, batch)).to.be.revertedWith("Gateway: BATCH_ROLLBACK");
   });
 });

@@ -411,4 +411,55 @@ describe("ChildERC20Predicate", () => {
       "ChildERC20Predicate: BURN_FAILED"
     );
   });
+
+  it("OnStateRollback: failed unmapped_token", async () => {
+    const mappedData = ethers.utils.defaultAbiCoder.encode(
+      ["bytes32", "address", "address", "address", "uint256"],
+      [
+        ethers.utils.solidityKeccak256(["string"], ["WITHDRAW"]),
+        "0x0000000000000000000000000000000000000000",
+        accounts[0].address,
+        accounts[0].address,
+        1,
+      ]
+    );
+
+    await expect(
+      stateReceiverChildERC20Predicate.onStateRollback(0, stateReceiverChildERC20Predicate.address, mappedData)
+    ).to.be.revertedWith("ChildERC20Predicate: UNMAPPED_TOKEN");
+  });
+
+  it("OnStateRollback: failed only_gateway", async () => {
+    const mappedData = ethers.utils.defaultAbiCoder.encode(
+      ["bytes32", "address", "address", "address", "uint256"],
+      [
+        ethers.utils.solidityKeccak256(["string"], ["WITHDRAW"]),
+        "0x0000000000000000000000000000000000000000",
+        accounts[0].address,
+        accounts[0].address,
+        1,
+      ]
+    );
+
+    await expect(
+      systemChildERC20Predicate.onStateRollback(0, systemChildERC20Predicate.address, mappedData)
+    ).to.be.revertedWith("ChildERC20Predicate: ONLY_GATEWAY");
+  });
+
+  it("OnStateRollback: failed only_child_predicate", async () => {
+    const mappedData = ethers.utils.defaultAbiCoder.encode(
+      ["bytes32", "address", "address", "address", "uint256"],
+      [
+        ethers.utils.solidityKeccak256(["string"], ["WITHDRAW"]),
+        "0x0000000000000000000000000000000000000001",
+        accounts[0].address,
+        accounts[0].address,
+        1,
+      ]
+    );
+
+    await expect(
+      stateReceiverChildERC20Predicate.onStateRollback(0, "0x0000000000000000000000000000000000000000", mappedData)
+    ).to.be.revertedWith("ChildERC20Predicate: ONLY_CHILD_PREDICATE");
+  });
 });

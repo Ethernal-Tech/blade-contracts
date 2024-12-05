@@ -87,6 +87,25 @@ contract ChildERC20Predicate is IChildERC20Predicate, Predicate, Initializable, 
     }
 
     /**
+     * @notice Function to be used for token deposits for rollback
+     * @param sender Address of the sender on the child chain
+     * @param data Data sent by the sender
+     * @dev Can be extended to include other signatures for more functionality
+     */
+    function onStateRollback(uint256 /* id */, address sender, bytes calldata data) external {
+        require(msg.sender == address(gateway), "ChildERC20Predicate: ONLY_GATEWAY");
+        require(sender == address(this), "ChildERC20Predicate: ONLY_CHILD_PREDICATE");
+
+        if (bytes32(data[:32]) == WITHDRAW_SIG) {
+            _beforeTokenDeposit();
+            _withdrawRollback(data[32:]);
+            _afterTokenDeposit();
+        } else {
+            revert("ChildERC20Predicate: INVALID_SIGNATURE");
+        }
+    }
+
+    /**
      * @notice Function to withdraw tokens from the withdrawer to themselves on the root chain
      * @param childToken Address of the child token being withdrawn
      * @param amount Amount to withdraw
@@ -171,12 +190,25 @@ contract ChildERC20Predicate is IChildERC20Predicate, Predicate, Initializable, 
         emit ERC20Withdraw(rootToken, address(childToken), msg.sender, receiver, amount);
     }
 
+    function _withdrawRollback(bytes calldata data) private {
+        (address depositToken, address sender, address receiver, uint256 amount) = abi.decode(
+            data,
+            (address, address, address, uint256)
+        );
+
+        _depositInternal(depositToken, receiver, sender, amount);
+    }
+
     function _deposit(bytes calldata data) private {
         (address depositToken, address depositor, address receiver, uint256 amount) = abi.decode(
             data,
             (address, address, address, uint256)
         );
 
+        _depositInternal(depositToken, depositor, receiver, amount);
+    }
+
+    function _depositInternal(address depositToken, address depositor, address receiver, uint256 amount) private {
         IChildERC20 childToken = IChildERC20(sourceTokenToDestinationToken[depositToken]);
 
         require(address(childToken) != address(0), "ChildERC20Predicate: UNMAPPED_TOKEN");

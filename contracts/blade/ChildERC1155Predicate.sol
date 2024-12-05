@@ -102,6 +102,29 @@ contract ChildERC1155Predicate is IChildERC1155Predicate, Predicate, Initializab
     }
 
     /**
+     * @notice Function to be used for token deposits for rollback
+     * @param sender Address of the sender on the child chain
+     * @param data Data sent by the sender
+     * @dev Can be extended to include other signatures for more functionality
+     */
+    function onStateRollback(uint256 /* id */, address sender, bytes calldata data) external {
+        require(msg.sender == address(gateway), "ChildERC1155Predicate: ONLY_GATEWAY");
+        require(sender == address(this), "ChildERC1155Predicate: ONLY_CHILD_PREDICATE");
+
+        if (bytes32(data[:32]) == WITHDRAW_SIG) {
+            _beforeTokenDeposit();
+            _withdrawRollback(data[32:]);
+            _afterTokenDeposit();
+        } else if (bytes32(data[:32]) == WITHDRAW_BATCH_SIG) {
+            _beforeTokenDeposit();
+            _withdrawBatchRollback(data);
+            _afterTokenDeposit();
+        } else {
+            revert("ChildERC1155Predicate: INVALID_SIGNATURE");
+        }
+    }
+
+    /**
      * @notice Function to withdraw tokens from the withdrawer to themselves on the root chain
      * @param childToken Address of the child token being withdrawn
      * @param tokenId Index of the NFT to withdraw
@@ -239,12 +262,31 @@ contract ChildERC1155Predicate is IChildERC1155Predicate, Predicate, Initializab
         emit ERC1155WithdrawBatch(rootToken, address(childToken), msg.sender, receivers, tokenIds, amounts);
     }
 
+    function _withdrawRollback(bytes calldata data) private {
+        (address depositToken, address sender, address receiver, uint256 tokenId, uint256 amount) = abi.decode(
+            data,
+            (address, address, address, uint256, uint256)
+        );
+
+        _depositInternal(depositToken, receiver, sender, tokenId, amount);
+    }
+
     function _deposit(bytes calldata data) private {
         (address depositToken, address depositor, address receiver, uint256 tokenId, uint256 amount) = abi.decode(
             data,
             (address, address, address, uint256, uint256)
         );
 
+        _depositInternal(depositToken, depositor, receiver, tokenId, amount);
+    }
+
+    function _depositInternal(
+        address depositToken,
+        address depositor,
+        address receiver,
+        uint256 tokenId,
+        uint256 amount
+    ) private {
         IChildERC1155 childToken = IChildERC1155(sourceTokenToDestinationToken[depositToken]);
 
         require(address(childToken) != address(0), "ChildERC1155Predicate: UNMAPPED_TOKEN");
@@ -264,6 +306,19 @@ contract ChildERC1155Predicate is IChildERC1155Predicate, Predicate, Initializab
         emit ERC1155Deposit(depositToken, address(childToken), depositor, receiver, tokenId, amount);
     }
 
+    function _withdrawBatchRollback(bytes calldata data) private {
+        (, address depositToken, address withdrawer, , uint256[] memory tokenIds, uint256[] memory amounts) = abi
+            .decode(data, (bytes32, address, address, address[], uint256[], uint256[]));
+
+        address[] memory withdrawers = new address[](tokenIds.length);
+
+        for (uint256 i = 0; i < tokenIds.length; i++) {
+            withdrawers[i] = withdrawer;
+        }
+
+        _depositBatchInternal(depositToken, withdrawer, withdrawers, tokenIds, amounts);
+    }
+
     function _depositBatch(bytes calldata data) private {
         (
             ,
@@ -274,6 +329,16 @@ contract ChildERC1155Predicate is IChildERC1155Predicate, Predicate, Initializab
             uint256[] memory amounts
         ) = abi.decode(data, (bytes32, address, address, address[], uint256[], uint256[]));
 
+        _depositBatchInternal(depositToken, depositor, receivers, tokenIds, amounts);
+    }
+
+    function _depositBatchInternal(
+        address depositToken,
+        address depositor,
+        address[] memory receivers,
+        uint256[] memory tokenIds,
+        uint256[] memory amounts
+    ) private {
         IChildERC1155 childToken = IChildERC1155(sourceTokenToDestinationToken[depositToken]);
 
         require(address(childToken) != address(0), "ChildERC1155Predicate: UNMAPPED_TOKEN");
