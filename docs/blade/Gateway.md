@@ -312,6 +312,28 @@ function processedEvents(uint256) external view returns (bool)
 |---|---|---|
 | _0 | bool | undefined |
 
+### processedEventsRollback
+
+```solidity
+function processedEventsRollback(uint256) external view returns (bool)
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | undefined |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | bool | undefined |
+
 ### receiveBatch
 
 ```solidity

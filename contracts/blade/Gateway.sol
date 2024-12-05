@@ -70,7 +70,12 @@ contract Gateway is ValidatorSetStorage, IGateway {
         BridgeMessage[] calldata batchMessages,
         SignedBridgeMessageBatch calldata signedBridgeBatch
     ) external {
-        _verifyBatch(batchMessages);
+        if (signedBridgeBatch.isRollback){
+        _verifyRollbackBatch(batchMessages);
+        } else{
+            _verifyBatch(batchMessages);
+        }
+
 
         bytes memory hash = abi.encode(
             keccak256(
@@ -141,6 +146,23 @@ contract Gateway is ValidatorSetStorage, IGateway {
         }
     }
 
+    function _verifyRollbackBatch(BridgeMessage[] calldata batch) private view{
+        require(batch.length > 0, "EMPTY_BATCH");
+
+        uint256 sourceChainId = block.chainid;
+        uint256 destinationChainId = batch[0].destinationChainId;
+
+        for (uint256 i = 0; i < batch.length; ){
+            BridgeMessage memory message = batch[i];
+            require(message.sourceChainId == sourceChainId, "INVALID_SOURCE_CHAIN_ID");
+            require(message.destinationChainId == destinationChainId, "INVALID_DESTINATION_CHAIN_ID");
+            unchecked {
+                ++i;
+            }
+        }
+    }
+
+
     function _executeBridgeMessage(BridgeMessage calldata message) private {
         require(!processedEvents[message.id], "DestinationGateway: BRIDGE_MESSAGE_IS_ALREADY_PROCESSED");
         // revert transaction if client has added flag, or receiver has no code
@@ -170,8 +192,6 @@ contract Gateway is ValidatorSetStorage, IGateway {
             !processedEventsRollback[message.id],
             "DestinationGateway: ROLLBACK_BRIDGE_MESSAGE_IS_ALREADY_PROCESSED"
         );
-        // revert transaction if client has added flag, or receiver has no code
-        require(message.receiver.code.length != 0, "receiver has no code");
 
         processedEventsRollback[message.id] = true;
 
