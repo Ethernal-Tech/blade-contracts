@@ -70,12 +70,11 @@ contract Gateway is ValidatorSetStorage, IGateway {
         BridgeMessage[] calldata batchMessages,
         SignedBridgeMessageBatch calldata signedBridgeBatch
     ) external {
-        if (signedBridgeBatch.isRollback){
-        _verifyRollbackBatch(batchMessages);
-        } else{
+        if (signedBridgeBatch.isRollback) {
+            _verifyRollbackBatch(batchMessages);
+        } else {
             _verifyBatch(batchMessages);
         }
-
 
         bytes memory hash = abi.encode(
             keccak256(
@@ -146,13 +145,13 @@ contract Gateway is ValidatorSetStorage, IGateway {
         }
     }
 
-    function _verifyRollbackBatch(BridgeMessage[] calldata batch) private view{
+    function _verifyRollbackBatch(BridgeMessage[] calldata batch) private view {
         require(batch.length > 0, "EMPTY_BATCH");
 
         uint256 sourceChainId = block.chainid;
         uint256 destinationChainId = batch[0].destinationChainId;
 
-        for (uint256 i = 0; i < batch.length; ){
+        for (uint256 i = 0; i < batch.length; ) {
             BridgeMessage memory message = batch[i];
             require(message.sourceChainId == sourceChainId, "INVALID_SOURCE_CHAIN_ID");
             require(message.destinationChainId == destinationChainId, "INVALID_DESTINATION_CHAIN_ID");
@@ -161,7 +160,6 @@ contract Gateway is ValidatorSetStorage, IGateway {
             }
         }
     }
-
 
     function _executeBridgeMessage(BridgeMessage calldata message) private {
         require(!processedEvents[message.id], "DestinationGateway: BRIDGE_MESSAGE_IS_ALREADY_PROCESSED");
