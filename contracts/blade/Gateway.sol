@@ -94,17 +94,7 @@ contract Gateway is ValidatorSetStorage, IGateway {
         verifySignature(bls.hashToPoint(DOMAIN_BRIDGE, hash), signedBridgeBatch.signature, signedBridgeBatch.bitmap);
 
         if (block.number > signedBridgeBatch.threshold && !signedBridgeBatch.isRollback) {
-            revert(
-                string(
-                    abi.encodePacked(
-                        "batch [start id ",
-                        Strings.toString(signedBridgeBatch.startId),
-                        " - end id ",
-                        Strings.toString(signedBridgeBatch.endId),
-                        "] has timed out"
-                    )
-                )
-            );
+            revert("the batch has timed out");
         }
 
         uint256 length = batchMessages.length;
