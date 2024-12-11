@@ -42,7 +42,6 @@ contract TestRollbackGateway is ValidatorSetStorage, IGateway {
     /**
      * @notice Test function to generate error for testing rollback
      * @param message Error message
-     * @return error
      */
     error TestRollbackError(string message);
 
