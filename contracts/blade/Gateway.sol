@@ -4,6 +4,7 @@ pragma solidity ^0.8.19;
 import "./ValidatorSetStorage.sol";
 import "../interfaces/IGateway.sol";
 import "../lib/Merkle.sol";
+import "@openzeppelin/contracts/utils/Strings.sol";
 
 contract Gateway is ValidatorSetStorage, IGateway {
     uint256 public constant MAX_LENGTH = 2048;
@@ -93,7 +94,17 @@ contract Gateway is ValidatorSetStorage, IGateway {
         verifySignature(bls.hashToPoint(DOMAIN_BRIDGE, hash), signedBridgeBatch.signature, signedBridgeBatch.bitmap);
 
         if (block.number > signedBridgeBatch.threshold && !signedBridgeBatch.isRollback) {
-            revert("block number is bigger than threshold");
+            revert(
+                string(
+                    abi.encodePacked(
+                        "batch [start id ",
+                        Strings.toString(signedBridgeBatch.startId),
+                        " - end id ",
+                        Strings.toString(signedBridgeBatch.endId),
+                        "] has timed out"
+                    )
+                )
+            );
         }
 
         uint256 length = batchMessages.length;
