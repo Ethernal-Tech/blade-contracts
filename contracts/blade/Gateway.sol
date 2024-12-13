@@ -16,7 +16,7 @@ contract Gateway is ValidatorSetStorage, IGateway {
     /// @custom:security write-protection="onlySystemCall()"
     // slither-disable-next-line protected-vars
     mapping(uint256 => bool) public processedEventsRollback;
-    BridgeMessage[] bridgeMessages;
+    mapping(uint256 => BridgeMessage) bridgeMessages;
 
     event BridgeMessageResult(
         uint256 indexed counter,
@@ -72,7 +72,7 @@ contract Gateway is ValidatorSetStorage, IGateway {
             data
         );
 
-        bridgeMessages.push(message);
+        bridgeMessages[counter] = message;
 
         // State sync id will start with 1
         emit BridgeMsg(counter, msg.sender, receiver, block.chainid, destinationChainId, data);
@@ -226,15 +226,14 @@ contract Gateway is ValidatorSetStorage, IGateway {
     }
 
     function getEvents(uint256 startId, uint256 endId) external view returns (BridgeMessage[] memory) {
-        uint256 lengthOfBridgeMessageArray = bridgeMessages.length;
         require(startId > 0, "start id must be bigger than 0, beacuse first events is one");
         require(startId <= endId, "startId cant be bigger than end id");
-        require(endId <= lengthOfBridgeMessageArray, "endId cant be bigger than lenght of bridge message array");
+        require(endId <= counter, "endId cant be bigger than lenght of bridge message array");
 
         BridgeMessage[] memory desiredMessages = new BridgeMessage[](endId - startId + 1);
 
         for (uint256 i = startId; i <= endId; i++) {
-            desiredMessages[i - startId] = bridgeMessages[i - 1];
+            desiredMessages[i - startId] = bridgeMessages[i];
         }
 
         return desiredMessages;
