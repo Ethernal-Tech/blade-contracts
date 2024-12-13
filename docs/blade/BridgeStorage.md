@@ -129,23 +129,6 @@ function SYSTEM() external view returns (address)
 |---|---|---|
 | _0 | address | undefined |
 
-### batchCounter
-
-```solidity
-function batchCounter() external view returns (uint256)
-```
-
-
-
-
-
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | uint256 | undefined |
-
 ### batches
 
 ```solidity
@@ -325,10 +308,10 @@ function currentValidatorSetLength() external view returns (uint256)
 ### getCommittedBatch
 
 ```solidity
-function getCommittedBatch(uint256 id) external view returns (struct SignedBridgeMessageBatch)
+function getCommittedBatch(uint256 firstBatchNumber) external view returns (struct SignedBridgeMessageBatch[])
 ```
 
-Returns the committed batch based on provided id
+Returns all committed batches from the provided ID to the end of the array
 
 
 
@@ -336,13 +319,13 @@ Returns the committed batch based on provided id
 
 | Name | Type | Description |
 |---|---|---|
-| id | uint256 | batch id |
+| firstBatchNumber | uint256 | batch id |
 
 #### Returns
 
 | Name | Type | Description |
 |---|---|---|
-| _0 | SignedBridgeMessageBatch | undefined |
+| _0 | SignedBridgeMessageBatch[] | undefined |
 
 ### getCommittedValidatorSet
 

@@ -4,12 +4,10 @@ pragma solidity ^0.8.19;
 import "./ValidatorSetStorage.sol";
 
 contract BridgeStorage is ValidatorSetStorage {
-    mapping(uint256 => SignedBridgeMessageBatch) public batches;
+    SignedBridgeMessageBatch[] public batches;
     mapping(uint256 => SignedValidatorSet) public commitedValidatorSets;
     mapping(uint256 => uint256) public lastCommitted;
     mapping(uint256 => uint256) public lastCommittedInternal;
-    /// @custom:security write-protection="onlySystemCall()"
-    uint256 public batchCounter;
     /// @custom:security write-protection="onlySystemCall()"
     uint256 public validatorSetCounter;
 
@@ -72,11 +70,7 @@ contract BridgeStorage is ValidatorSetStorage {
 
         verifySignature(bls.hashToPoint(DOMAIN_BRIDGE, hash), batch.signature, batch.bitmap);
 
-        batches[batchCounter] = batch;
-
-        emit NewBatch(batchCounter);
-
-        batchCounter++;
+        batches.push(batch);
     }
 
     /**
@@ -105,11 +99,20 @@ contract BridgeStorage is ValidatorSetStorage {
     }
 
     /**
-     * @notice Returns the committed batch based on provided id
-     * @param id batch id
+     * @notice Returns all committed batches from the provided ID to the end of the array
+     * @param firstBatchNumber batch id
      */
-    function getCommittedBatch(uint256 id) external view returns (SignedBridgeMessageBatch memory) {
-        return batches[id];
+    function getCommittedBatch(uint256 firstBatchNumber) external view returns (SignedBridgeMessageBatch[] memory) {
+        uint256 sizeOfBatchArray = batches.length;
+        require(firstBatchNumber < sizeOfBatchArray, "id exceeds size of batch array");
+
+        SignedBridgeMessageBatch[] memory unexecutedBatches = new SignedBridgeMessageBatch[](sizeOfBatchArray-firstBatchNumber);
+
+        for (uint256 i = firstBatchNumber; i<sizeOfBatchArray;i++){
+            unexecutedBatches[i-firstBatchNumber] = batches[i];
+        }
+
+        return unexecutedBatches;
     }
 
     /**
