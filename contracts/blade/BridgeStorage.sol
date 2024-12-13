@@ -106,10 +106,12 @@ contract BridgeStorage is ValidatorSetStorage {
         uint256 sizeOfBatchArray = batches.length;
         require(firstBatchNumber < sizeOfBatchArray, "id exceeds size of batch array");
 
-        SignedBridgeMessageBatch[] memory unexecutedBatches = new SignedBridgeMessageBatch[](sizeOfBatchArray-firstBatchNumber);
+        SignedBridgeMessageBatch[] memory unexecutedBatches = new SignedBridgeMessageBatch[](
+            sizeOfBatchArray - firstBatchNumber
+        );
 
-        for (uint256 i = firstBatchNumber; i<sizeOfBatchArray;i++){
-            unexecutedBatches[i-firstBatchNumber] = batches[i];
+        for (uint256 i = firstBatchNumber; i < sizeOfBatchArray; i++) {
+            unexecutedBatches[i - firstBatchNumber] = batches[i];
         }
 
         return unexecutedBatches;

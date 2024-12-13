@@ -63,7 +63,14 @@ contract Gateway is ValidatorSetStorage, IGateway {
 
         counter++;
 
-        BridgeMessage memory message = BridgeMessage(counter, block.chainid, destinationChainId, msg.sender, receiver, data);
+        BridgeMessage memory message = BridgeMessage(
+            counter,
+            block.chainid,
+            destinationChainId,
+            msg.sender,
+            receiver,
+            data
+        );
 
         bridgeMessages.push(message);
 
@@ -218,16 +225,16 @@ contract Gateway is ValidatorSetStorage, IGateway {
         emit BridgeMessageResult(message.id, success, message.sourceChainId, message.destinationChainId, returnData);
     }
 
-    function getEvents(uint256 startId, uint256 endId) external view returns(BridgeMessage[] memory){
+    function getEvents(uint256 startId, uint256 endId) external view returns (BridgeMessage[] memory) {
         uint256 lengthOfBridgeMessageArray = bridgeMessages.length;
-        require(startId>0, "start id must be bigger than 0, beacuse first events is one");
+        require(startId > 0, "start id must be bigger than 0, beacuse first events is one");
         require(startId <= endId, "startId cant be bigger than end id");
         require(endId <= lengthOfBridgeMessageArray, "endId cant be bigger than lenght of bridge message array");
 
         BridgeMessage[] memory desiredMessages = new BridgeMessage[](endId - startId + 1);
 
-        for (uint256 i = startId; i <= endId ; i++){
-            desiredMessages[i - startId] = bridgeMessages[i-1];
+        for (uint256 i = startId; i <= endId; i++) {
+            desiredMessages[i - startId] = bridgeMessages[i - 1];
         }
 
         return desiredMessages;
