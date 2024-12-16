@@ -225,7 +225,7 @@ contract Gateway is ValidatorSetStorage, IGateway {
         emit BridgeMessageResult(message.id, success, message.sourceChainId, message.destinationChainId, returnData);
     }
 
-    function getEvents(uint256 startId, uint256 endId) external view returns (BridgeMessage[] memory) {
+    function getMessagesInRange(uint256 startId, uint256 endId) external view returns (BridgeMessage[] memory) {
         require(startId > 0, "start id must be bigger than 0, beacuse first events is one");
         require(startId <= endId, "startId cant be bigger than end id");
         require(endId <= counter, "endId cant be bigger than lenght of bridge message array");
