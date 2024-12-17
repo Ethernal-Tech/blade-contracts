@@ -117,13 +117,11 @@ contract BridgeStorage is ValidatorSetStorage {
      * @param firstBatchNumber batch id
      */
     function getCommittedBatches(uint256 firstBatchNumber) external view returns (SignedBridgeMessageBatch[] memory) {
-        require(firstBatchNumber < batchCounter, "id exceeds size of batch array");
-
         SignedBridgeMessageBatch[] memory unexecutedBatches = new SignedBridgeMessageBatch[](
             batchCounter - firstBatchNumber
         );
 
-        for (uint256 i = firstBatchNumber; i <= batchCounter; i++) {
+        for (uint256 i = firstBatchNumber; i < batchCounter; i++) {
             unexecutedBatches[i - firstBatchNumber] = batches[i];
         }
 
