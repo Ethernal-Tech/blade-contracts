@@ -76,10 +76,10 @@ contract TestRollbackGateway is ValidatorSetStorage, IGateway {
         BridgeMessage[] calldata batchMessages,
         SignedBridgeMessageBatch calldata signedBridgeBatch
     ) external {
-        if(!signedBridgeBatch.isRollback) {
+        if (!signedBridgeBatch.isRollback) {
             revert TestRollbackError("TESTING BATCH");
         }
-        
+
         _verifyRollbackBatch(batchMessages);
 
         bytes memory hash = abi.encode(
@@ -107,7 +107,6 @@ contract TestRollbackGateway is ValidatorSetStorage, IGateway {
                 ++i;
             }
         }
-    
 
         // slither-disable-next-line reentrancy-events
         emit BridgeBatchResult(
