@@ -125,6 +125,7 @@ contract Gateway is ValidatorSetStorage, IGateway {
      * @notice Internal function that verifies the batch
      * @param batch batch to verify
      */
+    // slither-disable-next-line unused-state
     function _verifyBatch(BridgeMessage[] calldata batch) private view {
         require(batch.length > 0, "EMPTY_BATCH");
 
@@ -157,6 +158,7 @@ contract Gateway is ValidatorSetStorage, IGateway {
         }
     }
 
+    // slither-disable-next-line unused-state
     function _executeBridgeMessage(BridgeMessage calldata message) private {
         require(!processedEvents[message.id], "DestinationGateway: BRIDGE_MESSAGE_IS_ALREADY_PROCESSED");
         // revert transaction if client has added flag, or receiver has no code
