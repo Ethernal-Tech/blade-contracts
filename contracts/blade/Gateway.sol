@@ -70,7 +70,7 @@ contract Gateway is ValidatorSetStorage, IGateway {
     function receiveBatch(
         BridgeMessage[] calldata batchMessages,
         SignedBridgeMessageBatch calldata signedBridgeBatch
-    ) external {
+    ) external virtual {
         if (signedBridgeBatch.isRollback) {
             _verifyRollbackBatch(batchMessages);
         } else {
@@ -130,6 +130,7 @@ contract Gateway is ValidatorSetStorage, IGateway {
      * @notice Internal function that verifies the batch
      * @param batch batch to verify
      */
+    // slither-disable-start dead-code
     function _verifyBatch(BridgeMessage[] calldata batch) private view {
         require(batch.length > 0, "EMPTY_BATCH");
 
@@ -146,7 +147,9 @@ contract Gateway is ValidatorSetStorage, IGateway {
         }
     }
 
-    function _verifyRollbackBatch(BridgeMessage[] calldata batch) private view {
+    // slither-disable-end dead-code
+
+    function _verifyRollbackBatch(BridgeMessage[] calldata batch) internal view {
         require(batch.length > 0, "EMPTY_BATCH");
 
         uint256 sourceChainId = block.chainid;
@@ -162,6 +165,7 @@ contract Gateway is ValidatorSetStorage, IGateway {
         }
     }
 
+    // slither-disable-start dead-code
     function _executeBridgeMessage(BridgeMessage calldata message) private {
         require(!processedEvents[message.id], "DestinationGateway: BRIDGE_MESSAGE_IS_ALREADY_PROCESSED");
         // revert transaction if client has added flag, or receiver has no code
@@ -186,7 +190,9 @@ contract Gateway is ValidatorSetStorage, IGateway {
         emit BridgeMessageResult(message.id, success, message.sourceChainId, message.destinationChainId, returnData);
     }
 
-    function _executeRollbackBridgeMessage(BridgeMessage calldata message) private {
+    // slither-disable-end dead-code
+
+    function _executeRollbackBridgeMessage(BridgeMessage calldata message) internal {
         require(
             !processedEventsRollback[message.id],
             "DestinationGateway: ROLLBACK_BRIDGE_MESSAGE_IS_ALREADY_PROCESSED"
