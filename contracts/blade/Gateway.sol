@@ -125,7 +125,7 @@ contract Gateway is ValidatorSetStorage, IGateway {
      * @notice Internal function that verifies the batch
      * @param batch batch to verify
      */
-    function _verifyBatch(BridgeMessage[] calldata batch) private view {
+    function _verifyBatch(BridgeMessage[] calldata batch) internal view {
         require(batch.length > 0, "EMPTY_BATCH");
 
         uint256 destinationChainId = block.chainid;
@@ -157,7 +157,7 @@ contract Gateway is ValidatorSetStorage, IGateway {
         }
     }
 
-    function _executeBridgeMessage(BridgeMessage calldata message) private {
+    function _executeBridgeMessage(BridgeMessage calldata message) internal {
         require(!processedEvents[message.id], "DestinationGateway: BRIDGE_MESSAGE_IS_ALREADY_PROCESSED");
         // revert transaction if client has added flag, or receiver has no code
         require(message.receiver.code.length != 0, "receiver has no code");
