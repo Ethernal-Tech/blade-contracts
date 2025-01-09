@@ -272,10 +272,10 @@ function currentValidatorSetLength() external view returns (uint256)
 |---|---|---|
 | _0 | uint256 | undefined |
 
-### getEvents
+### getMessagesInRange
 
 ```solidity
-function getEvents(uint256 startId, uint256 endId) external view returns (struct BridgeMessage[])
+function getMessagesInRange(uint256 startId, uint256 endId) external view returns (struct BridgeMessage[])
 ```
 
 
