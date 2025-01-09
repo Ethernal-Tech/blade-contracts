@@ -101,7 +101,8 @@ contract BridgeStorageCommitBatchTests is BridgeStorageInitialized {
             signature: aggMessagePoints[0],
             bitmap: bitmaps[0],
             threshold: 0,
-            isRollback: false
+            isRollback: false,
+            validatorSetBatchCounter: 0
         });
 
         vm.expectRevert("SIGNATURE_VERIFICATION_FAILED");
@@ -118,7 +119,8 @@ contract BridgeStorageCommitBatchTests is BridgeStorageInitialized {
             signature: aggMessagePoints[1],
             bitmap: bitmaps[1],
             threshold: 0,
-            isRollback: false
+            isRollback: false,
+            validatorSetBatchCounter: 0
         });
 
         vm.expectRevert("BITMAP_IS_EMPTY");
@@ -135,7 +137,8 @@ contract BridgeStorageCommitBatchTests is BridgeStorageInitialized {
             signature: aggMessagePoints[2],
             bitmap: bitmaps[2],
             threshold: 0,
-            isRollback: false
+            isRollback: false,
+            validatorSetBatchCounter: 0
         });
 
         vm.expectRevert("INSUFFICIENT_VOTING_POWER");
@@ -152,7 +155,8 @@ contract BridgeStorageCommitBatchTests is BridgeStorageInitialized {
             signature: aggMessagePoints[3],
             bitmap: bitmaps[3],
             threshold: 1000,
-            isRollback: false
+            isRollback: false,
+            validatorSetBatchCounter: 0
         });
 
         vm.expectEmit();
