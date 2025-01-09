@@ -128,7 +128,7 @@ contract GatewayReceiveBatchTests is GatewayInitialized {
             bitmap: bitmaps[0],
             threshold: 1000,
             isRollback: false,
-            validatorSetBatchCounter: 0
+            validatorSetBatchId: 0
         });
 
         vm.expectRevert("SIGNATURE_VERIFICATION_FAILED");
@@ -146,7 +146,7 @@ contract GatewayReceiveBatchTests is GatewayInitialized {
             bitmap: bitmaps[1],
             threshold: 1000,
             isRollback: false,
-            validatorSetBatchCounter: 0
+            validatorSetBatchId: 0
         });
 
         vm.expectRevert("BITMAP_IS_EMPTY");
@@ -164,7 +164,7 @@ contract GatewayReceiveBatchTests is GatewayInitialized {
             bitmap: bitmaps[2],
             threshold: 1000,
             isRollback: false,
-            validatorSetBatchCounter: 0
+            validatorSetBatchId: 0
         });
 
         vm.expectRevert("INSUFFICIENT_VOTING_POWER");
@@ -182,7 +182,7 @@ contract GatewayReceiveBatchTests is GatewayInitialized {
             bitmap: bitmaps[3],
             threshold: 1000,
             isRollback: false,
-            validatorSetBatchCounter: 0
+            validatorSetBatchId: 0
         });
 
         vm.expectRevert("receiver has no code");

@@ -138,7 +138,7 @@ contract BridgeStorage is ValidatorSetStorage {
         return commitedValidatorSets[id];
     }
 
-    function insertEmptyBatch() private{
+    function insertEmptyBatch() private {
         batches[batchCounter] = SignedBridgeMessageBatch(
             bytes32(0),
             0,
@@ -153,7 +153,6 @@ contract BridgeStorage is ValidatorSetStorage {
         );
 
         batchCounter++;
-
     }
 
     // slither-disable-next-line unused-state,naming-convention

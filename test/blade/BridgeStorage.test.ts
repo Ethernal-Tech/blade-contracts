@@ -82,7 +82,7 @@ describe("BridgeStorage", () => {
       destinationChainId: destinationChainId,
       signature: [100, 200],
       bitmap: "0xffff",
-      validatorSetBatchId: 0
+      validatorSetBatchId: 0,
     };
 
     await expect(bridgeStorage.commitBatch(batch))
@@ -105,7 +105,7 @@ describe("BridgeStorage", () => {
       destinationChainId: destinationChainId,
       signature: [100, 200],
       bitmap: bitmap,
-      validatorSetBatchId: 0
+      validatorSetBatchId: 0,
     };
 
     const message = ethers.utils.keccak256(
@@ -154,7 +154,7 @@ describe("BridgeStorage", () => {
       destinationChainId: destinationChainId,
       signature: [0, 0],
       bitmap: bitmap,
-      validatorSetBatchId: 0
+      validatorSetBatchId: 0,
     };
 
     const messageOfBatch = ethers.utils.keccak256(
@@ -218,7 +218,7 @@ describe("BridgeStorage", () => {
       destinationChainId: destinationChainId,
       signature: [0, 0],
       bitmap: bitmap,
-      validatorSetBatchId: 0
+      validatorSetBatchId: 0,
     };
 
     const messageOfBatch = ethers.utils.keccak256(
@@ -282,7 +282,7 @@ describe("BridgeStorage", () => {
       destinationChainId: destinationChainId,
       signature: [0, 0],
       bitmap: bitmap,
-      validatorSetBatchId: 0
+      validatorSetBatchId: 0,
     };
 
     const messageOfBatch = ethers.utils.keccak256(
