@@ -40,7 +40,22 @@ contract BridgeStorage is ValidatorSetStorage {
             }
         }
 
+        batches[batchCounter] = SignedBridgeMessageBatch(
+            bytes32(0),
+            0,
+            0,
+            0,
+            0,
+            [uint256(0), uint256(0)],
+            bytes(""),
+            0,
+            false,
+            validatorSetCounter
+        );
+
         emit NewValidatorSetStored(validatorSetCounter);
+
+        batchCounter++;
 
         validatorSetCounter++;
     }
