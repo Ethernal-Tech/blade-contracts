@@ -40,7 +40,7 @@ contract BridgeStorage is ValidatorSetStorage {
             }
         }
 
-        insertNewVsBatchRef();
+        _insertNewValidatorSetBatchRef();
 
         emit NewValidatorSetStored(validatorSetCounter);
 
@@ -138,8 +138,10 @@ contract BridgeStorage is ValidatorSetStorage {
         return commitedValidatorSets[id];
     }
 
-    // Function which insert dummy batch for each committed validator set batch
-    function insertNewVsBatchRef() private {
+    /**
+     * @notice Inserts an empty batch used as a reference for each committed validator set batch
+     */
+    function _insertNewValidatorSetBatchRef() private {
         batches[batchCounter] = SignedBridgeMessageBatch(
             bytes32(0),
             0,

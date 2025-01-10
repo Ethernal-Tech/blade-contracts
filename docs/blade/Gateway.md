@@ -278,7 +278,7 @@ function currentValidatorSetLength() external view returns (uint256)
 function getMessagesInRange(uint256 startId, uint256 endId) external view returns (struct BridgeMessage[])
 ```
 
-
+Returns all bridge messages in range [startId, endId]
 
 
 
@@ -286,8 +286,8 @@ function getMessagesInRange(uint256 startId, uint256 endId) external view return
 
 | Name | Type | Description |
 |---|---|---|
-| startId | uint256 | undefined |
-| endId | uint256 | undefined |
+| startId | uint256 | Id of the 1st message in range |
+| endId | uint256 | Id of the last message in range |
 
 #### Returns
 
