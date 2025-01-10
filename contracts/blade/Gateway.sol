@@ -13,7 +13,10 @@ contract Gateway is ValidatorSetStorage, IGateway {
     /// @custom:security write-protection="onlySystemCall()"
     // slither-disable-next-line protected-vars
     mapping(uint256 => bool) public processedEvents;
+    /// @custom:security write-protection="onlySystemCall()"
+    // slither-disable-next-line protected-vars
     mapping(uint256 => bool) public processedEventsRollback;
+    mapping(uint256 => BridgeMessage) bridgeMessages;
 
     event BridgeMessageResult(
         uint256 indexed counter,
@@ -58,8 +61,21 @@ contract Gateway is ValidatorSetStorage, IGateway {
         // check destination chain id
         require(destinationChainId != 0, "INVALID_DESTINATION_CHAIN_ID");
 
+        counter++;
+
+        BridgeMessage memory message = BridgeMessage(
+            counter,
+            block.chainid,
+            destinationChainId,
+            msg.sender,
+            receiver,
+            data
+        );
+
+        bridgeMessages[counter] = message;
+
         // State sync id will start with 1
-        emit BridgeMsg(++counter, msg.sender, receiver, block.chainid, destinationChainId, data);
+        emit BridgeMsg(counter, msg.sender, receiver, block.chainid, destinationChainId, data);
     }
 
     /**
@@ -213,6 +229,25 @@ contract Gateway is ValidatorSetStorage, IGateway {
         // emit a ResultEvent indicating whether invocation of bridge rollback message was successful or not
         // slither-disable-next-line reentrancy-events
         emit BridgeMessageResult(message.id, success, message.sourceChainId, message.destinationChainId, returnData);
+    }
+
+    /**
+     * @notice Returns all bridge messages in range [startId, endId]
+     * @param startId Id of the 1st message in range
+     * @param endId Id of the last message in range
+     */
+    function getMessagesInRange(uint256 startId, uint256 endId) external view returns (BridgeMessage[] memory) {
+        require(startId > 0, "start id must be higher than 0");
+        require(startId <= endId, "startId can not be bigger than end id");
+        require(endId <= counter, "endId can not be bigger than length of bridge message array");
+
+        BridgeMessage[] memory desiredMessages = new BridgeMessage[](endId - startId + 1);
+
+        for (uint256 i = startId; i <= endId; i++) {
+            desiredMessages[i - startId] = bridgeMessages[i];
+        }
+
+        return desiredMessages;
     }
 
     // Function to calculate Merkle Root from an array of BridgeMessages

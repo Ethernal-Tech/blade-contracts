@@ -139,6 +139,7 @@ describe("Gateway", () => {
       destinationChainId: destinationChainId,
       signature: [0, 0],
       bitmap: bitmap,
+      validatorSetBatchId: 0,
     };
 
     const message = ethers.utils.keccak256(
@@ -212,6 +213,7 @@ describe("Gateway", () => {
       destinationChainId: destinationChainId,
       signature: [0, 0],
       bitmap: bitmap,
+      validatorSetBatchId: 0,
     };
 
     const encodedMessage1 = ethers.utils.defaultAbiCoder.encode(
@@ -311,6 +313,7 @@ describe("Gateway", () => {
       destinationChainId: destinationChainId,
       signature: [0, 0],
       bitmap: bitmap,
+      validatorSetBatchId: 0,
     };
 
     const encodedMessage1 = ethers.utils.defaultAbiCoder.encode(
@@ -409,6 +412,7 @@ describe("Gateway", () => {
       destinationChainId: destinationChainId,
       signature: [0, 0],
       bitmap: bitmap,
+      validatorSetBatchId: 0,
     };
 
     const encodedMessage1 = ethers.utils.defaultAbiCoder.encode(
