@@ -12,9 +12,15 @@ let accounts: any[] = [];
 let validatorSet: any[] = [];
 let eventRoot: any;
 let blockHash: any;
-let currentValidatorSetHash: any;
+let currentBlockMetadataHash: any;
 let bitmaps: any[] = [];
 let aggVotingPowers: any[] = [];
+
+const blockMetadata = {
+  blockHash: ethers.utils.hexlify(ethers.utils.randomBytes(32)),
+  blockRound: 0,
+  epochNumber: 0,
+};
 
 async function generateMsg() {
   const input = process.argv[2];
@@ -37,10 +43,10 @@ async function generateMsg() {
 
   eventRoot = ethers.utils.hexlify(ethers.utils.randomBytes(32));
   blockHash = ethers.utils.hexlify(ethers.utils.randomBytes(32));
-  currentValidatorSetHash = ethers.utils.keccak256(
+  currentBlockMetadataHash = ethers.utils.keccak256(
     ethers.utils.defaultAbiCoder.encode(
-      ["tuple(address _address, uint256[4] blsKey, uint256 votingPower)[]"],
-      [validatorSet]
+      ["tuple(bytes32 blockHash, uint256 blockRound, uint256 epochNumber)"],
+      [blockMetadata]
     )
   );
 
@@ -57,14 +63,16 @@ async function generateMsg() {
       "bytes32[]",
       "bytes[]",
       "uint256[]",
+      "tuple(bytes32 blockHash, uint256 blockRound, uint256 epochNumber)",
     ],
     [
       validatorSetSize,
       validatorSet,
       aggMessagePoints,
-      [eventRoot, blockHash, currentValidatorSetHash],
+      [eventRoot, blockHash, currentBlockMetadataHash],
       bitmaps,
       aggVotingPowers,
+      blockMetadata,
     ]
   );
 
@@ -115,8 +123,8 @@ function generateSignature1() {
   const bitmap = `0x${bitmapStr}`;
   const messageOfValidatorSet = ethers.utils.keccak256(
     ethers.utils.defaultAbiCoder.encode(
-      ["tuple(address _address, uint256[4] blsKey, uint256 votingPower)[]"],
-      [validatorSet]
+      ["tuple(bytes32 blockHash, uint256 blockRound, uint256 epochNumber)"],
+      [blockMetadata]
     )
   );
 
@@ -158,8 +166,8 @@ function generateSignature2() {
   const bitmap = `0x${bitmapStr}`;
   const messageOfValidatorSet = ethers.utils.keccak256(
     ethers.utils.defaultAbiCoder.encode(
-      ["tuple(address _address, uint256[4] blsKey, uint256 votingPower)[]"],
-      [validatorSet]
+      ["tuple(bytes32 blockHash, uint256 blockRound, uint256 epochNumber)"],
+      [blockMetadata]
     )
   );
 
@@ -201,8 +209,8 @@ function generateSignature3() {
   const bitmap = `0x${bitmapStr}`;
   const messageOfValidatorSet = ethers.utils.keccak256(
     ethers.utils.defaultAbiCoder.encode(
-      ["tuple(address _address, uint256[4] blsKey, uint256 votingPower)[]"],
-      [validatorSet]
+      ["tuple(bytes32 blockHash, uint256 blockRound, uint256 epochNumber)"],
+      [blockMetadata]
     )
   );
 
