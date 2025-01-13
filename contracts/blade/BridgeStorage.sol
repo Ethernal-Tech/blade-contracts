@@ -102,7 +102,7 @@ contract BridgeStorage is ValidatorSetStorage {
      * @notice Internal function that verifies the rollback batch
      * @param batch batch to verify
      */
-    function _verifyRollbackBatch(SignedBridgeMessageBatch calldata batch) private {
+    function _verifyRollbackBatch(SignedBridgeMessageBatch calldata batch) private pure {
         require(batch.rootHash != bytes32(0), "EMPTY_BATCH");
         require(batch.sourceChainId != batch.destinationChainId, "sourceChainId and destinationChainId not equal");
     }
