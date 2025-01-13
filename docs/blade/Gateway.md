@@ -183,7 +183,7 @@ function bn256G2() external view returns (contract IBN256G2)
 ### commitValidatorSet
 
 ```solidity
-function commitValidatorSet(Validator[] newValidatorSet, uint256[2] signature, bytes bitmap) external nonpayable
+function commitValidatorSet(Validator[] newValidatorSet, uint256[2] signature, bytes bitmap, BlockMetadata blockMetadata) external nonpayable
 ```
 
 
@@ -197,6 +197,7 @@ function commitValidatorSet(Validator[] newValidatorSet, uint256[2] signature, b
 | newValidatorSet | Validator[] | undefined |
 | signature | uint256[2] | undefined |
 | bitmap | bytes | undefined |
+| blockMetadata | BlockMetadata | undefined |
 
 ### counter
 
@@ -272,10 +273,10 @@ function currentValidatorSetLength() external view returns (uint256)
 |---|---|---|
 | _0 | uint256 | undefined |
 
-### getEvents
+### getMessagesInRange
 
 ```solidity
-function getEvents(uint256 startId, uint256 endId) external view returns (struct BridgeMessage[])
+function getMessagesInRange(uint256 startId, uint256 endId) external view returns (struct BridgeMessage[])
 ```
 
 

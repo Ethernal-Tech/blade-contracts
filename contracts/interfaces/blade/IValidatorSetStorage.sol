@@ -65,6 +65,17 @@ struct SignedValidatorSet {
     bytes bitmap;
 }
 
+/**
+ * @param blockHash hash of the block
+ * @param blockRound round of the block
+ * @param epochNumber epoch number of the block
+ **/
+struct BlockMetadata {
+    bytes32 blockHash;
+    uint256 blockRound;
+    uint256 epochNumber;
+}
+
 interface IValidatorSetStorage {
     event NewValidatorSet(Validator[] newValidatorSet);
 
@@ -73,10 +84,12 @@ interface IValidatorSetStorage {
      * @param newValidatorSet new validator set
      * @param signature aggregated signature of validators that signed the new validator set
      * @param bitmap bitmap of which validators signed the message
+     * @param blockMetadata metadata of the block
      */
     function commitValidatorSet(
         Validator[] calldata newValidatorSet,
         uint256[2] calldata signature,
-        bytes calldata bitmap
+        bytes calldata bitmap,
+        BlockMetadata calldata blockMetadata
     ) external;
 }

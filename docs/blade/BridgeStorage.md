@@ -228,7 +228,7 @@ function commitBatch(SignedBridgeMessageBatch batch) external nonpayable
 ### commitValidatorSet
 
 ```solidity
-function commitValidatorSet(Validator[] newValidatorSet, uint256[2] signature, bytes bitmap) external nonpayable
+function commitValidatorSet(Validator[] newValidatorSet, uint256[2] signature, bytes bitmap, BlockMetadata blockMetadata) external nonpayable
 ```
 
 
@@ -242,6 +242,7 @@ function commitValidatorSet(Validator[] newValidatorSet, uint256[2] signature, b
 | newValidatorSet | Validator[] | undefined |
 | signature | uint256[2] | undefined |
 | bitmap | bytes | undefined |
+| blockMetadata | BlockMetadata | undefined |
 
 ### commitedValidatorSets
 

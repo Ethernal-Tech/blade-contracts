@@ -25,9 +25,10 @@ contract BridgeStorage is ValidatorSetStorage {
     function commitValidatorSet(
         Validator[] calldata newValidatorSet,
         uint256[2] calldata signature,
-        bytes calldata bitmap
+        bytes calldata bitmap,
+        BlockMetadata calldata blockMetadata
     ) external override onlySystemCall {
-        _commitValidatorSet(newValidatorSet, signature, bitmap);
+        _commitValidatorSet(newValidatorSet, signature, bitmap, blockMetadata);
 
         SignedValidatorSet storage signedValidatorSet = commitedValidatorSets[validatorSetCounter];
         signedValidatorSet.signature = signature;
