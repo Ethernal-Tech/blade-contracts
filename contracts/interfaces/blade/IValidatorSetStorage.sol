@@ -1,8 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-bytes32 constant DOMAIN_VALIDATOR_SET = keccak256("DOMAIN_VALIDATOR_SET");
-
 bytes32 constant DOMAIN_BRIDGE = keccak256("DOMAIN_BRIDGE");
 
 /**
