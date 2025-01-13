@@ -145,8 +145,8 @@ describe("BaseBridgeGateway", () => {
 
     const message = ethers.utils.keccak256(
       ethers.utils.defaultAbiCoder.encode(
-        ["tuple(address _address, uint256[4] blsKey, uint256 votingPower)[]"],
-        [validatorSetTmp]
+        ["tuple(bytes32 blockHash, uint256 blockRound, uint256 epochNumber)"],
+        [blockMetadata]
       )
     );
 
