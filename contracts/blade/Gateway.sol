@@ -86,7 +86,7 @@ contract Gateway is ValidatorSetStorage, IGateway {
     function receiveBatch(
         BridgeMessage[] calldata batchMessages,
         SignedBridgeMessageBatch calldata signedBridgeBatch
-    ) external {
+    ) external virtual {
         if (signedBridgeBatch.isRollback) {
             _verifyRollbackBatch(batchMessages);
         } else {
@@ -146,6 +146,7 @@ contract Gateway is ValidatorSetStorage, IGateway {
      * @notice Internal function that verifies the batch
      * @param batch batch to verify
      */
+    // slither-disable-start dead-code
     function _verifyBatch(BridgeMessage[] calldata batch) private view {
         require(batch.length > 0, "EMPTY_BATCH");
 
@@ -162,7 +163,9 @@ contract Gateway is ValidatorSetStorage, IGateway {
         }
     }
 
-    function _verifyRollbackBatch(BridgeMessage[] calldata batch) private view {
+    // slither-disable-end dead-code
+
+    function _verifyRollbackBatch(BridgeMessage[] calldata batch) internal view {
         require(batch.length > 0, "EMPTY_BATCH");
 
         uint256 sourceChainId = block.chainid;
@@ -178,6 +181,7 @@ contract Gateway is ValidatorSetStorage, IGateway {
         }
     }
 
+    // slither-disable-start dead-code
     function _executeBridgeMessage(BridgeMessage calldata message) private {
         require(!processedEvents[message.id], "DestinationGateway: BRIDGE_MESSAGE_IS_ALREADY_PROCESSED");
         // revert transaction if client has added flag, or receiver has no code
@@ -202,7 +206,9 @@ contract Gateway is ValidatorSetStorage, IGateway {
         emit BridgeMessageResult(message.id, success, message.sourceChainId, message.destinationChainId, returnData);
     }
 
-    function _executeRollbackBridgeMessage(BridgeMessage calldata message) private {
+    // slither-disable-end dead-code
+
+    function _executeRollbackBridgeMessage(BridgeMessage calldata message) internal {
         require(
             !processedEventsRollback[message.id],
             "DestinationGateway: ROLLBACK_BRIDGE_MESSAGE_IS_ALREADY_PROCESSED"
@@ -225,10 +231,15 @@ contract Gateway is ValidatorSetStorage, IGateway {
         emit BridgeMessageResult(message.id, success, message.sourceChainId, message.destinationChainId, returnData);
     }
 
+    /**
+     * @notice Returns all bridge messages in range [startId, endId]
+     * @param startId Id of the 1st message in range
+     * @param endId Id of the last message in range
+     */
     function getMessagesInRange(uint256 startId, uint256 endId) external view returns (BridgeMessage[] memory) {
-        require(startId > 0, "start id must be bigger than 0, beacuse first events is one");
-        require(startId <= endId, "startId cant be bigger than end id");
-        require(endId <= counter, "endId cant be bigger than lenght of bridge message array");
+        require(startId > 0, "start id must be higher than 0");
+        require(startId <= endId, "startId can not be bigger than end id");
+        require(endId <= counter, "endId can not be bigger than length of bridge message array");
 
         BridgeMessage[] memory desiredMessages = new BridgeMessage[](endId - startId + 1);
 

@@ -52,6 +52,7 @@ struct SignedBridgeMessageBatch {
     bytes bitmap;
     uint256 threshold;
     bool isRollback;
+    uint256 validatorSetBatchId;
 }
 
 /**

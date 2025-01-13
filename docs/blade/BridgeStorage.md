@@ -149,7 +149,7 @@ function batchCounter() external view returns (uint256)
 ### batches
 
 ```solidity
-function batches(uint256) external view returns (bytes32 rootHash, uint256 startId, uint256 endId, uint256 sourceChainId, uint256 destinationChainId, bytes bitmap, uint256 threshold, bool isRollback)
+function batches(uint256) external view returns (bytes32 rootHash, uint256 startId, uint256 endId, uint256 sourceChainId, uint256 destinationChainId, bytes bitmap, uint256 threshold, bool isRollback, uint256 validatorSetBatchId)
 ```
 
 
@@ -174,6 +174,7 @@ function batches(uint256) external view returns (bytes32 rootHash, uint256 start
 | bitmap | bytes | undefined |
 | threshold | uint256 | undefined |
 | isRollback | bool | undefined |
+| validatorSetBatchId | uint256 | undefined |
 
 ### bls
 

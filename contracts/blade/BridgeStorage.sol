@@ -41,6 +41,8 @@ contract BridgeStorage is ValidatorSetStorage {
             }
         }
 
+        _insertNewValidatorSetBatchRef();
+
         emit NewValidatorSetStored(validatorSetCounter);
 
         validatorSetCounter++;
@@ -135,6 +137,26 @@ contract BridgeStorage is ValidatorSetStorage {
      */
     function getCommittedValidatorSet(uint256 id) external view returns (SignedValidatorSet memory) {
         return commitedValidatorSets[id];
+    }
+
+    /**
+     * @notice Inserts an empty batch used as a reference for each committed validator set batch
+     */
+    function _insertNewValidatorSetBatchRef() private {
+        batches[batchCounter] = SignedBridgeMessageBatch(
+            bytes32(0),
+            0,
+            0,
+            0,
+            0,
+            [uint256(0), uint256(0)],
+            bytes(""),
+            0,
+            false,
+            validatorSetCounter
+        );
+
+        batchCounter++;
     }
 
     // slither-disable-next-line unused-state,naming-convention

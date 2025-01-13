@@ -1,13 +1,5 @@
 # Gateway
 
-
-
-
-
-
-
-
-
 ## Methods
 
 ### ALLOWLIST_PRECOMPILE
@@ -16,16 +8,11 @@
 function ALLOWLIST_PRECOMPILE() external view returns (address)
 ```
 
-
-
-
-
-
 #### Returns
 
-| Name | Type | Description |
-|---|---|---|
-| _0 | address | undefined |
+| Name | Type    | Description |
+| ---- | ------- | ----------- |
+| \_0  | address | undefined   |
 
 ### BLOCKLIST_PRECOMPILE
 
@@ -33,16 +20,11 @@ function ALLOWLIST_PRECOMPILE() external view returns (address)
 function BLOCKLIST_PRECOMPILE() external view returns (address)
 ```
 
-
-
-
-
-
 #### Returns
 
-| Name | Type | Description |
-|---|---|---|
-| _0 | address | undefined |
+| Name | Type    | Description |
+| ---- | ------- | ----------- |
+| \_0  | address | undefined   |
 
 ### MAX_LENGTH
 
@@ -50,16 +32,11 @@ function BLOCKLIST_PRECOMPILE() external view returns (address)
 function MAX_LENGTH() external view returns (uint256)
 ```
 
-
-
-
-
-
 #### Returns
 
-| Name | Type | Description |
-|---|---|---|
-| _0 | uint256 | undefined |
+| Name | Type    | Description |
+| ---- | ------- | ----------- |
+| \_0  | uint256 | undefined   |
 
 ### NATIVE_TOKEN_CONTRACT
 
@@ -67,16 +44,11 @@ function MAX_LENGTH() external view returns (uint256)
 function NATIVE_TOKEN_CONTRACT() external view returns (address)
 ```
 
-
-
-
-
-
 #### Returns
 
-| Name | Type | Description |
-|---|---|---|
-| _0 | address | undefined |
+| Name | Type    | Description |
+| ---- | ------- | ----------- |
+| \_0  | address | undefined   |
 
 ### NATIVE_TRANSFER_PRECOMPILE
 
@@ -84,16 +56,11 @@ function NATIVE_TOKEN_CONTRACT() external view returns (address)
 function NATIVE_TRANSFER_PRECOMPILE() external view returns (address)
 ```
 
-
-
-
-
-
 #### Returns
 
-| Name | Type | Description |
-|---|---|---|
-| _0 | address | undefined |
+| Name | Type    | Description |
+| ---- | ------- | ----------- |
+| \_0  | address | undefined   |
 
 ### NATIVE_TRANSFER_PRECOMPILE_GAS
 
@@ -101,16 +68,11 @@ function NATIVE_TRANSFER_PRECOMPILE() external view returns (address)
 function NATIVE_TRANSFER_PRECOMPILE_GAS() external view returns (uint256)
 ```
 
-
-
-
-
-
 #### Returns
 
-| Name | Type | Description |
-|---|---|---|
-| _0 | uint256 | undefined |
+| Name | Type    | Description |
+| ---- | ------- | ----------- |
+| \_0  | uint256 | undefined   |
 
 ### READ_ADDRESSLIST_GAS
 
@@ -118,16 +80,11 @@ function NATIVE_TRANSFER_PRECOMPILE_GAS() external view returns (uint256)
 function READ_ADDRESSLIST_GAS() external view returns (uint256)
 ```
 
-
-
-
-
-
 #### Returns
 
-| Name | Type | Description |
-|---|---|---|
-| _0 | uint256 | undefined |
+| Name | Type    | Description |
+| ---- | ------- | ----------- |
+| \_0  | uint256 | undefined   |
 
 ### SYSTEM
 
@@ -135,16 +92,11 @@ function READ_ADDRESSLIST_GAS() external view returns (uint256)
 function SYSTEM() external view returns (address)
 ```
 
-
-
-
-
-
 #### Returns
 
-| Name | Type | Description |
-|---|---|---|
-| _0 | address | undefined |
+| Name | Type    | Description |
+| ---- | ------- | ----------- |
+| \_0  | address | undefined   |
 
 ### bls
 
@@ -152,16 +104,11 @@ function SYSTEM() external view returns (address)
 function bls() external view returns (contract IBLS)
 ```
 
-
-
-
-
-
 #### Returns
 
-| Name | Type | Description |
-|---|---|---|
-| _0 | contract IBLS | undefined |
+| Name | Type          | Description |
+| ---- | ------------- | ----------- |
+| \_0  | contract IBLS | undefined   |
 
 ### bn256G2
 
@@ -169,16 +116,11 @@ function bls() external view returns (contract IBLS)
 function bn256G2() external view returns (contract IBN256G2)
 ```
 
-
-
-
-
-
 #### Returns
 
-| Name | Type | Description |
-|---|---|---|
-| _0 | contract IBN256G2 | undefined |
+| Name | Type              | Description |
+| ---- | ----------------- | ----------- |
+| \_0  | contract IBN256G2 | undefined   |
 
 ### commitValidatorSet
 
@@ -186,18 +128,14 @@ function bn256G2() external view returns (contract IBN256G2)
 function commitValidatorSet(Validator[] newValidatorSet, uint256[2] signature, bytes bitmap, BlockMetadata blockMetadata) external nonpayable
 ```
 
-
-
-
-
 #### Parameters
 
-| Name | Type | Description |
-|---|---|---|
-| newValidatorSet | Validator[] | undefined |
-| signature | uint256[2] | undefined |
-| bitmap | bytes | undefined |
-| blockMetadata | BlockMetadata | undefined |
+| Name            | Type          | Description |
+| --------------- | ------------- | ----------- |
+| newValidatorSet | Validator[]   | undefined   |
+| signature       | uint256[2]    | undefined   |
+| bitmap          | bytes         | undefined   |
+| blockMetadata   | BlockMetadata | undefined   |
 
 ### counter
 
@@ -205,16 +143,11 @@ function commitValidatorSet(Validator[] newValidatorSet, uint256[2] signature, b
 function counter() external view returns (uint256)
 ```
 
-
-
-
-
-
 #### Returns
 
-| Name | Type | Description |
-|---|---|---|
-| _0 | uint256 | undefined |
+| Name | Type    | Description |
+| ---- | ------- | ----------- |
+| \_0  | uint256 | undefined   |
 
 ### currentValidatorSet
 
@@ -222,22 +155,18 @@ function counter() external view returns (uint256)
 function currentValidatorSet(uint256) external view returns (address _address, uint256 votingPower)
 ```
 
-
-
-
-
 #### Parameters
 
-| Name | Type | Description |
-|---|---|---|
-| _0 | uint256 | undefined |
+| Name | Type    | Description |
+| ---- | ------- | ----------- |
+| \_0  | uint256 | undefined   |
 
 #### Returns
 
-| Name | Type | Description |
-|---|---|---|
-| _address | address | undefined |
-| votingPower | uint256 | undefined |
+| Name        | Type    | Description |
+| ----------- | ------- | ----------- |
+| \_address   | address | undefined   |
+| votingPower | uint256 | undefined   |
 
 ### currentValidatorSetHash
 
@@ -245,16 +174,11 @@ function currentValidatorSet(uint256) external view returns (address _address, u
 function currentValidatorSetHash() external view returns (bytes32)
 ```
 
-
-
-
-
-
 #### Returns
 
-| Name | Type | Description |
-|---|---|---|
-| _0 | bytes32 | undefined |
+| Name | Type    | Description |
+| ---- | ------- | ----------- |
+| \_0  | bytes32 | undefined   |
 
 ### currentValidatorSetLength
 
@@ -262,16 +186,11 @@ function currentValidatorSetHash() external view returns (bytes32)
 function currentValidatorSetLength() external view returns (uint256)
 ```
 
-
-
-
-
-
 #### Returns
 
-| Name | Type | Description |
-|---|---|---|
-| _0 | uint256 | undefined |
+| Name | Type    | Description |
+| ---- | ------- | ----------- |
+| \_0  | uint256 | undefined   |
 
 ### getMessagesInRange
 
@@ -279,22 +198,20 @@ function currentValidatorSetLength() external view returns (uint256)
 function getMessagesInRange(uint256 startId, uint256 endId) external view returns (struct BridgeMessage[])
 ```
 
-
-
-
+Returns all bridge messages in range [startId, endId]
 
 #### Parameters
 
-| Name | Type | Description |
-|---|---|---|
-| startId | uint256 | undefined |
-| endId | uint256 | undefined |
+| Name    | Type    | Description                     |
+| ------- | ------- | ------------------------------- |
+| startId | uint256 | Id of the 1st message in range  |
+| endId   | uint256 | Id of the last message in range |
 
 #### Returns
 
-| Name | Type | Description |
-|---|---|---|
-| _0 | BridgeMessage[] | undefined |
+| Name | Type            | Description |
+| ---- | --------------- | ----------- |
+| \_0  | BridgeMessage[] | undefined   |
 
 ### initialize
 
@@ -302,17 +219,13 @@ function getMessagesInRange(uint256 startId, uint256 endId) external view return
 function initialize(contract IBLS newBls, contract IBN256G2 newBn256G2, Validator[] validators) external nonpayable
 ```
 
-
-
-
-
 #### Parameters
 
-| Name | Type | Description |
-|---|---|---|
-| newBls | contract IBLS | undefined |
-| newBn256G2 | contract IBN256G2 | undefined |
-| validators | Validator[] | undefined |
+| Name       | Type              | Description |
+| ---------- | ----------------- | ----------- |
+| newBls     | contract IBLS     | undefined   |
+| newBn256G2 | contract IBN256G2 | undefined   |
+| validators | Validator[]       | undefined   |
 
 ### processedEvents
 
@@ -320,21 +233,17 @@ function initialize(contract IBLS newBls, contract IBN256G2 newBn256G2, Validato
 function processedEvents(uint256) external view returns (bool)
 ```
 
-
-
-
-
 #### Parameters
 
-| Name | Type | Description |
-|---|---|---|
-| _0 | uint256 | undefined |
+| Name | Type    | Description |
+| ---- | ------- | ----------- |
+| \_0  | uint256 | undefined   |
 
 #### Returns
 
 | Name | Type | Description |
-|---|---|---|
-| _0 | bool | undefined |
+| ---- | ---- | ----------- |
+| \_0  | bool | undefined   |
 
 ### processedEventsRollback
 
@@ -342,21 +251,17 @@ function processedEvents(uint256) external view returns (bool)
 function processedEventsRollback(uint256) external view returns (bool)
 ```
 
-
-
-
-
 #### Parameters
 
-| Name | Type | Description |
-|---|---|---|
-| _0 | uint256 | undefined |
+| Name | Type    | Description |
+| ---- | ------- | ----------- |
+| \_0  | uint256 | undefined   |
 
 #### Returns
 
 | Name | Type | Description |
-|---|---|---|
-| _0 | bool | undefined |
+| ---- | ---- | ----------- |
+| \_0  | bool | undefined   |
 
 ### receiveBatch
 
@@ -364,16 +269,12 @@ function processedEventsRollback(uint256) external view returns (bool)
 function receiveBatch(BridgeMessage[] batchMessages, SignedBridgeMessageBatch signedBridgeBatch) external nonpayable
 ```
 
-
-
-
-
 #### Parameters
 
-| Name | Type | Description |
-|---|---|---|
-| batchMessages | BridgeMessage[] | undefined |
-| signedBridgeBatch | SignedBridgeMessageBatch | undefined |
+| Name              | Type                     | Description |
+| ----------------- | ------------------------ | ----------- |
+| batchMessages     | BridgeMessage[]          | undefined   |
+| signedBridgeBatch | SignedBridgeMessageBatch | undefined   |
 
 ### sendBridgeMsg
 
@@ -383,15 +284,13 @@ function sendBridgeMsg(address receiver, bytes data, uint256 destinationChainId)
 
 Generates sync state event based on receiver and data. Anyone can call this method to emit an event. Receiver on Polygon should add check based on sender.
 
-
-
 #### Parameters
 
-| Name | Type | Description |
-|---|---|---|
-| receiver | address | Receiver address on Polygon chain |
-| data | bytes | Data to send on Polygon chain |
-| destinationChainId | uint256 | Chain id of destination chain |
+| Name               | Type    | Description                       |
+| ------------------ | ------- | --------------------------------- |
+| receiver           | address | Receiver address on Polygon chain |
+| data               | bytes   | Data to send on Polygon chain     |
+| destinationChainId | uint256 | Chain id of destination chain     |
 
 ### totalVotingPower
 
@@ -399,18 +298,11 @@ Generates sync state event based on receiver and data. Anyone can call this meth
 function totalVotingPower() external view returns (uint256)
 ```
 
-
-
-
-
-
 #### Returns
 
-| Name | Type | Description |
-|---|---|---|
-| _0 | uint256 | undefined |
-
-
+| Name | Type    | Description |
+| ---- | ------- | ----------- |
+| \_0  | uint256 | undefined   |
 
 ## Events
 
@@ -420,19 +312,15 @@ function totalVotingPower() external view returns (uint256)
 event BridgeBatchResult(uint256 startId, uint256 endId, uint256 sourceChainId, uint256 destinationChainId, bool isRollback)
 ```
 
-
-
-
-
 #### Parameters
 
-| Name | Type | Description |
-|---|---|---|
-| startId  | uint256 | undefined |
-| endId  | uint256 | undefined |
-| sourceChainId  | uint256 | undefined |
-| destinationChainId  | uint256 | undefined |
-| isRollback  | bool | undefined |
+| Name               | Type    | Description |
+| ------------------ | ------- | ----------- |
+| startId            | uint256 | undefined   |
+| endId              | uint256 | undefined   |
+| sourceChainId      | uint256 | undefined   |
+| destinationChainId | uint256 | undefined   |
+| isRollback         | bool    | undefined   |
 
 ### BridgeMessageResult
 
@@ -440,19 +328,15 @@ event BridgeBatchResult(uint256 startId, uint256 endId, uint256 sourceChainId, u
 event BridgeMessageResult(uint256 indexed counter, bool indexed status, uint256 sourceChainID, uint256 destinationChainID, bytes message)
 ```
 
-
-
-
-
 #### Parameters
 
-| Name | Type | Description |
-|---|---|---|
-| counter `indexed` | uint256 | undefined |
-| status `indexed` | bool | undefined |
-| sourceChainID  | uint256 | undefined |
-| destinationChainID  | uint256 | undefined |
-| message  | bytes | undefined |
+| Name               | Type    | Description |
+| ------------------ | ------- | ----------- |
+| counter `indexed`  | uint256 | undefined   |
+| status `indexed`   | bool    | undefined   |
+| sourceChainID      | uint256 | undefined   |
+| destinationChainID | uint256 | undefined   |
+| message            | bytes   | undefined   |
 
 ### BridgeMsg
 
@@ -460,20 +344,16 @@ event BridgeMessageResult(uint256 indexed counter, bool indexed status, uint256 
 event BridgeMsg(uint256 indexed id, address indexed sender, address indexed receiver, uint256 sourceChainId, uint256 destinationChainId, bytes data)
 ```
 
-
-
-
-
 #### Parameters
 
-| Name | Type | Description |
-|---|---|---|
-| id `indexed` | uint256 | undefined |
-| sender `indexed` | address | undefined |
-| receiver `indexed` | address | undefined |
-| sourceChainId  | uint256 | undefined |
-| destinationChainId  | uint256 | undefined |
-| data  | bytes | undefined |
+| Name               | Type    | Description |
+| ------------------ | ------- | ----------- |
+| id `indexed`       | uint256 | undefined   |
+| sender `indexed`   | address | undefined   |
+| receiver `indexed` | address | undefined   |
+| sourceChainId      | uint256 | undefined   |
+| destinationChainId | uint256 | undefined   |
+| data               | bytes   | undefined   |
 
 ### Initialized
 
@@ -481,15 +361,13 @@ event BridgeMsg(uint256 indexed id, address indexed sender, address indexed rece
 event Initialized(uint8 version)
 ```
 
-
-
-*Triggered when the contract has been initialized or reinitialized.*
+_Triggered when the contract has been initialized or reinitialized._
 
 #### Parameters
 
-| Name | Type | Description |
-|---|---|---|
-| version  | uint8 | undefined |
+| Name    | Type  | Description |
+| ------- | ----- | ----------- |
+| version | uint8 | undefined   |
 
 ### NewValidatorSet
 
@@ -497,17 +375,11 @@ event Initialized(uint8 version)
 event NewValidatorSet(Validator[] newValidatorSet)
 ```
 
-
-
-
-
 #### Parameters
 
-| Name | Type | Description |
-|---|---|---|
-| newValidatorSet  | Validator[] | undefined |
-
-
+| Name            | Type        | Description |
+| --------------- | ----------- | ----------- |
+| newValidatorSet | Validator[] | undefined   |
 
 ## Errors
 
@@ -517,14 +389,8 @@ event NewValidatorSet(Validator[] newValidatorSet)
 error Unauthorized(string only)
 ```
 
-
-
-
-
 #### Parameters
 
-| Name | Type | Description |
-|---|---|---|
-| only | string | undefined |
-
-
+| Name | Type   | Description |
+| ---- | ------ | ----------- |
+| only | string | undefined   |
