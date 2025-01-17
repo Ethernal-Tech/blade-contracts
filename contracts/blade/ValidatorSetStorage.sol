@@ -33,20 +33,22 @@ contract ValidatorSetStorage is IValidatorSetStorage, Initializable, System {
      * @param newValidatorSet new validator set
      * @param signature aggregated signature of validators that signed the new validator set
      * @param bitmap bitmap of which validators signed the message
+     * @param blockMetadata metadata of the block
      */
     function commitValidatorSet(
         Validator[] calldata newValidatorSet,
         uint256[2] calldata signature,
-        bytes calldata bitmap
-    ) external virtual onlySystemCall {
-        _commitValidatorSet(newValidatorSet, signature, bitmap);
+        bytes calldata bitmap,
+        BlockMetadata calldata blockMetadata
+    ) external virtual {
+        _commitValidatorSet(newValidatorSet, signature, bitmap, blockMetadata);
     }
 
     /**
      * @notice Internal function that sets the new validator set
      * @param newValidatorSet new validator set
      */
-    function _setNewValidatorSet(Validator[] calldata newValidatorSet) private {
+    function _setNewValidatorSet(Validator[] calldata newValidatorSet) internal {
         uint256 length = newValidatorSet.length;
         currentValidatorSetLength = length;
         currentValidatorSetHash = keccak256(abi.encode(newValidatorSet));
@@ -140,13 +142,14 @@ contract ValidatorSetStorage is IValidatorSetStorage, Initializable, System {
     function _commitValidatorSet(
         Validator[] calldata newValidatorSet,
         uint256[2] calldata signature,
-        bytes calldata bitmap
+        bytes calldata bitmap,
+        BlockMetadata calldata blockMetadata
     ) internal {
         require(newValidatorSet.length > 0, "EMPTY_VALIDATOR_SET");
 
-        bytes memory hash = abi.encode(keccak256(abi.encode(newValidatorSet)));
+        bytes memory hash = abi.encode(keccak256(abi.encode(blockMetadata)));
 
-        verifySignature(bls.hashToPoint(DOMAIN_VALIDATOR_SET, hash), signature, bitmap);
+        verifySignature(bls.hashToPoint(DOMAIN_BRIDGE, hash), signature, bitmap);
 
         _setNewValidatorSet(newValidatorSet);
 

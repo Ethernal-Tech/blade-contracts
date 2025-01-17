@@ -4,9 +4,13 @@ import { ethers } from "hardhat";
 import { BLS, BN256G2, ValidatorSetStorage } from "../../typechain-types";
 import * as mcl from "../../ts/mcl";
 
-const DOMAIN_VALIDATOR_SET = ethers.utils.arrayify(
-  ethers.utils.solidityKeccak256(["string"], ["DOMAIN_VALIDATOR_SET"])
-);
+const DOMAIN_BRIDGE = ethers.utils.arrayify(ethers.utils.solidityKeccak256(["string"], ["DOMAIN_BRIDGE"]));
+
+const blockMetadata = {
+  blockHash: ethers.constants.HashZero,
+  blockRound: 0,
+  epochNumber: 0,
+};
 
 describe("BaseBridgeGateway", () => {
   let validatorSetStorage: ValidatorSetStorage,
@@ -97,29 +101,6 @@ describe("BaseBridgeGateway", () => {
     }
   });
 
-  it("Base bridge gateway fail: no system call", async () => {
-    msgs = [];
-
-    msgs = [
-      {
-        id: 1,
-        sourceChainId: 2,
-        destinationChainId: 3,
-        sender: ethers.constants.AddressZero,
-        receiver: ethers.constants.AddressZero,
-        payload: ethers.constants.HashZero,
-      },
-    ];
-
-    let sign: [number, number];
-
-    sign = [1, 1];
-
-    await expect(validatorSetStorage.commitValidatorSet(validatorSet, sign, ethers.constants.AddressZero))
-      .to.be.revertedWithCustomError(validatorSetStorage, "Unauthorized")
-      .withArgs("SYSTEMCALL");
-  });
-
   it("Bridge storage commitValidator success", async () => {
     validatorSetSize = Math.floor(Math.random() * (5 - 1) + 8); // Randomly pick 8 - 12
     const bitmap = "0xffff";
@@ -139,8 +120,8 @@ describe("BaseBridgeGateway", () => {
 
     const message = ethers.utils.keccak256(
       ethers.utils.defaultAbiCoder.encode(
-        ["tuple(address _address, uint256[4] blsKey, uint256 votingPower)[]"],
-        [validatorSetTmp]
+        ["tuple(bytes32 blockHash, uint256 blockRound, uint256 epochNumber)"],
+        [blockMetadata]
       )
     );
 
@@ -161,7 +142,7 @@ describe("BaseBridgeGateway", () => {
         const { signature, messagePoint } = mcl.sign(
           message,
           validatorSecretKeys[i],
-          ethers.utils.arrayify(DOMAIN_VALIDATOR_SET)
+          ethers.utils.arrayify(DOMAIN_BRIDGE)
         );
         signatures.push(signature);
         aggVotingPower += parseInt(ethers.utils.formatEther(validatorSet[i].votingPower), 10);
@@ -172,7 +153,12 @@ describe("BaseBridgeGateway", () => {
 
     const aggMessagePoint: mcl.MessagePoint = mcl.g1ToHex(mcl.aggregateRaw(signatures));
 
-    const firstTx = await systemValidatorSetStorage.commitValidatorSet(validatorSetTmp, aggMessagePoint, bitmap);
+    const firstTx = await systemValidatorSetStorage.commitValidatorSet(
+      validatorSetTmp,
+      aggMessagePoint,
+      bitmap,
+      blockMetadata
+    );
     const firstReceipt = await firstTx.wait();
     const firstLogs = firstReceipt?.events?.filter((log) => log.event === "NewValidatorSet") as any[];
     expect(firstLogs).to.exist;
@@ -188,7 +174,7 @@ describe("BaseBridgeGateway", () => {
     sign = [0, 0];
 
     await expect(
-      systemValidatorSetStorage.commitValidatorSet(validatorSet, sign, ethers.constants.AddressZero)
+      systemValidatorSetStorage.commitValidatorSet(validatorSet, sign, ethers.constants.AddressZero, blockMetadata)
     ).to.be.revertedWith("EMPTY_VALIDATOR_SET");
   });
 });

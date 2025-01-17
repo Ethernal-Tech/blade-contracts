@@ -1,4 +1,4 @@
-# ValidatorSetStorage
+# TestRollbackGateway
 
 
 
@@ -43,6 +43,23 @@ function BLOCKLIST_PRECOMPILE() external view returns (address)
 | Name | Type | Description |
 |---|---|---|
 | _0 | address | undefined |
+
+### MAX_LENGTH
+
+```solidity
+function MAX_LENGTH() external view returns (uint256)
+```
+
+
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | undefined |
 
 ### NATIVE_TOKEN_CONTRACT
 
@@ -182,6 +199,23 @@ function commitValidatorSet(Validator[] newValidatorSet, uint256[2] signature, b
 | bitmap | bytes | undefined |
 | blockMetadata | BlockMetadata | undefined |
 
+### counter
+
+```solidity
+function counter() external view returns (uint256)
+```
+
+
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | undefined |
+
 ### currentValidatorSet
 
 ```solidity
@@ -239,6 +273,29 @@ function currentValidatorSetLength() external view returns (uint256)
 |---|---|---|
 | _0 | uint256 | undefined |
 
+### getMessagesInRange
+
+```solidity
+function getMessagesInRange(uint256 startId, uint256 endId) external view returns (struct BridgeMessage[])
+```
+
+Returns all bridge messages in range [startId, endId]
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| startId | uint256 | Id of the 1st message in range |
+| endId | uint256 | Id of the last message in range |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | BridgeMessage[] | undefined |
+
 ### initialize
 
 ```solidity
@@ -256,6 +313,85 @@ function initialize(contract IBLS newBls, contract IBN256G2 newBn256G2, Validato
 | newBls | contract IBLS | undefined |
 | newBn256G2 | contract IBN256G2 | undefined |
 | validators | Validator[] | undefined |
+
+### processedEvents
+
+```solidity
+function processedEvents(uint256) external view returns (bool)
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | undefined |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | bool | undefined |
+
+### processedEventsRollback
+
+```solidity
+function processedEventsRollback(uint256) external view returns (bool)
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | undefined |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | bool | undefined |
+
+### receiveBatch
+
+```solidity
+function receiveBatch(BridgeMessage[] batchMessages, SignedBridgeMessageBatch signedBridgeBatch) external nonpayable
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| batchMessages | BridgeMessage[] | undefined |
+| signedBridgeBatch | SignedBridgeMessageBatch | undefined |
+
+### sendBridgeMsg
+
+```solidity
+function sendBridgeMsg(address receiver, bytes data, uint256 destinationChainId) external nonpayable
+```
+
+Generates sync state event based on receiver and data. Anyone can call this method to emit an event. Receiver on Polygon should add check based on sender.
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| receiver | address | Receiver address on Polygon chain |
+| data | bytes | Data to send on Polygon chain |
+| destinationChainId | uint256 | Chain id of destination chain |
 
 ### totalVotingPower
 
@@ -277,6 +413,67 @@ function totalVotingPower() external view returns (uint256)
 
 
 ## Events
+
+### BridgeBatchResult
+
+```solidity
+event BridgeBatchResult(uint256 startId, uint256 endId, uint256 sourceChainId, uint256 destinationChainId, bool isRollback)
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| startId  | uint256 | undefined |
+| endId  | uint256 | undefined |
+| sourceChainId  | uint256 | undefined |
+| destinationChainId  | uint256 | undefined |
+| isRollback  | bool | undefined |
+
+### BridgeMessageResult
+
+```solidity
+event BridgeMessageResult(uint256 indexed counter, bool indexed status, uint256 sourceChainID, uint256 destinationChainID, bytes message)
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| counter `indexed` | uint256 | undefined |
+| status `indexed` | bool | undefined |
+| sourceChainID  | uint256 | undefined |
+| destinationChainID  | uint256 | undefined |
+| message  | bytes | undefined |
+
+### BridgeMsg
+
+```solidity
+event BridgeMsg(uint256 indexed id, address indexed sender, address indexed receiver, uint256 sourceChainId, uint256 destinationChainId, bytes data)
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| id `indexed` | uint256 | undefined |
+| sender `indexed` | address | undefined |
+| receiver `indexed` | address | undefined |
+| sourceChainId  | uint256 | undefined |
+| destinationChainId  | uint256 | undefined |
+| data  | bytes | undefined |
 
 ### Initialized
 
@@ -310,5 +507,24 @@ event NewValidatorSet(Validator[] newValidatorSet)
 |---|---|---|
 | newValidatorSet  | Validator[] | undefined |
 
+
+
+## Errors
+
+### TestRollbackError
+
+```solidity
+error TestRollbackError(string message)
+```
+
+Test function to generate error for testing rollback
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| message | string | Error message |
 
 

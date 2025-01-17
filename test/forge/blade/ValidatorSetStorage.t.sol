@@ -3,7 +3,7 @@ pragma solidity 0.8.19;
 
 import "@utils/Test.sol";
 import {ValidatorSetStorage} from "contracts/blade/ValidatorSetStorage.sol";
-import {Validator, DOMAIN_VALIDATOR_SET} from "contracts/interfaces/blade/IValidatorSetStorage.sol";
+import {Validator, BlockMetadata, DOMAIN_BRIDGE} from "contracts/interfaces/blade/IValidatorSetStorage.sol";
 import {BLS} from "contracts/common/BLS.sol";
 import {BN256G2} from "contracts/common/BN256G2.sol";
 import {System} from "contracts/blade/System.sol";
@@ -19,6 +19,8 @@ abstract contract ValidatorSetStorageTest is Test, System, ValidatorSetStorage {
     bytes[] public bitmaps;
     uint256[2][] public aggMessagePoints;
 
+    BlockMetadata public blockMetadata;
+
     function setUp() public virtual {
         bls = new BLS();
         bn256G2 = new BN256G2();
@@ -30,15 +32,16 @@ abstract contract ValidatorSetStorageTest is Test, System, ValidatorSetStorage {
         cmd[0] = "npx";
         cmd[1] = "ts-node";
         cmd[2] = "test/forge/blade/generateMsgValidatorSetStorage.ts";
-        cmd[3] = vm.toString(abi.encode(DOMAIN_VALIDATOR_SET));
+        cmd[3] = vm.toString(abi.encode(DOMAIN_BRIDGE));
         bytes memory out = vm.ffi(cmd);
 
         Validator[] memory validatorSetTmp;
 
-        (validatorSetSize, validatorSetTmp, aggMessagePoints, hashes, bitmaps, aggVotingPowers) = abi.decode(
+        (validatorSetSize, validatorSetTmp, aggMessagePoints, hashes, bitmaps, aggVotingPowers, blockMetadata) = abi.decode(
             out,
-            (uint256, Validator[], uint256[2][], bytes32[], bytes[], uint256[])
+            (uint256, Validator[], uint256[2][], bytes32[], bytes[], uint256[], BlockMetadata)
         );
+
 
         for (uint256 i = 0; i < validatorSetTmp.length; i++) {
             validatorSet.push(validatorSetTmp[i]);
@@ -56,22 +59,22 @@ abstract contract BaseBridgeGatewayInitialized is ValidatorSetStorageTest {
 contract BaseBridgeCommitValidatorSetTests is BaseBridgeGatewayInitialized {
     function testCommitValidatorSet_InvalidSignature() public {
         vm.expectRevert("SIGNATURE_VERIFICATION_FAILED");
-        validatorSetStorage.commitValidatorSet(validatorSet, aggMessagePoints[0], bitmaps[0]);
+        validatorSetStorage.commitValidatorSet(validatorSet, aggMessagePoints[0], bitmaps[0], blockMetadata);
     }
 
     function testCommitValidatorSet_EmptyBitmap() public {
         vm.expectRevert("BITMAP_IS_EMPTY");
-        validatorSetStorage.commitValidatorSet(validatorSet, aggMessagePoints[1], bitmaps[1]);
+        validatorSetStorage.commitValidatorSet(validatorSet, aggMessagePoints[1], bitmaps[1], blockMetadata);
     }
 
     function testCommitValidatorSet_NotEnoughPower() public {
         vm.expectRevert("INSUFFICIENT_VOTING_POWER");
-        validatorSetStorage.commitValidatorSet(validatorSet, aggMessagePoints[2], bitmaps[2]);
+        validatorSetStorage.commitValidatorSet(validatorSet, aggMessagePoints[2], bitmaps[2], blockMetadata);
     }
 
     function testCommitValidatorSet_Success() public {
         vm.expectEmit();
         emit NewValidatorSet(validatorSet);
-        validatorSetStorage.commitValidatorSet(validatorSet, aggMessagePoints[3], bitmaps[3]);
+        validatorSetStorage.commitValidatorSet(validatorSet, aggMessagePoints[3], bitmaps[3], blockMetadata);
     }
 }

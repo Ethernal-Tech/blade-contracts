@@ -10,11 +10,24 @@ contract BridgeStorage is ValidatorSetStorage {
     mapping(uint256 => uint256) public lastCommittedInternal;
     /// @custom:security write-protection="onlySystemCall()"
     uint256 public batchCounter;
-    /// @custom:security write-protection="onlySystemCall()"
     uint256 public validatorSetCounter;
 
     event NewBatch(uint256 indexed id);
     event NewValidatorSetStored(uint256 indexed id);
+
+    /**
+     * @notice initializes the contract
+     * @param newBls address of the BLS library contract
+     * @param newBn256G2 address of the BN256G2 library contract
+     * @param validators list of validators
+     */
+    function initialize(IBLS newBls, IBN256G2 newBn256G2, Validator[] calldata validators) public override initializer {
+        bls = newBls;
+        bn256G2 = newBn256G2;
+        _setNewValidatorSet(validators);
+
+        validatorSetCounter = 1;
+    }
 
     /**
      * @notice commits new validator set
@@ -25,16 +38,19 @@ contract BridgeStorage is ValidatorSetStorage {
     function commitValidatorSet(
         Validator[] calldata newValidatorSet,
         uint256[2] calldata signature,
-        bytes calldata bitmap
+        bytes calldata bitmap,
+        BlockMetadata calldata blockMetadata
     ) external override onlySystemCall {
-        _commitValidatorSet(newValidatorSet, signature, bitmap);
+        _commitValidatorSet(newValidatorSet, signature, bitmap, blockMetadata);
 
         SignedValidatorSet storage signedValidatorSet = commitedValidatorSets[validatorSetCounter];
         signedValidatorSet.signature = signature;
         signedValidatorSet.bitmap = bitmap;
+        signedValidatorSet.blockMetadata = blockMetadata;
 
-        for (uint256 i = 0; i < newValidatorSet.length; ) {
-            signedValidatorSet.newValidatorSet[i] = newValidatorSet[i];
+        uint256 length = newValidatorSet.length;
+        for (uint256 i = 0; i < length; ) {
+            signedValidatorSet.newValidatorSet.push(newValidatorSet[i]);
             unchecked {
                 ++i;
             }
@@ -101,7 +117,7 @@ contract BridgeStorage is ValidatorSetStorage {
      * @notice Internal function that verifies the rollback batch
      * @param batch batch to verify
      */
-    function _verifyRollbackBatch(SignedBridgeMessageBatch calldata batch) private {
+    function _verifyRollbackBatch(SignedBridgeMessageBatch calldata batch) private pure {
         require(batch.rootHash != bytes32(0), "EMPTY_BATCH");
         require(batch.sourceChainId != batch.destinationChainId, "sourceChainId and destinationChainId not equal");
     }
@@ -142,19 +158,8 @@ contract BridgeStorage is ValidatorSetStorage {
      * @notice Inserts an empty batch used as a reference for each committed validator set batch
      */
     function _insertNewValidatorSetBatchRef() private {
-        batches[batchCounter] = SignedBridgeMessageBatch(
-            bytes32(0),
-            0,
-            0,
-            0,
-            0,
-            [uint256(0), uint256(0)],
-            bytes(""),
-            0,
-            false,
-            validatorSetCounter
-        );
-
+        SignedBridgeMessageBatch storage newValidatorSetBatchRef = batches[batchCounter];
+        newValidatorSetBatchRef.validatorSetBatchId = validatorSetCounter;
         batchCounter++;
     }
 
