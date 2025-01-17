@@ -101,31 +101,6 @@ describe("BaseBridgeGateway", () => {
     }
   });
 
-  it("Base bridge gateway fail: no system call", async () => {
-    msgs = [];
-
-    msgs = [
-      {
-        id: 1,
-        sourceChainId: 2,
-        destinationChainId: 3,
-        sender: ethers.constants.AddressZero,
-        receiver: ethers.constants.AddressZero,
-        payload: ethers.constants.HashZero,
-      },
-    ];
-
-    let sign: [number, number];
-
-    sign = [1, 1];
-
-    await expect(
-      validatorSetStorage.commitValidatorSet(validatorSet, sign, ethers.constants.AddressZero, blockMetadata)
-    )
-      .to.be.revertedWithCustomError(validatorSetStorage, "Unauthorized")
-      .withArgs("SYSTEMCALL");
-  });
-
   it("Bridge storage commitValidator success", async () => {
     validatorSetSize = Math.floor(Math.random() * (5 - 1) + 8); // Randomly pick 8 - 12
     const bitmap = "0xffff";

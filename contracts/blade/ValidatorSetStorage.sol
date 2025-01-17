@@ -33,6 +33,7 @@ contract ValidatorSetStorage is IValidatorSetStorage, Initializable, System {
      * @param newValidatorSet new validator set
      * @param signature aggregated signature of validators that signed the new validator set
      * @param bitmap bitmap of which validators signed the message
+     * @param blockMetadata metadata of the block
      */
     function commitValidatorSet(
         Validator[] calldata newValidatorSet,

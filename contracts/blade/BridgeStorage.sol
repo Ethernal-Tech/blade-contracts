@@ -12,7 +12,6 @@ contract BridgeStorage is ValidatorSetStorage {
     uint256 public batchCounter;
     /// @custom:security write-protection="onlySystemCall()"
     uint256 public validatorSetCounter;
-
     event NewBatch(uint256 indexed id);
     event NewValidatorSetStored(uint256 indexed id);
 
@@ -22,7 +21,11 @@ contract BridgeStorage is ValidatorSetStorage {
      * @param newBn256G2 address of the BN256G2 library contract
      * @param validators list of validators
      */
-    function initialize(IBLS newBls, IBN256G2 newBn256G2, Validator[] calldata validators) public override initializer {
+    function initialize(
+        IBLS newBls,
+        IBN256G2 newBn256G2,
+        Validator[] calldata validators
+    ) public override initializer onlySystemCall {
         bls = newBls;
         bn256G2 = newBn256G2;
         _setNewValidatorSet(validators);
