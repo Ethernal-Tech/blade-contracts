@@ -248,7 +248,7 @@ function commitValidatorSet(Validator[] newValidatorSet, uint256[2] signature, b
 ### commitedValidatorSets
 
 ```solidity
-function commitedValidatorSets(uint256) external view returns (bytes bitmap)
+function commitedValidatorSets(uint256) external view returns (bytes bitmap, struct BlockMetadata blockMetadata)
 ```
 
 
@@ -266,6 +266,7 @@ function commitedValidatorSets(uint256) external view returns (bytes bitmap)
 | Name | Type | Description |
 |---|---|---|
 | bitmap | bytes | undefined |
+| blockMetadata | BlockMetadata | undefined |
 
 ### currentValidatorSet
 

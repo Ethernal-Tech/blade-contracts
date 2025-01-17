@@ -527,20 +527,4 @@ Test function to generate error for testing rollback
 |---|---|---|
 | message | string | Error message |
 
-### Unauthorized
-
-```solidity
-error Unauthorized(string only)
-```
-
-
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| only | string | undefined |
-
 

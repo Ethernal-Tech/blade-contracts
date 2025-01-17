@@ -17,6 +17,20 @@ contract BridgeStorage is ValidatorSetStorage {
     event NewValidatorSetStored(uint256 indexed id);
 
     /**
+     * @notice initializes the contract
+     * @param newBls address of the BLS library contract
+     * @param newBn256G2 address of the BN256G2 library contract
+     * @param validators list of validators
+     */
+    function initialize(IBLS newBls, IBN256G2 newBn256G2, Validator[] calldata validators) public override initializer {
+        bls = newBls;
+        bn256G2 = newBn256G2;
+        _setNewValidatorSet(validators);
+
+        validatorSetCounter = 1;
+    }
+
+    /**
      * @notice commits new validator set
      * @param newValidatorSet new validator set
      * @param signature aggregated signature of validators that signed the new validator set
@@ -33,9 +47,11 @@ contract BridgeStorage is ValidatorSetStorage {
         SignedValidatorSet storage signedValidatorSet = commitedValidatorSets[validatorSetCounter];
         signedValidatorSet.signature = signature;
         signedValidatorSet.bitmap = bitmap;
+        signedValidatorSet.blockMetadata = blockMetadata;
 
-        for (uint256 i = 0; i < newValidatorSet.length; ) {
-            signedValidatorSet.newValidatorSet[i] = newValidatorSet[i];
+        uint256 length = newValidatorSet.length;
+        for (uint256 i = 0; i < length; ) {
+            signedValidatorSet.newValidatorSet.push(newValidatorSet[i]);
             unchecked {
                 ++i;
             }
@@ -143,19 +159,8 @@ contract BridgeStorage is ValidatorSetStorage {
      * @notice Inserts an empty batch used as a reference for each committed validator set batch
      */
     function _insertNewValidatorSetBatchRef() private {
-        batches[batchCounter] = SignedBridgeMessageBatch(
-            bytes32(0),
-            0,
-            0,
-            0,
-            0,
-            [uint256(0), uint256(0)],
-            bytes(""),
-            0,
-            false,
-            validatorSetCounter
-        );
-
+        SignedBridgeMessageBatch storage newValidatorSetBatchRef = batches[batchCounter];
+        newValidatorSetBatchRef.validatorSetBatchId = validatorSetCounter;
         batchCounter++;
     }
 

@@ -39,7 +39,7 @@ contract ValidatorSetStorage is IValidatorSetStorage, Initializable, System {
         uint256[2] calldata signature,
         bytes calldata bitmap,
         BlockMetadata calldata blockMetadata
-    ) external virtual onlySystemCall {
+    ) external virtual {
         _commitValidatorSet(newValidatorSet, signature, bitmap, blockMetadata);
     }
 
@@ -47,7 +47,7 @@ contract ValidatorSetStorage is IValidatorSetStorage, Initializable, System {
      * @notice Internal function that sets the new validator set
      * @param newValidatorSet new validator set
      */
-    function _setNewValidatorSet(Validator[] calldata newValidatorSet) private {
+    function _setNewValidatorSet(Validator[] calldata newValidatorSet) internal {
         uint256 length = newValidatorSet.length;
         currentValidatorSetLength = length;
         currentValidatorSetHash = keccak256(abi.encode(newValidatorSet));
