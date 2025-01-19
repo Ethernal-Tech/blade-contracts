@@ -182,29 +182,6 @@ function commitValidatorSet(Validator[] newValidatorSet, uint256[2] signature, b
 | bitmap | bytes | undefined |
 | blockMetadata | BlockMetadata | undefined |
 
-### currentValidatorSet
-
-```solidity
-function currentValidatorSet(uint256) external view returns (address _address, uint256 votingPower)
-```
-
-
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | uint256 | undefined |
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _address | address | undefined |
-| votingPower | uint256 | undefined |
-
 ### currentValidatorSetHash
 
 ```solidity
@@ -261,6 +238,23 @@ function initialize(contract IBLS newBls, contract IBN256G2 newBn256G2, Validato
 
 ```solidity
 function totalVotingPower() external view returns (uint256)
+```
+
+
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | undefined |
+
+### validatorSetCounter
+
+```solidity
+function validatorSetCounter() external view returns (uint256)
 ```
 
 

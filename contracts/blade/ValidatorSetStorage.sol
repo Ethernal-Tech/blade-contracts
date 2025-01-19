@@ -54,8 +54,8 @@ contract ValidatorSetStorage is IValidatorSetStorage, Initializable, System {
         uint256 totalPower = 0;
 
         SignedValidatorSet storage signedValidatorSet = committedValidatorSets[validatorSetCounter];
-        signedValidatorSet.newValidatorSet = newValidatorSet;
-        for (uint256 i = 0; i < committedValidatorSets[validatorSetCounter].newValidatorSet.length; ) {
+        for (uint256 i = 0; i < newValidatorSet.length; ) {
+            signedValidatorSet.newValidatorSet.push(newValidatorSet[i]);
             uint256 votingPower = newValidatorSet[i].votingPower;
             require(votingPower > 0, "VOTING_POWER_ZERO");
             totalPower += votingPower;

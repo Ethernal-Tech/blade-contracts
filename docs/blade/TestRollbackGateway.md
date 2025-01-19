@@ -216,29 +216,6 @@ function counter() external view returns (uint256)
 |---|---|---|
 | _0 | uint256 | undefined |
 
-### currentValidatorSet
-
-```solidity
-function currentValidatorSet(uint256) external view returns (address _address, uint256 votingPower)
-```
-
-
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | uint256 | undefined |
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _address | address | undefined |
-| votingPower | uint256 | undefined |
-
 ### currentValidatorSetHash
 
 ```solidity
@@ -397,6 +374,23 @@ Generates sync state event based on receiver and data. Anyone can call this meth
 
 ```solidity
 function totalVotingPower() external view returns (uint256)
+```
+
+
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | undefined |
+
+### validatorSetCounter
+
+```solidity
+function validatorSetCounter() external view returns (uint256)
 ```
 
 

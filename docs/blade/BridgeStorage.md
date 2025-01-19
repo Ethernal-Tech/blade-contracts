@@ -245,52 +245,6 @@ function commitValidatorSet(Validator[] newValidatorSet, uint256[2] signature, b
 | bitmap | bytes | undefined |
 | blockMetadata | BlockMetadata | undefined |
 
-### commitedValidatorSets
-
-```solidity
-function commitedValidatorSets(uint256) external view returns (bytes bitmap, struct BlockMetadata blockMetadata)
-```
-
-
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | uint256 | undefined |
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| bitmap | bytes | undefined |
-| blockMetadata | BlockMetadata | undefined |
-
-### currentValidatorSet
-
-```solidity
-function currentValidatorSet(uint256) external view returns (address _address, uint256 votingPower)
-```
-
-
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | uint256 | undefined |
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _address | address | undefined |
-| votingPower | uint256 | undefined |
-
 ### currentValidatorSetHash
 
 ```solidity
