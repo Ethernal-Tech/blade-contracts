@@ -11,7 +11,8 @@ contract ValidatorSetStorage is IValidatorSetStorage, Initializable, System {
     IBLS public bls;
     IBN256G2 public bn256G2;
 
-    mapping(uint256 => Validator) public currentValidatorSet;
+    mapping(uint256 => SignedValidatorSet) committedValidatorSets;
+    uint256 public validatorSetCounter;
     uint256 public currentValidatorSetLength;
     bytes32 public currentValidatorSetHash;
     uint256 public totalVotingPower;
@@ -25,7 +26,7 @@ contract ValidatorSetStorage is IValidatorSetStorage, Initializable, System {
     function initialize(IBLS newBls, IBN256G2 newBn256G2, Validator[] calldata validators) public virtual initializer {
         bls = newBls;
         bn256G2 = newBn256G2;
-        _setNewValidatorSet(validators);
+        _setInitialValidatorSet(validators);
     }
 
     /**
@@ -48,16 +49,16 @@ contract ValidatorSetStorage is IValidatorSetStorage, Initializable, System {
      * @notice Internal function that sets the new validator set
      * @param newValidatorSet new validator set
      */
-    function _setNewValidatorSet(Validator[] calldata newValidatorSet) internal {
-        uint256 length = newValidatorSet.length;
-        currentValidatorSetLength = length;
+    function _setInitialValidatorSet(Validator[] calldata newValidatorSet) internal {
         currentValidatorSetHash = keccak256(abi.encode(newValidatorSet));
         uint256 totalPower = 0;
-        for (uint256 i = 0; i < length; ) {
+
+        SignedValidatorSet storage signedValidatorSet = committedValidatorSets[validatorSetCounter];
+        signedValidatorSet.newValidatorSet = newValidatorSet;
+        for (uint256 i = 0; i < committedValidatorSets[validatorSetCounter].newValidatorSet.length; ) {
             uint256 votingPower = newValidatorSet[i].votingPower;
             require(votingPower > 0, "VOTING_POWER_ZERO");
             totalPower += votingPower;
-            currentValidatorSet[i] = newValidatorSet[i];
             unchecked {
                 ++i;
             }
@@ -84,9 +85,9 @@ contract ValidatorSetStorage is IValidatorSetStorage, Initializable, System {
         for (uint256 i = 0; i < length; ) {
             if (_getValueFromBitmap(bitmap, i)) {
                 if (aggVotingPower == 0) {
-                    aggPubkey = currentValidatorSet[i].blsKey;
+                    aggPubkey = committedValidatorSets[validatorSetCounter].newValidatorSet[i].blsKey;
                 } else {
-                    uint256[4] memory blsKey = currentValidatorSet[i].blsKey;
+                    uint256[4] memory blsKey = committedValidatorSets[validatorSetCounter].newValidatorSet[i].blsKey;
                     // slither-disable-next-line calls-loop
                     (aggPubkey[0], aggPubkey[1], aggPubkey[2], aggPubkey[3]) = bn256G2.ecTwistAdd(
                         aggPubkey[0],
@@ -99,7 +100,7 @@ contract ValidatorSetStorage is IValidatorSetStorage, Initializable, System {
                         blsKey[3]
                     );
                 }
-                aggVotingPower += currentValidatorSet[i].votingPower;
+                aggVotingPower += committedValidatorSets[validatorSetCounter].newValidatorSet[i].votingPower;
             }
             unchecked {
                 ++i;
@@ -151,7 +152,19 @@ contract ValidatorSetStorage is IValidatorSetStorage, Initializable, System {
 
         verifySignature(bls.hashToPoint(DOMAIN_BRIDGE, hash), signature, bitmap);
 
-        _setNewValidatorSet(newValidatorSet);
+        validatorSetCounter++;
+
+        SignedValidatorSet storage signedValidatorSet = committedValidatorSets[validatorSetCounter];
+        signedValidatorSet.signature = signature;
+        signedValidatorSet.bitmap = bitmap;
+        signedValidatorSet.blockMetadata = blockMetadata;
+        uint256 length = newValidatorSet.length;
+        for (uint256 i = 0; i < length; ) {
+            signedValidatorSet.newValidatorSet.push(newValidatorSet[i]);
+            unchecked {
+                ++i;
+            }
+        }
 
         emit NewValidatorSet(newValidatorSet);
     }

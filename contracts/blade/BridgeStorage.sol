@@ -5,12 +5,10 @@ import "./ValidatorSetStorage.sol";
 
 contract BridgeStorage is ValidatorSetStorage {
     mapping(uint256 => SignedBridgeMessageBatch) public batches;
-    mapping(uint256 => SignedValidatorSet) public commitedValidatorSets;
     mapping(uint256 => uint256) public lastCommitted;
     mapping(uint256 => uint256) public lastCommittedInternal;
     /// @custom:security write-protection="onlySystemCall()"
     uint256 public batchCounter;
-    uint256 public validatorSetCounter;
 
     event NewBatch(uint256 indexed id);
     event NewValidatorSetStored(uint256 indexed id);
@@ -24,9 +22,7 @@ contract BridgeStorage is ValidatorSetStorage {
     function initialize(IBLS newBls, IBN256G2 newBn256G2, Validator[] calldata validators) public override initializer {
         bls = newBls;
         bn256G2 = newBn256G2;
-        _setNewValidatorSet(validators);
-
-        validatorSetCounter = 1;
+        _setInitialValidatorSet(validators);
     }
 
     /**
@@ -43,24 +39,9 @@ contract BridgeStorage is ValidatorSetStorage {
     ) external override onlySystemCall {
         _commitValidatorSet(newValidatorSet, signature, bitmap, blockMetadata);
 
-        SignedValidatorSet storage signedValidatorSet = commitedValidatorSets[validatorSetCounter];
-        signedValidatorSet.signature = signature;
-        signedValidatorSet.bitmap = bitmap;
-        signedValidatorSet.blockMetadata = blockMetadata;
-
-        uint256 length = newValidatorSet.length;
-        for (uint256 i = 0; i < length; ) {
-            signedValidatorSet.newValidatorSet.push(newValidatorSet[i]);
-            unchecked {
-                ++i;
-            }
-        }
-
         _insertNewValidatorSetBatchRef();
 
         emit NewValidatorSetStored(validatorSetCounter);
-
-        validatorSetCounter++;
     }
 
     /**
@@ -151,7 +132,7 @@ contract BridgeStorage is ValidatorSetStorage {
      * @param id validator set id
      */
     function getCommittedValidatorSet(uint256 id) external view returns (SignedValidatorSet memory) {
-        return commitedValidatorSets[id];
+        return committedValidatorSets[id];
     }
 
     /**
