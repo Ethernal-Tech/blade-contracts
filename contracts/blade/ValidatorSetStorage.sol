@@ -78,11 +78,10 @@ contract ValidatorSetStorage is IValidatorSetStorage, Initializable, System {
         uint256[2] calldata signature,
         bytes calldata bitmap
     ) internal view {
-        uint256 length = currentValidatorSetLength;
         // slither-disable-next-line uninitialized-local
         uint256[4] memory aggPubkey;
         uint256 aggVotingPower = 0;
-        for (uint256 i = 0; i < length; ) {
+        for (uint256 i = 0; i < committedValidatorSets[validatorSetCounter].newValidatorSet.length; ) {
             if (_getValueFromBitmap(bitmap, i)) {
                 if (aggVotingPower == 0) {
                     aggPubkey = committedValidatorSets[validatorSetCounter].newValidatorSet[i].blsKey;
@@ -138,6 +137,7 @@ contract ValidatorSetStorage is IValidatorSetStorage, Initializable, System {
      * @param newValidatorSet The array of validators to be set as the new validator set
      * @param signature The aggregated signature of the validators that signed the new validator set
      * @param bitmap The bitmap representing which validators signed the new validator set
+     * @param blockMetadata The blockMetadata represents
      * Emits a `NewValidatorSet` event after successfully setting the new validator set.
      */
     function _commitValidatorSet(
@@ -146,6 +146,8 @@ contract ValidatorSetStorage is IValidatorSetStorage, Initializable, System {
         bytes calldata bitmap,
         BlockMetadata calldata blockMetadata
     ) internal {
+        uint256 totalPower = 0;
+
         require(newValidatorSet.length > 0, "EMPTY_VALIDATOR_SET");
 
         bytes memory hash = abi.encode(keccak256(abi.encode(blockMetadata)));
@@ -154,6 +156,8 @@ contract ValidatorSetStorage is IValidatorSetStorage, Initializable, System {
 
         validatorSetCounter++;
 
+        currentValidatorSetHash = keccak256(abi.encode(newValidatorSet));
+
         SignedValidatorSet storage signedValidatorSet = committedValidatorSets[validatorSetCounter];
         signedValidatorSet.signature = signature;
         signedValidatorSet.bitmap = bitmap;
@@ -161,10 +165,15 @@ contract ValidatorSetStorage is IValidatorSetStorage, Initializable, System {
         uint256 length = newValidatorSet.length;
         for (uint256 i = 0; i < length; ) {
             signedValidatorSet.newValidatorSet.push(newValidatorSet[i]);
+            uint256 votingPower = newValidatorSet[i].votingPower;
+            require(votingPower > 0, "VOTING_POWER_ZERO");
+            totalPower += votingPower;
             unchecked {
                 ++i;
             }
         }
+
+        totalVotingPower = totalPower;
 
         emit NewValidatorSet(newValidatorSet);
     }
