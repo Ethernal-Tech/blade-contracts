@@ -250,6 +250,28 @@ function currentValidatorSetLength() external view returns (uint256)
 |---|---|---|
 | _0 | uint256 | undefined |
 
+### getCommittedValidatorSet
+
+```solidity
+function getCommittedValidatorSet(uint256 id) external view returns (struct SignedValidatorSet)
+```
+
+Returns the committed validator set based on provided id
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| id | uint256 | validator set id |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | SignedValidatorSet | undefined |
+
 ### getMessagesInRange
 
 ```solidity
