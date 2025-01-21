@@ -128,14 +128,6 @@ contract BridgeStorage is ValidatorSetStorage {
     }
 
     /**
-     * @notice Returns the committed validator set based on provided id
-     * @param id validator set id
-     */
-    function getCommittedValidatorSet(uint256 id) external view returns (SignedValidatorSet memory) {
-        return committedValidatorSets[id];
-    }
-
-    /**
      * @notice Inserts an empty batch used as a reference for each committed validator set batch
      */
     function _insertNewValidatorSetBatchRef() private {

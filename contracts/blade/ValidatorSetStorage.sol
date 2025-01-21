@@ -177,4 +177,12 @@ contract ValidatorSetStorage is IValidatorSetStorage, Initializable, System {
 
         emit NewValidatorSet(newValidatorSet);
     }
+
+    /**
+     * @notice Returns the committed validator set based on provided id
+     * @param id validator set id
+     */
+    function getCommittedValidatorSet(uint256 id) external view returns (SignedValidatorSet memory) {
+        return committedValidatorSets[id];
+    }
 }
