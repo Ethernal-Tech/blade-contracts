@@ -80,43 +80,44 @@ contract Gateway is ValidatorSetStorage, IGateway {
 
     /**
      * @notice receives the batch of messages and executes them
-     * @param batchMessages batch of messages
+     * @param bridgeBatch batch of messages
+     * @param signature the aggregated signature submitted by the proposer
+     * @param bitmap bitmap of which validators signed the message
      */
     // slither-disable-next-line protected-vars
     function receiveBatch(
-        BridgeMessage[] calldata batchMessages,
-        SignedBridgeMessageBatch calldata signedBridgeBatch
+        BridgeMessageBatch calldata bridgeBatch,
+        uint256[2] calldata signature,
+        bytes calldata bitmap
     ) external virtual {
-        if (signedBridgeBatch.isRollback) {
-            _verifyRollbackBatch(batchMessages);
+        if (bridgeBatch.isRollback) {
+            _verifyRollbackBatch(bridgeBatch.messages);
         } else {
-            _verifyBatch(batchMessages);
+            _verifyBatch(bridgeBatch.messages);
         }
 
         bytes memory hash = abi.encode(
             keccak256(
                 abi.encode(
-                    calculateMerkleRoot(batchMessages),
-                    signedBridgeBatch.startId,
-                    signedBridgeBatch.endId,
-                    signedBridgeBatch.sourceChainId,
-                    signedBridgeBatch.destinationChainId,
-                    signedBridgeBatch.threshold,
-                    signedBridgeBatch.isRollback
+                    bridgeBatch.messages,
+                    bridgeBatch.sourceChainId,
+                    bridgeBatch.destinationChainId,
+                    bridgeBatch.threshold,
+                    bridgeBatch.isRollback
                 )
             )
         );
 
-        verifySignature(bls.hashToPoint(DOMAIN_BRIDGE, hash), signedBridgeBatch.signature, signedBridgeBatch.bitmap);
+        verifySignature(bls.hashToPoint(DOMAIN_BRIDGE, hash), signature, bitmap);
 
-        if (block.number > signedBridgeBatch.threshold && !signedBridgeBatch.isRollback) {
+        if (block.number > bridgeBatch.threshold && !bridgeBatch.isRollback) {
             revert("the batch has timed out");
         }
 
-        uint256 length = batchMessages.length;
-        if (!signedBridgeBatch.isRollback) {
+        uint256 length = bridgeBatch.messages.length;
+        if (!bridgeBatch.isRollback) {
             for (uint256 i = 0; i < length; ) {
-                _executeBridgeMessage(batchMessages[i]);
+                _executeBridgeMessage(bridgeBatch.messages[i]);
 
                 unchecked {
                     ++i;
@@ -124,7 +125,7 @@ contract Gateway is ValidatorSetStorage, IGateway {
             }
         } else {
             for (uint256 i = 0; i < length; ) {
-                _executeRollbackBridgeMessage(batchMessages[i]);
+                _executeRollbackBridgeMessage(bridgeBatch.messages[i]);
 
                 unchecked {
                     ++i;
@@ -134,11 +135,11 @@ contract Gateway is ValidatorSetStorage, IGateway {
 
         // slither-disable-next-line reentrancy-events
         emit BridgeBatchResult(
-            signedBridgeBatch.startId,
-            signedBridgeBatch.endId,
-            signedBridgeBatch.sourceChainId,
-            signedBridgeBatch.destinationChainId,
-            signedBridgeBatch.isRollback
+            bridgeBatch.messages[0].id,
+            bridgeBatch.messages[bridgeBatch.messages.length-1].id,
+            bridgeBatch.sourceChainId,
+            bridgeBatch.destinationChainId,
+            bridgeBatch.isRollback
         );
     }
 

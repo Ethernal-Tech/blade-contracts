@@ -118,74 +118,33 @@ contract GatewayStateSyncTest is GatewayInitialized {
 
 contract GatewayReceiveBatchTests is GatewayInitialized {
     function testReceiveBatch_InvalidSignature() public {
-        SignedBridgeMessageBatch memory batch = SignedBridgeMessageBatch({
-            rootHash: 0,
-            startId: msgs[0].id,
-            endId: msgs[msgs.length - 1].id,
-            sourceChainId: 2,
-            destinationChainId: 3,
-            signature: aggMessagePoints[0],
-            bitmap: bitmaps[0],
-            threshold: 1000,
-            isRollback: false,
-            validatorSetBatchId: 0
-        });
+        BridgeMessageBatch memory batch = BridgeMessageBatch({messages: msgs, sourceChainId: 2, destinationChainId: 3, threshold: 1000, isRollback: false});
 
         vm.expectRevert("SIGNATURE_VERIFICATION_FAILED");
-        gateway.receiveBatch(msgs, batch);
+        gateway.receiveBatch(batch, aggMessagePoints[0], bitmaps[0]);
     }
 
     function testReceiveBatch_EmptyBitmap() public {
-        SignedBridgeMessageBatch memory batch = SignedBridgeMessageBatch({
-            rootHash: 0,
-            startId: msgs[0].id,
-            endId: msgs[msgs.length - 1].id,
-            sourceChainId: 2,
-            destinationChainId: 3,
-            signature: aggMessagePoints[1],
-            bitmap: bitmaps[1],
-            threshold: 1000,
-            isRollback: false,
-            validatorSetBatchId: 0
-        });
+        BridgeMessageBatch memory batch = BridgeMessageBatch({messages: msgs, sourceChainId: 2, destinationChainId: 3, threshold: 1000, isRollback: false});
 
         vm.expectRevert("BITMAP_IS_EMPTY");
-        gateway.receiveBatch(msgs, batch);
+        gateway.receiveBatch(batch, aggMessagePoints[1], bitmaps[1]);
     }
 
     function testReceiveBatch_NotEnoughPower() public {
-        SignedBridgeMessageBatch memory batch = SignedBridgeMessageBatch({
-            rootHash: 0,
-            startId: msgs[0].id,
-            endId: msgs[msgs.length - 1].id,
-            sourceChainId: 2,
-            destinationChainId: 3,
-            signature: aggMessagePoints[2],
-            bitmap: bitmaps[2],
-            threshold: 1000,
-            isRollback: false,
-            validatorSetBatchId: 0
-        });
+        BridgeMessageBatch memory batch = BridgeMessageBatch({messages: msgs, sourceChainId: 2, destinationChainId: 3, threshold: 1000, isRollback: false });
 
         vm.expectRevert("INSUFFICIENT_VOTING_POWER");
-        gateway.receiveBatch(msgs, batch);
+        gateway.receiveBatch(batch, aggMessagePoints[2], bitmaps[2]);
     }
 
-    function testReceiveBatch_SuccessSignature() public {
-        SignedBridgeMessageBatch memory batch = SignedBridgeMessageBatch({
-            rootHash: 0,
-            startId: msgs[0].id,
-            endId: msgs[msgs.length - 1].id,
-            sourceChainId: 2,
-            destinationChainId: 3,
-            signature: aggMessagePoints[3],
-            bitmap: bitmaps[3],
-            threshold: 1000,
-            isRollback: false,
-            validatorSetBatchId: 0
-        });
+    function testReceiveBatch_Success() public {
+        BridgeMessageBatch memory batch = BridgeMessageBatch({messages: msgs, sourceChainId: 2, destinationChainId: 3, threshold: 1000, isRollback: false});
 
-        vm.expectRevert("receiver has no code");
-        gateway.receiveBatch(msgs, batch);
+        vm.expectEmit();
+        emit BridgeMessageResult(1, false, 2, 3, bytes(""));
+        vm.expectEmit();
+        emit BridgeMessageResult(2, false, 2, 3, bytes(""));
+        gateway.receiveBatch(batch, aggMessagePoints[3], bitmaps[3]);
     }
 }

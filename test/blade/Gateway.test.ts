@@ -3,7 +3,7 @@ import * as hre from "hardhat";
 import { ethers } from "hardhat";
 import { BLS, BN256G2, ChildERC20Predicate, Gateway } from "../../typechain-types";
 import * as mcl from "../../ts/mcl";
-import { SignedBridgeMessageBatchStruct } from "../../typechain-types/contracts/blade/Gateway";
+import { BridgeMessageBatchStruct } from "../../typechain-types/contracts/blade/BridgeStorage";
 
 const DOMAIN = ethers.utils.arrayify(ethers.utils.solidityKeccak256(["string"], ["DOMAIN_BRIDGE"]));
 const sourceChainId = 2;
@@ -127,26 +127,29 @@ describe("Gateway", () => {
         receiver: ethers.constants.AddressZero,
         payload: ethers.constants.HashZero,
       },
+      {
+        id: 2,
+        sourceChainId: sourceChainId,
+        destinationChainId: destinationChainId,
+        sender: ethers.constants.AddressZero,
+        receiver: ethers.constants.AddressZero,
+        payload: ethers.constants.HashZero,
+      },
     ];
 
-    var batch: SignedBridgeMessageBatchStruct = {
-      threshold: 0,
-      isRollback: false,
-      rootHash: "",
-      startId: 1,
-      endId: 1,
+    const batch = {
+      messages: msgs,
       sourceChainId: sourceChainId,
       destinationChainId: destinationChainId,
-      signature: [0, 0],
-      bitmap: bitmap,
-      validatorSetBatchId: 0,
+      threshold: 0,
+      isRollback: false,
     };
+
+
 
     const message = ethers.utils.keccak256(
       ethers.utils.defaultAbiCoder.encode(["bytes32"], [ethers.utils.hexlify(ethers.utils.randomBytes(32))])
     );
-
-    batch.rootHash = message;
 
     const signatures: mcl.Signature[] = [];
 
@@ -172,9 +175,7 @@ describe("Gateway", () => {
 
     const aggMessagePoint: mcl.MessagePoint = mcl.g1ToHex(mcl.aggregateRaw(signatures));
 
-    batch.signature = aggMessagePoint;
-
-    await expect(gateway.receiveBatch(msgs, batch)).to.be.revertedWith("SIGNATURE_VERIFICATION_FAILED");
+    await expect(gateway.receiveBatch(batch, aggMessagePoint,bitmap)).to.be.revertedWith("SIGNATURE_VERIFICATION_FAILED");
   });
 
   it("Gateway receiveBatch fail: empty bitmap", async () => {
@@ -203,41 +204,25 @@ describe("Gateway", () => {
       },
     ];
 
-    var batch: SignedBridgeMessageBatchStruct = {
+    var batch: BridgeMessageBatchStruct = {
+      messages: msgs,
       threshold: 0,
       isRollback: false,
-      rootHash: "0x00",
-      startId: 1,
-      endId: 2,
       sourceChainId: sourceChainId,
       destinationChainId: destinationChainId,
-      signature: [0, 0],
-      bitmap: bitmap,
-      validatorSetBatchId: 0,
     };
-
-    const encodedMessage1 = ethers.utils.defaultAbiCoder.encode(
-      ["uint256", "uint256", "uint256", "address", "address", "bytes"],
-      [msgs[0].id, msgs[0].sourceChainId, msgs[0].destinationChainId, msgs[0].sender, msgs[0].receiver, msgs[0].payload]
-    );
-    const hash1 = ethers.utils.keccak256(encodedMessage1);
-
-    const encodedMessage2 = ethers.utils.defaultAbiCoder.encode(
-      ["uint256", "uint256", "uint256", "address", "address", "bytes"],
-      [msgs[1].id, msgs[1].sourceChainId, msgs[1].destinationChainId, msgs[1].sender, msgs[1].receiver, msgs[1].payload]
-    );
-    const hash2 = ethers.utils.keccak256(encodedMessage2);
-
-    const concatenatedHashes = ethers.utils.hexConcat([hash1, hash2]);
-    batch.rootHash = ethers.utils.keccak256(concatenatedHashes);
 
     const messageOfBatch = ethers.utils.keccak256(
       ethers.utils.defaultAbiCoder.encode(
-        ["bytes32", "uint256", "uint256", "uint256", "uint256", "uint256", "bool"],
         [
-          batch.rootHash,
-          batch.startId,
-          batch.endId,
+          "tuple(uint256 id, uint256 sourceChainId, uint256 destinationChainId, address sender, address receiver, bytes payload)[]",
+          "uint256",
+          "uint256",
+          "uint256",
+          "bool",
+        ],
+        [
+          batch.messages,
           batch.sourceChainId,
           batch.destinationChainId,
           batch.threshold,
@@ -272,9 +257,7 @@ describe("Gateway", () => {
 
     const aggMessagePoint: mcl.MessagePoint = mcl.g1ToHex(mcl.aggregateRaw(signatures));
 
-    batch.signature = aggMessagePoint;
-
-    await expect(gateway.receiveBatch(msgs, batch)).to.be.revertedWith("BITMAP_IS_EMPTY");
+    await expect(gateway.receiveBatch(batch, aggMessagePoint, bitmap)).to.be.revertedWith("BITMAP_IS_EMPTY");
   });
 
   it("Gateway receiveBatch fail:not enough voting power", async () => {
@@ -303,41 +286,25 @@ describe("Gateway", () => {
       },
     ];
 
-    var batch: SignedBridgeMessageBatchStruct = {
+    var batch: BridgeMessageBatchStruct = {
+      messages: msgs,
       threshold: 0,
       isRollback: false,
-      rootHash: "0x1555ad6149fc39abc7852aad5c3df6b9df7964ac90ffbbcf6206b1eda846c881",
-      startId: 1,
-      endId: 2,
       sourceChainId: sourceChainId,
       destinationChainId: destinationChainId,
-      signature: [0, 0],
-      bitmap: bitmap,
-      validatorSetBatchId: 0,
     };
-
-    const encodedMessage1 = ethers.utils.defaultAbiCoder.encode(
-      ["uint256", "uint256", "uint256", "address", "address", "bytes"],
-      [msgs[0].id, msgs[0].sourceChainId, msgs[0].destinationChainId, msgs[0].sender, msgs[0].receiver, msgs[0].payload]
-    );
-    const hash1 = ethers.utils.keccak256(encodedMessage1);
-
-    const encodedMessage2 = ethers.utils.defaultAbiCoder.encode(
-      ["uint256", "uint256", "uint256", "address", "address", "bytes"],
-      [msgs[1].id, msgs[1].sourceChainId, msgs[1].destinationChainId, msgs[1].sender, msgs[1].receiver, msgs[1].payload]
-    );
-    const hash2 = ethers.utils.keccak256(encodedMessage2);
-
-    const concatenatedHashes = ethers.utils.hexConcat([hash1, hash2]);
-    batch.rootHash = ethers.utils.keccak256(concatenatedHashes);
 
     const messageOfBatch = ethers.utils.keccak256(
       ethers.utils.defaultAbiCoder.encode(
-        ["bytes32", "uint256", "uint256", "uint256", "uint256", "uint256", "bool"],
         [
-          batch.rootHash,
-          batch.startId,
-          batch.endId,
+          "tuple(uint256 id, uint256 sourceChainId, uint256 destinationChainId, address sender, address receiver, bytes payload)[]",
+          "uint256",
+          "uint256",
+          "uint256",
+          "bool",
+        ],
+        [
+          batch.messages,
           batch.sourceChainId,
           batch.destinationChainId,
           batch.threshold,
@@ -372,9 +339,7 @@ describe("Gateway", () => {
 
     const aggMessagePoint: mcl.MessagePoint = mcl.g1ToHex(mcl.aggregateRaw(signatures));
 
-    batch.signature = aggMessagePoint;
-
-    await expect(gateway.receiveBatch(msgs, batch)).to.be.revertedWith("INSUFFICIENT_VOTING_POWER");
+    await expect(gateway.receiveBatch(batch,aggMessagePoint, bitmap)).to.be.revertedWith("INSUFFICIENT_VOTING_POWER");
   });
 
   it("Gateway receiveBatch success signature", async () => {
@@ -402,41 +367,25 @@ describe("Gateway", () => {
         payload: ethers.constants.HashZero,
       },
     ];
-    var batch: SignedBridgeMessageBatchStruct = {
+    var batch: BridgeMessageBatchStruct = {
+      messages: msgs,
       threshold: 1000,
       isRollback: false,
-      rootHash: "",
-      startId: 1,
-      endId: 2,
       sourceChainId: sourceChainId,
       destinationChainId: destinationChainId,
-      signature: [0, 0],
-      bitmap: bitmap,
-      validatorSetBatchId: 0,
     };
-
-    const encodedMessage1 = ethers.utils.defaultAbiCoder.encode(
-      ["uint256", "uint256", "uint256", "address", "address", "bytes"],
-      [msgs[0].id, msgs[0].sourceChainId, msgs[0].destinationChainId, msgs[0].sender, msgs[0].receiver, msgs[0].payload]
-    );
-    const hash1 = ethers.utils.keccak256(encodedMessage1);
-
-    const encodedMessage2 = ethers.utils.defaultAbiCoder.encode(
-      ["uint256", "uint256", "uint256", "address", "address", "bytes"],
-      [msgs[1].id, msgs[1].sourceChainId, msgs[1].destinationChainId, msgs[1].sender, msgs[1].receiver, msgs[1].payload]
-    );
-    const hash2 = ethers.utils.keccak256(encodedMessage2);
-
-    const concatenatedHashes = ethers.utils.hexConcat([hash1, hash2]);
-    batch.rootHash = ethers.utils.keccak256(concatenatedHashes);
 
     const messageOfBatch = ethers.utils.keccak256(
       ethers.utils.defaultAbiCoder.encode(
-        ["bytes32", "uint256", "uint256", "uint256", "uint256", "uint256", "bool"],
         [
-          batch.rootHash,
-          batch.startId,
-          batch.endId,
+          "tuple(uint256 id, uint256 sourceChainId, uint256 destinationChainId, address sender, address receiver, bytes payload)[]",
+          "uint256",
+          "uint256",
+          "uint256",
+          "bool",
+        ],
+        [
+          batch.messages,
           batch.sourceChainId,
           batch.destinationChainId,
           batch.threshold,
@@ -471,8 +420,6 @@ describe("Gateway", () => {
 
     const aggMessagePoint: mcl.MessagePoint = mcl.g1ToHex(mcl.aggregateRaw(signatures));
 
-    batch.signature = aggMessagePoint;
-
-    await expect(gateway.receiveBatch(msgs, batch)).to.be.revertedWith("Gateway: BATCH_ROLLBACK");
+    await expect(gateway.receiveBatch(batch, aggMessagePoint, bitmap)).to.be.revertedWith("Gateway: BATCH_ROLLBACK");
   });
 });

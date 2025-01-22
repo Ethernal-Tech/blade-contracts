@@ -67,7 +67,9 @@ contract BridgeStorage is ValidatorSetStorage {
      * @notice commits new batch
      * @param batch new batch
      */
-    function commitBatch(SignedBridgeMessageBatch calldata batch) external onlySystemCall {
+    function commitBatch(BridgeMessageBatch calldata batch,
+        uint256[2] calldata signature,
+        bytes calldata bitmap) external onlySystemCall {
         if (batch.isRollback) {
             _verifyRollbackBatch(batch);
         } else {
@@ -77,9 +79,7 @@ contract BridgeStorage is ValidatorSetStorage {
         bytes memory hash = abi.encode(
             keccak256(
                 abi.encode(
-                    batch.rootHash,
-                    batch.startId,
-                    batch.endId,
+                    batch.messages,
                     batch.sourceChainId,
                     batch.destinationChainId,
                     batch.threshold,
@@ -88,9 +88,12 @@ contract BridgeStorage is ValidatorSetStorage {
             )
         );
 
-        verifySignature(bls.hashToPoint(DOMAIN_BRIDGE, hash), batch.signature, batch.bitmap);
+        verifySignature(bls.hashToPoint(DOMAIN_BRIDGE, hash), signature, bitmap);
 
-        batches[batchCounter] = batch;
+         SignedBridgeMessageBatch storage signedBatch = batches[batchCounter];
+         signedBatch.batch = batch;
+        signedBatch.signature = signature;
+         signedBatch.bitmap = bitmap;
 
         emit NewBatch(batchCounter);
 
@@ -101,15 +104,24 @@ contract BridgeStorage is ValidatorSetStorage {
      * @notice Internal function that verifies the regular batch
      * @param batch batch to verify
      */
-    function _verifyRegularBatch(SignedBridgeMessageBatch calldata batch) private {
-        require(batch.rootHash != bytes32(0), "EMPTY_BATCH");
-        require(batch.sourceChainId != batch.destinationChainId, "sourceChainId and destinationChainId not equal");
+    function _verifyRegularBatch(BridgeMessageBatch calldata batch) private {
+        require(batch.messages.length > 0, "EMPTY_BATCH");
+        require(lastCommitted[batch.sourceChainId] + 1 == batch.messages[0].id, "INVALID_LAST_COMMITTED");
+
+        for (uint256 i = 0; i < batch.messages.length; ) {
+            BridgeMessage memory message = batch.messages[i];
+            require(message.sourceChainId == batch.sourceChainId, "INVALID_SOURCE_CHAIN_ID");
+            require(message.destinationChainId == batch.destinationChainId, "INVALID_DESTINATION_CHAIN_ID");
+            unchecked {
+                ++i;
+            }
+        }
         if (batch.sourceChainId == block.chainid) {
-            require(lastCommittedInternal[batch.destinationChainId] + 1 == batch.startId, "INVALID_LAST_COMMITTED");
-            lastCommittedInternal[batch.destinationChainId] = batch.endId;
+            require(lastCommittedInternal[batch.destinationChainId] + 1 == batch.messages[0].id, "INVALID_LAST_COMMITTED");
+            lastCommittedInternal[batch.destinationChainId] = batch.messages[batch.messages.length-1].id;
         } else {
-            require(lastCommitted[batch.sourceChainId] + 1 == batch.startId, "INVALID_LAST_COMMITTED");
-            lastCommitted[batch.sourceChainId] = batch.endId;
+            require(lastCommitted[batch.sourceChainId] + 1 == batch.messages[0].id, "INVALID_LAST_COMMITTED");
+            lastCommitted[batch.sourceChainId] = batch.messages[batch.messages.length-1].id;
         }
     }
 
@@ -117,8 +129,8 @@ contract BridgeStorage is ValidatorSetStorage {
      * @notice Internal function that verifies the rollback batch
      * @param batch batch to verify
      */
-    function _verifyRollbackBatch(SignedBridgeMessageBatch calldata batch) private pure {
-        require(batch.rootHash != bytes32(0), "EMPTY_BATCH");
+    function _verifyRollbackBatch(BridgeMessageBatch calldata batch) private pure {
+        require(batch.messages.length > 0, "EMPTY_BATCH");
         require(batch.sourceChainId != batch.destinationChainId, "sourceChainId and destinationChainId not equal");
     }
 

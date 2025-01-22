@@ -5,6 +5,7 @@ import { BLS, BN256G2, BridgeStorage } from "../../typechain-types";
 import * as mcl from "../../ts/mcl";
 import { BigNumberish } from "ethers";
 import {
+  BridgeMessageBatchStruct,
   SignedBridgeMessageBatchStruct,
   SignedBridgeMessageBatchStructOutput,
 } from "../../typechain-types/contracts/blade/BridgeStorage";
@@ -72,40 +73,69 @@ describe("BridgeStorage", () => {
   });
 
   it("Bridge storage fail: no system call", async () => {
-    const batch: SignedBridgeMessageBatchStruct = {
+
+    msgs = [];
+
+    msgs = [
+      {
+        id: 1,
+        sourceChainId: sourceChainId,
+        destinationChainId: destinationChainId,
+        sender: ethers.constants.AddressZero,
+        receiver: ethers.constants.AddressZero,
+        payload: ethers.constants.HashZero,
+      },
+    ];
+
+    let sign: [number, number];
+
+    sign = [1, 1];
+
+    const batch: BridgeMessageBatchStruct = {
+      messages: msgs,
       threshold: 0,
       isRollback: false,
-      rootHash: "0x1555ad6149fc39abc7852aad5c3df6b9df7964ac90ffbbcf6206b1eda846c881",
-      startId: 1,
-      endId: 5,
       sourceChainId: sourceChainId,
       destinationChainId: destinationChainId,
-      signature: [100, 200],
-      bitmap: "0xffff",
-      validatorSetBatchId: 0,
     };
 
-    await expect(bridgeStorage.commitBatch(batch))
+    await expect(bridgeStorage.commitBatch(batch, sign, ethers.constants.AddressZero))
       .to.be.revertedWithCustomError(bridgeStorage, "Unauthorized")
       .withArgs("SYSTEMCALL");
   });
 
   it("Bridge storage commitBatch fail: invalid signature", async () => {
+    msgs = [];
+
+    msgs = [
+      {
+        id: 1,
+        sourceChainId: sourceChainId,
+        destinationChainId: destinationChainId,
+        sender: ethers.constants.AddressZero,
+        receiver: ethers.constants.AddressZero,
+        payload: ethers.constants.HashZero,
+      },
+      {
+        id: 2,
+        sourceChainId: sourceChainId,
+        destinationChainId: destinationChainId,
+        sender: ethers.constants.AddressZero,
+        receiver: ethers.constants.AddressZero,
+        payload: ethers.constants.HashZero,
+      },
+    ];
+
     const bitmapStr = "ffff";
 
     const bitmap = `0x${bitmapStr}`;
 
-    const batch: SignedBridgeMessageBatchStruct = {
+    const batch: BridgeMessageBatchStruct = {
+      messages: msgs,
       threshold: 0,
       isRollback: false,
-      rootHash: "0x1555ad6149fc39abc7852aad5c3df6b9df7964ac90ffbbcf6206b1eda846c881",
-      startId: 1,
-      endId: 5,
       sourceChainId: sourceChainId,
       destinationChainId: destinationChainId,
-      signature: [100, 200],
-      bitmap: bitmap,
-      validatorSetBatchId: 0,
     };
 
     const message = ethers.utils.keccak256(
@@ -136,34 +166,54 @@ describe("BridgeStorage", () => {
 
     const aggMessagePoint: mcl.MessagePoint = mcl.g1ToHex(mcl.aggregateRaw(signatures));
 
-    await expect(systemBridgeStorage.commitBatch(batch)).to.be.revertedWith("SIGNATURE_VERIFICATION_FAILED");
+    await expect(systemBridgeStorage.commitBatch(batch, aggMessagePoint, bitmap)).to.be.revertedWith("SIGNATURE_VERIFICATION_FAILED");
   });
 
   it("Bridge storage commitBatch fail: empty bitmap", async () => {
+    msgs = [];
+
+    msgs = [
+      {
+        id: 1,
+        sourceChainId: sourceChainId,
+        destinationChainId: destinationChainId,
+        sender: ethers.constants.AddressZero,
+        receiver: ethers.constants.AddressZero,
+        payload: ethers.constants.HashZero,
+      },
+      {
+        id: 2,
+        sourceChainId: sourceChainId,
+        destinationChainId: destinationChainId,
+        sender: ethers.constants.AddressZero,
+        receiver: ethers.constants.AddressZero,
+        payload: ethers.constants.HashZero,
+      },
+    ];
+
     const bitmapStr = "00";
 
     const bitmap = `0x${bitmapStr}`;
 
-    const batch: SignedBridgeMessageBatchStruct = {
+    const batch: BridgeMessageBatchStruct = {
+      messages: msgs,
       threshold: 0,
       isRollback: false,
-      rootHash: "0x1555ad6149fc39abc7852aad5c3df6b9df7964ac90ffbbcf6206b1eda846c881",
-      startId: 1,
-      endId: 5,
       sourceChainId: sourceChainId,
       destinationChainId: destinationChainId,
-      signature: [0, 0],
-      bitmap: bitmap,
-      validatorSetBatchId: 0,
     };
 
     const messageOfBatch = ethers.utils.keccak256(
       ethers.utils.defaultAbiCoder.encode(
-        ["bytes32", "uint256", "uint256", "uint256", "uint256", "uint256", "bool"],
         [
-          batch.rootHash,
-          batch.startId,
-          batch.endId,
+          "tuple(uint256 id, uint256 sourceChainId, uint256 destinationChainId, address sender, address receiver, bytes payload)[]",
+          "uint256",
+          "uint256",
+          "uint256",
+          "bool",
+        ],
+        [
+          batch.messages,
           batch.sourceChainId,
           batch.destinationChainId,
           batch.threshold,
@@ -198,36 +248,56 @@ describe("BridgeStorage", () => {
 
     const aggMessagePoint: mcl.MessagePoint = mcl.g1ToHex(mcl.aggregateRaw(signatures));
 
-    batch.signature = aggMessagePoint;
 
-    await expect(systemBridgeStorage.commitBatch(batch)).to.be.revertedWith("BITMAP_IS_EMPTY");
+    await expect(systemBridgeStorage.commitBatch(batch, aggMessagePoint, bitmap)).to.be.revertedWith("BITMAP_IS_EMPTY");
   });
 
   it("Bridge storage commitBatch fail:not enough voting power", async () => {
+
+    msgs = [];
+
+    msgs = [
+      {
+        id: 1,
+        sourceChainId: sourceChainId,
+        destinationChainId: destinationChainId,
+        sender: ethers.constants.AddressZero,
+        receiver: ethers.constants.AddressZero,
+        payload: ethers.constants.HashZero,
+      },
+      {
+        id: 2,
+        sourceChainId: sourceChainId,
+        destinationChainId: destinationChainId,
+        sender: ethers.constants.AddressZero,
+        receiver: ethers.constants.AddressZero,
+        payload: ethers.constants.HashZero,
+      },
+    ];
+
     const bitmapStr = "01";
 
     const bitmap = `0x${bitmapStr}`;
 
-    const batch: SignedBridgeMessageBatchStruct = {
+    const batch: BridgeMessageBatchStruct = {
+      messages: msgs,
       threshold: 0,
       isRollback: false,
-      rootHash: "0x1555ad6149fc39abc7852aad5c3df6b9df7964ac90ffbbcf6206b1eda846c881",
-      startId: 1,
-      endId: 5,
       sourceChainId: sourceChainId,
       destinationChainId: destinationChainId,
-      signature: [0, 0],
-      bitmap: bitmap,
-      validatorSetBatchId: 0,
     };
 
     const messageOfBatch = ethers.utils.keccak256(
       ethers.utils.defaultAbiCoder.encode(
-        ["bytes32", "uint256", "uint256", "uint256", "uint256", "uint256", "bool"],
         [
-          batch.rootHash,
-          batch.startId,
-          batch.endId,
+          "tuple(uint256 id, uint256 sourceChainId, uint256 destinationChainId, address sender, address receiver, bytes payload)[]",
+          "uint256",
+          "uint256",
+          "uint256",
+          "bool",
+        ],
+        [
+          batch.messages,
           batch.sourceChainId,
           batch.destinationChainId,
           batch.threshold,
@@ -262,36 +332,54 @@ describe("BridgeStorage", () => {
 
     const aggMessagePoint: mcl.MessagePoint = mcl.g1ToHex(mcl.aggregateRaw(signatures));
 
-    batch.signature = aggMessagePoint;
-
-    await expect(systemBridgeStorage.commitBatch(batch)).to.be.revertedWith("INSUFFICIENT_VOTING_POWER");
+    await expect(systemBridgeStorage.commitBatch(batch, aggMessagePoint, bitmap)).to.be.revertedWith("INSUFFICIENT_VOTING_POWER");
   });
 
   it("Bridge storage commitBatch success", async () => {
+    msgs = [];
+
+    msgs = [
+      {
+        id: 1,
+        sourceChainId: sourceChainId,
+        destinationChainId: destinationChainId,
+        sender: ethers.constants.AddressZero,
+        receiver: ethers.constants.AddressZero,
+        payload: ethers.constants.HashZero,
+      },
+      {
+        id: 2,
+        sourceChainId: sourceChainId,
+        destinationChainId: destinationChainId,
+        sender: ethers.constants.AddressZero,
+        receiver: ethers.constants.AddressZero,
+        payload: ethers.constants.HashZero,
+      },
+    ];
+
     const bitmapStr = "ffff";
 
     const bitmap = `0x${bitmapStr}`;
 
-    const batch: SignedBridgeMessageBatchStruct = {
+    const batch: BridgeMessageBatchStruct = {
+      messages: msgs,
       threshold: 0,
       isRollback: false,
-      rootHash: "0x1555ad6149fc39abc7852aad5c3df6b9df7964ac90ffbbcf6206b1eda846c881",
-      startId: 1,
-      endId: 5,
       sourceChainId: sourceChainId,
       destinationChainId: destinationChainId,
-      signature: [0, 0],
-      bitmap: bitmap,
-      validatorSetBatchId: 0,
     };
 
     const messageOfBatch = ethers.utils.keccak256(
       ethers.utils.defaultAbiCoder.encode(
-        ["bytes32", "uint256", "uint256", "uint256", "uint256", "uint256", "bool"],
         [
-          batch.rootHash,
-          batch.startId,
-          batch.endId,
+          "tuple(uint256 id, uint256 sourceChainId, uint256 destinationChainId, address sender, address receiver, bytes payload)[]",
+          "uint256",
+          "uint256",
+          "uint256",
+          "bool",
+        ],
+        [
+          batch.messages,
           batch.sourceChainId,
           batch.destinationChainId,
           batch.threshold,
@@ -326,11 +414,68 @@ describe("BridgeStorage", () => {
 
     const aggMessagePoint: mcl.MessagePoint = mcl.g1ToHex(mcl.aggregateRaw(signatures));
 
-    batch.signature = aggMessagePoint;
-
-    const firstTx = await systemBridgeStorage.commitBatch(batch);
+    const firstTx = await systemBridgeStorage.commitBatch(batch, aggMessagePoint, bitmap);
     const firstReceipt = await firstTx.wait();
     const firstLogs = firstReceipt?.events?.filter((log) => log.event === "NewBatch") as any[];
     expect(firstLogs).to.exist;
+  });
+
+  it("Bridge storage commitBatch fail: zero messages in batch", async () => {
+    msgs = [];
+
+    let sign: [number, number];
+
+    sign = [1, 1];
+
+    const batch = {
+      messages: msgs,
+      sourceChainId: sourceChainId,
+      destinationChainId: destinationChainId,
+      threshold: 0,
+      isRollback: false,
+    };
+
+    await expect(systemBridgeStorage.commitBatch(batch, sign, ethers.constants.AddressZero)).to.be.revertedWith(
+      "EMPTY_BATCH"
+    );
+  });
+
+  it("Bridge storage bad commitBatch fail: bad source chain id", async () => {
+    msgs = [];
+
+    msgs = [
+      {
+        id: 3,
+        sourceChainId: 1,
+        destinationChainId: destinationChainId,
+        sender: ethers.constants.AddressZero,
+        receiver: ethers.constants.AddressZero,
+        payload: ethers.constants.HashZero,
+      },
+      {
+        id: 4,
+        sourceChainId: sourceChainId,
+        destinationChainId: destinationChainId,
+        sender: ethers.constants.AddressZero,
+        receiver: ethers.constants.AddressZero,
+        payload: ethers.constants.HashZero,
+      },
+    ];
+
+    let sign: [number, number];
+
+    sign = [0, 0];
+
+    const batch = {
+      messages: msgs,
+      sourceChainId: sourceChainId,
+      destinationChainId: destinationChainId,
+      threshold: 0,
+      isRollback: false,
+    };
+
+    await expect(systemBridgeStorage.commitBatch(batch, sign, ethers.constants.AddressZero)).to.be.revertedWith(
+      "INVALID_SOURCE_CHAIN_ID"
+    );
   });
 });
