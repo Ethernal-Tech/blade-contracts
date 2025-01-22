@@ -73,7 +73,6 @@ describe("BridgeStorage", () => {
   });
 
   it("Bridge storage fail: no system call", async () => {
-
     msgs = [];
 
     msgs = [
@@ -166,7 +165,9 @@ describe("BridgeStorage", () => {
 
     const aggMessagePoint: mcl.MessagePoint = mcl.g1ToHex(mcl.aggregateRaw(signatures));
 
-    await expect(systemBridgeStorage.commitBatch(batch, aggMessagePoint, bitmap)).to.be.revertedWith("SIGNATURE_VERIFICATION_FAILED");
+    await expect(systemBridgeStorage.commitBatch(batch, aggMessagePoint, bitmap)).to.be.revertedWith(
+      "SIGNATURE_VERIFICATION_FAILED"
+    );
   });
 
   it("Bridge storage commitBatch fail: empty bitmap", async () => {
@@ -212,13 +213,7 @@ describe("BridgeStorage", () => {
           "uint256",
           "bool",
         ],
-        [
-          batch.messages,
-          batch.sourceChainId,
-          batch.destinationChainId,
-          batch.threshold,
-          batch.isRollback,
-        ]
+        [batch.messages, batch.sourceChainId, batch.destinationChainId, batch.threshold, batch.isRollback]
       )
     );
 
@@ -248,12 +243,10 @@ describe("BridgeStorage", () => {
 
     const aggMessagePoint: mcl.MessagePoint = mcl.g1ToHex(mcl.aggregateRaw(signatures));
 
-
     await expect(systemBridgeStorage.commitBatch(batch, aggMessagePoint, bitmap)).to.be.revertedWith("BITMAP_IS_EMPTY");
   });
 
   it("Bridge storage commitBatch fail:not enough voting power", async () => {
-
     msgs = [];
 
     msgs = [
@@ -296,13 +289,7 @@ describe("BridgeStorage", () => {
           "uint256",
           "bool",
         ],
-        [
-          batch.messages,
-          batch.sourceChainId,
-          batch.destinationChainId,
-          batch.threshold,
-          batch.isRollback,
-        ]
+        [batch.messages, batch.sourceChainId, batch.destinationChainId, batch.threshold, batch.isRollback]
       )
     );
 
@@ -332,7 +319,9 @@ describe("BridgeStorage", () => {
 
     const aggMessagePoint: mcl.MessagePoint = mcl.g1ToHex(mcl.aggregateRaw(signatures));
 
-    await expect(systemBridgeStorage.commitBatch(batch, aggMessagePoint, bitmap)).to.be.revertedWith("INSUFFICIENT_VOTING_POWER");
+    await expect(systemBridgeStorage.commitBatch(batch, aggMessagePoint, bitmap)).to.be.revertedWith(
+      "INSUFFICIENT_VOTING_POWER"
+    );
   });
 
   it("Bridge storage commitBatch success", async () => {
@@ -378,13 +367,7 @@ describe("BridgeStorage", () => {
           "uint256",
           "bool",
         ],
-        [
-          batch.messages,
-          batch.sourceChainId,
-          batch.destinationChainId,
-          batch.threshold,
-          batch.isRollback,
-        ]
+        [batch.messages, batch.sourceChainId, batch.destinationChainId, batch.threshold, batch.isRollback]
       )
     );
 

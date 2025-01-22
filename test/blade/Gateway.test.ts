@@ -145,8 +145,6 @@ describe("Gateway", () => {
       isRollback: false,
     };
 
-
-
     const message = ethers.utils.keccak256(
       ethers.utils.defaultAbiCoder.encode(["bytes32"], [ethers.utils.hexlify(ethers.utils.randomBytes(32))])
     );
@@ -175,7 +173,9 @@ describe("Gateway", () => {
 
     const aggMessagePoint: mcl.MessagePoint = mcl.g1ToHex(mcl.aggregateRaw(signatures));
 
-    await expect(gateway.receiveBatch(batch, aggMessagePoint,bitmap)).to.be.revertedWith("SIGNATURE_VERIFICATION_FAILED");
+    await expect(gateway.receiveBatch(batch, aggMessagePoint, bitmap)).to.be.revertedWith(
+      "SIGNATURE_VERIFICATION_FAILED"
+    );
   });
 
   it("Gateway receiveBatch fail: empty bitmap", async () => {
@@ -221,13 +221,7 @@ describe("Gateway", () => {
           "uint256",
           "bool",
         ],
-        [
-          batch.messages,
-          batch.sourceChainId,
-          batch.destinationChainId,
-          batch.threshold,
-          batch.isRollback,
-        ]
+        [batch.messages, batch.sourceChainId, batch.destinationChainId, batch.threshold, batch.isRollback]
       )
     );
 
@@ -303,13 +297,7 @@ describe("Gateway", () => {
           "uint256",
           "bool",
         ],
-        [
-          batch.messages,
-          batch.sourceChainId,
-          batch.destinationChainId,
-          batch.threshold,
-          batch.isRollback,
-        ]
+        [batch.messages, batch.sourceChainId, batch.destinationChainId, batch.threshold, batch.isRollback]
       )
     );
 
@@ -339,7 +327,7 @@ describe("Gateway", () => {
 
     const aggMessagePoint: mcl.MessagePoint = mcl.g1ToHex(mcl.aggregateRaw(signatures));
 
-    await expect(gateway.receiveBatch(batch,aggMessagePoint, bitmap)).to.be.revertedWith("INSUFFICIENT_VOTING_POWER");
+    await expect(gateway.receiveBatch(batch, aggMessagePoint, bitmap)).to.be.revertedWith("INSUFFICIENT_VOTING_POWER");
   });
 
   it("Gateway receiveBatch success signature", async () => {
@@ -384,13 +372,7 @@ describe("Gateway", () => {
           "uint256",
           "bool",
         ],
-        [
-          batch.messages,
-          batch.sourceChainId,
-          batch.destinationChainId,
-          batch.threshold,
-          batch.isRollback,
-        ]
+        [batch.messages, batch.sourceChainId, batch.destinationChainId, batch.threshold, batch.isRollback]
       )
     );
 

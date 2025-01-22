@@ -136,7 +136,7 @@ contract Gateway is ValidatorSetStorage, IGateway {
         // slither-disable-next-line reentrancy-events
         emit BridgeBatchResult(
             bridgeBatch.messages[0].id,
-            bridgeBatch.messages[bridgeBatch.messages.length-1].id,
+            bridgeBatch.messages[bridgeBatch.messages.length - 1].id,
             bridgeBatch.sourceChainId,
             bridgeBatch.destinationChainId,
             bridgeBatch.isRollback

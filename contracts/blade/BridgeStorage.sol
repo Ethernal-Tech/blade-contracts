@@ -67,9 +67,11 @@ contract BridgeStorage is ValidatorSetStorage {
      * @notice commits new batch
      * @param batch new batch
      */
-    function commitBatch(BridgeMessageBatch calldata batch,
+    function commitBatch(
+        BridgeMessageBatch calldata batch,
         uint256[2] calldata signature,
-        bytes calldata bitmap) external onlySystemCall {
+        bytes calldata bitmap
+    ) external onlySystemCall {
         if (batch.isRollback) {
             _verifyRollbackBatch(batch);
         } else {
@@ -90,10 +92,10 @@ contract BridgeStorage is ValidatorSetStorage {
 
         verifySignature(bls.hashToPoint(DOMAIN_BRIDGE, hash), signature, bitmap);
 
-         SignedBridgeMessageBatch storage signedBatch = batches[batchCounter];
-         signedBatch.batch = batch;
+        SignedBridgeMessageBatch storage signedBatch = batches[batchCounter];
+        signedBatch.batch = batch;
         signedBatch.signature = signature;
-         signedBatch.bitmap = bitmap;
+        signedBatch.bitmap = bitmap;
 
         emit NewBatch(batchCounter);
 
@@ -117,11 +119,14 @@ contract BridgeStorage is ValidatorSetStorage {
             }
         }
         if (batch.sourceChainId == block.chainid) {
-            require(lastCommittedInternal[batch.destinationChainId] + 1 == batch.messages[0].id, "INVALID_LAST_COMMITTED");
-            lastCommittedInternal[batch.destinationChainId] = batch.messages[batch.messages.length-1].id;
+            require(
+                lastCommittedInternal[batch.destinationChainId] + 1 == batch.messages[0].id,
+                "INVALID_LAST_COMMITTED"
+            );
+            lastCommittedInternal[batch.destinationChainId] = batch.messages[batch.messages.length - 1].id;
         } else {
             require(lastCommitted[batch.sourceChainId] + 1 == batch.messages[0].id, "INVALID_LAST_COMMITTED");
-            lastCommitted[batch.sourceChainId] = batch.messages[batch.messages.length-1].id;
+            lastCommitted[batch.sourceChainId] = batch.messages[batch.messages.length - 1].id;
         }
     }
 
