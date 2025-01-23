@@ -207,7 +207,7 @@ function bn256G2() external view returns (contract IBN256G2)
 ### commitBatch
 
 ```solidity
-function commitBatch(BridgeMessageBatch batch, uint256[2] signature, bytes bitmap) external nonpayable
+function commitBatch(SignedBridgeMessageBatch signedBatch) external nonpayable
 ```
 
 
@@ -218,9 +218,7 @@ function commitBatch(BridgeMessageBatch batch, uint256[2] signature, bytes bitma
 
 | Name | Type | Description |
 |---|---|---|
-| batch | BridgeMessageBatch | undefined |
-| signature | uint256[2] | undefined |
-| bitmap | bytes | undefined |
+| signedBatch | SignedBridgeMessageBatch | undefined |
 
 ### commitValidatorSet
 

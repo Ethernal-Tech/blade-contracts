@@ -361,7 +361,7 @@ function processedEventsRollback(uint256) external view returns (bool)
 ### receiveBatch
 
 ```solidity
-function receiveBatch(BridgeMessageBatch bridgeBatch, uint256[2] signature, bytes bitmap) external nonpayable
+function receiveBatch(SignedBridgeMessageBatch signedBatch) external nonpayable
 ```
 
 
@@ -372,9 +372,7 @@ function receiveBatch(BridgeMessageBatch bridgeBatch, uint256[2] signature, byte
 
 | Name | Type | Description |
 |---|---|---|
-| bridgeBatch | BridgeMessageBatch | undefined |
-| signature | uint256[2] | undefined |
-| bitmap | bytes | undefined |
+| signedBatch | SignedBridgeMessageBatch | undefined |
 
 ### sendBridgeMsg
 

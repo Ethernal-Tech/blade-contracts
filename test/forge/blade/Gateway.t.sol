@@ -120,28 +120,37 @@ contract GatewayReceiveBatchTests is GatewayInitialized {
     function testReceiveBatch_InvalidSignature() public {
         BridgeMessageBatch memory batch = BridgeMessageBatch({messages: msgs, sourceChainId: 2, destinationChainId: 3, threshold: 1000, isRollback: false});
 
+        SignedBridgeMessageBatch memory signedBatch = SignedBridgeMessageBatch({batch: batch, signature:aggMessagePoints[0], bitmap: bitmaps[0], validatorSetBatchId: 0});
+
         vm.expectRevert("SIGNATURE_VERIFICATION_FAILED");
-        gateway.receiveBatch(batch, aggMessagePoints[0], bitmaps[0]);
+        gateway.receiveBatch(signedBatch);
     }
 
     function testReceiveBatch_EmptyBitmap() public {
         BridgeMessageBatch memory batch = BridgeMessageBatch({messages: msgs, sourceChainId: 2, destinationChainId: 3, threshold: 1000, isRollback: false});
 
+
+         SignedBridgeMessageBatch memory signedBatch = SignedBridgeMessageBatch({batch: batch, signature:aggMessagePoints[1], bitmap: bitmaps[1], validatorSetBatchId: 0});
+
         vm.expectRevert("BITMAP_IS_EMPTY");
-        gateway.receiveBatch(batch, aggMessagePoints[1], bitmaps[1]);
+        gateway.receiveBatch(signedBatch);
     }
 
     function testReceiveBatch_NotEnoughPower() public {
         BridgeMessageBatch memory batch = BridgeMessageBatch({messages: msgs, sourceChainId: 2, destinationChainId: 3, threshold: 1000, isRollback: false });
 
+         SignedBridgeMessageBatch memory signedBatch = SignedBridgeMessageBatch({batch: batch, signature:aggMessagePoints[2], bitmap: bitmaps[2], validatorSetBatchId: 0});
+
         vm.expectRevert("INSUFFICIENT_VOTING_POWER");
-        gateway.receiveBatch(batch, aggMessagePoints[2], bitmaps[2]);
+        gateway.receiveBatch(signedBatch);
     }
 
     function testReceiveBatch_Success() public {
         BridgeMessageBatch memory batch = BridgeMessageBatch({messages: msgs, sourceChainId: 2, destinationChainId: 3, threshold: 1000, isRollback: false});
 
+         SignedBridgeMessageBatch memory signedBatch = SignedBridgeMessageBatch({batch: batch, signature:aggMessagePoints[3], bitmap: bitmaps[3], validatorSetBatchId: 0});
+
         vm.expectRevert("receiver has no code");
-        gateway.receiveBatch(batch, aggMessagePoints[3], bitmaps[3]);
+        gateway.receiveBatch(signedBatch);
     }
 }

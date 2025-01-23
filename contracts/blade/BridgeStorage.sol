@@ -65,37 +65,33 @@ contract BridgeStorage is ValidatorSetStorage {
 
     /**
      * @notice commits new batch
-     * @param batch new batch
+     * @param signedBatch new batch with signature and bitmap
      */
-    function commitBatch(
-        BridgeMessageBatch calldata batch,
-        uint256[2] calldata signature,
-        bytes calldata bitmap
-    ) external onlySystemCall {
-        if (batch.isRollback) {
-            _verifyRollbackBatch(batch);
+    function commitBatch(SignedBridgeMessageBatch calldata signedBatch) external onlySystemCall {
+        if (signedBatch.batch.isRollback) {
+            _verifyRollbackBatch(signedBatch.batch);
         } else {
-            _verifyRegularBatch(batch);
+            _verifyRegularBatch(signedBatch.batch);
         }
 
         bytes memory hash = abi.encode(
             keccak256(
                 abi.encode(
-                    batch.messages,
-                    batch.sourceChainId,
-                    batch.destinationChainId,
-                    batch.threshold,
-                    batch.isRollback
+                    signedBatch.batch.messages,
+                    signedBatch.batch.sourceChainId,
+                    signedBatch.batch.destinationChainId,
+                    signedBatch.batch.threshold,
+                    signedBatch.batch.isRollback
                 )
             )
         );
 
-        verifySignature(bls.hashToPoint(DOMAIN_BRIDGE, hash), signature, bitmap);
+        verifySignature(bls.hashToPoint(DOMAIN_BRIDGE, hash), signedBatch.signature, signedBatch.bitmap);
 
-        SignedBridgeMessageBatch storage signedBatch = batches[batchCounter];
-        signedBatch.batch = batch;
-        signedBatch.signature = signature;
-        signedBatch.bitmap = bitmap;
+        SignedBridgeMessageBatch storage batch = batches[batchCounter];
+        batch.batch = signedBatch.batch;
+        batch.signature = signedBatch.signature;
+        batch.bitmap = signedBatch.bitmap;
 
         emit NewBatch(batchCounter);
 

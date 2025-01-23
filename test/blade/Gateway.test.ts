@@ -3,7 +3,10 @@ import * as hre from "hardhat";
 import { ethers } from "hardhat";
 import { BLS, BN256G2, ChildERC20Predicate, Gateway } from "../../typechain-types";
 import * as mcl from "../../ts/mcl";
-import { BridgeMessageBatchStruct } from "../../typechain-types/contracts/blade/BridgeStorage";
+import {
+  BridgeMessageBatchStruct,
+  SignedBridgeMessageBatchStruct,
+} from "../../typechain-types/contracts/blade/BridgeStorage";
 
 const DOMAIN = ethers.utils.arrayify(ethers.utils.solidityKeccak256(["string"], ["DOMAIN_BRIDGE"]));
 const sourceChainId = 2;
@@ -145,6 +148,13 @@ describe("Gateway", () => {
       isRollback: false,
     };
 
+    var signedBatch: SignedBridgeMessageBatchStruct = {
+      batch: batch,
+      signature: [0, 0],
+      bitmap: bitmap,
+      validatorSetBatchId: 0,
+    };
+
     const message = ethers.utils.keccak256(
       ethers.utils.defaultAbiCoder.encode(["bytes32"], [ethers.utils.hexlify(ethers.utils.randomBytes(32))])
     );
@@ -173,9 +183,9 @@ describe("Gateway", () => {
 
     const aggMessagePoint: mcl.MessagePoint = mcl.g1ToHex(mcl.aggregateRaw(signatures));
 
-    await expect(gateway.receiveBatch(batch, aggMessagePoint, bitmap)).to.be.revertedWith(
-      "SIGNATURE_VERIFICATION_FAILED"
-    );
+    signedBatch.signature = aggMessagePoint;
+
+    await expect(gateway.receiveBatch(signedBatch)).to.be.revertedWith("SIGNATURE_VERIFICATION_FAILED");
   });
 
   it("Gateway receiveBatch fail: empty bitmap", async () => {
@@ -212,6 +222,13 @@ describe("Gateway", () => {
       destinationChainId: destinationChainId,
     };
 
+    var signedBatch: SignedBridgeMessageBatchStruct = {
+      batch: batch,
+      signature: [0, 0],
+      bitmap: bitmap,
+      validatorSetBatchId: 0,
+    };
+
     const messageOfBatch = ethers.utils.keccak256(
       ethers.utils.defaultAbiCoder.encode(
         [
@@ -251,7 +268,9 @@ describe("Gateway", () => {
 
     const aggMessagePoint: mcl.MessagePoint = mcl.g1ToHex(mcl.aggregateRaw(signatures));
 
-    await expect(gateway.receiveBatch(batch, aggMessagePoint, bitmap)).to.be.revertedWith("BITMAP_IS_EMPTY");
+    signedBatch.signature = aggMessagePoint;
+
+    await expect(gateway.receiveBatch(signedBatch)).to.be.revertedWith("BITMAP_IS_EMPTY");
   });
 
   it("Gateway receiveBatch fail:not enough voting power", async () => {
@@ -288,79 +307,11 @@ describe("Gateway", () => {
       destinationChainId: destinationChainId,
     };
 
-    const messageOfBatch = ethers.utils.keccak256(
-      ethers.utils.defaultAbiCoder.encode(
-        [
-          "tuple(uint256 id, uint256 sourceChainId, uint256 destinationChainId, address sender, address receiver, bytes payload)[]",
-          "uint256",
-          "uint256",
-          "uint256",
-          "bool",
-        ],
-        [batch.messages, batch.sourceChainId, batch.destinationChainId, batch.threshold, batch.isRollback]
-      )
-    );
-
-    const message = ethers.utils.defaultAbiCoder.encode(["bytes32"], [messageOfBatch]);
-
-    const signatures: mcl.Signature[] = [];
-
-    let aggVotingPower = 0;
-    for (let i = 0; i < validatorSecretKeys.length; i++) {
-      const byteNumber = Math.floor(i / 8);
-      const bitNumber = i % 8;
-
-      if (byteNumber >= bitmap.length / 2 - 1) {
-        continue;
-      }
-
-      // Get the value of the bit at the given 'index' in a byte.
-      const oneByte = parseInt(bitmap[2 + byteNumber * 2] + bitmap[3 + byteNumber * 2], 16);
-      if ((oneByte & (1 << bitNumber)) > 0) {
-        const { signature, messagePoint } = mcl.sign(message, validatorSecretKeys[i], ethers.utils.arrayify(DOMAIN));
-        signatures.push(signature);
-        aggVotingPower += parseInt(ethers.utils.formatEther(validatorSet[i].votingPower), 10);
-      } else {
-        continue;
-      }
-    }
-
-    const aggMessagePoint: mcl.MessagePoint = mcl.g1ToHex(mcl.aggregateRaw(signatures));
-
-    await expect(gateway.receiveBatch(batch, aggMessagePoint, bitmap)).to.be.revertedWith("INSUFFICIENT_VOTING_POWER");
-  });
-
-  it("Gateway receiveBatch success signature", async () => {
-    msgs = [];
-
-    const bitmapStr = "ffff";
-
-    const bitmap = `0x${bitmapStr}`;
-
-    msgs = [
-      {
-        id: 1,
-        sourceChainId: 2,
-        destinationChainId: 3,
-        sender: ethers.constants.AddressZero,
-        receiver: childERC20Predicate.address,
-        payload: ethers.constants.HashZero,
-      },
-      {
-        id: 2,
-        sourceChainId: 2,
-        destinationChainId: 3,
-        sender: ethers.constants.AddressZero,
-        receiver: childERC20Predicate.address,
-        payload: ethers.constants.HashZero,
-      },
-    ];
-    var batch: BridgeMessageBatchStruct = {
-      messages: msgs,
-      threshold: 1000,
-      isRollback: false,
-      sourceChainId: sourceChainId,
-      destinationChainId: destinationChainId,
+    var signedBatch: SignedBridgeMessageBatchStruct = {
+      batch: batch,
+      signature: [0, 0],
+      bitmap: bitmap,
+      validatorSetBatchId: 0,
     };
 
     const messageOfBatch = ethers.utils.keccak256(
@@ -402,6 +353,92 @@ describe("Gateway", () => {
 
     const aggMessagePoint: mcl.MessagePoint = mcl.g1ToHex(mcl.aggregateRaw(signatures));
 
-    await expect(gateway.receiveBatch(batch, aggMessagePoint, bitmap)).to.be.revertedWith("Gateway: BATCH_ROLLBACK");
+    signedBatch.signature = aggMessagePoint;
+
+    await expect(gateway.receiveBatch(signedBatch)).to.be.revertedWith("INSUFFICIENT_VOTING_POWER");
+  });
+
+  it("Gateway receiveBatch success signature", async () => {
+    msgs = [];
+
+    const bitmapStr = "ffff";
+
+    const bitmap = `0x${bitmapStr}`;
+
+    msgs = [
+      {
+        id: 1,
+        sourceChainId: 2,
+        destinationChainId: 3,
+        sender: ethers.constants.AddressZero,
+        receiver: childERC20Predicate.address,
+        payload: ethers.constants.HashZero,
+      },
+      {
+        id: 2,
+        sourceChainId: 2,
+        destinationChainId: 3,
+        sender: ethers.constants.AddressZero,
+        receiver: childERC20Predicate.address,
+        payload: ethers.constants.HashZero,
+      },
+    ];
+    var batch: BridgeMessageBatchStruct = {
+      messages: msgs,
+      threshold: 1000,
+      isRollback: false,
+      sourceChainId: sourceChainId,
+      destinationChainId: destinationChainId,
+    };
+
+    var signedBatch: SignedBridgeMessageBatchStruct = {
+      batch: batch,
+      signature: [0, 0],
+      bitmap: bitmap,
+      validatorSetBatchId: 0,
+    };
+
+    const messageOfBatch = ethers.utils.keccak256(
+      ethers.utils.defaultAbiCoder.encode(
+        [
+          "tuple(uint256 id, uint256 sourceChainId, uint256 destinationChainId, address sender, address receiver, bytes payload)[]",
+          "uint256",
+          "uint256",
+          "uint256",
+          "bool",
+        ],
+        [batch.messages, batch.sourceChainId, batch.destinationChainId, batch.threshold, batch.isRollback]
+      )
+    );
+
+    const message = ethers.utils.defaultAbiCoder.encode(["bytes32"], [messageOfBatch]);
+
+    const signatures: mcl.Signature[] = [];
+
+    let aggVotingPower = 0;
+    for (let i = 0; i < validatorSecretKeys.length; i++) {
+      const byteNumber = Math.floor(i / 8);
+      const bitNumber = i % 8;
+
+      if (byteNumber >= bitmap.length / 2 - 1) {
+        continue;
+      }
+
+      // Get the value of the bit at the given 'index' in a byte.
+      const oneByte = parseInt(bitmap[2 + byteNumber * 2] + bitmap[3 + byteNumber * 2], 16);
+      if ((oneByte & (1 << bitNumber)) > 0) {
+        const { signature, messagePoint } = mcl.sign(message, validatorSecretKeys[i], ethers.utils.arrayify(DOMAIN));
+        signatures.push(signature);
+        aggVotingPower += parseInt(ethers.utils.formatEther(validatorSet[i].votingPower), 10);
+      } else {
+        continue;
+      }
+    }
+
+    const aggMessagePoint: mcl.MessagePoint = mcl.g1ToHex(mcl.aggregateRaw(signatures));
+
+    signedBatch.signature = aggMessagePoint;
+
+    await expect(gateway.receiveBatch(signedBatch)).to.be.revertedWith("Gateway: BATCH_ROLLBACK");
   });
 });
