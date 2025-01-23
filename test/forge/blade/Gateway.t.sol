@@ -141,10 +141,7 @@ contract GatewayReceiveBatchTests is GatewayInitialized {
     function testReceiveBatch_Success() public {
         BridgeMessageBatch memory batch = BridgeMessageBatch({messages: msgs, sourceChainId: 2, destinationChainId: 3, threshold: 1000, isRollback: false});
 
-        vm.expectEmit();
-        emit BridgeMessageResult(1, false, 2, 3, bytes(""));
-        vm.expectEmit();
-        emit BridgeMessageResult(2, false, 2, 3, bytes(""));
+        vm.expectRevert("receiver has no code");
         gateway.receiveBatch(batch, aggMessagePoints[3], bitmaps[3]);
     }
 }

@@ -251,30 +251,6 @@ contract Gateway is ValidatorSetStorage, IGateway {
         return desiredMessages;
     }
 
-    // Function to calculate Merkle Root from an array of BridgeMessages
-    function calculateMerkleRoot(BridgeMessage[] memory messages) internal pure returns (bytes32) {
-        require(messages.length > 0, "No messages provided");
-
-        // Convert the BridgeMessages to their keccak256 hashes (this will be the actual leaves)
-        bytes32[] memory leaves = new bytes32[](messages.length);
-
-        for (uint256 i = 0; i < messages.length; i++) {
-            leaves[i] = keccak256(
-                abi.encode(
-                    messages[i].id,
-                    messages[i].sourceChainId,
-                    messages[i].destinationChainId,
-                    messages[i].sender,
-                    messages[i].receiver,
-                    messages[i].payload
-                )
-            );
-        }
-
-        // Pass the leaves to compute the Merkle root
-        return Merkle.computeMerkleRoot(leaves);
-    }
-
     // slither-disable-next-line unused-state,naming-convention
     uint256[50] private __gap;
 }
