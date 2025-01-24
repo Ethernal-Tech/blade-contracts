@@ -104,8 +104,7 @@ contract BridgeStorage is ValidatorSetStorage {
      */
     function _verifyRegularBatch(BridgeMessageBatch calldata batch) private {
         require(batch.messages.length > 0, "EMPTY_BATCH");
-        require(lastCommitted[batch.sourceChainId] + 1 == batch.messages[0].id, "INVALID_LAST_COMMITTED");
-
+        
         for (uint256 i = 0; i < batch.messages.length; ) {
             BridgeMessage memory message = batch.messages[i];
             require(message.sourceChainId == batch.sourceChainId, "INVALID_SOURCE_CHAIN_ID");
