@@ -66,7 +66,7 @@ contract BridgeStorage is ValidatorSetStorage {
         validatorSetCounter++;
 
         length = addresses.length;
-        // slither-disable-start call-inside-a-loop reentrancy-events low-level-calls
+        // slither-disable-start call-inside-a-loop,reentrancy-events,low-level-calls
         for (uint i = 0; i < length; ) {
             (bool ok, ) = addresses[i].call(
                 abi.encodeWithSignature(
@@ -83,7 +83,7 @@ contract BridgeStorage is ValidatorSetStorage {
                 ++i;
             }
         }
-        // slither-disable-end call-inside-a-loop reentrancy-events low-level-calls
+        // slither-disable-end call-inside-a-loop,reentrancy-events,low-level-calls
 
         emit NewValidatorSetStored(validatorSetCounter);
     }
