@@ -52,6 +52,8 @@ contract Gateway is ValidatorSetStorage, IGateway {
         address bsAddress
     ) public initializer {
         init(newBls, newBn256G2, validators);
+
+        require(bsAddress != address(0), "INVALID_BRIDGE_STORAGE_ADDRESS");
         bridgeStorageAddress = bsAddress;
     }
 
@@ -97,6 +99,7 @@ contract Gateway is ValidatorSetStorage, IGateway {
     // slither-disable-next-line protected-vars
     function receiveBatch(SignedBridgeMessageBatch calldata signedBatch) external virtual {
         if (bridgeStorageAddress != address(0)) {
+            // slither-disable-next-line low-level-calls
             (bool ok, ) = bridgeStorageAddress.call(
                 abi.encodeWithSignature(
                     "commitBatch((((uint256,uint256,uint256,address,address,bytes)[],uint256,uint256,uint256,bool),uint256[2],bytes,uint256))",

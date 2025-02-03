@@ -27,11 +27,11 @@ contract BridgeStorage is ValidatorSetStorage {
         IBLS newBls,
         IBN256G2 newBn256G2,
         Validator[] calldata validators,
-        address[] calldata _addresses
+        address[] calldata addressesGateway
     ) public initializer {
         init(newBls, newBn256G2, validators);
         validatorSetCounter = 1;
-        addresses = _addresses;
+        addresses = addressesGateway;
     }
 
     /**
@@ -48,20 +48,6 @@ contract BridgeStorage is ValidatorSetStorage {
     ) external override onlySystemCall {
         _commitValidatorSet(newValidatorSet, signature, bitmap, blockMetadata);
 
-        for (uint i = 0; i < addresses.length; i++) {
-            (bool ok, ) = addresses[i].call(
-                abi.encodeWithSignature(
-                    "commitValidatorSet((address,uint256[4],uint256)[],uint256[2],bytes,(bytes32,uint256,uint256))",
-                    newValidatorSet,
-                    signature,
-                    bitmap,
-                    blockMetadata
-                )
-            );
-
-            require(ok, "cannot commit new validator set");
-        }
-
         SignedValidatorSet storage signedValidatorSet = commitedValidatorSets[validatorSetCounter];
         signedValidatorSet.signature = signature;
         signedValidatorSet.bitmap = bitmap;
@@ -77,9 +63,29 @@ contract BridgeStorage is ValidatorSetStorage {
 
         _insertNewValidatorSetBatchRef();
 
-        emit NewValidatorSetStored(validatorSetCounter);
-
         validatorSetCounter++;
+
+        length = addresses.length;
+        // slither-disable-start call-inside-a-loop reentrancy-events low-level-calls
+        for (uint i = 0; i < length; ) {
+            (bool ok, ) = addresses[i].call(
+                abi.encodeWithSignature(
+                    "commitValidatorSet((address,uint256[4],uint256)[],uint256[2],bytes,(bytes32,uint256,uint256))",
+                    newValidatorSet,
+                    signature,
+                    bitmap,
+                    blockMetadata
+                )
+            );
+
+            require(ok, "cannot commit new validator set");
+            unchecked {
+                ++i;
+            }
+        }
+        // slither-disable-end call-inside-a-loop reentrancy-events low-level-calls
+
+        emit NewValidatorSetStored(validatorSetCounter);
     }
 
     /**
