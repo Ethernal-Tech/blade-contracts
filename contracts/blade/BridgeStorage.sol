@@ -12,6 +12,8 @@ contract BridgeStorage is ValidatorSetStorage {
     uint256 public batchCounter;
     uint256 public validatorSetCounter;
 
+    address[] public addresses;
+
     event NewBatch(uint256 indexed id);
     event NewValidatorSetStored(uint256 indexed id);
 
@@ -21,12 +23,15 @@ contract BridgeStorage is ValidatorSetStorage {
      * @param newBn256G2 address of the BN256G2 library contract
      * @param validators list of validators
      */
-    function initialize(IBLS newBls, IBN256G2 newBn256G2, Validator[] calldata validators) public override initializer {
-        bls = newBls;
-        bn256G2 = newBn256G2;
-        _setNewValidatorSet(validators);
-
+    function initializeBS(
+        IBLS newBls,
+        IBN256G2 newBn256G2,
+        Validator[] calldata validators,
+        address[] calldata _addresses
+    ) public initializer {
+        init(newBls, newBn256G2, validators);
         validatorSetCounter = 1;
+        addresses = _addresses;
     }
 
     /**
@@ -42,6 +47,20 @@ contract BridgeStorage is ValidatorSetStorage {
         BlockMetadata calldata blockMetadata
     ) external override onlySystemCall {
         _commitValidatorSet(newValidatorSet, signature, bitmap, blockMetadata);
+
+        for (uint i = 0; i < addresses.length; i++) {
+            (bool ok, ) = addresses[i].call(
+                abi.encodeWithSignature(
+                    "commitValidatorSet((address,uint256[4],uint256)[],uint256[2],bytes,(bytes32,uint256,uint256))",
+                    newValidatorSet,
+                    signature,
+                    bitmap,
+                    blockMetadata
+                )
+            );
+
+            require(ok, "cannot commit new validator set");
+        }
 
         SignedValidatorSet storage signedValidatorSet = commitedValidatorSets[validatorSetCounter];
         signedValidatorSet.signature = signature;
@@ -104,7 +123,7 @@ contract BridgeStorage is ValidatorSetStorage {
      */
     function _verifyRegularBatch(BridgeMessageBatch calldata batch) private {
         require(batch.messages.length > 0, "EMPTY_BATCH");
-        
+
         for (uint256 i = 0; i < batch.messages.length; ) {
             BridgeMessage memory message = batch.messages[i];
             require(message.sourceChainId == batch.sourceChainId, "INVALID_SOURCE_CHAIN_ID");

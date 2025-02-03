@@ -18,6 +18,8 @@ contract Gateway is ValidatorSetStorage, IGateway {
     mapping(uint256 => bool) public processedEventsRollback;
     mapping(uint256 => BridgeMessage) bridgeMessages;
 
+    address public bridgeStorageAddress;
+
     event BridgeMessageResult(
         uint256 indexed counter,
         bool indexed status,
@@ -42,6 +44,16 @@ contract Gateway is ValidatorSetStorage, IGateway {
         uint256 destinationChainId,
         bool isRollback
     );
+
+    function initializeSC(
+        IBLS newBls,
+        IBN256G2 newBn256G2,
+        Validator[] calldata validators,
+        address bsAddress
+    ) public initializer {
+        init(newBls, newBn256G2, validators);
+        bridgeStorageAddress = bsAddress;
+    }
 
     /**
      *
@@ -84,6 +96,17 @@ contract Gateway is ValidatorSetStorage, IGateway {
      */
     // slither-disable-next-line protected-vars
     function receiveBatch(SignedBridgeMessageBatch calldata signedBatch) external virtual {
+        if (bridgeStorageAddress != address(0)) {
+            (bool ok, ) = bridgeStorageAddress.call(
+                abi.encodeWithSignature(
+                    "commitBatch((((uint256,uint256,uint256,address,address,bytes)[],uint256,uint256,uint256,bool),uint256[2],bytes,uint256))",
+                    signedBatch
+                )
+            );
+
+            require(ok, "cannot commit batch");
+        }
+
         if (signedBatch.batch.isRollback) {
             _verifyRollbackBatch(signedBatch.batch.messages);
         } else {

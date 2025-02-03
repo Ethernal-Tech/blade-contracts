@@ -180,6 +180,23 @@ function bn256G2() external view returns (contract IBN256G2)
 |---|---|---|
 | _0 | contract IBN256G2 | undefined |
 
+### bridgeStorageAddress
+
+```solidity
+function bridgeStorageAddress() external view returns (address)
+```
+
+
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | address | undefined |
+
 ### commitValidatorSet
 
 ```solidity
@@ -313,6 +330,25 @@ function initialize(contract IBLS newBls, contract IBN256G2 newBn256G2, Validato
 | newBls | contract IBLS | undefined |
 | newBn256G2 | contract IBN256G2 | undefined |
 | validators | Validator[] | undefined |
+
+### initializeSC
+
+```solidity
+function initializeSC(contract IBLS newBls, contract IBN256G2 newBn256G2, Validator[] validators, address bsAddress) external nonpayable
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| newBls | contract IBLS | undefined |
+| newBn256G2 | contract IBN256G2 | undefined |
+| validators | Validator[] | undefined |
+| bsAddress | address | undefined |
 
 ### processedEvents
 

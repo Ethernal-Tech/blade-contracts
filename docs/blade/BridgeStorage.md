@@ -129,6 +129,28 @@ function SYSTEM() external view returns (address)
 |---|---|---|
 | _0 | address | undefined |
 
+### addresses
+
+```solidity
+function addresses(uint256) external view returns (address)
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | undefined |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | address | undefined |
+
 ### batchCounter
 
 ```solidity
@@ -402,6 +424,25 @@ function initialize(contract IBLS newBls, contract IBN256G2 newBn256G2, Validato
 | newBls | contract IBLS | undefined |
 | newBn256G2 | contract IBN256G2 | undefined |
 | validators | Validator[] | undefined |
+
+### initializeBS
+
+```solidity
+function initializeBS(contract IBLS newBls, contract IBN256G2 newBn256G2, Validator[] validators, address[] _addresses) external nonpayable
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| newBls | contract IBLS | undefined |
+| newBn256G2 | contract IBN256G2 | undefined |
+| validators | Validator[] | undefined |
+| _addresses | address[] | undefined |
 
 ### lastCommitted
 
