@@ -428,7 +428,7 @@ function initialize(contract IBLS newBls, contract IBN256G2 newBn256G2, Validato
 ### initializeBS
 
 ```solidity
-function initializeBS(contract IBLS newBls, contract IBN256G2 newBn256G2, Validator[] validators, address[] _addresses) external nonpayable
+function initializeBS(contract IBLS newBls, contract IBN256G2 newBn256G2, Validator[] validators, address[] addressesGateway) external nonpayable
 ```
 
 
@@ -442,7 +442,7 @@ function initializeBS(contract IBLS newBls, contract IBN256G2 newBn256G2, Valida
 | newBls | contract IBLS | undefined |
 | newBn256G2 | contract IBN256G2 | undefined |
 | validators | Validator[] | undefined |
-| _addresses | address[] | undefined |
+| addressesGateway | address[] | undefined |
 
 ### lastCommitted
 

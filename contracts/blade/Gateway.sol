@@ -45,7 +45,7 @@ contract Gateway is ValidatorSetStorage, IGateway {
         bool isRollback
     );
 
-    function initializeSC(
+    function initializeGW(
         IBLS newBls,
         IBN256G2 newBn256G2,
         Validator[] calldata validators,

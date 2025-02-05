@@ -331,10 +331,10 @@ function initialize(contract IBLS newBls, contract IBN256G2 newBn256G2, Validato
 | newBn256G2 | contract IBN256G2 | undefined |
 | validators | Validator[] | undefined |
 
-### initializeSC
+### initializeGW
 
 ```solidity
-function initializeSC(contract IBLS newBls, contract IBN256G2 newBn256G2, Validator[] validators, address bsAddress) external nonpayable
+function initializeGW(contract IBLS newBls, contract IBN256G2 newBn256G2, Validator[] validators, address bsAddress) external nonpayable
 ```
 
 
