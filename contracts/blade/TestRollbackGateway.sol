@@ -12,39 +12,34 @@ contract TestRollbackGateway is Gateway {
 
     /**
      * @notice receives the batch of messages and executes them
-     * @param batchMessages batch of messages
+     * @param signedBatch batch of messages
      */
     // slither-disable-next-line protected-vars
-    function receiveBatch(
-        BridgeMessage[] calldata batchMessages,
-        SignedBridgeMessageBatch calldata signedBridgeBatch
-    ) external override {
-        if (!signedBridgeBatch.isRollback) {
+    function receiveBatch(SignedBridgeMessageBatch calldata signedBatch) external override {
+        if (!signedBatch.batch.isRollback) {
             revert TestRollbackError("TESTING BATCH");
         }
 
-        _verifyRollbackBatch(batchMessages);
+        _verifyRollbackBatch(signedBatch.batch.messages);
 
         bytes memory hash = abi.encode(
             keccak256(
                 abi.encode(
-                    calculateMerkleRoot(batchMessages),
-                    signedBridgeBatch.startId,
-                    signedBridgeBatch.endId,
-                    signedBridgeBatch.sourceChainId,
-                    signedBridgeBatch.destinationChainId,
-                    signedBridgeBatch.threshold,
-                    signedBridgeBatch.isRollback
+                    signedBatch.batch.messages,
+                    signedBatch.batch.sourceChainId,
+                    signedBatch.batch.destinationChainId,
+                    signedBatch.batch.threshold,
+                    signedBatch.batch.isRollback
                 )
             )
         );
 
-        verifySignature(bls.hashToPoint(DOMAIN_BRIDGE, hash), signedBridgeBatch.signature, signedBridgeBatch.bitmap);
+        verifySignature(bls.hashToPoint(DOMAIN_BRIDGE, hash), signedBatch.signature, signedBatch.bitmap);
 
-        uint256 length = batchMessages.length;
+        uint256 length = signedBatch.batch.messages.length;
 
         for (uint256 i = 0; i < length; ) {
-            _executeRollbackBridgeMessage(batchMessages[i]);
+            _executeRollbackBridgeMessage(signedBatch.batch.messages[i]);
 
             unchecked {
                 ++i;
@@ -53,11 +48,11 @@ contract TestRollbackGateway is Gateway {
 
         // slither-disable-next-line reentrancy-events
         emit BridgeBatchResult(
-            signedBridgeBatch.startId,
-            signedBridgeBatch.endId,
-            signedBridgeBatch.sourceChainId,
-            signedBridgeBatch.destinationChainId,
-            signedBridgeBatch.isRollback
+            signedBatch.batch.messages[0].id,
+            signedBatch.batch.messages[signedBatch.batch.messages.length].id,
+            signedBatch.batch.sourceChainId,
+            signedBatch.batch.destinationChainId,
+            signedBatch.batch.isRollback
         );
     }
 }

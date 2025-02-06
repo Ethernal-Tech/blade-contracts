@@ -12,6 +12,8 @@ contract BridgeStorage is ValidatorSetStorage {
     uint256 public batchCounter;
     uint256 public validatorSetCounter;
 
+    address[] public addresses;
+
     event NewBatch(uint256 indexed id);
     event NewValidatorSetStored(uint256 indexed id);
 
@@ -21,12 +23,15 @@ contract BridgeStorage is ValidatorSetStorage {
      * @param newBn256G2 address of the BN256G2 library contract
      * @param validators list of validators
      */
-    function initialize(IBLS newBls, IBN256G2 newBn256G2, Validator[] calldata validators) public override initializer {
-        bls = newBls;
-        bn256G2 = newBn256G2;
-        _setNewValidatorSet(validators);
-
+    function initializeBS(
+        IBLS newBls,
+        IBN256G2 newBn256G2,
+        Validator[] calldata validators,
+        address[] calldata addressesGateway
+    ) public initializer {
+        init(newBls, newBn256G2, validators);
         validatorSetCounter = 1;
+        addresses = addressesGateway;
     }
 
     /**
@@ -58,39 +63,60 @@ contract BridgeStorage is ValidatorSetStorage {
 
         _insertNewValidatorSetBatchRef();
 
-        emit NewValidatorSetStored(validatorSetCounter);
-
         validatorSetCounter++;
+
+        length = addresses.length;
+        // slither-disable-start calls-loop,reentrancy-events,low-level-calls
+        for (uint i = 0; i < length; ) {
+            (bool ok, ) = addresses[i].call(
+                abi.encodeWithSignature(
+                    "commitValidatorSet((address,uint256[4],uint256)[],uint256[2],bytes,(bytes32,uint256,uint256))",
+                    newValidatorSet,
+                    signature,
+                    bitmap,
+                    blockMetadata
+                )
+            );
+
+            require(ok, "cannot commit new validator set");
+            unchecked {
+                ++i;
+            }
+        }
+        // slither-disable-end calls-loop,reentrancy-events,low-level-calls
+
+        emit NewValidatorSetStored(validatorSetCounter);
     }
 
     /**
      * @notice commits new batch
-     * @param batch new batch
+     * @param signedBatch new batch with signature and bitmap
      */
-    function commitBatch(SignedBridgeMessageBatch calldata batch) external onlySystemCall {
-        if (batch.isRollback) {
-            _verifyRollbackBatch(batch);
+    function commitBatch(SignedBridgeMessageBatch calldata signedBatch) external onlySystemCall {
+        if (signedBatch.batch.isRollback) {
+            _verifyRollbackBatch(signedBatch.batch);
         } else {
-            _verifyRegularBatch(batch);
+            _verifyRegularBatch(signedBatch.batch);
         }
 
         bytes memory hash = abi.encode(
             keccak256(
                 abi.encode(
-                    batch.rootHash,
-                    batch.startId,
-                    batch.endId,
-                    batch.sourceChainId,
-                    batch.destinationChainId,
-                    batch.threshold,
-                    batch.isRollback
+                    signedBatch.batch.messages,
+                    signedBatch.batch.sourceChainId,
+                    signedBatch.batch.destinationChainId,
+                    signedBatch.batch.threshold,
+                    signedBatch.batch.isRollback
                 )
             )
         );
 
-        verifySignature(bls.hashToPoint(DOMAIN_BRIDGE, hash), batch.signature, batch.bitmap);
+        verifySignature(bls.hashToPoint(DOMAIN_BRIDGE, hash), signedBatch.signature, signedBatch.bitmap);
 
-        batches[batchCounter] = batch;
+        SignedBridgeMessageBatch storage batch = batches[batchCounter];
+        batch.batch = signedBatch.batch;
+        batch.signature = signedBatch.signature;
+        batch.bitmap = signedBatch.bitmap;
 
         emit NewBatch(batchCounter);
 
@@ -101,15 +127,26 @@ contract BridgeStorage is ValidatorSetStorage {
      * @notice Internal function that verifies the regular batch
      * @param batch batch to verify
      */
-    function _verifyRegularBatch(SignedBridgeMessageBatch calldata batch) private {
-        require(batch.rootHash != bytes32(0), "EMPTY_BATCH");
-        require(batch.sourceChainId != batch.destinationChainId, "sourceChainId and destinationChainId not equal");
+    function _verifyRegularBatch(BridgeMessageBatch calldata batch) private {
+        require(batch.messages.length > 0, "EMPTY_BATCH");
+
+        for (uint256 i = 0; i < batch.messages.length; ) {
+            BridgeMessage memory message = batch.messages[i];
+            require(message.sourceChainId == batch.sourceChainId, "INVALID_SOURCE_CHAIN_ID");
+            require(message.destinationChainId == batch.destinationChainId, "INVALID_DESTINATION_CHAIN_ID");
+            unchecked {
+                ++i;
+            }
+        }
         if (batch.sourceChainId == block.chainid) {
-            require(lastCommittedInternal[batch.destinationChainId] + 1 == batch.startId, "INVALID_LAST_COMMITTED");
-            lastCommittedInternal[batch.destinationChainId] = batch.endId;
+            require(
+                lastCommittedInternal[batch.destinationChainId] + 1 == batch.messages[0].id,
+                "INVALID_LAST_COMMITTED"
+            );
+            lastCommittedInternal[batch.destinationChainId] = batch.messages[batch.messages.length - 1].id;
         } else {
-            require(lastCommitted[batch.sourceChainId] + 1 == batch.startId, "INVALID_LAST_COMMITTED");
-            lastCommitted[batch.sourceChainId] = batch.endId;
+            require(lastCommitted[batch.sourceChainId] + 1 == batch.messages[0].id, "INVALID_LAST_COMMITTED");
+            lastCommitted[batch.sourceChainId] = batch.messages[batch.messages.length - 1].id;
         }
     }
 
@@ -117,8 +154,8 @@ contract BridgeStorage is ValidatorSetStorage {
      * @notice Internal function that verifies the rollback batch
      * @param batch batch to verify
      */
-    function _verifyRollbackBatch(SignedBridgeMessageBatch calldata batch) private pure {
-        require(batch.rootHash != bytes32(0), "EMPTY_BATCH");
+    function _verifyRollbackBatch(BridgeMessageBatch calldata batch) private pure {
+        require(batch.messages.length > 0, "EMPTY_BATCH");
         require(batch.sourceChainId != batch.destinationChainId, "sourceChainId and destinationChainId not equal");
     }
 

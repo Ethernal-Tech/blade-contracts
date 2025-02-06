@@ -129,6 +129,28 @@ function SYSTEM() external view returns (address)
 |---|---|---|
 | _0 | address | undefined |
 
+### addresses
+
+```solidity
+function addresses(uint256) external view returns (address)
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | undefined |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | address | undefined |
+
 ### batchCounter
 
 ```solidity
@@ -149,7 +171,7 @@ function batchCounter() external view returns (uint256)
 ### batches
 
 ```solidity
-function batches(uint256) external view returns (bytes32 rootHash, uint256 startId, uint256 endId, uint256 sourceChainId, uint256 destinationChainId, bytes bitmap, uint256 threshold, bool isRollback, uint256 validatorSetBatchId)
+function batches(uint256) external view returns (struct BridgeMessageBatch batch, bytes bitmap, uint256 validatorSetBatchId)
 ```
 
 
@@ -166,14 +188,8 @@ function batches(uint256) external view returns (bytes32 rootHash, uint256 start
 
 | Name | Type | Description |
 |---|---|---|
-| rootHash | bytes32 | undefined |
-| startId | uint256 | undefined |
-| endId | uint256 | undefined |
-| sourceChainId | uint256 | undefined |
-| destinationChainId | uint256 | undefined |
+| batch | BridgeMessageBatch | undefined |
 | bitmap | bytes | undefined |
-| threshold | uint256 | undefined |
-| isRollback | bool | undefined |
 | validatorSetBatchId | uint256 | undefined |
 
 ### bls
@@ -213,7 +229,7 @@ function bn256G2() external view returns (contract IBN256G2)
 ### commitBatch
 
 ```solidity
-function commitBatch(SignedBridgeMessageBatch batch) external nonpayable
+function commitBatch(SignedBridgeMessageBatch signedBatch) external nonpayable
 ```
 
 
@@ -224,7 +240,7 @@ function commitBatch(SignedBridgeMessageBatch batch) external nonpayable
 
 | Name | Type | Description |
 |---|---|---|
-| batch | SignedBridgeMessageBatch | undefined |
+| signedBatch | SignedBridgeMessageBatch | undefined |
 
 ### commitValidatorSet
 
@@ -408,6 +424,25 @@ function initialize(contract IBLS newBls, contract IBN256G2 newBn256G2, Validato
 | newBls | contract IBLS | undefined |
 | newBn256G2 | contract IBN256G2 | undefined |
 | validators | Validator[] | undefined |
+
+### initializeBS
+
+```solidity
+function initializeBS(contract IBLS newBls, contract IBN256G2 newBn256G2, Validator[] validators, address[] addressesGateway) external nonpayable
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| newBls | contract IBLS | undefined |
+| newBn256G2 | contract IBN256G2 | undefined |
+| validators | Validator[] | undefined |
+| addressesGateway | address[] | undefined |
 
 ### lastCommitted
 

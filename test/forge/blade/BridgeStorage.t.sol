@@ -3,11 +3,10 @@ pragma solidity ^0.8.19;
 
 import "@utils/Test.sol";
 import {BridgeStorage} from "contracts/blade/BridgeStorage.sol";
-import {Validator, BridgeMessage, SignedBridgeMessageBatch, DOMAIN_BRIDGE} from "contracts/interfaces/blade/IValidatorSetStorage.sol";
+import {Validator, BridgeMessage,SignedBridgeMessageBatch, BridgeMessageBatch, DOMAIN_BRIDGE} from "contracts/interfaces/blade/IValidatorSetStorage.sol";
 import {BLS} from "contracts/common/BLS.sol";
 import {BN256G2} from "contracts/common/BN256G2.sol";
 import {System} from "contracts/blade/System.sol";
-import "contracts/lib/Merkle.sol";
 
 abstract contract BridgeStorageTest is Test, System, BridgeStorage {
     BridgeStorage bridgeStorage;
@@ -18,7 +17,6 @@ abstract contract BridgeStorageTest is Test, System, BridgeStorage {
     bytes[] public bitmaps;
     uint256[2][] public aggMessagePoints;
     BridgeMessage[] public msgs;
-    bytes32 rootHash;
 
     function setUp() public virtual {
         bls = new BLS();
@@ -50,22 +48,9 @@ abstract contract BridgeStorageTest is Test, System, BridgeStorage {
             validatorSet.push(validatorTemp[i]);
         }
 
-        bytes32[] memory leaves = new bytes32[](messageTmp.length);
         for (uint256 i = 0; i < messageTmp.length; i++) {
             msgs.push(messageTmp[i]);
-            leaves[i] = keccak256(
-                abi.encode(
-                    messageTmp[i].id,
-                    messageTmp[i].sourceChainId,
-                    messageTmp[i].destinationChainId,
-                    messageTmp[i].sender,
-                    messageTmp[i].receiver,
-                    messageTmp[i].payload
-                )
-            );
         }
-
-        rootHash = Merkle.computeMerkleRoot(leaves);
     }
 }
 
@@ -92,75 +77,39 @@ contract BridgeStorageUnitialized is BridgeStorageTest {
 
 contract BridgeStorageCommitBatchTests is BridgeStorageInitialized {
     function testCommitBatch_InvalidSignature() public {
-        SignedBridgeMessageBatch memory batch = SignedBridgeMessageBatch({
-            rootHash: rootHash,
-            startId: msgs[0].id,
-            endId: msgs[msgs.length - 1].id,
-            sourceChainId: 2,
-            destinationChainId: 3,
-            signature: aggMessagePoints[0],
-            bitmap: bitmaps[0],
-            threshold: 0,
-            isRollback: false,
-            validatorSetBatchId: 0
-        });
+        BridgeMessageBatch memory batch = BridgeMessageBatch({messages: msgs, sourceChainId: 2, destinationChainId: 3, threshold: 1000, isRollback: false});
+
+         SignedBridgeMessageBatch memory signedBatch = SignedBridgeMessageBatch({batch: batch, signature:aggMessagePoints[0], bitmap: bitmaps[0], validatorSetBatchId: 0});
 
         vm.expectRevert("SIGNATURE_VERIFICATION_FAILED");
-        bridgeStorage.commitBatch(batch);
+        bridgeStorage.commitBatch(signedBatch);
     }
 
     function testCommitBatch_EmptyBitmap() public {
-        SignedBridgeMessageBatch memory batch = SignedBridgeMessageBatch({
-            rootHash: rootHash,
-            startId: msgs[0].id,
-            endId: msgs[msgs.length - 1].id,
-            sourceChainId: 2,
-            destinationChainId: 3,
-            signature: aggMessagePoints[1],
-            bitmap: bitmaps[1],
-            threshold: 0,
-            isRollback: false,
-            validatorSetBatchId: 0
-        });
+        BridgeMessageBatch memory batch = BridgeMessageBatch({messages: msgs, sourceChainId: 2, destinationChainId: 3, threshold: 1000, isRollback: false});
+
+         SignedBridgeMessageBatch memory signedBatch = SignedBridgeMessageBatch({batch: batch, signature:aggMessagePoints[1], bitmap: bitmaps[1], validatorSetBatchId: 0});
 
         vm.expectRevert("BITMAP_IS_EMPTY");
-        bridgeStorage.commitBatch(batch);
+        bridgeStorage.commitBatch(signedBatch);
     }
 
     function testCommitBatch_NotEnoughPower() public {
-        SignedBridgeMessageBatch memory batch = SignedBridgeMessageBatch({
-            rootHash: rootHash,
-            startId: msgs[0].id,
-            endId: msgs[msgs.length - 1].id,
-            sourceChainId: 2,
-            destinationChainId: 3,
-            signature: aggMessagePoints[2],
-            bitmap: bitmaps[2],
-            threshold: 0,
-            isRollback: false,
-            validatorSetBatchId: 0
-        });
+        BridgeMessageBatch memory batch = BridgeMessageBatch({messages: msgs, sourceChainId: 2, destinationChainId: 3, threshold: 1000, isRollback: false});
+
+         SignedBridgeMessageBatch memory signedBatch = SignedBridgeMessageBatch({batch: batch, signature:aggMessagePoints[2], bitmap: bitmaps[2], validatorSetBatchId: 0});
 
         vm.expectRevert("INSUFFICIENT_VOTING_POWER");
-        bridgeStorage.commitBatch(batch);
+        bridgeStorage.commitBatch(signedBatch);
     }
 
     function testCommitBatch_Success() public {
-        SignedBridgeMessageBatch memory batch = SignedBridgeMessageBatch({
-            rootHash: rootHash,
-            startId: msgs[0].id,
-            endId: msgs[msgs.length - 1].id,
-            sourceChainId: 2,
-            destinationChainId: 3,
-            signature: aggMessagePoints[3],
-            bitmap: bitmaps[3],
-            threshold: 1000,
-            isRollback: false,
-            validatorSetBatchId: 0
-        });
+        BridgeMessageBatch memory batch = BridgeMessageBatch({messages: msgs, sourceChainId: 2, destinationChainId: 3,threshold: 1000, isRollback: false});
+
+         SignedBridgeMessageBatch memory signedBatch = SignedBridgeMessageBatch({batch: batch, signature:aggMessagePoints[3], bitmap: bitmaps[3], validatorSetBatchId: 0});
 
         vm.expectEmit();
         emit NewBatch(0);
-        bridgeStorage.commitBatch(batch);
+        bridgeStorage.commitBatch(signedBatch);
     }
 }

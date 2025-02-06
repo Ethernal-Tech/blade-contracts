@@ -32,24 +32,33 @@ struct BridgeMessage {
 }
 
 /**
- * @param rootHash root hash of the batch
- * @param startId start id of the batch
- * @param endId end id of the batch
+ * @param messages list of all messages in batch
+ * @param sourceChainId id of chain which is source of batch
+ * @param destinationChainId id of chain which is destination of batch
+ * @param threshold
+ * @param isRollback
+ */
+struct BridgeMessageBatch {
+    BridgeMessage[] messages;
+    uint256 sourceChainId;
+    uint256 destinationChainId;
+    uint256 threshold;
+    bool isRollback;
+}
+
+/**
+ * @param messages list of all messages in batch
  * @param sourceChainId id of source chain
  * @param destinationChainId id of destination chain
  * @param signature aggregated signature of validators that signed the batch
  * @param bitmap bitmap of which validators signed the message
+
+ * @param validatorSetBatchId
  */
 struct SignedBridgeMessageBatch {
-    bytes32 rootHash;
-    uint256 startId;
-    uint256 endId;
-    uint256 sourceChainId;
-    uint256 destinationChainId;
+    BridgeMessageBatch batch;
     uint256[2] signature;
     bytes bitmap;
-    uint256 threshold;
-    bool isRollback;
     uint256 validatorSetBatchId;
 }
 

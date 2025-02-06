@@ -18,6 +18,8 @@ contract Gateway is ValidatorSetStorage, IGateway {
     mapping(uint256 => bool) public processedEventsRollback;
     mapping(uint256 => BridgeMessage) bridgeMessages;
 
+    address public bridgeStorageAddress;
+
     event BridgeMessageResult(
         uint256 indexed counter,
         bool indexed status,
@@ -42,6 +44,18 @@ contract Gateway is ValidatorSetStorage, IGateway {
         uint256 destinationChainId,
         bool isRollback
     );
+
+    function initializeGW(
+        IBLS newBls,
+        IBN256G2 newBn256G2,
+        Validator[] calldata validators,
+        address bsAddress
+    ) public initializer {
+        init(newBls, newBn256G2, validators);
+
+        require(bsAddress != address(0), "INVALID_BRIDGE_STORAGE_ADDRESS");
+        bridgeStorageAddress = bsAddress;
+    }
 
     /**
      *
@@ -80,43 +94,50 @@ contract Gateway is ValidatorSetStorage, IGateway {
 
     /**
      * @notice receives the batch of messages and executes them
-     * @param batchMessages batch of messages
+     * @param signedBatch batch with messages, signature and bitmap
      */
     // slither-disable-next-line protected-vars
-    function receiveBatch(
-        BridgeMessage[] calldata batchMessages,
-        SignedBridgeMessageBatch calldata signedBridgeBatch
-    ) external virtual {
-        if (signedBridgeBatch.isRollback) {
-            _verifyRollbackBatch(batchMessages);
+    function receiveBatch(SignedBridgeMessageBatch calldata signedBatch) external virtual {
+        if (bridgeStorageAddress != address(0)) {
+            // slither-disable-next-line low-level-calls
+            (bool ok, ) = bridgeStorageAddress.call(
+                abi.encodeWithSignature(
+                    "commitBatch((((uint256,uint256,uint256,address,address,bytes)[],uint256,uint256,uint256,bool),uint256[2],bytes,uint256))",
+                    signedBatch
+                )
+            );
+
+            require(ok, "cannot commit batch");
+        }
+
+        if (signedBatch.batch.isRollback) {
+            _verifyRollbackBatch(signedBatch.batch.messages);
         } else {
-            _verifyBatch(batchMessages);
+            _verifyBatch(signedBatch.batch.messages);
         }
 
         bytes memory hash = abi.encode(
             keccak256(
                 abi.encode(
-                    calculateMerkleRoot(batchMessages),
-                    signedBridgeBatch.startId,
-                    signedBridgeBatch.endId,
-                    signedBridgeBatch.sourceChainId,
-                    signedBridgeBatch.destinationChainId,
-                    signedBridgeBatch.threshold,
-                    signedBridgeBatch.isRollback
+                    signedBatch.batch.messages,
+                    signedBatch.batch.sourceChainId,
+                    signedBatch.batch.destinationChainId,
+                    signedBatch.batch.threshold,
+                    signedBatch.batch.isRollback
                 )
             )
         );
 
-        verifySignature(bls.hashToPoint(DOMAIN_BRIDGE, hash), signedBridgeBatch.signature, signedBridgeBatch.bitmap);
+        verifySignature(bls.hashToPoint(DOMAIN_BRIDGE, hash), signedBatch.signature, signedBatch.bitmap);
 
-        if (block.number > signedBridgeBatch.threshold && !signedBridgeBatch.isRollback) {
+        if (block.number > signedBatch.batch.threshold && !signedBatch.batch.isRollback) {
             revert("the batch has timed out");
         }
 
-        uint256 length = batchMessages.length;
-        if (!signedBridgeBatch.isRollback) {
+        uint256 length = signedBatch.batch.messages.length;
+        if (!signedBatch.batch.isRollback) {
             for (uint256 i = 0; i < length; ) {
-                _executeBridgeMessage(batchMessages[i]);
+                _executeBridgeMessage(signedBatch.batch.messages[i]);
 
                 unchecked {
                     ++i;
@@ -124,7 +145,7 @@ contract Gateway is ValidatorSetStorage, IGateway {
             }
         } else {
             for (uint256 i = 0; i < length; ) {
-                _executeRollbackBridgeMessage(batchMessages[i]);
+                _executeRollbackBridgeMessage(signedBatch.batch.messages[i]);
 
                 unchecked {
                     ++i;
@@ -134,11 +155,11 @@ contract Gateway is ValidatorSetStorage, IGateway {
 
         // slither-disable-next-line reentrancy-events
         emit BridgeBatchResult(
-            signedBridgeBatch.startId,
-            signedBridgeBatch.endId,
-            signedBridgeBatch.sourceChainId,
-            signedBridgeBatch.destinationChainId,
-            signedBridgeBatch.isRollback
+            signedBatch.batch.messages[0].id,
+            signedBatch.batch.messages[signedBatch.batch.messages.length - 1].id,
+            signedBatch.batch.sourceChainId,
+            signedBatch.batch.destinationChainId,
+            signedBatch.batch.isRollback
         );
     }
 
@@ -248,30 +269,6 @@ contract Gateway is ValidatorSetStorage, IGateway {
         }
 
         return desiredMessages;
-    }
-
-    // Function to calculate Merkle Root from an array of BridgeMessages
-    function calculateMerkleRoot(BridgeMessage[] memory messages) internal pure returns (bytes32) {
-        require(messages.length > 0, "No messages provided");
-
-        // Convert the BridgeMessages to their keccak256 hashes (this will be the actual leaves)
-        bytes32[] memory leaves = new bytes32[](messages.length);
-
-        for (uint256 i = 0; i < messages.length; i++) {
-            leaves[i] = keccak256(
-                abi.encode(
-                    messages[i].id,
-                    messages[i].sourceChainId,
-                    messages[i].destinationChainId,
-                    messages[i].sender,
-                    messages[i].receiver,
-                    messages[i].payload
-                )
-            );
-        }
-
-        // Pass the leaves to compute the Merkle root
-        return Merkle.computeMerkleRoot(leaves);
     }
 
     // slither-disable-next-line unused-state,naming-convention

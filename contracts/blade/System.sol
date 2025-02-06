@@ -21,7 +21,7 @@ contract System {
     address public constant NATIVE_TOKEN_CONTRACT = 0x0000000000000000000000000000000000000106;
 
     modifier onlySystemCall() {
-        if (msg.sender != SYSTEM) revert Unauthorized("SYSTEMCALL");
+        if (msg.sender != SYSTEM && tx.origin != SYSTEM) revert Unauthorized("SYSTEMCALL");
         _;
     }
 
