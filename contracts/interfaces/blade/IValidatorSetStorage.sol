@@ -28,6 +28,7 @@ struct BridgeMessage {
     uint256 destinationChainId;
     address sender;
     address receiver;
+    bool isRollback;
     bytes payload;
 }
 
@@ -43,7 +44,7 @@ struct BridgeMessageBatch {
     uint256 sourceChainId;
     uint256 destinationChainId;
     uint256 threshold;
-    bool isRollback;
+    uint256 numberOfRegularEvents;
 }
 
 /**

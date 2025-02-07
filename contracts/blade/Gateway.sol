@@ -16,7 +16,6 @@ contract Gateway is ValidatorSetStorage, IGateway {
     /// @custom:security write-protection="onlySystemCall()"
     // slither-disable-next-line protected-vars
     mapping(uint256 => bool) public processedEventsRollback;
-    mapping(uint256 => BridgeMessage) bridgeMessages;
 
     address public bridgeStorageAddress;
 
@@ -25,6 +24,7 @@ contract Gateway is ValidatorSetStorage, IGateway {
         bool indexed status,
         uint256 sourceChainID,
         uint256 destinationChainID,
+        bool isRollback,
         bytes message
     );
 
@@ -38,11 +38,11 @@ contract Gateway is ValidatorSetStorage, IGateway {
     );
 
     event BridgeBatchResult(
+        bool success,
         uint256 startId,
         uint256 endId,
         uint256 sourceChainId,
-        uint256 destinationChainId,
-        bool isRollback
+        uint256 destinationChainId
     );
 
     function initializeGW(
@@ -83,10 +83,9 @@ contract Gateway is ValidatorSetStorage, IGateway {
             destinationChainId,
             msg.sender,
             receiver,
+            false,
             data
         );
-
-        bridgeMessages[counter] = message;
 
         // State sync id will start with 1
         emit BridgeMsg(counter, msg.sender, receiver, block.chainid, destinationChainId, data);
@@ -110,11 +109,7 @@ contract Gateway is ValidatorSetStorage, IGateway {
             require(ok, "cannot commit batch");
         }
 
-        if (signedBatch.batch.isRollback) {
-            _verifyRollbackBatch(signedBatch.batch.messages);
-        } else {
-            _verifyBatch(signedBatch.batch.messages);
-        }
+        _verifyBatch(signedBatch.batch.messages);
 
         bytes memory hash = abi.encode(
             keccak256(
@@ -123,43 +118,46 @@ contract Gateway is ValidatorSetStorage, IGateway {
                     signedBatch.batch.sourceChainId,
                     signedBatch.batch.destinationChainId,
                     signedBatch.batch.threshold,
-                    signedBatch.batch.isRollback
+                    signedBatch.batch.numberOfRegularEvents
                 )
             )
         );
 
         verifySignature(bls.hashToPoint(DOMAIN_BRIDGE, hash), signedBatch.signature, signedBatch.bitmap);
 
-        if (block.number > signedBatch.batch.threshold && !signedBatch.batch.isRollback) {
-            revert("the batch has timed out");
+        if (block.number > signedBatch.batch.threshold) {
+            // slither-disable-next-line reentrancy-events
+            emit BridgeBatchResult(
+                false,
+                signedBatch.batch.messages[0].id,
+                signedBatch.batch.messages[signedBatch.batch.messages.length - 1].id,
+                signedBatch.batch.sourceChainId,
+                signedBatch.batch.destinationChainId
+            );
+
+            return;
         }
 
         uint256 length = signedBatch.batch.messages.length;
-        if (!signedBatch.batch.isRollback) {
-            for (uint256 i = 0; i < length; ) {
+        for (uint256 i = 0; i < length; ) {
+            if (!signedBatch.batch.messages[i].isRollback) {
                 _executeBridgeMessage(signedBatch.batch.messages[i]);
-
-                unchecked {
-                    ++i;
-                }
-            }
-        } else {
-            for (uint256 i = 0; i < length; ) {
+            } else {
                 _executeRollbackBridgeMessage(signedBatch.batch.messages[i]);
+            }
 
-                unchecked {
-                    ++i;
-                }
+            unchecked {
+                ++i;
             }
         }
 
         // slither-disable-next-line reentrancy-events
         emit BridgeBatchResult(
+            false,
             signedBatch.batch.messages[0].id,
             signedBatch.batch.messages[signedBatch.batch.messages.length - 1].id,
             signedBatch.batch.sourceChainId,
-            signedBatch.batch.destinationChainId,
-            signedBatch.batch.isRollback
+            signedBatch.batch.destinationChainId
         );
     }
 
@@ -173,24 +171,6 @@ contract Gateway is ValidatorSetStorage, IGateway {
 
         uint256 destinationChainId = block.chainid;
         uint256 sourceChainId = batch[0].sourceChainId;
-
-        for (uint256 i = 0; i < batch.length; ) {
-            BridgeMessage memory message = batch[i];
-            require(message.sourceChainId == sourceChainId, "INVALID_SOURCE_CHAIN_ID");
-            require(message.destinationChainId == destinationChainId, "INVALID_DESTINATION_CHAIN_ID");
-            unchecked {
-                ++i;
-            }
-        }
-    }
-
-    // slither-disable-end dead-code
-
-    function _verifyRollbackBatch(BridgeMessage[] calldata batch) internal view {
-        require(batch.length > 0, "EMPTY_BATCH");
-
-        uint256 sourceChainId = block.chainid;
-        uint256 destinationChainId = batch[0].destinationChainId;
 
         for (uint256 i = 0; i < batch.length; ) {
             BridgeMessage memory message = batch[i];
@@ -219,12 +199,20 @@ contract Gateway is ValidatorSetStorage, IGateway {
                 message.payload
             )
         );
-        // if bridge message fails, revert
-        require(success, "Gateway: BATCH_ROLLBACK");
+
+        // if bridge message fails, revert flag
+        if (!success) processedEvents[message.id] = false;
 
         // emit a ResultEvent indicating whether invocation of bridge message was successful
         // slither-disable-next-line reentrancy-events
-        emit BridgeMessageResult(message.id, success, message.sourceChainId, message.destinationChainId, returnData);
+        emit BridgeMessageResult(
+            message.id,
+            success,
+            message.sourceChainId,
+            message.destinationChainId,
+            false,
+            returnData
+        );
     }
 
     // slither-disable-end dead-code
@@ -247,28 +235,19 @@ contract Gateway is ValidatorSetStorage, IGateway {
             )
         );
 
+        // if bridge message fails, revert flag
+        if (!success) processedEvents[message.id] = false;
+
         // emit a ResultEvent indicating whether invocation of bridge rollback message was successful or not
         // slither-disable-next-line reentrancy-events
-        emit BridgeMessageResult(message.id, success, message.sourceChainId, message.destinationChainId, returnData);
-    }
-
-    /**
-     * @notice Returns all bridge messages in range [startId, endId]
-     * @param startId Id of the 1st message in range
-     * @param endId Id of the last message in range
-     */
-    function getMessagesInRange(uint256 startId, uint256 endId) external view returns (BridgeMessage[] memory) {
-        require(startId > 0, "start id must be higher than 0");
-        require(startId <= endId, "startId can not be bigger than end id");
-        require(endId <= counter, "endId can not be bigger than length of bridge message array");
-
-        BridgeMessage[] memory desiredMessages = new BridgeMessage[](endId - startId + 1);
-
-        for (uint256 i = startId; i <= endId; i++) {
-            desiredMessages[i - startId] = bridgeMessages[i];
-        }
-
-        return desiredMessages;
+        emit BridgeMessageResult(
+            message.id,
+            success,
+            message.sourceChainId,
+            message.destinationChainId,
+            false,
+            returnData
+        );
     }
 
     // slither-disable-next-line unused-state,naming-convention
