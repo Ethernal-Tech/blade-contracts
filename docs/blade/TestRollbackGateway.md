@@ -290,29 +290,6 @@ function currentValidatorSetLength() external view returns (uint256)
 |---|---|---|
 | _0 | uint256 | undefined |
 
-### getMessagesInRange
-
-```solidity
-function getMessagesInRange(uint256 startId, uint256 endId) external view returns (struct BridgeMessage[])
-```
-
-Returns all bridge messages in range [startId, endId]
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| startId | uint256 | Id of the 1st message in range |
-| endId | uint256 | Id of the last message in range |
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | BridgeMessage[] | undefined |
-
 ### initialize
 
 ```solidity
@@ -452,7 +429,7 @@ function totalVotingPower() external view returns (uint256)
 ### BridgeBatchResult
 
 ```solidity
-event BridgeBatchResult(uint256 startId, uint256 endId, uint256 sourceChainId, uint256 destinationChainId, bool isRollback)
+event BridgeBatchResult(bool success, uint256 startId, uint256 endId, uint256 sourceChainId, uint256 destinationChainId)
 ```
 
 
@@ -463,16 +440,16 @@ event BridgeBatchResult(uint256 startId, uint256 endId, uint256 sourceChainId, u
 
 | Name | Type | Description |
 |---|---|---|
+| success  | bool | undefined |
 | startId  | uint256 | undefined |
 | endId  | uint256 | undefined |
 | sourceChainId  | uint256 | undefined |
 | destinationChainId  | uint256 | undefined |
-| isRollback  | bool | undefined |
 
 ### BridgeMessageResult
 
 ```solidity
-event BridgeMessageResult(uint256 indexed counter, bool indexed status, uint256 sourceChainID, uint256 destinationChainID, bytes message)
+event BridgeMessageResult(uint256 indexed counter, bool indexed status, uint256 sourceChainID, uint256 destinationChainID, bool isRollback, bytes message)
 ```
 
 
@@ -487,6 +464,7 @@ event BridgeMessageResult(uint256 indexed counter, bool indexed status, uint256 
 | status `indexed` | bool | undefined |
 | sourceChainID  | uint256 | undefined |
 | destinationChainID  | uint256 | undefined |
+| isRollback  | bool | undefined |
 | message  | bytes | undefined |
 
 ### BridgeMsg

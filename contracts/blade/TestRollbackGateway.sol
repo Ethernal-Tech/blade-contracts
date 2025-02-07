@@ -16,11 +16,7 @@ contract TestRollbackGateway is Gateway {
      */
     // slither-disable-next-line protected-vars
     function receiveBatch(SignedBridgeMessageBatch calldata signedBatch) external override {
-        if (!signedBatch.batch.isRollback) {
-            revert TestRollbackError("TESTING BATCH");
-        }
-
-        _verifyRollbackBatch(signedBatch.batch.messages);
+        _verifyBatch(signedBatch.batch.messages);
 
         bytes memory hash = abi.encode(
             keccak256(
@@ -29,7 +25,7 @@ contract TestRollbackGateway is Gateway {
                     signedBatch.batch.sourceChainId,
                     signedBatch.batch.destinationChainId,
                     signedBatch.batch.threshold,
-                    signedBatch.batch.isRollback
+                    signedBatch.batch.numberOfRegularEvents
                 )
             )
         );
@@ -48,11 +44,11 @@ contract TestRollbackGateway is Gateway {
 
         // slither-disable-next-line reentrancy-events
         emit BridgeBatchResult(
+            true,
             signedBatch.batch.messages[0].id,
             signedBatch.batch.messages[signedBatch.batch.messages.length].id,
             signedBatch.batch.sourceChainId,
-            signedBatch.batch.destinationChainId,
-            signedBatch.batch.isRollback
+            signedBatch.batch.destinationChainId
         );
     }
 }

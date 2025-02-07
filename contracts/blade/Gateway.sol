@@ -77,16 +77,6 @@ contract Gateway is ValidatorSetStorage, IGateway {
 
         counter++;
 
-        BridgeMessage memory message = BridgeMessage(
-            counter,
-            block.chainid,
-            destinationChainId,
-            msg.sender,
-            receiver,
-            false,
-            data
-        );
-
         // State sync id will start with 1
         emit BridgeMsg(counter, msg.sender, receiver, block.chainid, destinationChainId, data);
     }
@@ -166,7 +156,7 @@ contract Gateway is ValidatorSetStorage, IGateway {
      * @param batch batch to verify
      */
     // slither-disable-start dead-code
-    function _verifyBatch(BridgeMessage[] calldata batch) private view {
+    function _verifyBatch(BridgeMessage[] calldata batch) internal view {
         require(batch.length > 0, "EMPTY_BATCH");
 
         uint256 destinationChainId = block.chainid;
