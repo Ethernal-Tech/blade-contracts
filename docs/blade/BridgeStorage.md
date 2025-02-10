@@ -444,10 +444,10 @@ function initializeBS(contract IBLS newBls, contract IBN256G2 newBn256G2, Valida
 | validators | Validator[] | undefined |
 | addressesGateway | address[] | undefined |
 
-### lastCommitted
+### lastCommittedE2I
 
 ```solidity
-function lastCommitted(uint256) external view returns (uint256)
+function lastCommittedE2I(uint256) external view returns (uint256)
 ```
 
 
@@ -466,10 +466,10 @@ function lastCommitted(uint256) external view returns (uint256)
 |---|---|---|
 | _0 | uint256 | undefined |
 
-### lastCommittedInternal
+### lastCommittedI2E
 
 ```solidity
-function lastCommittedInternal(uint256) external view returns (uint256)
+function lastCommittedI2E(uint256) external view returns (uint256)
 ```
 
 
