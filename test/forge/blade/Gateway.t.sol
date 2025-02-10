@@ -158,6 +158,6 @@ contract GatewayReceiveBatchTests is GatewayInitialized {
             2,
             3
         );
-        bridgeStorage.commitBatch(signedBatch);
+        gatewaty.receiveBatch(signedBatch);
     }
 }
