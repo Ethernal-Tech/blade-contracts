@@ -178,8 +178,6 @@ contract Gateway is ValidatorSetStorage, IGateway {
         // revert transaction if client has added flag, or receiver has no code
         require(message.receiver.code.length != 0, "receiver has no code");
 
-        processedEvents[message.id] = true;
-
         // slither-disable-next-line calls-loop,low-level-calls,reentrancy-no-eth
         (bool success, bytes memory returnData) = message.receiver.call(
             abi.encodeWithSignature(
@@ -191,7 +189,7 @@ contract Gateway is ValidatorSetStorage, IGateway {
         );
 
         // if bridge message fails, revert flag
-        if (!success) processedEvents[message.id] = false;
+        if (!success) processedEvents[message.id] = success;
 
         // emit a ResultEvent indicating whether invocation of bridge message was successful
         // slither-disable-next-line reentrancy-events
@@ -200,7 +198,7 @@ contract Gateway is ValidatorSetStorage, IGateway {
             success,
             message.sourceChainId,
             message.destinationChainId,
-            false,
+            success,
             returnData
         );
     }
@@ -213,8 +211,6 @@ contract Gateway is ValidatorSetStorage, IGateway {
             "DestinationGateway: ROLLBACK_BRIDGE_MESSAGE_IS_ALREADY_PROCESSED"
         );
 
-        processedEventsRollback[message.id] = true;
-
         // slither-disable-next-line calls-loop,low-level-calls,reentrancy-no-eth
         (bool success, bytes memory returnData) = message.receiver.call(
             abi.encodeWithSignature(
@@ -226,7 +222,7 @@ contract Gateway is ValidatorSetStorage, IGateway {
         );
 
         // if bridge message fails, revert flag
-        if (!success) processedEvents[message.id] = false;
+        if (!success) processedEvents[message.id] = success;
 
         // emit a ResultEvent indicating whether invocation of bridge rollback message was successful or not
         // slither-disable-next-line reentrancy-events
@@ -235,7 +231,7 @@ contract Gateway is ValidatorSetStorage, IGateway {
             success,
             message.sourceChainId,
             message.destinationChainId,
-            false,
+            success,
             returnData
         );
     }

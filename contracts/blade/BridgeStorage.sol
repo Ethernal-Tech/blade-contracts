@@ -6,8 +6,8 @@ import "./ValidatorSetStorage.sol";
 contract BridgeStorage is ValidatorSetStorage {
     mapping(uint256 => SignedBridgeMessageBatch) public batches;
     mapping(uint256 => SignedValidatorSet) public commitedValidatorSets;
-    mapping(uint256 => uint256) public lastCommitted;
-    mapping(uint256 => uint256) public lastCommittedInternal;
+    mapping(uint256 => uint256) public lastCommittedE2I;
+    mapping(uint256 => uint256) public lastCommittedI2E;
     /// @custom:security write-protection="onlySystemCall()"
     uint256 public batchCounter;
     uint256 public validatorSetCounter;
@@ -137,18 +137,18 @@ contract BridgeStorage is ValidatorSetStorage {
         if (batch.numberOfRegularEvents > 0) {
             if (batch.sourceChainId == block.chainid) {
                 require(
-                    lastCommittedInternal[batch.destinationChainId] + 1 ==
+                    lastCommittedI2E[batch.destinationChainId] + 1 ==
                         batch.messages[batch.messages.length - batch.numberOfRegularEvents].id,
                     "INVALID_LAST_COMMITTED"
                 );
-                lastCommittedInternal[batch.destinationChainId] = batch.messages[batch.messages.length - 1].id;
+                lastCommittedI2E[batch.destinationChainId] = batch.messages[batch.messages.length - 1].id;
             } else {
                 require(
-                    lastCommitted[batch.sourceChainId] + 1 ==
+                    lastCommittedE2I[batch.sourceChainId] + 1 ==
                         batch.messages[batch.messages.length - batch.numberOfRegularEvents].id,
                     "INVALID_LAST_COMMITTED"
                 );
-                lastCommitted[batch.sourceChainId] = batch.messages[batch.messages.length - 1].id;
+                lastCommittedE2I[batch.sourceChainId] = batch.messages[batch.messages.length - 1].id;
             }
         }
     }

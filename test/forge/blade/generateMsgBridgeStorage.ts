@@ -15,8 +15,6 @@ const validatorSetSize = Math.floor(Math.random() * (5 - 1) + 8); // Randomly pi
 let aggMessagePoints: mcl.MessagePoint[] = [];
 let accounts: any[] = [];
 let validatorSet: any[] = [];
-let eventRoot: any;
-let blockHash: any;
 let currentValidatorSetHash: any;
 let bitmaps: any[] = [];
 let aggVotingPowers: any[] = [];
@@ -27,6 +25,7 @@ let msgs = [
     destinationChainId: destinationChainId,
     sender: ethers.constants.AddressZero,
     receiver: ethers.constants.AddressZero,
+    isRollback: false,
     payload: ethers.utils.id("1122"),
   },
   {
@@ -35,6 +34,7 @@ let msgs = [
     destinationChainId: destinationChainId,
     sender: ethers.constants.AddressZero,
     receiver: ethers.constants.AddressZero,
+    isRollback: false,
     payload: ethers.utils.id("2233"),
   },
 ];
@@ -44,7 +44,7 @@ let batch = {
   sourceChainId: sourceChainId,
   destinationChainId: destinationChainId,
   threshold: 1000,
-  isRollback: false,
+  numberOfRegularEvents: 2
 };
 
 async function generateMsg() {
@@ -66,8 +66,6 @@ async function generateMsg() {
     });
   }
 
-  eventRoot = ethers.utils.hexlify(ethers.utils.randomBytes(32));
-  blockHash = ethers.utils.hexlify(ethers.utils.randomBytes(32));
   currentValidatorSetHash = ethers.utils.keccak256(
     ethers.utils.defaultAbiCoder.encode(
       ["tuple(address _address, uint256[4] blsKey, uint256 votingPower)[]"],
@@ -85,7 +83,7 @@ async function generateMsg() {
       "tuple(address _address, uint256[4] blsKey, uint256 votingPower)[]",
       "uint256[2][]",
       "bytes[]",
-      "tuple(uint256 id, uint256 sourceChainId, uint256 destinationChainId, address sender, address receiver, bytes payload)[]",
+      "tuple(uint256 id, uint256 sourceChainId, uint256 destinationChainId, address sender, address receiver,bool isRollback, bytes payload)[]",
     ],
     [validatorSet, aggMessagePoints, bitmaps, msgs]
   );
@@ -147,7 +145,7 @@ function generateSignature1() {
         batch.sourceChainId,
         batch.destinationChainId,
         batch.threshold,
-        batch.isRollback,
+        batch.numberOfRegularEvents,
       ]
     )
   );
@@ -200,7 +198,7 @@ function generateSignature2() {
         batch.sourceChainId,
         batch.destinationChainId,
         batch.threshold,
-        batch.isRollback,
+        batch.numberOfRegularEvents,
       ]
     )
   );
@@ -253,7 +251,7 @@ function generateSignature3() {
           batch.sourceChainId,
           batch.destinationChainId,
           batch.threshold,
-          batch.isRollback,
+          batch.numberOfRegularEvents,
         ]
       )
     );
