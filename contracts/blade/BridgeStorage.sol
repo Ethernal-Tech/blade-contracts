@@ -125,6 +125,7 @@ contract BridgeStorage is ValidatorSetStorage {
      */
     function _verifyBatch(BridgeMessageBatch calldata batch) private {
         require(batch.messages.length > 0, "EMPTY_BATCH");
+        require(batch.numberOfRegularEvents< batch.messages.length, "NUMBER_OF_EVENTS_IS_BIGGER_THAN_MESSAGE_LENGTH");
 
         for (uint256 i = 0; i < batch.messages.length; ) {
             BridgeMessage memory message = batch.messages[i];
@@ -138,17 +139,17 @@ contract BridgeStorage is ValidatorSetStorage {
             if (batch.sourceChainId == block.chainid) {
                 require(
                     lastCommittedI2E[batch.destinationChainId] + 1 ==
-                        batch.messages[batch.messages.length - batch.numberOfRegularEvents].id,
+                        batch.messages[0].id,
                     "INVALID_LAST_COMMITTED"
                 );
-                lastCommittedI2E[batch.destinationChainId] = batch.messages[batch.messages.length - 1].id;
+                lastCommittedI2E[batch.destinationChainId] = batch.messages[batch.numberOfRegularEvents-1].id;
             } else {
                 require(
                     lastCommittedE2I[batch.sourceChainId] + 1 ==
-                        batch.messages[batch.messages.length - batch.numberOfRegularEvents].id,
+                        batch.messages[0].id,
                     "INVALID_LAST_COMMITTED"
                 );
-                lastCommittedE2I[batch.sourceChainId] = batch.messages[batch.messages.length - 1].id;
+                lastCommittedE2I[batch.sourceChainId] = batch.messages[batch.numberOfRegularEvents-1].id;
             }
         }
     }

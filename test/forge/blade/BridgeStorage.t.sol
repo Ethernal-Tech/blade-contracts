@@ -77,7 +77,7 @@ contract BridgeStorageUnitialized is BridgeStorageTest {
 
 contract BridgeStorageCommitBatchTests is BridgeStorageInitialized {
     function testCommitBatch_InvalidSignature() public {
-        BridgeMessageBatch memory batch = BridgeMessageBatch({messages: msgs, sourceChainId: 2, destinationChainId: 3, threshold: 1000, isRollback: false});
+        BridgeMessageBatch memory batch = BridgeMessageBatch({messages: msgs, sourceChainId: 2, destinationChainId: 3, threshold: 1000, numberOfRegularEvents: 2});
 
          SignedBridgeMessageBatch memory signedBatch = SignedBridgeMessageBatch({batch: batch, signature:aggMessagePoints[0], bitmap: bitmaps[0], validatorSetBatchId: 0});
 
@@ -86,7 +86,7 @@ contract BridgeStorageCommitBatchTests is BridgeStorageInitialized {
     }
 
     function testCommitBatch_EmptyBitmap() public {
-        BridgeMessageBatch memory batch = BridgeMessageBatch({messages: msgs, sourceChainId: 2, destinationChainId: 3, threshold: 1000, isRollback: false});
+        BridgeMessageBatch memory batch = BridgeMessageBatch({messages: msgs, sourceChainId: 2, destinationChainId: 3, threshold: 1000, numberOfRegularEvents: 2});
 
          SignedBridgeMessageBatch memory signedBatch = SignedBridgeMessageBatch({batch: batch, signature:aggMessagePoints[1], bitmap: bitmaps[1], validatorSetBatchId: 0});
 
@@ -95,7 +95,7 @@ contract BridgeStorageCommitBatchTests is BridgeStorageInitialized {
     }
 
     function testCommitBatch_NotEnoughPower() public {
-        BridgeMessageBatch memory batch = BridgeMessageBatch({messages: msgs, sourceChainId: 2, destinationChainId: 3, threshold: 1000, isRollback: false});
+        BridgeMessageBatch memory batch = BridgeMessageBatch({messages: msgs, sourceChainId: 2, destinationChainId: 3, threshold: 1000, numberOfRegularEvents: 2});
 
          SignedBridgeMessageBatch memory signedBatch = SignedBridgeMessageBatch({batch: batch, signature:aggMessagePoints[2], bitmap: bitmaps[2], validatorSetBatchId: 0});
 
@@ -104,7 +104,7 @@ contract BridgeStorageCommitBatchTests is BridgeStorageInitialized {
     }
 
     function testCommitBatch_Success() public {
-        BridgeMessageBatch memory batch = BridgeMessageBatch({messages: msgs, sourceChainId: 2, destinationChainId: 3,threshold: 1000, isRollback: false});
+        BridgeMessageBatch memory batch = BridgeMessageBatch({messages: msgs, sourceChainId: 2, destinationChainId: 3,threshold: 1000, numberOfRegularEvents: 2});
 
          SignedBridgeMessageBatch memory signedBatch = SignedBridgeMessageBatch({batch: batch, signature:aggMessagePoints[3], bitmap: bitmaps[3], validatorSetBatchId: 0});
 
