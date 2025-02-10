@@ -244,7 +244,7 @@ function generateSignature3() {
           "uint256",
           "uint256",
           "uint256",
-          "bool",
+          "uint256",
         ],
         [
           batch.messages,
