@@ -176,7 +176,17 @@ contract Gateway is ValidatorSetStorage, IGateway {
     function _executeBridgeMessage(BridgeMessage calldata message) private {
         require(!processedEvents[message.id], "DestinationGateway: BRIDGE_MESSAGE_IS_ALREADY_PROCESSED");
         // revert transaction if client has added flag, or receiver has no code
-        require(message.receiver.code.length != 0, "receiver has no code");
+        if (message.receiver.code.length == 0) {
+            // slither-disable-next-line reentrancy-events
+            emit BridgeMessageResult(
+                message.id,
+                false,
+                message.sourceChainId,
+                message.destinationChainId,
+                message.isRollback,
+                "receiver has no code"
+            );
+        }
 
         processedEvents[message.id] = true;
 
@@ -200,7 +210,7 @@ contract Gateway is ValidatorSetStorage, IGateway {
             success,
             message.sourceChainId,
             message.destinationChainId,
-            success,
+            message.isRollback,
             returnData
         );
     }
@@ -235,7 +245,7 @@ contract Gateway is ValidatorSetStorage, IGateway {
             success,
             message.sourceChainId,
             message.destinationChainId,
-            success,
+            message.isRollback,
             returnData
         );
     }

@@ -1,6 +1,5 @@
 import { ethers } from "hardhat";
 import * as mcl from "../../../ts/mcl";
-import {ChildERC20Predicate} from "../../../typechain-types";
 const input = process.argv[2];
 
 const sourceChainId = 2;
@@ -52,11 +51,6 @@ async function generateMsg() {
   const input = process.argv[2];
   const data = ethers.utils.defaultAbiCoder.decode(["bytes32"], input);
   domain = data[0];
-  let childERC20Predicate: ChildERC20Predicate
-
-  const ChildERC20Predicate = await ethers.getContractFactory("ChildERC20Predicate");
-  childERC20Predicate = await ChildERC20Predicate.deploy();
-  await childERC20Predicate.deployed();
 
   await mcl.init();
 
@@ -83,9 +77,6 @@ async function generateMsg() {
   generateSignature1();
   generateSignature2();
   generateSignature3();
-
-  msgs[0].receiver = childERC20Predicate.address
-  msgs[1].receiver = childERC20Predicate.address
 
   const output = ethers.utils.defaultAbiCoder.encode(
     [
