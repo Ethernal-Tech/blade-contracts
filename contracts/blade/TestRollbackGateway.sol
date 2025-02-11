@@ -43,7 +43,7 @@ contract TestRollbackGateway is Gateway {
         }
 
         // slither-disable-next-line reentrancy-events
-        emit BridgeBatchResult(
+        emit BridgeBatchProcessed(
             true,
             signedBatch.batch.messages[0].id,
             signedBatch.batch.messages[signedBatch.batch.messages.length].id,
