@@ -186,6 +186,8 @@ contract Gateway is ValidatorSetStorage, IGateway {
                 message.isRollback,
                 "receiver has no code"
             );
+
+            return;
         }
 
         processedEvents[message.id] = true;

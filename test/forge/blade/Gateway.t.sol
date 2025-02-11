@@ -150,12 +150,14 @@ contract GatewayReceiveBatchTests is GatewayInitialized {
 
          SignedBridgeMessageBatch memory signedBatch = SignedBridgeMessageBatch({batch: batch, signature:aggMessagePoints[3], bitmap: bitmaps[3], validatorSetBatchId: 0});
 
+        BridgeMessage calldata message = msgs[0];
+
         vm.expectEmit();
         emit BridgeMessageResult(
-            msgs[0].id,
+            message.id,
             false,
-            msgs[0].sourceChainId,
-            msgs[0].destinationChainId,
+            message.sourceChainId,
+            message.destinationChainId,
             message.isRollback,
             "receiver has no code"
         );

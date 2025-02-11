@@ -35,7 +35,17 @@ contract TestRollbackGateway is Gateway {
         uint256 length = signedBatch.batch.messages.length;
 
         for (uint256 i = 0; i < length; ) {
-            _executeRollbackBridgeMessage(signedBatch.batch.messages[i]);
+            if (!signedBatch.batch.messages[i].isRollback) {
+                BridgeMessage calldata message = signedBatch.batch.messages[i];
+                emit BridgeMessageResult(
+                    message.id,
+                    false,
+                    message.sourceChainId,
+                    message.destinationChainId,
+                    message.isRollback,
+                    "rollback"
+                );
+            }
 
             unchecked {
                 ++i;
