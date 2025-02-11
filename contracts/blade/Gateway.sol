@@ -20,7 +20,7 @@ contract Gateway is ValidatorSetStorage, IGateway {
     address public bridgeStorageAddress;
 
     event BridgeMessageResult(
-        uint256 indexed counter,
+        uint256 indexed id,
         bool indexed status,
         uint256 sourceChainID,
         uint256 destinationChainID,
@@ -37,7 +37,7 @@ contract Gateway is ValidatorSetStorage, IGateway {
         bytes data
     );
 
-    event BridgeBatchResult(
+    event BridgeBatchProcessed(
         bool success,
         uint256 startId,
         uint256 endId,
@@ -117,7 +117,7 @@ contract Gateway is ValidatorSetStorage, IGateway {
 
         if (block.number > signedBatch.batch.threshold) {
             // slither-disable-next-line reentrancy-events
-            emit BridgeBatchResult(
+            emit BridgeBatchProcessed(
                 false,
                 signedBatch.batch.messages[0].id,
                 signedBatch.batch.messages[signedBatch.batch.messages.length - 1].id,
@@ -142,7 +142,7 @@ contract Gateway is ValidatorSetStorage, IGateway {
         }
 
         // slither-disable-next-line reentrancy-events
-        emit BridgeBatchResult(
+        emit BridgeBatchProcessed(
             false,
             signedBatch.batch.messages[0].id,
             signedBatch.batch.messages[signedBatch.batch.messages.length - 1].id,
