@@ -134,7 +134,7 @@ function generateSignature1() {
   const message = ethers.utils.keccak256(
     ethers.utils.defaultAbiCoder.encode(
       [
-        "tuple(uint256 id, uint256 sourceChainId, uint256 destinationChainId, address sender, address receiver, bytes payload)[]",
+        "tuple(uint256 id, uint256 sourceChainId, uint256 destinationChainId, address sender, address receiver, bool isRollback, bytes payload)[]",
         "uint256",
         "uint256",
         "uint256",
@@ -187,7 +187,7 @@ function generateSignature2() {
   const message = ethers.utils.keccak256(
     ethers.utils.defaultAbiCoder.encode(
       [
-        "tuple(uint256 id, uint256 sourceChainId, uint256 destinationChainId, address sender, address receiver, bytes payload)[]",
+        "tuple(uint256 id, uint256 sourceChainId, uint256 destinationChainId, address sender, address receiver, bool isRollback, bytes payload)[]",
         "uint256",
         "uint256",
         "uint256",
@@ -240,7 +240,7 @@ function generateSignature3() {
     const message = ethers.utils.keccak256(
       ethers.utils.defaultAbiCoder.encode(
         [
-          "tuple(uint256 id, uint256 sourceChainId, uint256 destinationChainId, address sender, address receiver, bytes payload)[]",
+          "tuple(uint256 id, uint256 sourceChainId, uint256 destinationChainId, address sender, address receiver,bool isRollback, bytes payload)[]",
           "uint256",
           "uint256",
           "uint256",
