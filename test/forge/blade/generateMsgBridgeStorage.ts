@@ -52,6 +52,10 @@ async function generateMsg() {
   const data = ethers.utils.defaultAbiCoder.decode(["bytes32"], input);
   domain = data[0];
 
+  const ChildERC20Predicate = await ethers.getContractFactory("ChildERC20Predicate");
+  let childERC20Predicate = await ChildERC20Predicate.deploy();
+  await childERC20Predicate.deployed();
+
   await mcl.init();
 
   accounts = await ethers.getSigners();
@@ -77,6 +81,9 @@ async function generateMsg() {
   generateSignature1();
   generateSignature2();
   generateSignature3();
+
+  msgs[0].receiver = childERC20Predicate.address
+  msgs[1].receiver = childERC20Predicate.address
 
   const output = ethers.utils.defaultAbiCoder.encode(
     [
