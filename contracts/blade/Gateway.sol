@@ -37,13 +37,7 @@ contract Gateway is ValidatorSetStorage, IGateway {
         bytes data
     );
 
-    event BridgeBatchProcessed(
-        bool success,
-        uint256 startId,
-        uint256 endId,
-        uint256 sourceChainId,
-        uint256 destinationChainId
-    );
+    event BridgeBatchProcessed(bool success, uint256 sourceChainId, uint256 destinationChainId, bytes batchHash);
 
     function initializeGW(
         IBLS newBls,
@@ -119,10 +113,9 @@ contract Gateway is ValidatorSetStorage, IGateway {
             // slither-disable-next-line reentrancy-events
             emit BridgeBatchProcessed(
                 false,
-                signedBatch.batch.messages[0].id,
-                signedBatch.batch.messages[signedBatch.batch.messages.length - 1].id,
                 signedBatch.batch.sourceChainId,
-                signedBatch.batch.destinationChainId
+                signedBatch.batch.destinationChainId,
+                hash
             );
 
             return;
@@ -142,13 +135,7 @@ contract Gateway is ValidatorSetStorage, IGateway {
         }
 
         // slither-disable-next-line reentrancy-events
-        emit BridgeBatchProcessed(
-            false,
-            signedBatch.batch.messages[0].id,
-            signedBatch.batch.messages[signedBatch.batch.messages.length - 1].id,
-            signedBatch.batch.sourceChainId,
-            signedBatch.batch.destinationChainId
-        );
+        emit BridgeBatchProcessed(false, signedBatch.batch.sourceChainId, signedBatch.batch.destinationChainId, hash);
     }
 
     /**
