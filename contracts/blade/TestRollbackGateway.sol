@@ -53,11 +53,6 @@ contract TestRollbackGateway is Gateway {
         }
 
         // slither-disable-next-line reentrancy-events
-        emit BridgeBatchProcessed(
-            true,
-            signedBatch.batch.sourceChainId,
-            signedBatch.batch.destinationChainId,
-            hash
-        );
+        emit BridgeBatchProcessed(true, signedBatch.batch.sourceChainId, signedBatch.batch.destinationChainId, hash);
     }
 }
