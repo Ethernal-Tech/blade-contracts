@@ -2,6 +2,7 @@
 pragma solidity ^0.8.19;
 
 import "./ValidatorSetStorage.sol";
+import "./BridgeStorage.sol";
 import "../interfaces/IGateway.sol";
 import "../lib/Merkle.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
@@ -17,7 +18,7 @@ contract Gateway is ValidatorSetStorage, IGateway {
     // slither-disable-next-line protected-vars
     mapping(uint256 => bool) public processedEventsRollback;
 
-    address public bridgeStorageAddress;
+    BridgeStorage public bridgeStorage;
 
     event BridgeMessageResult(
         uint256 indexed id,
@@ -48,7 +49,7 @@ contract Gateway is ValidatorSetStorage, IGateway {
         init(newBls, newBn256G2, validators);
 
         require(bsAddress != address(0), "INVALID_BRIDGE_STORAGE_ADDRESS");
-        bridgeStorageAddress = bsAddress;
+        bridgeStorage = BridgeStorage(bsAddress);
     }
 
     /**
@@ -81,16 +82,8 @@ contract Gateway is ValidatorSetStorage, IGateway {
      */
     // slither-disable-next-line protected-vars
     function receiveBatch(SignedBridgeMessageBatch calldata signedBatch) external virtual {
-        if (bridgeStorageAddress != address(0)) {
-            // slither-disable-next-line low-level-calls
-            (bool ok, ) = bridgeStorageAddress.call(
-                abi.encodeWithSignature(
-                    "commitBatch((((uint256,uint256,uint256,address,address,bytes)[],uint256,uint256,uint256,bool),uint256[2],bytes,uint256))",
-                    signedBatch
-                )
-            );
-
-            require(ok, "cannot commit batch");
+        if (address(bridgeStorage) != address(0)) {
+            bridgeStorage.commitBatch(signedBatch);
         }
 
         _verifyBatch(signedBatch.batch.messages);
