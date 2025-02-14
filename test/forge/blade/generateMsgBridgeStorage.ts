@@ -44,7 +44,8 @@ let batch = {
   sourceChainId: sourceChainId,
   destinationChainId: destinationChainId,
   threshold: 1000,
-  numberOfRegularEvents: 2
+  numberOfRegularEvents: 2,
+  validationNumber: 1
 };
 
 async function generateMsg() {
