@@ -8,6 +8,7 @@ contract BridgeStorage is ValidatorSetStorage {
     mapping(uint256 => SignedValidatorSet) public commitedValidatorSets;
     mapping(uint256 => uint256) public lastCommittedE2I;
     mapping(uint256 => uint256) public lastCommittedI2E;
+    mapping(bytes => uint256) public batchValidation;
     /// @custom:security write-protection="onlySystemCall()"
     uint256 public batchCounter;
     uint256 public validatorSetCounter;
@@ -102,12 +103,29 @@ contract BridgeStorage is ValidatorSetStorage {
                     signedBatch.batch.sourceChainId,
                     signedBatch.batch.destinationChainId,
                     signedBatch.batch.threshold,
-                    signedBatch.batch.numberOfRegularEvents
+                    signedBatch.batch.numberOfRegularEvents,
+                    signedBatch.batch.validationCounter
                 )
             )
         );
 
         verifySignature(bls.hashToPoint(DOMAIN_BRIDGE, hash), signedBatch.signature, signedBatch.bitmap);
+
+        bytes memory validationHash = abi.encode(
+            keccak256(
+                abi.encode(
+                    signedBatch.batch.messages,
+                    signedBatch.batch.sourceChainId,
+                    signedBatch.batch.destinationChainId,
+                    signedBatch.batch.threshold,
+                    signedBatch.batch.numberOfRegularEvents
+                )
+            )
+        );
+
+        require(batchValidation[validationHash] != signedBatch.batch.validationCounter, "batch is already stored");
+
+        batchValidation[validationHash]++;
 
         SignedBridgeMessageBatch storage batch = batches[batchCounter];
         batch.batch = signedBatch.batch;

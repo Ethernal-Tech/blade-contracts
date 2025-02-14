@@ -95,7 +95,8 @@ contract Gateway is ValidatorSetStorage, IGateway {
                     signedBatch.batch.sourceChainId,
                     signedBatch.batch.destinationChainId,
                     signedBatch.batch.threshold,
-                    signedBatch.batch.numberOfRegularEvents
+                    signedBatch.batch.numberOfRegularEvents,
+                    signedBatch.batch.validationCounter
                 )
             )
         );
