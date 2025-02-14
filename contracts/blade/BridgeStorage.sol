@@ -123,7 +123,7 @@ contract BridgeStorage is ValidatorSetStorage {
             )
         );
 
-        require(batchValidation[validationHash] != signedBatch.batch.validationCounter, "batch is already stored");
+        require(signedBatch.batch.validationCounter > batchValidation[validationHash], "batch is already stored");
 
         batchValidation[validationHash]++;
 
