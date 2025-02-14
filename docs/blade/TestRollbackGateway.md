@@ -180,10 +180,10 @@ function bn256G2() external view returns (contract IBN256G2)
 |---|---|---|
 | _0 | contract IBN256G2 | undefined |
 
-### bridgeStorageAddress
+### bridgeStorage
 
 ```solidity
-function bridgeStorageAddress() external view returns (address)
+function bridgeStorage() external view returns (contract BridgeStorage)
 ```
 
 
@@ -195,7 +195,7 @@ function bridgeStorageAddress() external view returns (address)
 
 | Name | Type | Description |
 |---|---|---|
-| _0 | address | undefined |
+| _0 | contract BridgeStorage | undefined |
 
 ### commitValidatorSet
 

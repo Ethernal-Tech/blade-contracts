@@ -148,6 +148,7 @@ describe("Gateway", () => {
       destinationChainId: destinationChainId,
       threshold: 0,
       numberOfRegularEvents: 2,
+      validationCounter:0
     };
 
     var signedBatch: SignedBridgeMessageBatchStruct = {
@@ -224,6 +225,7 @@ describe("Gateway", () => {
       sourceChainId: sourceChainId,
       destinationChainId: destinationChainId,
       numberOfRegularEvents: 2,
+      validationCounter: 0
     };
 
     var signedBatch: SignedBridgeMessageBatchStruct = {
@@ -241,8 +243,9 @@ describe("Gateway", () => {
           "uint256",
           "uint256",
           "uint256",
+          "uint256",
         ],
-        [batch.messages, batch.sourceChainId, batch.destinationChainId, batch.threshold, batch.numberOfRegularEvents]
+        [batch.messages, batch.sourceChainId, batch.destinationChainId, batch.threshold, batch.numberOfRegularEvents, batch.validationCounter]
       )
     );
 
@@ -311,6 +314,7 @@ describe("Gateway", () => {
       sourceChainId: sourceChainId,
       destinationChainId: destinationChainId,
       numberOfRegularEvents: 2,
+      validationCounter: 0
     };
 
     var signedBatch: SignedBridgeMessageBatchStruct = {
@@ -397,6 +401,7 @@ describe("Gateway", () => {
       numberOfRegularEvents: 2,
       sourceChainId: sourceChainId,
       destinationChainId: destinationChainId,
+      validationCounter: 0,
     };
 
     var signedBatch: SignedBridgeMessageBatchStruct = {
@@ -414,8 +419,9 @@ describe("Gateway", () => {
           "uint256",
           "uint256",
           "uint256",
+          "uint256",
         ],
-        [batch.messages, batch.sourceChainId, batch.destinationChainId, batch.threshold, batch.numberOfRegularEvents]
+        [batch.messages, batch.sourceChainId, batch.destinationChainId, batch.threshold, batch.numberOfRegularEvents, batch.validationCounter]
       )
     );
 
