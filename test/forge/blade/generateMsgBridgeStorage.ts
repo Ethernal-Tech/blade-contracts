@@ -45,7 +45,7 @@ let batch = {
   destinationChainId: destinationChainId,
   threshold: 1000,
   numberOfRegularEvents: 2,
-  validationNumber: 1
+  validationCounter: 1
 };
 
 async function generateMsg() {
@@ -139,7 +139,8 @@ function generateSignature1() {
         "uint256",
         "uint256",
         "uint256",
-        "bool",
+        "uint256",
+        "uint256",
       ],
       [
         batch.messages,
@@ -147,6 +148,7 @@ function generateSignature1() {
         batch.destinationChainId,
         batch.threshold,
         batch.numberOfRegularEvents,
+        batch.validationCounter,
       ]
     )
   );
@@ -192,7 +194,8 @@ function generateSignature2() {
         "uint256",
         "uint256",
         "uint256",
-        "bool",
+        "uint256",
+        "uint256",
       ],
       [
         batch.messages,
@@ -200,6 +203,7 @@ function generateSignature2() {
         batch.destinationChainId,
         batch.threshold,
         batch.numberOfRegularEvents,
+        batch.validationCounter,
       ]
     )
   );
@@ -246,6 +250,7 @@ function generateSignature3() {
           "uint256",
           "uint256",
           "uint256",
+          "uint256",
         ],
         [
           batch.messages,
@@ -253,6 +258,7 @@ function generateSignature3() {
           batch.destinationChainId,
           batch.threshold,
           batch.numberOfRegularEvents,
+          batch.validationCounter,
         ]
       )
     );
