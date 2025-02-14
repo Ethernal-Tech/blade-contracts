@@ -118,7 +118,8 @@ contract BridgeStorage is ValidatorSetStorage {
                     signedBatch.batch.sourceChainId,
                     signedBatch.batch.destinationChainId,
                     signedBatch.batch.threshold,
-                    signedBatch.batch.numberOfRegularEvents
+                    signedBatch.batch.numberOfRegularEvents,
+                    0
                 )
             )
         );
