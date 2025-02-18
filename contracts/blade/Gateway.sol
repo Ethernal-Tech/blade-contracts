@@ -201,7 +201,7 @@ contract Gateway is ValidatorSetStorage, IGateway {
     // slither-disable-end dead-code
 
     function _executeRollbackBridgeMessage(BridgeMessage calldata message) internal {
-        if (processedEvents[message.id]) return;
+        if (processedEventsRollback[message.id]) return;
         processedEventsRollback[message.id] = true;
 
         // slither-disable-next-line calls-loop,low-level-calls,reentrancy-no-eth
