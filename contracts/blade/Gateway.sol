@@ -104,22 +104,25 @@ contract Gateway is ValidatorSetStorage, IGateway {
         verifySignature(bls.hashToPoint(DOMAIN_BRIDGE, hash), signedBatch.signature, signedBatch.bitmap);
 
         if (block.number > signedBatch.batch.threshold) {
-            // slither-disable-next-line reentrancy-events
-            emit BridgeBatchProcessed(
-                false,
-                signedBatch.batch.sourceChainId,
-                signedBatch.batch.destinationChainId,
-                hash
-            );
-
             return;
         }
 
         uint256 length = signedBatch.batch.messages.length;
+        uint256 executedMessages;
         for (uint256 i = 0; i < length; ) {
             if (!signedBatch.batch.messages[i].isRollback) {
+                if (processedEvents[signedBatch.batch.messages[i].id]) continue;
+
+                processedEvents[signedBatch.batch.messages[i].id] = true;
+
+                executedMessages++;
                 _executeBridgeMessage(signedBatch.batch.messages[i]);
             } else {
+                if (processedEventsRollback[signedBatch.batch.messages[i].id]) continue;
+
+                processedEventsRollback[signedBatch.batch.messages[i].id] = true;
+
+                executedMessages++;
                 _executeRollbackBridgeMessage(signedBatch.batch.messages[i]);
             }
 
@@ -128,8 +131,15 @@ contract Gateway is ValidatorSetStorage, IGateway {
             }
         }
 
-        // slither-disable-next-line reentrancy-events
-        emit BridgeBatchProcessed(false, signedBatch.batch.sourceChainId, signedBatch.batch.destinationChainId, hash);
+        if (executedMessages > 0) {
+            // slither-disable-next-line reentrancy-events
+            emit BridgeBatchProcessed(
+                false,
+                signedBatch.batch.sourceChainId,
+                signedBatch.batch.destinationChainId,
+                hash
+            );
+        }
     }
 
     /**
@@ -155,7 +165,6 @@ contract Gateway is ValidatorSetStorage, IGateway {
 
     // slither-disable-start dead-code
     function _executeBridgeMessage(BridgeMessage calldata message) internal {
-        if (processedEvents[message.id]) return;
         // revert transaction if client has added flag, or receiver has no code
         if (message.receiver.code.length == 0) {
             // slither-disable-next-line reentrancy-events
@@ -171,8 +180,6 @@ contract Gateway is ValidatorSetStorage, IGateway {
             return;
         }
 
-        processedEvents[message.id] = true;
-
         // slither-disable-next-line calls-loop,low-level-calls,reentrancy-no-eth
         (bool success, bytes memory returnData) = message.receiver.call(
             abi.encodeWithSignature(
@@ -182,9 +189,6 @@ contract Gateway is ValidatorSetStorage, IGateway {
                 message.payload
             )
         );
-
-        // if bridge message fails, revert flag
-        if (!success) processedEvents[message.id] = false;
 
         // emit a ResultEvent indicating whether invocation of bridge message was successful
         // slither-disable-next-line reentrancy-events
@@ -201,9 +205,6 @@ contract Gateway is ValidatorSetStorage, IGateway {
     // slither-disable-end dead-code
 
     function _executeRollbackBridgeMessage(BridgeMessage calldata message) internal {
-        if (processedEventsRollback[message.id]) return;
-        processedEventsRollback[message.id] = true;
-
         // slither-disable-next-line calls-loop,low-level-calls,reentrancy-no-eth
         (bool success, bytes memory returnData) = message.receiver.call(
             abi.encodeWithSignature(
@@ -213,9 +214,6 @@ contract Gateway is ValidatorSetStorage, IGateway {
                 message.payload
             )
         );
-
-        // if bridge message fails, revert flag
-        if (!success) processedEventsRollback[message.id] = false;
 
         // emit a ResultEvent indicating whether invocation of bridge rollback message was successful or not
         // slither-disable-next-line reentrancy-events
