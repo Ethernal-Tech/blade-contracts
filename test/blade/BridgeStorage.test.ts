@@ -99,7 +99,7 @@ describe("BridgeStorage", () => {
       sourceChainId: sourceChainId,
       numberOfRegularEvents: 1,
       destinationChainId: destinationChainId,
-      validationCounter: 0,
+      commitCounter: 0,
     };
 
     var signedBatch: SignedBridgeMessageBatchStruct = {
@@ -148,7 +148,7 @@ describe("BridgeStorage", () => {
       numberOfRegularEvents: 2,
       sourceChainId: sourceChainId,
       destinationChainId: destinationChainId,
-      validationCounter: 0,
+      commitCounter: 0,
     };
 
     var signedBatch: SignedBridgeMessageBatchStruct = {
@@ -225,7 +225,7 @@ describe("BridgeStorage", () => {
       sourceChainId: sourceChainId,
       destinationChainId: destinationChainId,
       numberOfRegularEvents: 2,
-      validationCounter: 0,
+      commitCounter: 0,
     };
 
     var signedBatch: SignedBridgeMessageBatchStruct = {
@@ -251,7 +251,7 @@ describe("BridgeStorage", () => {
           batch.destinationChainId,
           batch.threshold,
           batch.numberOfRegularEvents,
-          batch.validationCounter,
+          batch.commitCounter,
         ]
       )
     );
@@ -321,7 +321,7 @@ describe("BridgeStorage", () => {
       sourceChainId: sourceChainId,
       destinationChainId: destinationChainId,
       numberOfRegularEvents: 2,
-      validationCounter: 0,
+      commitCounter: 0,
     };
 
     var signedBatch: SignedBridgeMessageBatchStruct = {
@@ -347,7 +347,7 @@ describe("BridgeStorage", () => {
           batch.destinationChainId,
           batch.threshold,
           batch.numberOfRegularEvents,
-          batch.validationCounter,
+          batch.commitCounter,
         ]
       )
     );
@@ -417,7 +417,7 @@ describe("BridgeStorage", () => {
       sourceChainId: sourceChainId,
       destinationChainId: destinationChainId,
       numberOfRegularEvents: 2,
-      validationCounter: 1,
+      commitCounter: 1,
     };
 
     var signedBatch: SignedBridgeMessageBatchStruct = {
@@ -443,7 +443,7 @@ describe("BridgeStorage", () => {
           batch.destinationChainId,
           batch.threshold,
           batch.numberOfRegularEvents,
-          batch.validationCounter,
+          batch.commitCounter,
         ]
       )
     );
@@ -495,7 +495,7 @@ describe("BridgeStorage", () => {
       destinationChainId: destinationChainId,
       threshold: 0,
       numberOfRegularEvents: 0,
-      validationCounter: 0,
+      commitCounter: 0,
     };
 
     var signedBatch: SignedBridgeMessageBatchStruct = {
@@ -542,7 +542,7 @@ describe("BridgeStorage", () => {
       destinationChainId: destinationChainId,
       threshold: 0,
       numberOfRegularEvents: 2,
-      validationCounter: 0,
+      commitCounter: 0,
     };
 
     var signedBatch: SignedBridgeMessageBatchStruct = {

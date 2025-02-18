@@ -8,7 +8,7 @@ contract BridgeStorage is ValidatorSetStorage {
     mapping(uint256 => SignedValidatorSet) public commitedValidatorSets;
     mapping(uint256 => uint256) public lastCommittedE2I;
     mapping(uint256 => uint256) public lastCommittedI2E;
-    mapping(bytes => uint256) public batchValidation;
+    mapping(bytes => uint256) public batchCommitCounter;
     /// @custom:security write-protection="onlySystemCall()"
     uint256 public batchCounter;
     uint256 public validatorSetCounter;
@@ -104,14 +104,14 @@ contract BridgeStorage is ValidatorSetStorage {
                     signedBatch.batch.destinationChainId,
                     signedBatch.batch.threshold,
                     signedBatch.batch.numberOfRegularEvents,
-                    signedBatch.batch.validationCounter
+                    signedBatch.batch.commitCounter
                 )
             )
         );
 
         verifySignature(bls.hashToPoint(DOMAIN_BRIDGE, hash), signedBatch.signature, signedBatch.bitmap);
 
-        bytes memory validationHash = abi.encode(
+        bytes memory batchHash = abi.encode(
             keccak256(
                 abi.encode(
                     signedBatch.batch.messages,
@@ -124,9 +124,9 @@ contract BridgeStorage is ValidatorSetStorage {
             )
         );
 
-        require(signedBatch.batch.validationCounter > batchValidation[validationHash], "batch is already stored");
+        require(signedBatch.batch.commitCounter > batchCommitCounter[batchHash], "batch is already committed");
 
-        batchValidation[validationHash]++;
+        batchCommitCounter[batchHash]++;
 
         SignedBridgeMessageBatch storage batch = batches[batchCounter];
         batch.batch = signedBatch.batch;
@@ -144,7 +144,10 @@ contract BridgeStorage is ValidatorSetStorage {
      */
     function _verifyBatch(BridgeMessageBatch calldata batch) private {
         require(batch.messages.length > 0, "EMPTY_BATCH");
-        require(batch.numberOfRegularEvents <= batch.messages.length, "NUMBER_OF_EVENTS_IS_BIGGER_THAN_MESSAGE_LENGTH");
+        require(
+            batch.numberOfRegularEvents <= batch.messages.length,
+            "NUMBER_OF_EVENTS_IS_GREATER_THAN_MESSAGE_LENGTH"
+        );
 
         for (uint256 i = 0; i < batch.messages.length; ) {
             BridgeMessage memory message = batch.messages[i];

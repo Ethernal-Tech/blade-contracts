@@ -151,27 +151,10 @@ function addresses(uint256) external view returns (address)
 |---|---|---|
 | _0 | address | undefined |
 
-### batchCounter
+### batchCommitCounter
 
 ```solidity
-function batchCounter() external view returns (uint256)
-```
-
-
-
-
-
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | uint256 | undefined |
-
-### batchValidation
-
-```solidity
-function batchValidation(bytes) external view returns (uint256)
+function batchCommitCounter(bytes) external view returns (uint256)
 ```
 
 
@@ -183,6 +166,23 @@ function batchValidation(bytes) external view returns (uint256)
 | Name | Type | Description |
 |---|---|---|
 | _0 | bytes | undefined |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | undefined |
+
+### batchCounter
+
+```solidity
+function batchCounter() external view returns (uint256)
+```
+
+
+
+
+
 
 #### Returns
 

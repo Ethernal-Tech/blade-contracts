@@ -148,7 +148,7 @@ describe("Gateway", () => {
       destinationChainId: destinationChainId,
       threshold: 0,
       numberOfRegularEvents: 2,
-      validationCounter: 0,
+      commitCounter: 0,
     };
 
     var signedBatch: SignedBridgeMessageBatchStruct = {
@@ -225,7 +225,7 @@ describe("Gateway", () => {
       sourceChainId: sourceChainId,
       destinationChainId: destinationChainId,
       numberOfRegularEvents: 2,
-      validationCounter: 0,
+      commitCounter: 0,
     };
 
     var signedBatch: SignedBridgeMessageBatchStruct = {
@@ -251,7 +251,7 @@ describe("Gateway", () => {
           batch.destinationChainId,
           batch.threshold,
           batch.numberOfRegularEvents,
-          batch.validationCounter,
+          batch.commitCounter,
         ]
       )
     );
@@ -321,7 +321,7 @@ describe("Gateway", () => {
       sourceChainId: sourceChainId,
       destinationChainId: destinationChainId,
       numberOfRegularEvents: 2,
-      validationCounter: 0,
+      commitCounter: 0,
     };
 
     var signedBatch: SignedBridgeMessageBatchStruct = {
@@ -408,7 +408,7 @@ describe("Gateway", () => {
       numberOfRegularEvents: 2,
       sourceChainId: sourceChainId,
       destinationChainId: destinationChainId,
-      validationCounter: 0,
+      commitCounter: 0,
     };
 
     var signedBatch: SignedBridgeMessageBatchStruct = {
@@ -434,7 +434,7 @@ describe("Gateway", () => {
           batch.destinationChainId,
           batch.threshold,
           batch.numberOfRegularEvents,
-          batch.validationCounter,
+          batch.commitCounter,
         ]
       )
     );
