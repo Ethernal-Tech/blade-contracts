@@ -154,8 +154,8 @@ contract Gateway is ValidatorSetStorage, IGateway {
     }
 
     // slither-disable-start dead-code
-    function _executeBridgeMessage(BridgeMessage calldata message) private {
-        require(!processedEvents[message.id], "DestinationGateway: BRIDGE_MESSAGE_IS_ALREADY_PROCESSED");
+    function _executeBridgeMessage(BridgeMessage calldata message) internal {
+        if (processedEvents[message.id]) return;
         // revert transaction if client has added flag, or receiver has no code
         if (message.receiver.code.length == 0) {
             // slither-disable-next-line reentrancy-events
@@ -201,11 +201,7 @@ contract Gateway is ValidatorSetStorage, IGateway {
     // slither-disable-end dead-code
 
     function _executeRollbackBridgeMessage(BridgeMessage calldata message) internal {
-        require(
-            !processedEventsRollback[message.id],
-            "DestinationGateway: ROLLBACK_BRIDGE_MESSAGE_IS_ALREADY_PROCESSED"
-        );
-
+        if (processedEvents[message.id]) return;
         processedEventsRollback[message.id] = true;
 
         // slither-disable-next-line calls-loop,low-level-calls,reentrancy-no-eth

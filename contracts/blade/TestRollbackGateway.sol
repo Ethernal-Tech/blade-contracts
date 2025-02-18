@@ -25,7 +25,8 @@ contract TestRollbackGateway is Gateway {
                     signedBatch.batch.sourceChainId,
                     signedBatch.batch.destinationChainId,
                     signedBatch.batch.threshold,
-                    signedBatch.batch.numberOfRegularEvents
+                    signedBatch.batch.numberOfRegularEvents,
+                    signedBatch.batch.validationCounter
                 )
             )
         );
@@ -37,14 +38,18 @@ contract TestRollbackGateway is Gateway {
         for (uint256 i = 0; i < length; ) {
             if (!signedBatch.batch.messages[i].isRollback) {
                 BridgeMessage calldata message = signedBatch.batch.messages[i];
-                emit BridgeMessageResult(
-                    message.id,
-                    false,
-                    message.sourceChainId,
-                    message.destinationChainId,
-                    message.isRollback,
-                    "rollback"
-                );
+                if (i % 2 == 0) {
+                    _executeBridgeMessage(message);
+                } else {
+                    emit BridgeMessageResult(
+                        message.id,
+                        false,
+                        message.sourceChainId,
+                        message.destinationChainId,
+                        message.isRollback,
+                        "rollback"
+                    );
+                }
             }
 
             unchecked {
