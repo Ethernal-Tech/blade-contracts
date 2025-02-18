@@ -108,7 +108,7 @@ contract Gateway is ValidatorSetStorage, IGateway {
         }
 
         uint256 length = signedBatch.batch.messages.length;
-        uint256 executedMessages;
+        uint256 executedMessages = 0;
         for (uint256 i = 0; i < length; ) {
             if (!signedBatch.batch.messages[i].isRollback) {
                 if (processedEvents[signedBatch.batch.messages[i].id]) continue;
