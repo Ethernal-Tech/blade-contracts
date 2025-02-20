@@ -521,22 +521,3 @@ event NewValidatorSet(Validator[] newValidatorSet)
 
 
 
-## Errors
-
-### TestRollbackError
-
-```solidity
-error TestRollbackError(string message)
-```
-
-Test function to generate error for testing rollback
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| message | string | Error message |
-
-

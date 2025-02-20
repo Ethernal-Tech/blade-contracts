@@ -5,12 +5,6 @@ import "./Gateway.sol";
 
 contract TestRollbackGateway is Gateway {
     /**
-     * @notice Test function to generate error for testing rollback
-     * @param message Error message
-     */
-    error TestRollbackError(string message);
-
-    /**
      * @notice receives the batch of messages and executes them
      * @param signedBatch batch of messages
      */
@@ -36,20 +30,18 @@ contract TestRollbackGateway is Gateway {
         uint256 length = signedBatch.batch.messages.length;
 
         for (uint256 i = 0; i < length; ) {
-            if (!signedBatch.batch.messages[i].isRollback) {
-                BridgeMessage calldata message = signedBatch.batch.messages[i];
-                if (i % 2 == 0) {
-                    _executeBridgeMessage(message);
-                } else {
-                    emit BridgeMessageResult(
-                        message.id,
-                        false,
-                        message.sourceChainId,
-                        message.destinationChainId,
-                        message.isRollback,
-                        "rollback"
-                    );
-                }
+            BridgeMessage calldata message = signedBatch.batch.messages[i];
+            if (!message.isRollback) {
+                processedEvents[message.id] = true;
+
+                emit BridgeMessageResult(
+                    message.id,
+                    false,
+                    message.sourceChainId,
+                    message.destinationChainId,
+                    message.isRollback,
+                    "rollback"
+                );
             }
 
             unchecked {
