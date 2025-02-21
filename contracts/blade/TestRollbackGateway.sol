@@ -10,6 +10,9 @@ contract TestRollbackGateway is Gateway {
      */
     // slither-disable-next-line protected-vars
     function receiveBatch(SignedBridgeMessageBatch calldata signedBatch) external override {
+        if (address(bridgeStorage) != address(0)) {
+            bridgeStorage.commitBatch(signedBatch);
+        }
         _verifyBatch(signedBatch.batch.messages);
 
         bytes memory hash = abi.encode(
@@ -31,9 +34,12 @@ contract TestRollbackGateway is Gateway {
 
         for (uint256 i = 0; i < length; ) {
             BridgeMessage calldata message = signedBatch.batch.messages[i];
-            if (!message.isRollback) {
-                processedEvents[message.id] = true;
 
+            processedEvents[message.id] = true;
+
+            if (message.id % 2 == 1) {
+                _executeBridgeMessage(message);
+            } else {
                 emit BridgeMessageResult(
                     message.id,
                     false,
