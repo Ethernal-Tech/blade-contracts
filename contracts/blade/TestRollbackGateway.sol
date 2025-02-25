@@ -8,7 +8,7 @@ contract TestRollbackGateway is Gateway {
      * @notice receives the batch of messages and executes them
      * @param signedBatch batch of messages
      */
-    // slither-disable-start reentrancy
+    // slither-disable-start reentrancy-benign
     // slither-disable-next-line protected-vars
     function receiveBatch(SignedBridgeMessageBatch calldata signedBatch) external override {
         if (address(bridgeStorage) != address(0)) {
@@ -59,5 +59,5 @@ contract TestRollbackGateway is Gateway {
         // slither-disable-next-line reentrancy-events
         emit BridgeBatchProcessed(true, signedBatch.batch.sourceChainId, signedBatch.batch.destinationChainId, hash);
     }
-    // slither-disable-end reentrancy
+    // slither-disable-end reentrancy-benign
 }
