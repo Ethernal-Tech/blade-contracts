@@ -201,8 +201,6 @@ contract Gateway is ValidatorSetStorage, IGateway {
         );
     }
 
-    // slither-disable-end dead-code
-
     function _executeRollbackBridgeMessage(BridgeMessage calldata message) private {
         // slither-disable-next-line calls-loop,low-level-calls,reentrancy-no-eth
         (bool success, bytes memory returnData) = message.receiver.call(
@@ -225,6 +223,8 @@ contract Gateway is ValidatorSetStorage, IGateway {
             returnData
         );
     }
+
+    // slither-disable-start dead-code
 
     // slither-disable-next-line unused-state,naming-convention
     uint256[50] private __gap;
