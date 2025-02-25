@@ -147,6 +147,7 @@ contract Gateway is ValidatorSetStorage, IGateway {
      * @param batch batch to verify
      */
     function _verifyBatch(BridgeMessage[] calldata batch) internal view {
+        //The number of messages must be greater than zero.
         require(batch.length > 0, "EMPTY_BATCH");
 
         uint256 destinationChainId = block.chainid;
@@ -154,7 +155,9 @@ contract Gateway is ValidatorSetStorage, IGateway {
 
         for (uint256 i = 0; i < batch.length; ) {
             BridgeMessage memory message = batch[i];
+            // the sourceChainId of all messages must be the same.
             require(message.sourceChainId == sourceChainId, "INVALID_SOURCE_CHAIN_ID");
+            // the destinationChainId of all messages must be the same.
             require(message.destinationChainId == destinationChainId, "INVALID_DESTINATION_CHAIN_ID");
             unchecked {
                 ++i;
