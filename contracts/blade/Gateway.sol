@@ -146,7 +146,6 @@ contract Gateway is ValidatorSetStorage, IGateway {
      * @notice Internal function that verifies the batch
      * @param batch batch to verify
      */
-    // slither-disable-start dead-code
     function _verifyBatch(BridgeMessage[] calldata batch) internal view {
         require(batch.length > 0, "EMPTY_BATCH");
 
