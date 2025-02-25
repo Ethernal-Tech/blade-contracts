@@ -8,8 +8,11 @@ contract TestRollbackGateway is Gateway {
      * @notice receives the batch of messages and executes them
      * @param signedBatch batch of messages
      */
-    // slither-disable-next-line protected-vars
+    // slither-disable-next-line protected-vars,reentrancy
     function receiveBatch(SignedBridgeMessageBatch calldata signedBatch) external override {
+        if (address(bridgeStorage) != address(0)) {
+            bridgeStorage.commitBatch(signedBatch);
+        }
         _verifyBatch(signedBatch.batch.messages);
 
         bytes memory hash = abi.encode(
@@ -31,7 +34,7 @@ contract TestRollbackGateway is Gateway {
 
         for (uint256 i = 0; i < length; ) {
             BridgeMessage calldata message = signedBatch.batch.messages[i];
-
+ 
             processedEvents[message.id] = true;
 
             if (message.id % 2 == 1) {
@@ -50,10 +53,6 @@ contract TestRollbackGateway is Gateway {
             unchecked {
                 ++i;
             }
-        }
-
-        if (address(bridgeStorage) != address(0)) {
-            bridgeStorage.commitBatch(signedBatch);
         }
 
         // slither-disable-next-line reentrancy-events
