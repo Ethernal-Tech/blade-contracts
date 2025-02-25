@@ -163,7 +163,7 @@ contract Gateway is ValidatorSetStorage, IGateway {
     }
 
     /**
-     * @notice An internal function that executes messages
+     * @notice internal function that executes messages
      * @param message message to execute
      */
     function _executeBridgeMessage(BridgeMessage calldata message) internal {
@@ -205,9 +205,10 @@ contract Gateway is ValidatorSetStorage, IGateway {
     }
 
     /**
-     * @notice An private function that executes rollback messages
+     * @notice private function that executes rollback messages
      * @param message rollback message to execute
      */
+    // slither-disable-start dead-code
     function _executeRollbackBridgeMessage(BridgeMessage calldata message) private {
         // slither-disable-next-line calls-loop,low-level-calls,reentrancy-no-eth
         (bool success, bytes memory returnData) = message.receiver.call(
@@ -230,6 +231,8 @@ contract Gateway is ValidatorSetStorage, IGateway {
             returnData
         );
     }
+
+    // slither-disable-end dead-code
 
     // slither-disable-next-line unused-state,naming-convention
     uint256[50] private __gap;
