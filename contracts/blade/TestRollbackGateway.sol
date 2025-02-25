@@ -35,6 +35,7 @@ contract TestRollbackGateway is Gateway {
         for (uint256 i = 0; i < length; ) {
             BridgeMessage calldata message = signedBatch.batch.messages[i];
 
+            // slither-disable-next-line
             processedEvents[message.id] = true;
 
             if (message.id % 2 == 1) {
