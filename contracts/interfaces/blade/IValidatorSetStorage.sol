@@ -28,6 +28,7 @@ struct BridgeMessage {
     uint256 destinationChainId;
     address sender;
     address receiver;
+    bool isRollback;
     bytes payload;
 }
 
@@ -35,15 +36,17 @@ struct BridgeMessage {
  * @param messages list of all messages in batch
  * @param sourceChainId id of chain which is source of batch
  * @param destinationChainId id of chain which is destination of batch
- * @param threshold
- * @param isRollback
+ * @param threshold ock number before which the batch must be executed
+ * @param isRollback flag for rollback batch
+ * @param commitCounter number of commitments for this batch
  */
 struct BridgeMessageBatch {
     BridgeMessage[] messages;
     uint256 sourceChainId;
     uint256 destinationChainId;
     uint256 threshold;
-    bool isRollback;
+    uint256 numberOfRegularEvents;
+    uint256 commitCounter;
 }
 
 /**

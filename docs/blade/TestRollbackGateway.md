@@ -180,10 +180,10 @@ function bn256G2() external view returns (contract IBN256G2)
 |---|---|---|
 | _0 | contract IBN256G2 | undefined |
 
-### bridgeStorageAddress
+### bridgeStorage
 
 ```solidity
-function bridgeStorageAddress() external view returns (address)
+function bridgeStorage() external view returns (contract BridgeStorage)
 ```
 
 
@@ -195,7 +195,7 @@ function bridgeStorageAddress() external view returns (address)
 
 | Name | Type | Description |
 |---|---|---|
-| _0 | address | undefined |
+| _0 | contract BridgeStorage | undefined |
 
 ### commitValidatorSet
 
@@ -289,29 +289,6 @@ function currentValidatorSetLength() external view returns (uint256)
 | Name | Type | Description |
 |---|---|---|
 | _0 | uint256 | undefined |
-
-### getMessagesInRange
-
-```solidity
-function getMessagesInRange(uint256 startId, uint256 endId) external view returns (struct BridgeMessage[])
-```
-
-Returns all bridge messages in range [startId, endId]
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| startId | uint256 | Id of the 1st message in range |
-| endId | uint256 | Id of the last message in range |
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | BridgeMessage[] | undefined |
 
 ### initialize
 
@@ -449,10 +426,10 @@ function totalVotingPower() external view returns (uint256)
 
 ## Events
 
-### BridgeBatchResult
+### BridgeBatchProcessed
 
 ```solidity
-event BridgeBatchResult(uint256 startId, uint256 endId, uint256 sourceChainId, uint256 destinationChainId, bool isRollback)
+event BridgeBatchProcessed(bool success, uint256 sourceChainId, uint256 destinationChainId, bytes batchHash)
 ```
 
 
@@ -463,16 +440,15 @@ event BridgeBatchResult(uint256 startId, uint256 endId, uint256 sourceChainId, u
 
 | Name | Type | Description |
 |---|---|---|
-| startId  | uint256 | undefined |
-| endId  | uint256 | undefined |
+| success  | bool | undefined |
 | sourceChainId  | uint256 | undefined |
 | destinationChainId  | uint256 | undefined |
-| isRollback  | bool | undefined |
+| batchHash  | bytes | undefined |
 
 ### BridgeMessageResult
 
 ```solidity
-event BridgeMessageResult(uint256 indexed counter, bool indexed status, uint256 sourceChainID, uint256 destinationChainID, bytes message)
+event BridgeMessageResult(uint256 indexed id, bool indexed status, uint256 sourceChainID, uint256 destinationChainID, bool isRollback, bytes message)
 ```
 
 
@@ -483,10 +459,11 @@ event BridgeMessageResult(uint256 indexed counter, bool indexed status, uint256 
 
 | Name | Type | Description |
 |---|---|---|
-| counter `indexed` | uint256 | undefined |
+| id `indexed` | uint256 | undefined |
 | status `indexed` | bool | undefined |
 | sourceChainID  | uint256 | undefined |
 | destinationChainID  | uint256 | undefined |
+| isRollback  | bool | undefined |
 | message  | bytes | undefined |
 
 ### BridgeMsg
@@ -542,24 +519,5 @@ event NewValidatorSet(Validator[] newValidatorSet)
 |---|---|---|
 | newValidatorSet  | Validator[] | undefined |
 
-
-
-## Errors
-
-### TestRollbackError
-
-```solidity
-error TestRollbackError(string message)
-```
-
-Test function to generate error for testing rollback
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| message | string | Error message |
 
 

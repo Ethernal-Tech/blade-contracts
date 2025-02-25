@@ -5,22 +5,16 @@ import "./Gateway.sol";
 
 contract TestRollbackGateway is Gateway {
     /**
-     * @notice Test function to generate error for testing rollback
-     * @param message Error message
-     */
-    error TestRollbackError(string message);
-
-    /**
      * @notice receives the batch of messages and executes them
      * @param signedBatch batch of messages
      */
+    // slither-disable-start reentrancy-benign
     // slither-disable-next-line protected-vars
     function receiveBatch(SignedBridgeMessageBatch calldata signedBatch) external override {
-        if (!signedBatch.batch.isRollback) {
-            revert TestRollbackError("TESTING BATCH");
+        if (address(bridgeStorage) != address(0)) {
+            bridgeStorage.commitBatch(signedBatch);
         }
-
-        _verifyRollbackBatch(signedBatch.batch.messages);
+        _verifyBatch(signedBatch.batch.messages);
 
         bytes memory hash = abi.encode(
             keccak256(
@@ -29,7 +23,8 @@ contract TestRollbackGateway is Gateway {
                     signedBatch.batch.sourceChainId,
                     signedBatch.batch.destinationChainId,
                     signedBatch.batch.threshold,
-                    signedBatch.batch.isRollback
+                    signedBatch.batch.numberOfRegularEvents,
+                    signedBatch.batch.commitCounter
                 )
             )
         );
@@ -39,7 +34,22 @@ contract TestRollbackGateway is Gateway {
         uint256 length = signedBatch.batch.messages.length;
 
         for (uint256 i = 0; i < length; ) {
-            _executeRollbackBridgeMessage(signedBatch.batch.messages[i]);
+            BridgeMessage calldata message = signedBatch.batch.messages[i];
+
+            processedEvents[message.id] = true;
+
+            if (message.id % 2 == 1) {
+                _executeBridgeMessage(message);
+            } else {
+                emit BridgeMessageResult(
+                    message.id,
+                    false,
+                    message.sourceChainId,
+                    message.destinationChainId,
+                    message.isRollback,
+                    "rollback"
+                );
+            }
 
             unchecked {
                 ++i;
@@ -47,12 +57,7 @@ contract TestRollbackGateway is Gateway {
         }
 
         // slither-disable-next-line reentrancy-events
-        emit BridgeBatchResult(
-            signedBatch.batch.messages[0].id,
-            signedBatch.batch.messages[signedBatch.batch.messages.length].id,
-            signedBatch.batch.sourceChainId,
-            signedBatch.batch.destinationChainId,
-            signedBatch.batch.isRollback
-        );
+        emit BridgeBatchProcessed(true, signedBatch.batch.sourceChainId, signedBatch.batch.destinationChainId, hash);
     }
+    // slither-disable-end reentrancy-benign
 }

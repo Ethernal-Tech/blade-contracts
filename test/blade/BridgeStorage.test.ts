@@ -84,6 +84,7 @@ describe("BridgeStorage", () => {
         destinationChainId: destinationChainId,
         sender: ethers.constants.AddressZero,
         receiver: ethers.constants.AddressZero,
+        isRollback: false,
         payload: ethers.constants.HashZero,
       },
     ];
@@ -95,9 +96,10 @@ describe("BridgeStorage", () => {
     const batch: BridgeMessageBatchStruct = {
       messages: msgs,
       threshold: 0,
-      isRollback: false,
       sourceChainId: sourceChainId,
+      numberOfRegularEvents: 1,
       destinationChainId: destinationChainId,
+      commitCounter: 0,
     };
 
     var signedBatch: SignedBridgeMessageBatchStruct = {
@@ -122,6 +124,7 @@ describe("BridgeStorage", () => {
         destinationChainId: destinationChainId,
         sender: ethers.constants.AddressZero,
         receiver: ethers.constants.AddressZero,
+        isRollback: false,
         payload: ethers.constants.HashZero,
       },
       {
@@ -130,6 +133,7 @@ describe("BridgeStorage", () => {
         destinationChainId: destinationChainId,
         sender: ethers.constants.AddressZero,
         receiver: ethers.constants.AddressZero,
+        isRollback: false,
         payload: ethers.constants.HashZero,
       },
     ];
@@ -141,9 +145,10 @@ describe("BridgeStorage", () => {
     const batch: BridgeMessageBatchStruct = {
       messages: msgs,
       threshold: 0,
-      isRollback: false,
+      numberOfRegularEvents: 2,
       sourceChainId: sourceChainId,
       destinationChainId: destinationChainId,
+      commitCounter: 0,
     };
 
     var signedBatch: SignedBridgeMessageBatchStruct = {
@@ -196,6 +201,7 @@ describe("BridgeStorage", () => {
         destinationChainId: destinationChainId,
         sender: ethers.constants.AddressZero,
         receiver: ethers.constants.AddressZero,
+        isRollback: false,
         payload: ethers.constants.HashZero,
       },
       {
@@ -204,6 +210,7 @@ describe("BridgeStorage", () => {
         destinationChainId: destinationChainId,
         sender: ethers.constants.AddressZero,
         receiver: ethers.constants.AddressZero,
+        isRollback: false,
         payload: ethers.constants.HashZero,
       },
     ];
@@ -215,9 +222,10 @@ describe("BridgeStorage", () => {
     const batch: BridgeMessageBatchStruct = {
       messages: msgs,
       threshold: 0,
-      isRollback: false,
       sourceChainId: sourceChainId,
       destinationChainId: destinationChainId,
+      numberOfRegularEvents: 2,
+      commitCounter: 0,
     };
 
     var signedBatch: SignedBridgeMessageBatchStruct = {
@@ -230,13 +238,21 @@ describe("BridgeStorage", () => {
     const messageOfBatch = ethers.utils.keccak256(
       ethers.utils.defaultAbiCoder.encode(
         [
-          "tuple(uint256 id, uint256 sourceChainId, uint256 destinationChainId, address sender, address receiver, bytes payload)[]",
+          "tuple(uint256 id, uint256 sourceChainId, uint256 destinationChainId, address sender, address receiver, bool isRollback, uint256 payload)[]",
           "uint256",
           "uint256",
           "uint256",
-          "bool",
+          "uint256",
+          "uint256",
         ],
-        [batch.messages, batch.sourceChainId, batch.destinationChainId, batch.threshold, batch.isRollback]
+        [
+          batch.messages,
+          batch.sourceChainId,
+          batch.destinationChainId,
+          batch.threshold,
+          batch.numberOfRegularEvents,
+          batch.commitCounter,
+        ]
       )
     );
 
@@ -281,6 +297,7 @@ describe("BridgeStorage", () => {
         destinationChainId: destinationChainId,
         sender: ethers.constants.AddressZero,
         receiver: ethers.constants.AddressZero,
+        isRollback: false,
         payload: ethers.constants.HashZero,
       },
       {
@@ -289,6 +306,7 @@ describe("BridgeStorage", () => {
         destinationChainId: destinationChainId,
         sender: ethers.constants.AddressZero,
         receiver: ethers.constants.AddressZero,
+        isRollback: false,
         payload: ethers.constants.HashZero,
       },
     ];
@@ -300,9 +318,10 @@ describe("BridgeStorage", () => {
     const batch: BridgeMessageBatchStruct = {
       messages: msgs,
       threshold: 0,
-      isRollback: false,
       sourceChainId: sourceChainId,
       destinationChainId: destinationChainId,
+      numberOfRegularEvents: 2,
+      commitCounter: 0,
     };
 
     var signedBatch: SignedBridgeMessageBatchStruct = {
@@ -315,13 +334,21 @@ describe("BridgeStorage", () => {
     const messageOfBatch = ethers.utils.keccak256(
       ethers.utils.defaultAbiCoder.encode(
         [
-          "tuple(uint256 id, uint256 sourceChainId, uint256 destinationChainId, address sender, address receiver, bytes payload)[]",
+          "tuple(uint256 id, uint256 sourceChainId, uint256 destinationChainId, address sender, address receiver,bool isRollback ,bytes payload)[]",
           "uint256",
           "uint256",
           "uint256",
-          "bool",
+          "uint256",
+          "uint256",
         ],
-        [batch.messages, batch.sourceChainId, batch.destinationChainId, batch.threshold, batch.isRollback]
+        [
+          batch.messages,
+          batch.sourceChainId,
+          batch.destinationChainId,
+          batch.threshold,
+          batch.numberOfRegularEvents,
+          batch.commitCounter,
+        ]
       )
     );
 
@@ -366,6 +393,7 @@ describe("BridgeStorage", () => {
         destinationChainId: destinationChainId,
         sender: ethers.constants.AddressZero,
         receiver: ethers.constants.AddressZero,
+        isRollback: false,
         payload: ethers.constants.HashZero,
       },
       {
@@ -374,6 +402,7 @@ describe("BridgeStorage", () => {
         destinationChainId: destinationChainId,
         sender: ethers.constants.AddressZero,
         receiver: ethers.constants.AddressZero,
+        isRollback: false,
         payload: ethers.constants.HashZero,
       },
     ];
@@ -385,9 +414,10 @@ describe("BridgeStorage", () => {
     const batch: BridgeMessageBatchStruct = {
       messages: msgs,
       threshold: 0,
-      isRollback: false,
       sourceChainId: sourceChainId,
       destinationChainId: destinationChainId,
+      numberOfRegularEvents: 2,
+      commitCounter: 1,
     };
 
     var signedBatch: SignedBridgeMessageBatchStruct = {
@@ -400,13 +430,21 @@ describe("BridgeStorage", () => {
     const messageOfBatch = ethers.utils.keccak256(
       ethers.utils.defaultAbiCoder.encode(
         [
-          "tuple(uint256 id, uint256 sourceChainId, uint256 destinationChainId, address sender, address receiver, bytes payload)[]",
+          "tuple(uint256 id, uint256 sourceChainId, uint256 destinationChainId, address sender, address receiver,bool isRollback, bytes payload)[]",
           "uint256",
           "uint256",
           "uint256",
-          "bool",
+          "uint256",
+          "uint256",
         ],
-        [batch.messages, batch.sourceChainId, batch.destinationChainId, batch.threshold, batch.isRollback]
+        [
+          batch.messages,
+          batch.sourceChainId,
+          batch.destinationChainId,
+          batch.threshold,
+          batch.numberOfRegularEvents,
+          batch.commitCounter,
+        ]
       )
     );
 
@@ -456,7 +494,8 @@ describe("BridgeStorage", () => {
       sourceChainId: sourceChainId,
       destinationChainId: destinationChainId,
       threshold: 0,
-      isRollback: false,
+      numberOfRegularEvents: 0,
+      commitCounter: 0,
     };
 
     var signedBatch: SignedBridgeMessageBatchStruct = {
@@ -483,6 +522,7 @@ describe("BridgeStorage", () => {
         destinationChainId: destinationChainId,
         sender: ethers.constants.AddressZero,
         receiver: ethers.constants.AddressZero,
+        isRollback: false,
         payload: ethers.constants.HashZero,
       },
       {
@@ -491,6 +531,7 @@ describe("BridgeStorage", () => {
         destinationChainId: destinationChainId,
         sender: ethers.constants.AddressZero,
         receiver: ethers.constants.AddressZero,
+        isRollback: false,
         payload: ethers.constants.HashZero,
       },
     ];
@@ -500,7 +541,8 @@ describe("BridgeStorage", () => {
       sourceChainId: sourceChainId,
       destinationChainId: destinationChainId,
       threshold: 0,
-      isRollback: false,
+      numberOfRegularEvents: 2,
+      commitCounter: 0,
     };
 
     var signedBatch: SignedBridgeMessageBatchStruct = {

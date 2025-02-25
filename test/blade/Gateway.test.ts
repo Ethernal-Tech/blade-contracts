@@ -128,6 +128,7 @@ describe("Gateway", () => {
         destinationChainId: destinationChainId,
         sender: ethers.constants.AddressZero,
         receiver: ethers.constants.AddressZero,
+        isRollback: false,
         payload: ethers.constants.HashZero,
       },
       {
@@ -136,6 +137,7 @@ describe("Gateway", () => {
         destinationChainId: destinationChainId,
         sender: ethers.constants.AddressZero,
         receiver: ethers.constants.AddressZero,
+        isRollback: false,
         payload: ethers.constants.HashZero,
       },
     ];
@@ -145,7 +147,8 @@ describe("Gateway", () => {
       sourceChainId: sourceChainId,
       destinationChainId: destinationChainId,
       threshold: 0,
-      isRollback: false,
+      numberOfRegularEvents: 2,
+      commitCounter: 0,
     };
 
     var signedBatch: SignedBridgeMessageBatchStruct = {
@@ -202,6 +205,7 @@ describe("Gateway", () => {
         destinationChainId: 3,
         sender: ethers.constants.AddressZero,
         receiver: ethers.constants.AddressZero,
+        isRollback: false,
         payload: ethers.constants.HashZero,
       },
       {
@@ -210,6 +214,7 @@ describe("Gateway", () => {
         destinationChainId: 3,
         sender: ethers.constants.AddressZero,
         receiver: ethers.constants.AddressZero,
+        isRollback: false,
         payload: ethers.constants.HashZero,
       },
     ];
@@ -217,9 +222,10 @@ describe("Gateway", () => {
     var batch: BridgeMessageBatchStruct = {
       messages: msgs,
       threshold: 0,
-      isRollback: false,
       sourceChainId: sourceChainId,
       destinationChainId: destinationChainId,
+      numberOfRegularEvents: 2,
+      commitCounter: 0,
     };
 
     var signedBatch: SignedBridgeMessageBatchStruct = {
@@ -232,13 +238,21 @@ describe("Gateway", () => {
     const messageOfBatch = ethers.utils.keccak256(
       ethers.utils.defaultAbiCoder.encode(
         [
-          "tuple(uint256 id, uint256 sourceChainId, uint256 destinationChainId, address sender, address receiver, bytes payload)[]",
+          "tuple(uint256 id, uint256 sourceChainId, uint256 destinationChainId, address sender, address receiver,bool isRollback,bytes payload)[]",
           "uint256",
           "uint256",
           "uint256",
-          "bool",
+          "uint256",
+          "uint256",
         ],
-        [batch.messages, batch.sourceChainId, batch.destinationChainId, batch.threshold, batch.isRollback]
+        [
+          batch.messages,
+          batch.sourceChainId,
+          batch.destinationChainId,
+          batch.threshold,
+          batch.numberOfRegularEvents,
+          batch.commitCounter,
+        ]
       )
     );
 
@@ -287,6 +301,7 @@ describe("Gateway", () => {
         destinationChainId: 3,
         sender: ethers.constants.AddressZero,
         receiver: ethers.constants.AddressZero,
+        isRollback: false,
         payload: ethers.constants.HashZero,
       },
       {
@@ -295,6 +310,7 @@ describe("Gateway", () => {
         destinationChainId: 3,
         sender: ethers.constants.AddressZero,
         receiver: ethers.constants.AddressZero,
+        isRollback: false,
         payload: ethers.constants.HashZero,
       },
     ];
@@ -302,9 +318,10 @@ describe("Gateway", () => {
     var batch: BridgeMessageBatchStruct = {
       messages: msgs,
       threshold: 0,
-      isRollback: false,
       sourceChainId: sourceChainId,
       destinationChainId: destinationChainId,
+      numberOfRegularEvents: 2,
+      commitCounter: 0,
     };
 
     var signedBatch: SignedBridgeMessageBatchStruct = {
@@ -317,13 +334,13 @@ describe("Gateway", () => {
     const messageOfBatch = ethers.utils.keccak256(
       ethers.utils.defaultAbiCoder.encode(
         [
-          "tuple(uint256 id, uint256 sourceChainId, uint256 destinationChainId, address sender, address receiver, bytes payload)[]",
+          "tuple(uint256 id, uint256 sourceChainId, uint256 destinationChainId, address sender, address receiver,bool isRollback,bytes payload)[]",
           "uint256",
           "uint256",
           "uint256",
-          "bool",
+          "uint256",
         ],
-        [batch.messages, batch.sourceChainId, batch.destinationChainId, batch.threshold, batch.isRollback]
+        [batch.messages, batch.sourceChainId, batch.destinationChainId, batch.threshold, batch.numberOfRegularEvents]
       )
     );
 
@@ -372,6 +389,7 @@ describe("Gateway", () => {
         destinationChainId: 3,
         sender: ethers.constants.AddressZero,
         receiver: childERC20Predicate.address,
+        isRollback: false,
         payload: ethers.constants.HashZero,
       },
       {
@@ -380,15 +398,17 @@ describe("Gateway", () => {
         destinationChainId: 3,
         sender: ethers.constants.AddressZero,
         receiver: childERC20Predicate.address,
+        isRollback: false,
         payload: ethers.constants.HashZero,
       },
     ];
     var batch: BridgeMessageBatchStruct = {
       messages: msgs,
       threshold: 1000,
-      isRollback: false,
+      numberOfRegularEvents: 2,
       sourceChainId: sourceChainId,
       destinationChainId: destinationChainId,
+      commitCounter: 0,
     };
 
     var signedBatch: SignedBridgeMessageBatchStruct = {
@@ -401,13 +421,21 @@ describe("Gateway", () => {
     const messageOfBatch = ethers.utils.keccak256(
       ethers.utils.defaultAbiCoder.encode(
         [
-          "tuple(uint256 id, uint256 sourceChainId, uint256 destinationChainId, address sender, address receiver, bytes payload)[]",
+          "tuple(uint256 id, uint256 sourceChainId, uint256 destinationChainId, address sender, address receiver,bool isRollback,bytes payload)[]",
           "uint256",
           "uint256",
           "uint256",
-          "bool",
+          "uint256",
+          "uint256",
         ],
-        [batch.messages, batch.sourceChainId, batch.destinationChainId, batch.threshold, batch.isRollback]
+        [
+          batch.messages,
+          batch.sourceChainId,
+          batch.destinationChainId,
+          batch.threshold,
+          batch.numberOfRegularEvents,
+          batch.commitCounter,
+        ]
       )
     );
 
@@ -439,6 +467,11 @@ describe("Gateway", () => {
 
     signedBatch.signature = aggMessagePoint;
 
-    await expect(gateway.receiveBatch(signedBatch)).to.be.revertedWith("Gateway: BATCH_ROLLBACK");
+    const firstTx = await gateway.receiveBatch(signedBatch);
+    const firstReceipt = await firstTx.wait();
+    const firstLogs = firstReceipt?.events?.filter((log) => log.event === "BridgeMessageResult") as any[];
+    expect(firstLogs).to.exist;
+    const secondLogs = firstReceipt?.events?.filter((log) => log.event === "BridgeBatchResult") as any[];
+    expect(secondLogs).to.exist;
   });
 });
