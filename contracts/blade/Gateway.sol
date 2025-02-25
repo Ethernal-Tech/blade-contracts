@@ -223,8 +223,7 @@ contract Gateway is ValidatorSetStorage, IGateway {
             returnData
         );
     }
-
-    // slither-disable-start dead-code
+    // slither-disable-end dead-code
 
     // slither-disable-next-line unused-state,naming-convention
     uint256[50] private __gap;
