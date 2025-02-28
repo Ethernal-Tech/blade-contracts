@@ -16,12 +16,6 @@ contract ValidatorSetStorage is IValidatorSetStorage, Initializable, System {
     bytes32 public currentValidatorSetHash;
     uint256 public totalVotingPower;
 
-    function init(IBLS newBls, IBN256G2 newBn256G2, Validator[] calldata validators) internal {
-        bls = newBls;
-        bn256G2 = newBn256G2;
-        _setNewValidatorSet(validators);
-    }
-
     /**
      * @notice initializes the contract
      * @param newBls address of the BLS library contract
@@ -29,7 +23,19 @@ contract ValidatorSetStorage is IValidatorSetStorage, Initializable, System {
      * @param validators list of validators
      */
     function initialize(IBLS newBls, IBN256G2 newBn256G2, Validator[] calldata validators) public virtual initializer {
-        init(newBls, newBn256G2, validators);
+        _init(newBls, newBn256G2, validators);
+    }
+
+    /**
+     * @notice common internal method for contract initialization (needed for inheritance)
+     * @param newBls address of the BLS library contract
+     * @param newBn256G2 address of the BN256G2 library contract
+     * @param validators list of validators
+     */
+    function _init(IBLS newBls, IBN256G2 newBn256G2, Validator[] calldata validators) internal {
+        bls = newBls;
+        bn256G2 = newBn256G2;
+        _setNewValidatorSet(validators);
     }
 
     /**
@@ -76,7 +82,7 @@ contract ValidatorSetStorage is IValidatorSetStorage, Initializable, System {
      * @param signature The aggregated signature submitted by the proposer
      * @param bitmap bitmap of which validators signed the message
      */
-    function verifySignature(
+    function _verifySignature(
         uint256[2] memory message,
         uint256[2] calldata signature,
         bytes calldata bitmap
@@ -153,7 +159,7 @@ contract ValidatorSetStorage is IValidatorSetStorage, Initializable, System {
 
         bytes memory hash = abi.encode(keccak256(abi.encode(blockMetadata)));
 
-        verifySignature(bls.hashToPoint(DOMAIN_BRIDGE, hash), signature, bitmap);
+        _verifySignature(bls.hashToPoint(DOMAIN_BRIDGE, hash), signature, bitmap);
 
         _setNewValidatorSet(newValidatorSet);
 

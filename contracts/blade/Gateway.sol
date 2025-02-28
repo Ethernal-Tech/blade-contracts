@@ -10,15 +10,12 @@ import "@openzeppelin/contracts/utils/Strings.sol";
 contract Gateway is ValidatorSetStorage, IGateway {
     uint256 public constant MAX_LENGTH = 2048;
     uint256 public counter;
+    BridgeStorage public bridgeStorage;
 
     /// @custom:security write-protection="onlySystemCall()"
-    // slither-disable-next-line protected-vars
     mapping(uint256 => bool) public processedEvents;
     /// @custom:security write-protection="onlySystemCall()"
-    // slither-disable-next-line protected-vars
     mapping(uint256 => bool) public processedEventsRollback;
-
-    BridgeStorage public bridgeStorage;
 
     event BridgeMessageResult(
         uint256 indexed id,
@@ -40,13 +37,20 @@ contract Gateway is ValidatorSetStorage, IGateway {
 
     event BridgeBatchProcessed(bool success, uint256 sourceChainId, uint256 destinationChainId, bytes batchHash);
 
+    /**
+     * @notice initializes the contract
+     * @param newBls address of the BLS library contract
+     * @param newBn256G2 address of the BN256G2 library contract
+     * @param validators list of validators
+     * @param bsAddress address of the BridgeStorage contract (needed only for internal GW)
+     */
     function initializeGW(
         IBLS newBls,
         IBN256G2 newBn256G2,
         Validator[] calldata validators,
         address bsAddress
     ) public initializer {
-        init(newBls, newBn256G2, validators);
+        _init(newBls, newBn256G2, validators);
 
         require(bsAddress != address(0), "INVALID_BRIDGE_STORAGE_ADDRESS");
         bridgeStorage = BridgeStorage(bsAddress);
@@ -55,10 +59,10 @@ contract Gateway is ValidatorSetStorage, IGateway {
     /**
      *
      * @notice Generates sync state event based on receiver and data.
-     * Anyone can call this method to emit an event. Receiver on Polygon should add check based on sender.
+     * Anyone can call this method to emit an event. Receiver on Blade should add check based on sender.
      *
-     * @param receiver Receiver address on Polygon chain
-     * @param data Data to send on Polygon chain
+     * @param receiver Receiver address on Blade chain
+     * @param data Data to send on Blade chain
      * @param destinationChainId Chain id of destination chain
      *
      */
@@ -101,7 +105,7 @@ contract Gateway is ValidatorSetStorage, IGateway {
             )
         );
 
-        verifySignature(bls.hashToPoint(DOMAIN_BRIDGE, hash), signedBatch.signature, signedBatch.bitmap);
+        _verifySignature(bls.hashToPoint(DOMAIN_BRIDGE, hash), signedBatch.signature, signedBatch.bitmap);
 
         if (block.number > signedBatch.batch.threshold) {
             return;

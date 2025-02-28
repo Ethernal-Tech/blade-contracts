@@ -29,7 +29,7 @@ contract TestRollbackGateway is Gateway {
             )
         );
 
-        verifySignature(bls.hashToPoint(DOMAIN_BRIDGE, hash), signedBatch.signature, signedBatch.bitmap);
+        _verifySignature(bls.hashToPoint(DOMAIN_BRIDGE, hash), signedBatch.signature, signedBatch.bitmap);
 
         uint256 length = signedBatch.batch.messages.length;
 
