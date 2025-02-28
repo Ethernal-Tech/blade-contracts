@@ -4,16 +4,21 @@ pragma solidity ^0.8.19;
 import "./ValidatorSetStorage.sol";
 
 contract BridgeStorage is ValidatorSetStorage {
+    uint256 public validatorSetCounter;
+    address[] public addresses;
+
+    /// @custom:security write-protection="onlySystemCall()"
     mapping(uint256 => SignedBridgeMessageBatch) public batches;
+    /// @custom:security write-protection="onlySystemCall()"
     mapping(uint256 => SignedValidatorSet) public commitedValidatorSets;
+    /// @custom:security write-protection="onlySystemCall()"
     mapping(uint256 => uint256) public lastCommittedE2I;
+    /// @custom:security write-protection="onlySystemCall()"
     mapping(uint256 => uint256) public lastCommittedI2E;
+    /// @custom:security write-protection="onlySystemCall()"
     mapping(bytes => uint256) public batchCommitCounter;
     /// @custom:security write-protection="onlySystemCall()"
     uint256 public batchCounter;
-    uint256 public validatorSetCounter;
-
-    address[] public addresses;
 
     event NewBatch(uint256 indexed id);
     event NewValidatorSetStored(uint256 indexed id);
@@ -30,7 +35,7 @@ contract BridgeStorage is ValidatorSetStorage {
         Validator[] calldata validators,
         address[] calldata addressesGateway
     ) public initializer {
-        init(newBls, newBn256G2, validators);
+        _init(newBls, newBn256G2, validators);
         validatorSetCounter = 1;
         addresses = addressesGateway;
     }
@@ -109,7 +114,7 @@ contract BridgeStorage is ValidatorSetStorage {
             )
         );
 
-        verifySignature(bls.hashToPoint(DOMAIN_BRIDGE, hash), signedBatch.signature, signedBatch.bitmap);
+        _verifySignature(bls.hashToPoint(DOMAIN_BRIDGE, hash), signedBatch.signature, signedBatch.bitmap);
 
         bytes memory batchHash = abi.encode(
             keccak256(
