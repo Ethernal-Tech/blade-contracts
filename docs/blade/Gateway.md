@@ -393,7 +393,7 @@ function receiveBatch(SignedBridgeMessageBatch signedBatch) external nonpayable
 function sendBridgeMsg(address receiver, bytes data, uint256 destinationChainId) external nonpayable
 ```
 
-Generates sync state event based on receiver and data. Anyone can call this method to emit an event. Receiver on Polygon should add check based on sender.
+Generates sync state event based on receiver and data. Anyone can call this method to emit an event. Receiver on Blade should add check based on sender.
 
 
 
@@ -401,8 +401,8 @@ Generates sync state event based on receiver and data. Anyone can call this meth
 
 | Name | Type | Description |
 |---|---|---|
-| receiver | address | Receiver address on Polygon chain |
-| data | bytes | Data to send on Polygon chain |
+| receiver | address | Receiver address on Blade chain |
+| data | bytes | Data to send on Blade chain |
 | destinationChainId | uint256 | Chain id of destination chain |
 
 ### totalVotingPower
