@@ -16,6 +16,10 @@ contract BridgeStorage is ValidatorSetStorage {
     /// @custom:security write-protection="onlySystemCall()"
     mapping(uint256 => uint256) public lastCommittedI2E;
     /// @custom:security write-protection="onlySystemCall()"
+    mapping(uint256 => uint256[]) public rollbackedE2I;
+    /// @custom:security write-protection="onlySystemCall()"
+    mapping(uint256 => uint256[]) public rollbackedI2E;
+    /// @custom:security write-protection="onlySystemCall()"
     mapping(bytes => uint256) public batchCommitCounter;
     /// @custom:security write-protection="onlySystemCall()"
     uint256 public batchCounter;
@@ -161,6 +165,14 @@ contract BridgeStorage is ValidatorSetStorage {
             unchecked {
                 ++i;
             }
+
+            if (message.isRollback) {
+                if (message.sourceChainId == block.chainid) {
+                    rollbackedI2E[message.destinationChainId].push(message.id);
+                } else {
+                    rollbackedE2I[message.sourceChainId].push(message.id);
+                }
+            }
         }
         if (batch.numberOfRegularEvents > 0) {
             if (batch.sourceChainId == block.chainid) {
@@ -215,6 +227,38 @@ contract BridgeStorage is ValidatorSetStorage {
         SignedBridgeMessageBatch storage newValidatorSetBatchRef = batches[batchCounter];
         newValidatorSetBatchRef.validatorSetBatchId = validatorSetCounter;
         batchCounter++;
+    }
+
+    /**
+     * @notice Returns true if message with id is rollbacked on I2E transfer, else false
+     * @param chainId external chain id
+     * @param id message id
+     */
+    function getConfirmedRollbackedI2E(uint256 chainId, uint256 id) external view returns (bool) {
+        uint256[] storage rollbacked = rollbackedI2E[chainId];
+        for (uint256 i = 0; i < rollbacked.length; i++) {
+            if (rollbacked[i] == id) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * @notice Returns true if message with id is rollbacked on E2I transfer, else false
+     * @param chainId external chain id
+     * @param id message id
+     */
+    function getConfirmedRollbackedE2I(uint256 chainId, uint256 id) external view returns (bool) {
+        uint256[] storage rollbacked = rollbackedE2I[chainId];
+        for (uint256 i = 0; i < rollbacked.length; i++) {
+            if (rollbacked[i] == id) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     // slither-disable-next-line unused-state,naming-convention

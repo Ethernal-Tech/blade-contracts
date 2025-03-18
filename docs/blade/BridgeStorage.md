@@ -429,6 +429,52 @@ Returns the committed validator set based on provided id
 |---|---|---|
 | _0 | SignedValidatorSet | undefined |
 
+### getConfirmedRollbackedE2I
+
+```solidity
+function getConfirmedRollbackedE2I(uint256 chainId, uint256 id) external view returns (bool)
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| chainId | uint256 | undefined |
+| id | uint256 | undefined |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | bool | undefined |
+
+### getConfirmedRollbackedI2E
+
+```solidity
+function getConfirmedRollbackedI2E(uint256 chainId, uint256 id) external view returns (bool)
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| chainId | uint256 | undefined |
+| id | uint256 | undefined |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | bool | undefined |
+
 ### initialize
 
 ```solidity
@@ -503,6 +549,52 @@ function lastCommittedI2E(uint256) external view returns (uint256)
 | Name | Type | Description |
 |---|---|---|
 | _0 | uint256 | undefined |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | undefined |
+
+### rollbackedE2I
+
+```solidity
+function rollbackedE2I(uint256, uint256) external view returns (uint256)
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | undefined |
+| _1 | uint256 | undefined |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | undefined |
+
+### rollbackedI2E
+
+```solidity
+function rollbackedI2E(uint256, uint256) external view returns (uint256)
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | undefined |
+| _1 | uint256 | undefined |
 
 #### Returns
 
