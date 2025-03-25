@@ -127,7 +127,7 @@ contract BridgeStorage is ValidatorSetStorage {
                     signedBatch.batch.sourceChainId,
                     signedBatch.batch.destinationChainId,
                     0,
-                    0,
+                    signedBatch.batch.numberOfRegularEvents,
                     0
                 )
             )
@@ -166,15 +166,23 @@ contract BridgeStorage is ValidatorSetStorage {
                 ++i;
             }
 
-            if (message.isRollback) {
+            if (batch.commitCounter == 1 && message.isRollback) {
                 if (message.sourceChainId == block.chainid) {
+                    require(
+                        !getConfirmedRollbackedI2E(message.destinationChainId, message.id),
+                        "ROLLBACK_MESSAGE_ALREADY_ROLLBACKED"
+                    );
                     rollbackedI2E[message.destinationChainId].push(message.id);
                 } else {
+                    require(
+                        !getConfirmedRollbackedE2I(message.destinationChainId, message.id),
+                        "ROLLBACK_MESSAGE_ALREADY_ROLLBACKED"
+                    );
                     rollbackedE2I[message.sourceChainId].push(message.id);
                 }
             }
         }
-        if (batch.numberOfRegularEvents > 0) {
+        if (batch.commitCounter == 1) {
             if (batch.sourceChainId == block.chainid) {
                 require(
                     lastCommittedI2E[batch.destinationChainId] + 1 == batch.messages[0].id,
@@ -234,7 +242,7 @@ contract BridgeStorage is ValidatorSetStorage {
      * @param chainId external chain id
      * @param id message id
      */
-    function getConfirmedRollbackedI2E(uint256 chainId, uint256 id) external view returns (bool) {
+    function getConfirmedRollbackedI2E(uint256 chainId, uint256 id) public view returns (bool) {
         uint256[] storage rollbacked = rollbackedI2E[chainId];
         for (uint256 i = 0; i < rollbacked.length; i++) {
             if (rollbacked[i] == id) {
@@ -250,7 +258,7 @@ contract BridgeStorage is ValidatorSetStorage {
      * @param chainId external chain id
      * @param id message id
      */
-    function getConfirmedRollbackedE2I(uint256 chainId, uint256 id) external view returns (bool) {
+    function getConfirmedRollbackedE2I(uint256 chainId, uint256 id) public view returns (bool) {
         uint256[] storage rollbacked = rollbackedE2I[chainId];
         for (uint256 i = 0; i < rollbacked.length; i++) {
             if (rollbacked[i] == id) {
