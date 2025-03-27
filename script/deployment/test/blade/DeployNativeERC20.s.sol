@@ -4,7 +4,7 @@ pragma solidity 0.8.19;
 
 import "forge-std/Script.sol";
 
-import {NativeERC20} from "contracts/bridge/internal/NativeERC20.sol";
+import {NativeERC20} from "contracts/blade/NativeERC20.sol";
 import {TransparentUpgradeableProxy} from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 
 abstract contract NativeERC20Deployer is Script {
