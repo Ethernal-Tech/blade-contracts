@@ -435,7 +435,7 @@ Returns the committed validator set based on provided id
 function getConfirmedRollbackedE2I(uint256 chainId, uint256 id) external view returns (bool)
 ```
 
-
+Returns true if message with id is rollbacked on E2I transfer, else false
 
 
 
@@ -443,8 +443,8 @@ function getConfirmedRollbackedE2I(uint256 chainId, uint256 id) external view re
 
 | Name | Type | Description |
 |---|---|---|
-| chainId | uint256 | undefined |
-| id | uint256 | undefined |
+| chainId | uint256 | external chain id |
+| id | uint256 | message id |
 
 #### Returns
 
@@ -458,7 +458,7 @@ function getConfirmedRollbackedE2I(uint256 chainId, uint256 id) external view re
 function getConfirmedRollbackedI2E(uint256 chainId, uint256 id) external view returns (bool)
 ```
 
-
+Returns true if message with id is rollbacked on I2E transfer, else false
 
 
 
@@ -466,8 +466,8 @@ function getConfirmedRollbackedI2E(uint256 chainId, uint256 id) external view re
 
 | Name | Type | Description |
 |---|---|---|
-| chainId | uint256 | undefined |
-| id | uint256 | undefined |
+| chainId | uint256 | external chain id |
+| id | uint256 | message id |
 
 #### Returns
 

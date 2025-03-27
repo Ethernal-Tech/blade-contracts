@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.19;
+pragma solidity ^0.8.19;
 
-import {ChildERC20Predicate} from "./ChildERC20Predicate.sol";
-import {AccessList} from "../lib/AccessList.sol";
+import {ChildERC20Predicate} from "../common/ChildERC20Predicate.sol";
+import {AccessList} from "../../lib/AccessList.sol";
 
 /**
     @title ChildERC20PredicateAccessList

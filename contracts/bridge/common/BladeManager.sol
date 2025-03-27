@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.19;
+pragma solidity ^0.8.19;
 
 import "@openzeppelin/contracts-upgradeable/access/Ownable2StepUpgradeable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import "../lib/GenesisLib.sol";
-import "../interfaces/bridge/IBladeManager.sol";
-import "../interfaces/bridge/IRootERC20Predicate.sol";
+import "../../lib/GenesisLib.sol";
+import "../../interfaces/bridge/IBladeManager.sol";
+import "../../interfaces/bridge/IRootERC20Predicate.sol";
 
 contract BladeManager is IBladeManager, Ownable2StepUpgradeable {
     using SafeERC20 for IERC20;
