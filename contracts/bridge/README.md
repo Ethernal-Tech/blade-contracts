@@ -38,10 +38,6 @@ The BladeManager contract is a critical component of the blockchain bridge syste
 
 The TestRollbackGateway contract extends the Gateway contract and is designed to simulate and test the handling of rollback operations in the blockchain bridge system. It overrides the receiveBatch function to process a batch of messages. For each message, the contract either executes the bridge message or simulates a rollback if the message ID is even, emitting the corresponding result.
 
-#### Child(ERC20/721/1155)Predicates
+#### Predicate contracts
 
-The ChildERCPredicate contracts enables the deposit and withdrawal of tokens between a root chain and a child chain in a blockchain bridge system. It uses Clones to create destination tokens, and the contract listens for state changes like deposits and withdrawals, handling them accordingly.
-
-#### Root(ERC20/721/1155)Predicates
-
-The RootPredicate contracts is part of a cross-chain bridge system, enabling token deposits and withdrawals from the root chain to the child chain. It serves as the "root" counterpart of the ChildPredicates, and it facilitates the creation and management of mappings between root and child tokens.
+The predicate contracts provide an interface for the bridge to manage transactions involving assets of their respective standards. These are provided in two forms, a regular template and access list version. Supernets can be made permissioned, and the access list versions of the predicate check to see if the address interacting with the bridge has the permissions to do so using either a inclusionary list (AllowList) or exclusionary list (BlockList). Usage of these lists can be turned off at any time by the Supernet's administrators.
