@@ -5,7 +5,7 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts/token/ERC1155/utils/ERC1155Holder.sol";
 import "@openzeppelin/contracts/proxy/Clones.sol";
 import "../../interfaces/bridge/IRootERC1155Predicate.sol";
-import "../../interfaces/IGateway.sol";
+import "../../interfaces/bridge/IGateway.sol";
 import "../../lib/Predicate.sol";
 
 // solhint-disable reason-string

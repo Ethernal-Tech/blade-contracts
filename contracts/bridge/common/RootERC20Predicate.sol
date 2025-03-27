@@ -5,7 +5,7 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/proxy/Clones.sol";
 import "../../interfaces/bridge/IRootERC20Predicate.sol";
-import "../../interfaces/IGateway.sol";
+import "../../interfaces/bridge/IGateway.sol";
 import "../../lib/Predicate.sol";
 
 // solhint-disable reason-string

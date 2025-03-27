@@ -5,9 +5,9 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/proxy/Clones.sol";
-import "../../interfaces/blade/IChildERC20Predicate.sol";
-import "../../interfaces/blade/IChildERC20.sol";
-import "../../interfaces/IGateway.sol";
+import "../../interfaces/bridge/IChildERC20Predicate.sol";
+import "../../interfaces/bridge/IChildERC20.sol";
+import "../../interfaces/bridge/IGateway.sol";
 import "../../blade/System.sol";
 import "../../lib/Predicate.sol";
 

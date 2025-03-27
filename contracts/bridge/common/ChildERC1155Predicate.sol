@@ -3,9 +3,9 @@ pragma solidity ^0.8.19;
 
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts/proxy/Clones.sol";
-import "../../interfaces/blade/IChildERC1155Predicate.sol";
-import "../../interfaces/blade/IChildERC1155.sol";
-import "../../interfaces/IGateway.sol";
+import "../../interfaces/bridge/IChildERC1155Predicate.sol";
+import "../../interfaces/bridge/IChildERC1155.sol";
+import "../../interfaces/bridge/IGateway.sol";
 import "../../lib/Predicate.sol";
 
 /**

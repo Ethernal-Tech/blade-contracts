@@ -6,7 +6,7 @@ import "forge-std/Test.sol";
 
 import {DeployGateway} from "script/deployment/bridge/DeployGateway.s.sol";
 
-import {Gateway} from "contracts/blade/Gateway.sol";
+import {Gateway} from "contracts/bridge/commonGateway.sol";
 
 contract DeployGatewayTest is Test {
     DeployGateway private deployer;

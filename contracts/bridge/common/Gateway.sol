@@ -3,7 +3,7 @@ pragma solidity ^0.8.19;
 
 import "../internal/ValidatorSetStorage.sol";
 import "../internal/BridgeStorage.sol";
-import "../../interfaces/IGateway.sol";
+import "../../interfaces/bridge/IGateway.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 
 contract Gateway is ValidatorSetStorage, IGateway {
