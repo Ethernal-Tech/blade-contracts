@@ -4,7 +4,7 @@ pragma solidity 0.8.19;
 
 import "forge-std/Script.sol";
 
-import {ChildERC1155PredicateAccessList} from "contracts/blade/ChildERC1155PredicateAccessList.sol";
+import {ChildERC1155PredicateAccessList} from "contracts/bridge/internal/ChildERC1155PredicateAccessList.sol";
 import {TransparentUpgradeableProxy} from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 
 abstract contract ChildERC1155PredicateAccessListDeployer is Script {

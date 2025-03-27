@@ -3,9 +3,9 @@ pragma solidity 0.8.19;
 
 import "@utils/Test.sol";
 import "contracts/blade/Gateway.sol";
-import {BladeManager, GenesisAccount} from "contracts/bridge/BladeManager.sol";
+import {BladeManager, GenesisAccount} from "contracts/bridge/common/BladeManager.sol";
 import {MockERC20} from "contracts/mocks/MockERC20.sol";
-import {RootERC20Predicate} from "contracts/bridge/RootERC20Predicate.sol";
+import {RootERC20Predicate} from "contracts/bridge/common/RootERC20Predicate.sol";
 import "contracts/interfaces/Errors.sol";
 
 abstract contract Uninitialized is Test {

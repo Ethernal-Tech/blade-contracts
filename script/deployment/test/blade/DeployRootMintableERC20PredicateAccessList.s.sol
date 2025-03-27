@@ -4,7 +4,7 @@ pragma solidity 0.8.19;
 
 import "forge-std/Script.sol";
 
-import {RootMintableERC20PredicateAccessList} from "contracts/blade/RootMintableERC20PredicateAccessList.sol";
+import {RootMintableERC20PredicateAccessList} from "contracts/bridge/internal/RootMintableERC20PredicateAccessList.sol";
 import {TransparentUpgradeableProxy} from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 
 abstract contract RootMintableERC20PredicateAccessListDeployer is Script {

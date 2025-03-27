@@ -3,8 +3,8 @@ pragma solidity 0.8.19;
 
 import "@utils/Test.sol";
 
-import "contracts/blade/ChildERC20.sol";
-import "contracts/blade/ChildERC20Predicate.sol";
+import "contracts/bridge/internal/ChildERC20.sol";
+import "contracts/bridge/common/ChildERC20Predicate.sol";
 import "contracts/interfaces/IGateway.sol";
 import "contracts/interfaces/blade/IChildERC20.sol";
 

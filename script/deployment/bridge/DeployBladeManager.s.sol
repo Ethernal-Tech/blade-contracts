@@ -5,7 +5,7 @@ pragma solidity 0.8.19;
 import "forge-std/Script.sol";
 
 import {GenesisAccount} from "contracts/lib/GenesisLib.sol";
-import {BladeManager} from "contracts/bridge/BladeManager.sol";
+import {BladeManager} from "contracts/bridge/common/BladeManager.sol";
 import {TransparentUpgradeableProxy} from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 
 abstract contract BladeManagerDeployer is Script {
