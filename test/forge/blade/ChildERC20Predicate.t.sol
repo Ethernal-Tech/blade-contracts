@@ -5,8 +5,8 @@ import "@utils/Test.sol";
 
 import "contracts/bridge/internal/ChildERC20.sol";
 import "contracts/bridge/common/ChildERC20Predicate.sol";
-import "contracts/interfaces/IGateway.sol";
-import "contracts/interfaces/blade/IChildERC20.sol";
+import "contracts/interfaces/bridge/IGateway.sol";
+import "contracts/interfaces/bridge/IChildERC20.sol";
 
 contract ChildERC20PredicateTest is Test {
     ChildERC20Predicate predicate;
