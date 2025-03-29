@@ -175,14 +175,14 @@ contract BridgeStorage is ValidatorSetStorage {
                     rollbackedI2E[message.destinationChainId].push(message.id);
                 } else {
                     require(
-                        !getConfirmedRollbackedE2I(message.destinationChainId, message.id),
+                        !getConfirmedRollbackedE2I(message.sourceChainId, message.id),
                         "ROLLBACK_MESSAGE_ALREADY_ROLLBACKED"
                     );
                     rollbackedE2I[message.sourceChainId].push(message.id);
                 }
             }
         }
-        if (batch.commitCounter == 1) {
+        if (batch.commitCounter == 1 && batch.numberOfRegularEvents > 0) {
             if (batch.sourceChainId == block.chainid) {
                 require(
                     lastCommittedI2E[batch.destinationChainId] + 1 == batch.messages[0].id,
