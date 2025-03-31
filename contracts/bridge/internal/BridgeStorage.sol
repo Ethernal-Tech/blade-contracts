@@ -112,7 +112,6 @@ contract BridgeStorage is ValidatorSetStorage {
                     signedBatch.batch.sourceChainId,
                     signedBatch.batch.destinationChainId,
                     signedBatch.batch.threshold,
-                    signedBatch.batch.numberOfRegularEvents,
                     signedBatch.batch.commitCounter
                 )
             )
@@ -127,7 +126,6 @@ contract BridgeStorage is ValidatorSetStorage {
                     signedBatch.batch.sourceChainId,
                     signedBatch.batch.destinationChainId,
                     0,
-                    signedBatch.batch.numberOfRegularEvents,
                     0
                 )
             )
@@ -152,11 +150,13 @@ contract BridgeStorage is ValidatorSetStorage {
      * @param batch batch to verify
      */
     function _verifyBatch(BridgeMessageBatch calldata batch) private {
+        if (batch.commitCounter > 1) {
+            return; // when commitCounter is greater than one, we resubmit the old batch, so we don’t need to verify the batch again.
+        }
+
         require(batch.messages.length > 0, "EMPTY_BATCH");
-        require(
-            batch.numberOfRegularEvents <= batch.messages.length,
-            "NUMBER_OF_EVENTS_IS_GREATER_THAN_MESSAGE_LENGTH"
-        );
+
+        uint256 numberOfRegularMessages = 0;
 
         for (uint256 i = 0; i < batch.messages.length; ) {
             BridgeMessage memory message = batch.messages[i];
@@ -166,7 +166,7 @@ contract BridgeStorage is ValidatorSetStorage {
                 ++i;
             }
 
-            if (batch.commitCounter == 1 && message.isRollback) {
+            if (message.isRollback) {
                 if (message.sourceChainId == block.chainid) {
                     require(
                         !getConfirmedRollbackedI2E(message.destinationChainId, message.id),
@@ -180,18 +180,20 @@ contract BridgeStorage is ValidatorSetStorage {
                     );
                     rollbackedE2I[message.sourceChainId].push(message.id);
                 }
+            } else {
+                numberOfRegularMessages++;
             }
         }
-        if (batch.commitCounter == 1 && batch.numberOfRegularEvents > 0) {
+        if (numberOfRegularMessages > 0) {
             if (batch.sourceChainId == block.chainid) {
                 require(
                     lastCommittedI2E[batch.destinationChainId] + 1 == batch.messages[0].id,
                     "INVALID_LAST_COMMITTED"
                 );
-                lastCommittedI2E[batch.destinationChainId] = batch.messages[batch.numberOfRegularEvents - 1].id;
+                lastCommittedI2E[batch.destinationChainId] = batch.messages[numberOfRegularMessages - 1].id;
             } else {
                 require(lastCommittedE2I[batch.sourceChainId] + 1 == batch.messages[0].id, "INVALID_LAST_COMMITTED");
-                lastCommittedE2I[batch.sourceChainId] = batch.messages[batch.numberOfRegularEvents - 1].id;
+                lastCommittedE2I[batch.sourceChainId] = batch.messages[numberOfRegularMessages - 1].id;
             }
         }
     }

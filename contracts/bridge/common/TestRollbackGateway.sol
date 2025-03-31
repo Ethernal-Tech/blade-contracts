@@ -23,7 +23,6 @@ contract TestRollbackGateway is Gateway {
                     signedBatch.batch.sourceChainId,
                     signedBatch.batch.destinationChainId,
                     signedBatch.batch.threshold,
-                    signedBatch.batch.numberOfRegularEvents,
                     signedBatch.batch.commitCounter
                 )
             )
