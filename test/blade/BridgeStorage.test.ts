@@ -97,7 +97,6 @@ describe("BridgeStorage", () => {
       messages: msgs,
       threshold: 0,
       sourceChainId: sourceChainId,
-      numberOfRegularEvents: 1,
       destinationChainId: destinationChainId,
       commitCounter: 0,
     };
@@ -145,7 +144,6 @@ describe("BridgeStorage", () => {
     const batch: BridgeMessageBatchStruct = {
       messages: msgs,
       threshold: 0,
-      numberOfRegularEvents: 2,
       sourceChainId: sourceChainId,
       destinationChainId: destinationChainId,
       commitCounter: 0,
@@ -224,7 +222,6 @@ describe("BridgeStorage", () => {
       threshold: 0,
       sourceChainId: sourceChainId,
       destinationChainId: destinationChainId,
-      numberOfRegularEvents: 2,
       commitCounter: 0,
     };
 
@@ -243,16 +240,8 @@ describe("BridgeStorage", () => {
           "uint256",
           "uint256",
           "uint256",
-          "uint256",
         ],
-        [
-          batch.messages,
-          batch.sourceChainId,
-          batch.destinationChainId,
-          batch.threshold,
-          batch.numberOfRegularEvents,
-          batch.commitCounter,
-        ]
+        [batch.messages, batch.sourceChainId, batch.destinationChainId, batch.threshold, batch.commitCounter]
       )
     );
 
@@ -320,7 +309,6 @@ describe("BridgeStorage", () => {
       threshold: 0,
       sourceChainId: sourceChainId,
       destinationChainId: destinationChainId,
-      numberOfRegularEvents: 2,
       commitCounter: 0,
     };
 
@@ -339,16 +327,8 @@ describe("BridgeStorage", () => {
           "uint256",
           "uint256",
           "uint256",
-          "uint256",
         ],
-        [
-          batch.messages,
-          batch.sourceChainId,
-          batch.destinationChainId,
-          batch.threshold,
-          batch.numberOfRegularEvents,
-          batch.commitCounter,
-        ]
+        [batch.messages, batch.sourceChainId, batch.destinationChainId, batch.threshold, batch.commitCounter]
       )
     );
 
@@ -416,7 +396,6 @@ describe("BridgeStorage", () => {
       threshold: 0,
       sourceChainId: sourceChainId,
       destinationChainId: destinationChainId,
-      numberOfRegularEvents: 2,
       commitCounter: 1,
     };
 
@@ -435,16 +414,8 @@ describe("BridgeStorage", () => {
           "uint256",
           "uint256",
           "uint256",
-          "uint256",
         ],
-        [
-          batch.messages,
-          batch.sourceChainId,
-          batch.destinationChainId,
-          batch.threshold,
-          batch.numberOfRegularEvents,
-          batch.commitCounter,
-        ]
+        [batch.messages, batch.sourceChainId, batch.destinationChainId, batch.threshold, batch.commitCounter]
       )
     );
 
@@ -494,7 +465,6 @@ describe("BridgeStorage", () => {
       sourceChainId: sourceChainId,
       destinationChainId: destinationChainId,
       threshold: 0,
-      numberOfRegularEvents: 0,
       commitCounter: 0,
     };
 
@@ -541,7 +511,6 @@ describe("BridgeStorage", () => {
       sourceChainId: sourceChainId,
       destinationChainId: destinationChainId,
       threshold: 0,
-      numberOfRegularEvents: 2,
       commitCounter: 0,
     };
 
