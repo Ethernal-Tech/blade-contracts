@@ -14,13 +14,9 @@ The BridgeStorage contract is a fundamental component of a multi-chain bridge pr
 
 The ValidatorSetStorage contract is responsible for storing and updating validator sets used for validating cross-chain transactions. It verifies validator signatures using BLS (Boneh-Lynn-Shacham) cryptography, ensuring that changes to the validator set meet the required quorum before being committed.
 
-#### NativeERC20
+#### Token contracts
 
-The NativeERC20 contract represents the native token on Blade. It facilitates native token interactions while maintaining compatibility with ERC20-like functions.
-
-#### NativeERC20Mintable
-
-NativeERC20Mintable is an ERC20-compatible contract that represents the native token on Blade chains. It enables seamless interaction with the native token while maintaining compatibility with ERC20-like functions. The contract allows for minting and burning of tokens.
+The `ChildERC20`, `ChildERC721`, `ChildERC1155` contracts represent templates for the management of bridged assets on the blade chain.
 
 ### Common
 

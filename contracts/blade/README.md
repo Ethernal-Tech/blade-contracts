@@ -6,7 +6,7 @@ This directory contains contracts meant for usage on the blade chain. A brief ov
 
 ## Token Contracts
 
-The `ChildERC20`, `ChildERC721`, `ChildERC1155`, and `NativeERC20` contracts represent templates for the management of bridged assets on the blade chain. The latter two represent assets which are an ERC20 on the connected chain, but used as the native asset (for the payment of gas) on the blade chain. The `NativeERC20` allows for more of the asset to be minted on the child chain directly. The other contracts assume the supply is dictated by the connected chain asset, and cannot mint more of the asset directly. Work is already underway to add Mintable templates for ERC20/721/1155 tokens.
+`NativeERC20` and `NativeMintableERC20` represent assets which are an ERC20 on the external chain, but used as the native asset (for the payment of gas) on the blade chain. The `NativeMintableERC20` allows for more of the asset to be minted on the child chain directly.
 
 ## System
 
