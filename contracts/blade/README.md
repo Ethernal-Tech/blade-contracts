@@ -6,7 +6,7 @@ This directory contains contracts meant for usage on the blade chain. A brief ov
 
 ## Token Contracts
 
-`NativeERC20` and `NativeMintableERC20` represent assets which are an ERC20 on the external chain, but used as the native asset (for the payment of gas) on the blade chain. The `NativeMintableERC20` allows for more of the asset to be minted on the child chain directly.
+`NativeERC20` and `NativeMintableERC20` represent assets which are an ERC20 on the external chain, but used as the native asset (for the payment of gas) on the blade chain. Only predicates can mint and burn in the case of a `NativeERC20 contract`, whereas in the case of a `NativeMintableERC20` contract, minting and burning can be done not only by predicates but also directly using a minter.
 
 ## System
 
