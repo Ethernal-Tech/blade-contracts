@@ -34,8 +34,6 @@ contract Gateway is ValidatorSetStorage, IGateway {
         bytes data
     );
 
-    event BridgeBatchProcessed(bool success, uint256 sourceChainId, uint256 destinationChainId, bytes batchHash);
-
     /**
      * @notice initializes the contract
      * @param newBls address of the BLS library contract
@@ -98,7 +96,6 @@ contract Gateway is ValidatorSetStorage, IGateway {
                     signedBatch.batch.sourceChainId,
                     signedBatch.batch.destinationChainId,
                     signedBatch.batch.threshold,
-                    signedBatch.batch.numberOfRegularEvents,
                     signedBatch.batch.commitCounter
                 )
             )
@@ -111,37 +108,24 @@ contract Gateway is ValidatorSetStorage, IGateway {
         }
 
         uint256 length = signedBatch.batch.messages.length;
-        uint256 executedMessages = 0;
         for (uint256 i = 0; i < length; ) {
             if (!signedBatch.batch.messages[i].isRollback) {
                 if (processedEvents[signedBatch.batch.messages[i].id]) continue;
 
                 processedEvents[signedBatch.batch.messages[i].id] = true;
 
-                executedMessages++;
                 _executeBridgeMessage(signedBatch.batch.messages[i]);
             } else {
                 if (processedEventsRollback[signedBatch.batch.messages[i].id]) continue;
 
                 processedEventsRollback[signedBatch.batch.messages[i].id] = true;
 
-                executedMessages++;
                 _executeRollbackBridgeMessage(signedBatch.batch.messages[i]);
             }
 
             unchecked {
                 ++i;
             }
-        }
-
-        if (executedMessages > 0) {
-            // slither-disable-next-line reentrancy-events
-            emit BridgeBatchProcessed(
-                false,
-                signedBatch.batch.sourceChainId,
-                signedBatch.batch.destinationChainId,
-                hash
-            );
         }
     }
 

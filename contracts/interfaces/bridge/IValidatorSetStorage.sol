@@ -45,7 +45,6 @@ struct BridgeMessageBatch {
     uint256 sourceChainId;
     uint256 destinationChainId;
     uint256 threshold;
-    uint256 numberOfRegularEvents;
     uint256 commitCounter;
 }
 

@@ -112,7 +112,6 @@ contract BridgeStorage is ValidatorSetStorage {
                     signedBatch.batch.sourceChainId,
                     signedBatch.batch.destinationChainId,
                     signedBatch.batch.threshold,
-                    signedBatch.batch.numberOfRegularEvents,
                     signedBatch.batch.commitCounter
                 )
             )
@@ -126,7 +125,6 @@ contract BridgeStorage is ValidatorSetStorage {
                     signedBatch.batch.messages,
                     signedBatch.batch.sourceChainId,
                     signedBatch.batch.destinationChainId,
-                    0,
                     0,
                     0
                 )
@@ -152,11 +150,13 @@ contract BridgeStorage is ValidatorSetStorage {
      * @param batch batch to verify
      */
     function _verifyBatch(BridgeMessageBatch calldata batch) private {
+        if (batch.commitCounter > 1) {
+            return; // when commitCounter is greater than one, we resubmit the old batch, so we don’t need to verify the batch again.
+        }
+
         require(batch.messages.length > 0, "EMPTY_BATCH");
-        require(
-            batch.numberOfRegularEvents <= batch.messages.length,
-            "NUMBER_OF_EVENTS_IS_GREATER_THAN_MESSAGE_LENGTH"
-        );
+
+        uint256 numberOfOrdinaryMessages = 0;
 
         for (uint256 i = 0; i < batch.messages.length; ) {
             BridgeMessage memory message = batch.messages[i];
@@ -168,22 +168,32 @@ contract BridgeStorage is ValidatorSetStorage {
 
             if (message.isRollback) {
                 if (message.sourceChainId == block.chainid) {
+                    require(
+                        !getConfirmedRollbackedI2E(message.destinationChainId, message.id),
+                        "ROLLBACK_MESSAGE_ALREADY_ROLLBACKED"
+                    );
                     rollbackedI2E[message.destinationChainId].push(message.id);
                 } else {
+                    require(
+                        !getConfirmedRollbackedE2I(message.sourceChainId, message.id),
+                        "ROLLBACK_MESSAGE_ALREADY_ROLLBACKED"
+                    );
                     rollbackedE2I[message.sourceChainId].push(message.id);
                 }
+            } else {
+                numberOfOrdinaryMessages++;
             }
         }
-        if (batch.numberOfRegularEvents > 0) {
+        if (numberOfOrdinaryMessages > 0) {
             if (batch.sourceChainId == block.chainid) {
                 require(
                     lastCommittedI2E[batch.destinationChainId] + 1 == batch.messages[0].id,
                     "INVALID_LAST_COMMITTED"
                 );
-                lastCommittedI2E[batch.destinationChainId] = batch.messages[batch.numberOfRegularEvents - 1].id;
+                lastCommittedI2E[batch.destinationChainId] = batch.messages[numberOfOrdinaryMessages - 1].id;
             } else {
                 require(lastCommittedE2I[batch.sourceChainId] + 1 == batch.messages[0].id, "INVALID_LAST_COMMITTED");
-                lastCommittedE2I[batch.sourceChainId] = batch.messages[batch.numberOfRegularEvents - 1].id;
+                lastCommittedE2I[batch.sourceChainId] = batch.messages[numberOfOrdinaryMessages - 1].id;
             }
         }
     }
@@ -234,7 +244,7 @@ contract BridgeStorage is ValidatorSetStorage {
      * @param chainId external chain id
      * @param id message id
      */
-    function getConfirmedRollbackedI2E(uint256 chainId, uint256 id) external view returns (bool) {
+    function getConfirmedRollbackedI2E(uint256 chainId, uint256 id) public view returns (bool) {
         uint256[] storage rollbacked = rollbackedI2E[chainId];
         for (uint256 i = 0; i < rollbacked.length; i++) {
             if (rollbacked[i] == id) {
@@ -250,7 +260,7 @@ contract BridgeStorage is ValidatorSetStorage {
      * @param chainId external chain id
      * @param id message id
      */
-    function getConfirmedRollbackedE2I(uint256 chainId, uint256 id) external view returns (bool) {
+    function getConfirmedRollbackedE2I(uint256 chainId, uint256 id) public view returns (bool) {
         uint256[] storage rollbacked = rollbackedE2I[chainId];
         for (uint256 i = 0; i < rollbacked.length; i++) {
             if (rollbacked[i] == id) {

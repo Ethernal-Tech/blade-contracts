@@ -147,7 +147,6 @@ describe("Gateway", () => {
       sourceChainId: sourceChainId,
       destinationChainId: destinationChainId,
       threshold: 0,
-      numberOfRegularEvents: 2,
       commitCounter: 0,
     };
 
@@ -224,7 +223,6 @@ describe("Gateway", () => {
       threshold: 0,
       sourceChainId: sourceChainId,
       destinationChainId: destinationChainId,
-      numberOfRegularEvents: 2,
       commitCounter: 0,
     };
 
@@ -243,16 +241,8 @@ describe("Gateway", () => {
           "uint256",
           "uint256",
           "uint256",
-          "uint256",
         ],
-        [
-          batch.messages,
-          batch.sourceChainId,
-          batch.destinationChainId,
-          batch.threshold,
-          batch.numberOfRegularEvents,
-          batch.commitCounter,
-        ]
+        [batch.messages, batch.sourceChainId, batch.destinationChainId, batch.threshold, batch.commitCounter]
       )
     );
 
@@ -320,7 +310,6 @@ describe("Gateway", () => {
       threshold: 0,
       sourceChainId: sourceChainId,
       destinationChainId: destinationChainId,
-      numberOfRegularEvents: 2,
       commitCounter: 0,
     };
 
@@ -340,7 +329,7 @@ describe("Gateway", () => {
           "uint256",
           "uint256",
         ],
-        [batch.messages, batch.sourceChainId, batch.destinationChainId, batch.threshold, batch.numberOfRegularEvents]
+        [batch.messages, batch.sourceChainId, batch.destinationChainId, batch.threshold, batch.commitCounter]
       )
     );
 
@@ -405,7 +394,6 @@ describe("Gateway", () => {
     var batch: BridgeMessageBatchStruct = {
       messages: msgs,
       threshold: 1000,
-      numberOfRegularEvents: 2,
       sourceChainId: sourceChainId,
       destinationChainId: destinationChainId,
       commitCounter: 0,
@@ -426,16 +414,8 @@ describe("Gateway", () => {
           "uint256",
           "uint256",
           "uint256",
-          "uint256",
         ],
-        [
-          batch.messages,
-          batch.sourceChainId,
-          batch.destinationChainId,
-          batch.threshold,
-          batch.numberOfRegularEvents,
-          batch.commitCounter,
-        ]
+        [batch.messages, batch.sourceChainId, batch.destinationChainId, batch.threshold, batch.commitCounter]
       )
     );
 

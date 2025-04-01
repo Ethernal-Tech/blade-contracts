@@ -44,7 +44,6 @@ let batch = {
   sourceChainId: sourceChainId,
   destinationChainId: destinationChainId,
   threshold: 1000,
-  numberOfRegularEvents: 2,
   commitCounter: 1
 };
 
@@ -140,14 +139,12 @@ function generateSignature1() {
         "uint256",
         "uint256",
         "uint256",
-        "uint256",
       ],
       [
         batch.messages,
         batch.sourceChainId,
         batch.destinationChainId,
         batch.threshold,
-        batch.numberOfRegularEvents,
         batch.commitCounter,
       ]
     )
@@ -195,14 +192,12 @@ function generateSignature2() {
         "uint256",
         "uint256",
         "uint256",
-        "uint256",
       ],
       [
         batch.messages,
         batch.sourceChainId,
         batch.destinationChainId,
         batch.threshold,
-        batch.numberOfRegularEvents,
         batch.commitCounter,
       ]
     )
@@ -250,14 +245,12 @@ function generateSignature3() {
           "uint256",
           "uint256",
           "uint256",
-          "uint256",
         ],
         [
           batch.messages,
           batch.sourceChainId,
           batch.destinationChainId,
           batch.threshold,
-          batch.numberOfRegularEvents,
           batch.commitCounter,
         ]
       )

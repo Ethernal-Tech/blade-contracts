@@ -426,25 +426,6 @@ function totalVotingPower() external view returns (uint256)
 
 ## Events
 
-### BridgeBatchProcessed
-
-```solidity
-event BridgeBatchProcessed(bool success, uint256 sourceChainId, uint256 destinationChainId, bytes batchHash)
-```
-
-
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| success  | bool | undefined |
-| sourceChainId  | uint256 | undefined |
-| destinationChainId  | uint256 | undefined |
-| batchHash  | bytes | undefined |
-
 ### BridgeMessageResult
 
 ```solidity
