@@ -6,7 +6,7 @@ import "forge-std/Test.sol";
 
 import {DeployRootERC721Predicate} from "script/deployment/bridge/DeployRootERC721Predicate.s.sol";
 
-import {RootERC721Predicate} from "contracts/bridge/RootERC721Predicate.sol";
+import {RootERC721Predicate} from "contracts/bridge/common/RootERC721Predicate.sol";
 import {ITransparentUpgradeableProxy} from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 
 contract DeployRootERC721PredicateTest is Test {

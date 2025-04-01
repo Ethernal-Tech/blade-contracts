@@ -2,10 +2,10 @@
 pragma solidity ^0.8.19;
 
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import {System} from "./System.sol";
-import "../interfaces/common/IBLS.sol";
-import "../interfaces/common/IBN256G2.sol";
-import "../interfaces/blade/IValidatorSetStorage.sol";
+import {System} from "../../blade/System.sol";
+import "../../interfaces/common/IBLS.sol";
+import "../../interfaces/common/IBN256G2.sol";
+import "../../interfaces/bridge/IValidatorSetStorage.sol";
 
 contract ValidatorSetStorage is IValidatorSetStorage, Initializable, System {
     IBLS public bls;

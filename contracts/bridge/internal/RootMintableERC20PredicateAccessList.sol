@@ -1,26 +1,26 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.19;
+pragma solidity ^0.8.19;
 
-import {RootERC721Predicate} from "../bridge/RootERC721Predicate.sol";
-import {AccessList} from "../lib/AccessList.sol";
+import {RootERC20Predicate} from "../common/RootERC20Predicate.sol";
+import {AccessList} from "../../lib/AccessList.sol";
 
 /**
-    @title RootMintableERC721PredicateAccessList
+    @title RootMintableERC20PredicateAccessList
     @author Polygon Technology (@QEDK)
-    @notice Enables child-chain origin ERC721 token deposits and withdrawals (only from allowlisted address, and not from blocklisted addresses) across an arbitrary root chain and child chain
+    @notice Enables child-chain origin ERC20 token deposits and withdrawals (only from allowlisted address, and not from blocklisted addresses) across an arbitrary root chain and child chain
  */
 // solhint-disable reason-string
-contract RootMintableERC721PredicateAccessList is AccessList, RootERC721Predicate {
+contract RootMintableERC20PredicateAccessList is AccessList, RootERC20Predicate {
     function initialize(
         address newGateway,
-        address newChildERC721Predicate,
+        address newChildERC20Predicate,
         address newTokenTemplate,
         uint256 newDestinationChainId,
         bool newUseAllowList,
         bool newUseBlockList,
         address newOwner
     ) public virtual onlySystemCall initializer {
-        _initialize(newGateway, newChildERC721Predicate, newTokenTemplate, newDestinationChainId);
+        _initialize(newGateway, newChildERC20Predicate, newTokenTemplate, address(0), newDestinationChainId);
         _initializeAccessList(newUseAllowList, newUseBlockList);
         _transferOwnership(newOwner);
     }

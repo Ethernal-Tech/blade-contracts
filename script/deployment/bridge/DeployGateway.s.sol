@@ -4,7 +4,7 @@ pragma solidity 0.8.19;
 
 import "forge-std/Script.sol";
 
-import {Gateway} from "contracts/blade/Gateway.sol";
+import {Gateway} from "contracts/bridge/common/Gateway.sol";
 
 abstract contract GatewayDeployer is Script {
     function deployGateway() internal returns (address contractAddr) {

@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.19;
+pragma solidity ^0.8.19;
 
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts/token/ERC721/utils/ERC721Holder.sol";
 import "@openzeppelin/contracts/proxy/Clones.sol";
-import "../interfaces/bridge/IRootERC721Predicate.sol";
-import "../interfaces/IGateway.sol";
-import "../lib/Predicate.sol";
+import "../../interfaces/bridge/IRootERC721Predicate.sol";
+import "../../interfaces/bridge/IGateway.sol";
+import "../../lib/Predicate.sol";
 
 // solhint-disable reason-string
 contract RootERC721Predicate is Predicate, Initializable, ERC721Holder, IRootERC721Predicate {

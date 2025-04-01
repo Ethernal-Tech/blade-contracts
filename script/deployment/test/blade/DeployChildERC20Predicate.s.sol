@@ -4,7 +4,7 @@ pragma solidity 0.8.19;
 
 import "forge-std/Script.sol";
 
-import {ChildERC20Predicate} from "contracts/blade/ChildERC20Predicate.sol";
+import {ChildERC20Predicate} from "contracts/bridge/common/ChildERC20Predicate.sol";
 import {TransparentUpgradeableProxy} from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 
 abstract contract ChildERC20PredicateDeployer is Script {

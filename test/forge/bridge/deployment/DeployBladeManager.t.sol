@@ -6,7 +6,7 @@ import "forge-std/Test.sol";
 
 import {DeployBladeManager} from "script/deployment/bridge/DeployBladeManager.s.sol";
 
-import {BladeManager, GenesisAccount} from "contracts/bridge/BladeManager.sol";
+import {BladeManager, GenesisAccount} from "contracts/bridge/common/BladeManager.sol";
 import {ITransparentUpgradeableProxy} from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 
 contract DeployBladeManagerTest is Test {

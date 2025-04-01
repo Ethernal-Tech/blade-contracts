@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.19;
 
-import "../interfaces/IGateway.sol";
+import "../interfaces/bridge/IGateway.sol";
 
 abstract contract Predicate {
     bytes32 public constant DEPOSIT_SIG = keccak256("DEPOSIT");

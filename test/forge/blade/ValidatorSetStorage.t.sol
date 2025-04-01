@@ -2,8 +2,8 @@
 pragma solidity 0.8.19;
 
 import "@utils/Test.sol";
-import {ValidatorSetStorage} from "contracts/blade/ValidatorSetStorage.sol";
-import {Validator, BlockMetadata, DOMAIN_BRIDGE} from "contracts/interfaces/blade/IValidatorSetStorage.sol";
+import {ValidatorSetStorage} from "contracts/bridge/internal/ValidatorSetStorage.sol";
+import {Validator, BlockMetadata, DOMAIN_BRIDGE} from "contracts/interfaces/bridge/IValidatorSetStorage.sol";
 import {BLS} from "contracts/common/BLS.sol";
 import {BN256G2} from "contracts/common/BN256G2.sol";
 import {System} from "contracts/blade/System.sol";
