@@ -109,18 +109,25 @@ contract Gateway is ValidatorSetStorage, IGateway {
 
         uint256 length = signedBatch.batch.messages.length;
         for (uint256 i = 0; i < length; ) {
-            if (!signedBatch.batch.messages[i].isRollback) {
-                if (processedEvents[signedBatch.batch.messages[i].id]) continue;
-
-                processedEvents[signedBatch.batch.messages[i].id] = true;
-
-                _executeBridgeMessage(signedBatch.batch.messages[i]);
-            } else {
+            if (signedBatch.batch.messages[i].isRollback) {
                 if (processedEventsRollback[signedBatch.batch.messages[i].id]) continue;
 
                 processedEventsRollback[signedBatch.batch.messages[i].id] = true;
 
                 _executeRollbackBridgeMessage(signedBatch.batch.messages[i]);
+
+                continue;
+            }
+
+            if (!signedBatch.batch.messages[i].isRollback) {
+                emit BridgeMessageResult(
+                    signedBatch.batch.messages[i].id,
+                    false,
+                    signedBatch.batch.messages[i].sourceChainId,
+                    signedBatch.batch.messages[i].destinationChainId,
+                    signedBatch.batch.messages[i].isRollback,
+                    "rollback"
+                );
             }
 
             unchecked {
