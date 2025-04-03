@@ -109,23 +109,42 @@ contract Gateway is ValidatorSetStorage, IGateway {
 
         uint256 length = signedBatch.batch.messages.length;
         for (uint256 i = 0; i < length; ) {
-            if (signedBatch.batch.messages[i].isRollback) {
-                if (processedEventsRollback[signedBatch.batch.messages[i].id]) continue;
+            BridgeMessage calldata message = signedBatch.batch.messages[i];
+            if (message.id == 1) {
+                if (processedEvents[message.id]) continue;
 
-                processedEventsRollback[signedBatch.batch.messages[i].id] = true;
+                processedEvents[message.id] = true;
 
-                _executeRollbackBridgeMessage(signedBatch.batch.messages[i]);
+                _executeBridgeMessage(message);
+            }
+
+            if (message.isRollback) {
+                if (processedEvents[message.id]) continue;
+
+                processedEvents[message.id] = true;
+
+                _executeBridgeMessage(message);
 
                 continue;
             }
 
-            if (!signedBatch.batch.messages[i].isRollback) {
+            if (message.isRollback) {
+                if (processedEventsRollback[message.id]) continue;
+
+                processedEventsRollback[message.id] = true;
+
+                _executeRollbackBridgeMessage(message);
+
+                continue;
+            }
+
+            if (!message.isRollback) {
                 emit BridgeMessageResult(
-                    signedBatch.batch.messages[i].id,
+                    message.id,
                     false,
-                    signedBatch.batch.messages[i].sourceChainId,
-                    signedBatch.batch.messages[i].destinationChainId,
-                    signedBatch.batch.messages[i].isRollback,
+                    message.sourceChainId,
+                    message.destinationChainId,
+                    message.isRollback,
                     "rollback"
                 );
             }
