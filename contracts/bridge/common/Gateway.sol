@@ -171,12 +171,7 @@ contract Gateway is ValidatorSetStorage, IGateway {
 
         // slither-disable-next-line calls-loop,low-level-calls,reentrancy-no-eth
         (bool success, bytes memory returnData) = message.receiver.call(
-            abi.encodeWithSignature(
-                "onStateReceive(uint256,address,bytes)",
-                message.id,
-                message.sender,
-                message.payload
-            )
+            abi.encodeWithSignature("onMsgReceive(uint256,address,bytes)", message.id, message.sender, message.payload)
         );
 
         // emit a ResultEvent indicating whether invocation of bridge message was successful
@@ -199,12 +194,7 @@ contract Gateway is ValidatorSetStorage, IGateway {
     function _executeRollbackBridgeMessage(BridgeMessage calldata message) private {
         // slither-disable-next-line calls-loop,low-level-calls,reentrancy-no-eth
         (bool success, bytes memory returnData) = message.receiver.call(
-            abi.encodeWithSignature(
-                "onStateRollback(uint256,address,bytes)",
-                message.id,
-                message.sender,
-                message.payload
-            )
+            abi.encodeWithSignature("onMsgRollback(uint256,address,bytes)", message.id, message.sender, message.payload)
         );
 
         // emit a ResultEvent indicating whether invocation of bridge rollback message was successful or not

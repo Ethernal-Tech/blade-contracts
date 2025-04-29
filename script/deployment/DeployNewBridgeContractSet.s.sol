@@ -34,7 +34,6 @@ contract DeployNewBridgeContractSet is GatewayDeployer, BladeManagerDeployer {
 
         proxyAdmin = address(_proxyAdmin);
 
-        // TODO - change gateway and blade manager deployment
         gatewayLogic = deployGateway();
 
         // // To be initialized manually later.

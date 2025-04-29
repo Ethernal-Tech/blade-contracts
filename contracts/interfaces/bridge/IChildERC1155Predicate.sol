@@ -2,9 +2,9 @@
 pragma solidity 0.8.19;
 
 import "./IChildERC1155.sol";
-import "./IStateReceiver.sol";
+import "./IReceiver.sol";
 
-interface IChildERC1155Predicate is IStateReceiver {
+interface IChildERC1155Predicate is IReceiver {
     function initialize(
         address newGateway,
         address newRootERC721Predicate,

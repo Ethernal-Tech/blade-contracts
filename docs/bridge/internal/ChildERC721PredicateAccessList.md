@@ -317,10 +317,10 @@ Initialization function for ChildERC721Predicate
 | newDestinationTokenTemplate | address | Address of destination token implementation to deploy clones of |
 | newDestinationChainId | uint256 | Chain ID of destination chain |
 
-### onStateReceive
+### onMsgReceive
 
 ```solidity
-function onStateReceive(uint256, address sender, bytes data) external nonpayable
+function onMsgReceive(uint256, address sender, bytes data) external nonpayable
 ```
 
 Function to be used for token deposits
@@ -335,10 +335,10 @@ Function to be used for token deposits
 | sender | address | Address of the sender on the root chain |
 | data | bytes | Data sent by the sender |
 
-### onStateRollback
+### onMsgRollback
 
 ```solidity
-function onStateRollback(uint256, address sender, bytes data) external nonpayable
+function onMsgRollback(uint256, address sender, bytes data) external nonpayable
 ```
 
 Function to be used for token deposits for rollback

@@ -1,4 +1,4 @@
-# IStateReceiver
+# IReceiver
 
 
 
@@ -10,10 +10,10 @@
 
 ## Methods
 
-### onStateReceive
+### onMsgReceive
 
 ```solidity
-function onStateReceive(uint256 counter, address sender, bytes data) external nonpayable
+function onMsgReceive(uint256 counter, address sender, bytes data) external nonpayable
 ```
 
 
@@ -28,10 +28,10 @@ function onStateReceive(uint256 counter, address sender, bytes data) external no
 | sender | address | undefined |
 | data | bytes | undefined |
 
-### onStateRollback
+### onMsgRollback
 
 ```solidity
-function onStateRollback(uint256 id, address sender, bytes data) external nonpayable
+function onMsgRollback(uint256 id, address sender, bytes data) external nonpayable
 ```
 
 

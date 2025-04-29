@@ -2,9 +2,9 @@
 pragma solidity 0.8.19;
 
 import "@openzeppelin/contracts/token/ERC721/extensions/IERC721Metadata.sol";
-import "./IStateReceiver.sol";
+import "./IReceiver.sol";
 
-interface IRootERC721Predicate is IStateReceiver {
+interface IRootERC721Predicate is IReceiver {
     event ERC721Deposit(
         address indexed rootToken,
         address indexed childToken,

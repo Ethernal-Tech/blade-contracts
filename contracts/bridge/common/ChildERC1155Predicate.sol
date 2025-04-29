@@ -82,7 +82,7 @@ contract ChildERC1155Predicate is IChildERC1155Predicate, Predicate, Initializab
      * @param data Data sent by the sender
      * @dev Can be extended to include other signatures for more functionality
      */
-    function onStateReceive(uint256 /* id */, address sender, bytes calldata data) external {
+    function onMsgReceive(uint256 /* id */, address sender, bytes calldata data) external {
         require(msg.sender == address(gateway), "ChildERC1155Predicate: ONLY_GATEWAY");
         require(sender == rootERC1155Predicate, "ChildERC1155Predicate: ONLY_ROOT_PREDICATE");
 
@@ -107,7 +107,7 @@ contract ChildERC1155Predicate is IChildERC1155Predicate, Predicate, Initializab
      * @param data Data sent by the sender
      * @dev Can be extended to include other signatures for more functionality
      */
-    function onStateRollback(uint256 /* id */, address sender, bytes calldata data) external {
+    function onMsgRollback(uint256 /* id */, address sender, bytes calldata data) external {
         require(msg.sender == address(gateway), "ChildERC1155Predicate: ONLY_GATEWAY");
         require(sender == address(this), "ChildERC1155Predicate: ONLY_CHILD_PREDICATE");
 

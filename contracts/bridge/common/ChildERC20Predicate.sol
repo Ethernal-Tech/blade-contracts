@@ -71,7 +71,7 @@ contract ChildERC20Predicate is IChildERC20Predicate, Predicate, Initializable, 
      * @param data Data sent by the sender
      * @dev Can be extended to include other signatures for more functionality
      */
-    function onStateReceive(uint256 /* id */, address sender, bytes calldata data) external {
+    function onMsgReceive(uint256 /* id */, address sender, bytes calldata data) external {
         require(msg.sender == address(gateway), "ChildERC20Predicate: ONLY_GATEWAY");
         require(sender == rootERC20Predicate, "ChildERC20Predicate: ONLY_ROOT_PREDICATE");
 
@@ -92,7 +92,7 @@ contract ChildERC20Predicate is IChildERC20Predicate, Predicate, Initializable, 
      * @param data Data sent by the sender
      * @dev Can be extended to include other signatures for more functionality
      */
-    function onStateRollback(uint256 /* id */, address sender, bytes calldata data) external {
+    function onMsgRollback(uint256 /* id */, address sender, bytes calldata data) external {
         require(msg.sender == address(gateway), "ChildERC20Predicate: ONLY_GATEWAY");
         require(sender == address(this), "ChildERC20Predicate: ONLY_CHILD_PREDICATE");
 

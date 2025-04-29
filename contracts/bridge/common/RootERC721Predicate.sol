@@ -32,11 +32,11 @@ contract RootERC721Predicate is Predicate, Initializable, ERC721Holder, IRootERC
     }
 
     /**
-     * @inheritdoc IStateReceiver
+     * @inheritdoc IReceiver
      * @notice Function to be used for token withdrawals
      * @dev Can be extended to include other signatures for more functionality
      */
-    function onStateReceive(uint256 /* id */, address sender, bytes calldata data) external {
+    function onMsgReceive(uint256 /* id */, address sender, bytes calldata data) external {
         require(msg.sender == address(gateway), "RootERC721Predicate: ONLY_GATEWAY");
         require(sender == childERC721Predicate, "RootERC721Predicate: ONLY_CHILD_PREDICATE");
 
@@ -50,11 +50,11 @@ contract RootERC721Predicate is Predicate, Initializable, ERC721Holder, IRootERC
     }
 
     /**
-     * @inheritdoc IStateReceiver
+     * @inheritdoc IReceiver
      * @notice Function to be used for token withdrawals for rollback
      * @dev Can be extended to include other signatures for more functionality
      */
-    function onStateRollback(uint256 /*  id */, address sender, bytes calldata data) external {
+    function onMsgRollback(uint256 /*  id */, address sender, bytes calldata data) external {
         require(msg.sender == address(gateway), "RootERC721Predicate: ONLY_GATEWAY");
         require(sender == address(this), "RootERC721Predicate: ONLY_ROOT_PREDICATE");
 
