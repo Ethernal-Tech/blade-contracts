@@ -24,7 +24,7 @@ const nativeERC20TokenAddress = "0x0000000000000000000000000000000000000106";
 describe("ChildERC20Predicate", () => {
   let childERC20Predicate: ChildERC20Predicate,
     systemChildERC20Predicate: ChildERC20Predicate,
-    stateReceiverChildERC20Predicate: ChildERC20Predicate,
+    receiverChildERC20Predicate: ChildERC20Predicate,
     gateway: Gateway,
     rootERC20Predicate: string,
     childERC20: ChildERC20,
@@ -76,7 +76,7 @@ describe("ChildERC20Predicate", () => {
 
     impersonateAccount(gateway.address);
     setBalance(gateway.address, "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF");
-    stateReceiverChildERC20Predicate = childERC20Predicate.connect(await ethers.getSigner(gateway.address));
+    receiverChildERC20Predicate = childERC20Predicate.connect(await ethers.getSigner(gateway.address));
   });
 
   it("fail bad initialization", async () => {
@@ -137,9 +137,9 @@ describe("ChildERC20Predicate", () => {
         ethers.utils.parseUnits(String(randomAmount)),
       ]
     );
-    const depositTx = await stateReceiverChildERC20Predicate.onStateReceive(0, rootERC20Predicate, stateSyncData);
+    const depositTx = await receiverChildERC20Predicate.onMsgReceive(0, rootERC20Predicate, stateSyncData);
     const depositReceipt = await depositTx.wait();
-    stopImpersonatingAccount(stateReceiverChildERC20Predicate.address);
+    stopImpersonatingAccount(receiverChildERC20Predicate.address);
     const depositEvent = depositReceipt.events?.find((log) => log.event === "ERC20Deposit");
     expect(depositEvent?.args?.rootToken).to.equal(nativeERC20RootToken);
     expect(depositEvent?.args?.childToken).to.equal(nativeERC20.address);
@@ -161,7 +161,7 @@ describe("ChildERC20Predicate", () => {
         ethers.utils.parseUnits(String(randomAmount)),
       ]
     );
-    const depositTx = await stateReceiverChildERC20Predicate.onStateReceive(0, rootERC20Predicate, stateSyncData);
+    const depositTx = await receiverChildERC20Predicate.onMsgReceive(0, rootERC20Predicate, stateSyncData);
     const depositReceipt = await depositTx.wait();
     const depositEvent = depositReceipt.events?.find((log) => log.event === "ERC20Deposit");
     expect(depositEvent?.args?.rootToken).to.equal(nativeERC20RootToken);
@@ -184,7 +184,7 @@ describe("ChildERC20Predicate", () => {
       ["bytes32", "address", "string", "string", "uint8"],
       [ethers.utils.solidityKeccak256(["string"], ["MAP_TOKEN"]), rootToken, "TEST1", "TEST1", 18]
     );
-    const mapTx = await stateReceiverChildERC20Predicate.onStateReceive(0, rootERC20Predicate, stateSyncData);
+    const mapTx = await receiverChildERC20Predicate.onMsgReceive(0, rootERC20Predicate, stateSyncData);
     const mapReceipt = await mapTx.wait();
     const mapEvent = mapReceipt?.events?.find((log) => log.event === "TokenMapped");
     expect(mapEvent?.args?.rootToken).to.equal(rootToken);
@@ -208,7 +208,7 @@ describe("ChildERC20Predicate", () => {
       ]
     );
     await expect(
-      stateReceiverChildERC20Predicate.onStateReceive(0, rootERC20Predicate, stateSyncData)
+      receiverChildERC20Predicate.onMsgReceive(0, rootERC20Predicate, stateSyncData)
     ).to.be.revertedWithPanic();
   });
 
@@ -218,7 +218,7 @@ describe("ChildERC20Predicate", () => {
       [ethers.utils.solidityKeccak256(["string"], ["MAP_TOKEN"]), rootToken, "TEST1", "TEST1", 18]
     );
     await expect(
-      stateReceiverChildERC20Predicate.onStateReceive(0, rootERC20Predicate, stateSyncData)
+      receiverChildERC20Predicate.onMsgReceive(0, rootERC20Predicate, stateSyncData)
     ).to.be.revertedWithPanic();
   });
 
@@ -267,7 +267,7 @@ describe("ChildERC20Predicate", () => {
         0,
       ]
     );
-    await expect(childERC20Predicate.onStateReceive(0, rootERC20Predicate, stateSyncData)).to.be.revertedWith(
+    await expect(childERC20Predicate.onMsgReceive(0, rootERC20Predicate, stateSyncData)).to.be.revertedWith(
       "ChildERC20Predicate: ONLY_GATEWAY"
     );
   });
@@ -285,7 +285,7 @@ describe("ChildERC20Predicate", () => {
       ]
     );
     await expect(
-      stateReceiverChildERC20Predicate.onStateReceive(0, ethers.Wallet.createRandom().address, stateSyncData)
+      receiverChildERC20Predicate.onMsgReceive(0, ethers.Wallet.createRandom().address, stateSyncData)
     ).to.be.revertedWith("ChildERC20Predicate: ONLY_ROOT_PREDICATE");
   });
 
@@ -301,9 +301,9 @@ describe("ChildERC20Predicate", () => {
         1,
       ]
     );
-    await expect(
-      stateReceiverChildERC20Predicate.onStateReceive(0, rootERC20Predicate, stateSyncData)
-    ).to.be.revertedWith("ChildERC20Predicate: INVALID_SIGNATURE");
+    await expect(receiverChildERC20Predicate.onMsgReceive(0, rootERC20Predicate, stateSyncData)).to.be.revertedWith(
+      "ChildERC20Predicate: INVALID_SIGNATURE"
+    );
   });
 
   it("fail deposit tokens of unknown child token: not a contract", async () => {
@@ -317,9 +317,9 @@ describe("ChildERC20Predicate", () => {
         0,
       ]
     );
-    await expect(
-      stateReceiverChildERC20Predicate.onStateReceive(0, rootERC20Predicate, stateSyncData)
-    ).to.be.revertedWith("ChildERC20Predicate: UNMAPPED_TOKEN");
+    await expect(receiverChildERC20Predicate.onMsgReceive(0, rootERC20Predicate, stateSyncData)).to.be.revertedWith(
+      "ChildERC20Predicate: UNMAPPED_TOKEN"
+    );
   });
 
   it("fail withdraw tokens of unknown child token: not a contract", async () => {
@@ -341,9 +341,9 @@ describe("ChildERC20Predicate", () => {
         0,
       ]
     );
-    await expect(
-      stateReceiverChildERC20Predicate.onStateReceive(0, rootERC20Predicate, stateSyncData)
-    ).to.be.revertedWith("ChildERC20Predicate: UNMAPPED_TOKEN");
+    await expect(receiverChildERC20Predicate.onMsgReceive(0, rootERC20Predicate, stateSyncData)).to.be.revertedWith(
+      "ChildERC20Predicate: UNMAPPED_TOKEN"
+    );
   });
 
   it("fail deposit tokens of unknown child token: unmapped token", async () => {
@@ -361,16 +361,16 @@ describe("ChildERC20Predicate", () => {
         0,
       ]
     );
-    await expect(
-      stateReceiverChildERC20Predicate.onStateReceive(0, rootERC20Predicate, stateSyncData)
-    ).to.be.revertedWith("ChildERC20Predicate: UNMAPPED_TOKEN");
+    await expect(receiverChildERC20Predicate.onMsgReceive(0, rootERC20Predicate, stateSyncData)).to.be.revertedWith(
+      "ChildERC20Predicate: UNMAPPED_TOKEN"
+    );
   });
 
   it("fail withdraw tokens of unknown child token: unmapped token", async () => {
     const rootToken = ethers.Wallet.createRandom().address;
     const childToken = await (await ethers.getContractFactory("ChildERC20")).deploy();
     await childToken.initialize(rootToken, "TEST", "TEST", 18);
-    await expect(stateReceiverChildERC20Predicate.withdraw(childToken.address, 1)).to.be.revertedWith(
+    await expect(receiverChildERC20Predicate.withdraw(childToken.address, 1)).to.be.revertedWith(
       "ChildERC20Predicate: UNMAPPED_TOKEN"
     );
   });
@@ -392,11 +392,11 @@ describe("ChildERC20Predicate", () => {
       address: nativeERC20TokenAddress,
     });
     fakeNativeERC20.rootToken.returns(nativeERC20RootToken);
-    fakeNativeERC20.predicate.returns(stateReceiverChildERC20Predicate.address);
+    fakeNativeERC20.predicate.returns(receiverChildERC20Predicate.address);
     fakeNativeERC20.mint.returns(false);
-    await expect(
-      stateReceiverChildERC20Predicate.onStateReceive(0, rootERC20Predicate, stateSyncData)
-    ).to.be.revertedWith("ChildERC20Predicate: MINT_FAILED");
+    await expect(receiverChildERC20Predicate.onMsgReceive(0, rootERC20Predicate, stateSyncData)).to.be.revertedWith(
+      "ChildERC20Predicate: MINT_FAILED"
+    );
     fakeNativeERC20.mint.returns();
   });
 
@@ -405,14 +405,14 @@ describe("ChildERC20Predicate", () => {
       address: nativeERC20TokenAddress,
     });
     fakeNativeERC20.rootToken.returns(nativeERC20RootToken);
-    fakeNativeERC20.predicate.returns(stateReceiverChildERC20Predicate.address);
+    fakeNativeERC20.predicate.returns(receiverChildERC20Predicate.address);
     fakeNativeERC20.burn.returns(false);
-    await expect(stateReceiverChildERC20Predicate.withdraw(nativeERC20.address, 1)).to.be.revertedWith(
+    await expect(receiverChildERC20Predicate.withdraw(nativeERC20.address, 1)).to.be.revertedWith(
       "ChildERC20Predicate: BURN_FAILED"
     );
   });
 
-  it("OnStateRollback: failed unmapped_token", async () => {
+  it("OnMsgRollback: failed unmapped_token", async () => {
     const mappedData = ethers.utils.defaultAbiCoder.encode(
       ["bytes32", "address", "address", "address", "uint256"],
       [
@@ -425,11 +425,11 @@ describe("ChildERC20Predicate", () => {
     );
 
     await expect(
-      stateReceiverChildERC20Predicate.onStateRollback(0, stateReceiverChildERC20Predicate.address, mappedData)
+      receiverChildERC20Predicate.onMsgRollback(0, receiverChildERC20Predicate.address, mappedData)
     ).to.be.revertedWith("ChildERC20Predicate: UNMAPPED_TOKEN");
   });
 
-  it("OnStateRollback: failed only_gateway", async () => {
+  it("OnMsgRollback: failed only_gateway", async () => {
     const mappedData = ethers.utils.defaultAbiCoder.encode(
       ["bytes32", "address", "address", "address", "uint256"],
       [
@@ -442,11 +442,11 @@ describe("ChildERC20Predicate", () => {
     );
 
     await expect(
-      systemChildERC20Predicate.onStateRollback(0, systemChildERC20Predicate.address, mappedData)
+      systemChildERC20Predicate.onMsgRollback(0, systemChildERC20Predicate.address, mappedData)
     ).to.be.revertedWith("ChildERC20Predicate: ONLY_GATEWAY");
   });
 
-  it("OnStateRollback: failed only_child_predicate", async () => {
+  it("OnMsgRollback: failed only_child_predicate", async () => {
     const mappedData = ethers.utils.defaultAbiCoder.encode(
       ["bytes32", "address", "address", "address", "uint256"],
       [
@@ -459,7 +459,7 @@ describe("ChildERC20Predicate", () => {
     );
 
     await expect(
-      stateReceiverChildERC20Predicate.onStateRollback(0, "0x0000000000000000000000000000000000000000", mappedData)
+      receiverChildERC20Predicate.onMsgRollback(0, "0x0000000000000000000000000000000000000000", mappedData)
     ).to.be.revertedWith("ChildERC20Predicate: ONLY_CHILD_PREDICATE");
   });
 });

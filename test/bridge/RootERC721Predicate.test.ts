@@ -369,7 +369,7 @@ describe("RootERC721Predicate", () => {
     expect(withdrawEvent?.args?.rootToken).to.equal(rootToken.address);
   });
 
-  it("OnStateRollback: failed only_gateway", async () => {
+  it("OnMsgRollback: failed only_gateway", async () => {
     const mappedData = ethers.utils.defaultAbiCoder.encode(
       ["bytes32", "address", "address", "address", "uint256"],
       [
@@ -386,7 +386,7 @@ describe("RootERC721Predicate", () => {
     );
   });
 
-  it("OnStateRollback: failed only_child_predicate", async () => {
+  it("OnMsgRollback: failed only_child_predicate", async () => {
     const mappedData = ethers.utils.defaultAbiCoder.encode(
       ["bytes32", "address", "address", "address", "uint256"],
       [

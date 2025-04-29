@@ -138,7 +138,7 @@ describe("EIP1559Burn", () => {
         ethers.utils.parseUnits(String(randomAmount)),
       ]
     );
-    await expect(stateReceiverChildERC20Predicate.onStateReceive(0, rootERC20Predicate, stateSyncData)).to.not.be
+    await expect(stateReceiverChildERC20Predicate.onMsgReceive(0, rootERC20Predicate, stateSyncData)).to.not.be
       .reverted;
     setBalance(eip1559Burn.address, ethers.utils.parseUnits(String(randomAmount)));
     expect(await nativeERC20.balanceOf(eip1559Burn.address)).to.equal(ethers.utils.parseUnits(String(randomAmount)));
