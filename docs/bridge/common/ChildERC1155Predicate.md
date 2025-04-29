@@ -218,10 +218,10 @@ function rootERC1155Predicate() external view returns (address)
 |---|---|---|
 | _0 | address | undefined |
 
-### sourceTokenToDestinationToken
+### rootTokenToChildToken
 
 ```solidity
-function sourceTokenToDestinationToken(address) external view returns (address)
+function rootTokenToChildToken(address) external view returns (address)
 ```
 
 

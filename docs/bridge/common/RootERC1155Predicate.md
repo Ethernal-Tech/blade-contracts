@@ -348,10 +348,10 @@ Function to be used for token withdrawals for rollback
 | sender | address | Address of the sender on the root chain |
 | data | bytes | Data sent by the sender |
 
-### sourceTokenToDestinationToken
+### rootTokenToChildToken
 
 ```solidity
-function sourceTokenToDestinationToken(address) external view returns (address)
+function rootTokenToChildToken(address) external view returns (address)
 ```
 
 

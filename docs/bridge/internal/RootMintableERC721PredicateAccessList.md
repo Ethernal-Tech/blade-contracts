@@ -515,6 +515,28 @@ function renounceOwnership() external nonpayable
 *Leaves the contract without owner. It will not be possible to call `onlyOwner` functions. Can only be called by the current owner. NOTE: Renouncing ownership will leave the contract without an owner, thereby disabling any functionality that is only available to the owner.*
 
 
+### rootTokenToChildToken
+
+```solidity
+function rootTokenToChildToken(address) external view returns (address)
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | address | undefined |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | address | undefined |
+
 ### setAllowList
 
 ```solidity
@@ -546,28 +568,6 @@ function setBlockList(bool newUseBlockList) external nonpayable
 | Name | Type | Description |
 |---|---|---|
 | newUseBlockList | bool | undefined |
-
-### sourceTokenToDestinationToken
-
-```solidity
-function sourceTokenToDestinationToken(address) external view returns (address)
-```
-
-
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | address | undefined |
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | address | undefined |
 
 ### transferOwnership
 
