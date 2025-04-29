@@ -12,7 +12,7 @@ import "../../lib/Predicate.sol";
 contract RootERC1155Predicate is Predicate, Initializable, ERC1155Holder, IRootERC1155Predicate {
     address public childERC1155Predicate;
     address public destinationTokenTemplate;
-    mapping(address => address) public sourceTokenToDestinationToken;
+    mapping(address => address) public rootTokenToChildToken;
 
     /**
      * @notice Initialization function for RootERC1155Predicate
@@ -104,10 +104,7 @@ contract RootERC1155Predicate is Predicate, Initializable, ERC1155Holder, IRootE
      */
     function mapToken(IERC1155MetadataURI rootToken) public returns (address childToken) {
         require(address(rootToken) != address(0), "RootERC1155Predicate: INVALID_TOKEN");
-        require(
-            sourceTokenToDestinationToken[address(rootToken)] == address(0),
-            "RootERC1155Predicate: ALREADY_MAPPED"
-        );
+        require(rootTokenToChildToken[address(rootToken)] == address(0), "RootERC1155Predicate: ALREADY_MAPPED");
 
         address childPredicate = childERC1155Predicate;
 
@@ -117,7 +114,7 @@ contract RootERC1155Predicate is Predicate, Initializable, ERC1155Holder, IRootE
             childPredicate
         );
 
-        sourceTokenToDestinationToken[address(rootToken)] = childToken;
+        rootTokenToChildToken[address(rootToken)] = childToken;
 
         string memory uri = "";
         // slither does not deal well with try-catch: https://github.com/crytic/slither/issues/982
@@ -135,11 +132,11 @@ contract RootERC1155Predicate is Predicate, Initializable, ERC1155Holder, IRootE
         (address rootToken, , , ) = abi.decode(data, (address, address, address, uint256));
         require(address(rootToken) != address(0), "RootERC1155Predicate: INVALID_TOKEN");
         require(
-            sourceTokenToDestinationToken[address(rootToken)] != address(0),
+            rootTokenToChildToken[address(rootToken)] != address(0),
             "RootERC1155Predicate: TOKEN_IS_ALREADY_UNMAPPED"
         );
 
-        sourceTokenToDestinationToken[rootToken] = address(0);
+        rootTokenToChildToken[rootToken] = address(0);
 
         emit TokenUnMapped(rootToken);
     }
@@ -211,7 +208,7 @@ contract RootERC1155Predicate is Predicate, Initializable, ERC1155Holder, IRootE
         uint256 tokenId,
         uint256 amount
     ) private {
-        address childToken = sourceTokenToDestinationToken[rootToken];
+        address childToken = rootTokenToChildToken[rootToken];
         assert(childToken != address(0)); // invariant because child predicate should have already mapped tokens
 
         IERC1155MetadataURI(rootToken).safeTransferFrom(address(this), receiver, tokenId, amount, "");
@@ -253,7 +250,7 @@ contract RootERC1155Predicate is Predicate, Initializable, ERC1155Holder, IRootE
         uint256[] memory tokenIds,
         uint256[] memory amounts
     ) private {
-        address childToken = sourceTokenToDestinationToken[rootToken];
+        address childToken = rootTokenToChildToken[rootToken];
         assert(childToken != address(0)); // invariant because child predicate should have already mapped tokens
         for (uint256 i = 0; i < tokenIds.length; ) {
             IERC1155MetadataURI(rootToken).safeTransferFrom(address(this), receivers[i], tokenIds[i], amounts[i], "");
@@ -266,7 +263,7 @@ contract RootERC1155Predicate is Predicate, Initializable, ERC1155Holder, IRootE
     }
 
     function _getChildToken(IERC1155MetadataURI rootToken) private returns (address childToken) {
-        childToken = sourceTokenToDestinationToken[address(rootToken)];
+        childToken = rootTokenToChildToken[address(rootToken)];
         if (childToken == address(0)) childToken = mapToken(IERC1155MetadataURI(rootToken));
         assert(childToken != address(0)); // invariant because we map the token if mapping does not exist
     }

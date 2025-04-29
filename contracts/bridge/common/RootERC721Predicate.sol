@@ -12,7 +12,7 @@ import "../../lib/Predicate.sol";
 contract RootERC721Predicate is Predicate, Initializable, ERC721Holder, IRootERC721Predicate {
     address public childERC721Predicate;
     address public destinationTokenTemplate;
-    mapping(address => address) public sourceTokenToDestinationToken;
+    mapping(address => address) public rootTokenToChildToken;
 
     /**
      * @notice Initialization function for RootERC721Predicate
@@ -100,7 +100,7 @@ contract RootERC721Predicate is Predicate, Initializable, ERC721Holder, IRootERC
      */
     function mapToken(IERC721Metadata rootToken) public returns (address) {
         require(address(rootToken) != address(0), "RootERC721Predicate: INVALID_TOKEN");
-        require(sourceTokenToDestinationToken[address(rootToken)] == address(0), "RootERC721Predicate: ALREADY_MAPPED");
+        require(rootTokenToChildToken[address(rootToken)] == address(0), "RootERC721Predicate: ALREADY_MAPPED");
 
         address childPredicate = childERC721Predicate;
 
@@ -110,7 +110,7 @@ contract RootERC721Predicate is Predicate, Initializable, ERC721Holder, IRootERC
             childPredicate
         );
 
-        sourceTokenToDestinationToken[address(rootToken)] = childToken;
+        rootTokenToChildToken[address(rootToken)] = childToken;
 
         gateway.sendBridgeMsg(
             childPredicate,
@@ -126,11 +126,11 @@ contract RootERC721Predicate is Predicate, Initializable, ERC721Holder, IRootERC
         (address rootToken, , , ) = abi.decode(data, (address, address, address, uint256));
         require(address(rootToken) != address(0), "RootERC721Predicate: INVALID_TOKEN");
         require(
-            sourceTokenToDestinationToken[address(rootToken)] != address(0),
+            rootTokenToChildToken[address(rootToken)] != address(0),
             "RootERC721Predicate: TOKEN_IS_ALREADY_UNMAPPED"
         );
 
-        sourceTokenToDestinationToken[rootToken] = address(0);
+        rootTokenToChildToken[rootToken] = address(0);
 
         emit TokenUnMapped(rootToken);
     }
@@ -195,7 +195,7 @@ contract RootERC721Predicate is Predicate, Initializable, ERC721Holder, IRootERC
     }
 
     function _withdrawInternal(address rootToken, address withdrawer, address receiver, uint256 tokenId) private {
-        address childToken = sourceTokenToDestinationToken[rootToken];
+        address childToken = rootTokenToChildToken[rootToken];
         assert(childToken != address(0)); // invariant because child predicate should have already mapped tokens
 
         IERC721Metadata(rootToken).safeTransferFrom(address(this), receiver, tokenId);
@@ -233,7 +233,7 @@ contract RootERC721Predicate is Predicate, Initializable, ERC721Holder, IRootERC
         address[] memory receivers,
         uint256[] memory tokenIds
     ) private {
-        address childToken = sourceTokenToDestinationToken[rootToken];
+        address childToken = rootTokenToChildToken[rootToken];
         assert(childToken != address(0)); // invariant because child predicate should have already mapped tokens
         for (uint256 i = 0; i < tokenIds.length; ) {
             IERC721Metadata(rootToken).safeTransferFrom(address(this), receivers[i], tokenIds[i]);
@@ -246,7 +246,7 @@ contract RootERC721Predicate is Predicate, Initializable, ERC721Holder, IRootERC
     }
 
     function _getChildToken(IERC721Metadata rootToken) private returns (address childToken) {
-        childToken = sourceTokenToDestinationToken[address(rootToken)];
+        childToken = rootTokenToChildToken[address(rootToken)];
         if (childToken == address(0)) childToken = mapToken(IERC721Metadata(rootToken));
         assert(childToken != address(0)); // invariant because we map the token if mapping does not exist
     }
