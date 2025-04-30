@@ -14,7 +14,7 @@ import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 
 describe("RootERC721Predicate", () => {
   let rootERC721Predicate: RootERC721Predicate,
-    exitHelperRootERC721Predicate: RootERC721Predicate,
+    gatewaySignerRootERC721Predicate: RootERC721Predicate,
     gateway: Gateway,
     childERC721Predicate: string,
     childTokenTemplate: ChildERC721,
@@ -43,7 +43,7 @@ describe("RootERC721Predicate", () => {
 
     impersonateAccount(gateway.address);
     setBalance(gateway.address, "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF");
-    exitHelperRootERC721Predicate = rootERC721Predicate.connect(await ethers.getSigner(gateway.address));
+    gatewaySignerRootERC721Predicate = rootERC721Predicate.connect(await ethers.getSigner(gateway.address));
   });
 
   it("fail bad initialization", async () => {
@@ -84,7 +84,7 @@ describe("RootERC721Predicate", () => {
 
   it("withdraw tokens fail: only child predicate", async () => {
     await expect(
-      exitHelperRootERC721Predicate.onMsgReceive(0, ethers.Wallet.createRandom().address, "0x00")
+      gatewaySignerRootERC721Predicate.onMsgReceive(0, ethers.Wallet.createRandom().address, "0x00")
     ).to.be.revertedWith("RootERC721Predicate: ONLY_CHILD_PREDICATE");
   });
 
@@ -99,7 +99,7 @@ describe("RootERC721Predicate", () => {
         0,
       ]
     );
-    await expect(exitHelperRootERC721Predicate.onMsgReceive(0, childERC721Predicate, exitData)).to.be.revertedWith(
+    await expect(gatewaySignerRootERC721Predicate.onMsgReceive(0, childERC721Predicate, exitData)).to.be.revertedWith(
       "RootERC721Predicate: INVALID_SIGNATURE"
     );
   });
@@ -116,7 +116,7 @@ describe("RootERC721Predicate", () => {
       ]
     );
     await expect(
-      exitHelperRootERC721Predicate.onMsgReceive(0, childERC721Predicate, exitData)
+      gatewaySignerRootERC721Predicate.onMsgReceive(0, childERC721Predicate, exitData)
     ).to.be.revertedWithPanic();
   });
 
@@ -159,7 +159,7 @@ describe("RootERC721Predicate", () => {
         1,
       ]
     );
-    await expect(exitHelperRootERC721Predicate.onMsgReceive(0, childERC721Predicate, exitData)).to.be.revertedWith(
+    await expect(gatewaySignerRootERC721Predicate.onMsgReceive(0, childERC721Predicate, exitData)).to.be.revertedWith(
       "ERC721: invalid token ID"
     );
   });
@@ -253,7 +253,7 @@ describe("RootERC721Predicate", () => {
         0,
       ]
     );
-    const withdrawTx = await exitHelperRootERC721Predicate.onMsgReceive(0, childERC721Predicate, exitData);
+    const withdrawTx = await gatewaySignerRootERC721Predicate.onMsgReceive(0, childERC721Predicate, exitData);
     const withdrawReceipt = await withdrawTx.wait();
     const withdrawEvent = withdrawReceipt?.events?.find((log: any) => log.event === "ERC721Withdraw");
     const childToken = await rootERC721Predicate.rootTokenToChildToken(rootToken.address);
@@ -275,7 +275,7 @@ describe("RootERC721Predicate", () => {
         1,
       ]
     );
-    const withdrawTx = await exitHelperRootERC721Predicate.onMsgReceive(0, childERC721Predicate, exitData);
+    const withdrawTx = await gatewaySignerRootERC721Predicate.onMsgReceive(0, childERC721Predicate, exitData);
     const withdrawReceipt = await withdrawTx.wait();
     const withdrawEvent = withdrawReceipt?.events?.find((log: any) => log.event === "ERC721Withdraw");
     const childToken = await rootERC721Predicate.rootTokenToChildToken(rootToken.address);
@@ -302,7 +302,7 @@ describe("RootERC721Predicate", () => {
         depositedBatchIds.slice(0, batchSize),
       ]
     );
-    const withdrawTx = await exitHelperRootERC721Predicate.onMsgReceive(0, childERC721Predicate, exitData);
+    const withdrawTx = await gatewaySignerRootERC721Predicate.onMsgReceive(0, childERC721Predicate, exitData);
     const withdrawReceipt = await withdrawTx.wait();
     const withdrawEvent = withdrawReceipt?.events?.find((log: any) => log.event === "ERC721WithdrawBatch");
     const childToken = await rootERC721Predicate.rootTokenToChildToken(rootToken.address);
@@ -326,7 +326,7 @@ describe("RootERC721Predicate", () => {
     );
 
     await expect(
-      exitHelperRootERC721Predicate.onMsgRollback(0, exitHelperRootERC721Predicate.address, mappedData)
+      gatewaySignerRootERC721Predicate.onMsgRollback(0, gatewaySignerRootERC721Predicate.address, mappedData)
     ).to.be.revertedWith("RootERC721Predicate: INVALID_TOKEN");
   });
 
@@ -343,7 +343,7 @@ describe("RootERC721Predicate", () => {
     );
 
     await expect(
-      exitHelperRootERC721Predicate.onMsgRollback(0, exitHelperRootERC721Predicate.address, mappedData)
+      gatewaySignerRootERC721Predicate.onMsgRollback(0, gatewaySignerRootERC721Predicate.address, mappedData)
     ).to.be.revertedWith("RootERC721Predicate: TOKEN_IS_ALREADY_UNMAPPED");
   });
 
@@ -359,9 +359,9 @@ describe("RootERC721Predicate", () => {
       ]
     );
 
-    const withdrawTx = await exitHelperRootERC721Predicate.onMsgRollback(
+    const withdrawTx = await gatewaySignerRootERC721Predicate.onMsgRollback(
       0,
-      exitHelperRootERC721Predicate.address,
+      gatewaySignerRootERC721Predicate.address,
       mappedData
     );
     const withdrawReceipt = await withdrawTx.wait();
@@ -399,7 +399,7 @@ describe("RootERC721Predicate", () => {
     );
 
     await expect(
-      exitHelperRootERC721Predicate.onMsgRollback(0, "0x0000000000000000000000000000000000000000", mappedData)
+      gatewaySignerRootERC721Predicate.onMsgRollback(0, "0x0000000000000000000000000000000000000000", mappedData)
     ).to.be.revertedWith("RootERC721Predicate: ONLY_ROOT_PREDICATE");
   });
 });

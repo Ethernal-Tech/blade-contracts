@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.19;
 
-contract StateReceivingContract {
+contract ReceivingContract {
     uint256 public counter;
 
     function onMsgReceive(uint256 /* id */, address /* sender */, bytes calldata data) external returns (bytes32) {

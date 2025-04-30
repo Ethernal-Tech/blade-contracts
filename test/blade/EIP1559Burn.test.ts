@@ -24,7 +24,7 @@ describe("EIP1559Burn", () => {
     childERC20: ChildERC20,
     childERC20Predicate: ChildERC20Predicate,
     systemChildERC20Predicate: ChildERC20Predicate,
-    stateReceiverChildERC20Predicate: ChildERC20Predicate,
+    receiverChildERC20Predicate: ChildERC20Predicate,
     nativeERC20: NativeERC20,
     rootERC20Predicate: string,
     nativeERC20RootToken: string,
@@ -86,7 +86,7 @@ describe("EIP1559Burn", () => {
     impersonateAccount(gateway.address);
     setBalance(gateway.address, "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF");
 
-    stateReceiverChildERC20Predicate = childERC20Predicate.connect(await ethers.getSigner(gateway.address));
+    receiverChildERC20Predicate = childERC20Predicate.connect(await ethers.getSigner(gateway.address));
 
     const EIP1559Burn: EIP1559Burn__factory = await ethers.getContractFactory("EIP1559Burn");
     eip1559Burn = await EIP1559Burn.deploy();
@@ -138,8 +138,7 @@ describe("EIP1559Burn", () => {
         ethers.utils.parseUnits(String(randomAmount)),
       ]
     );
-    await expect(stateReceiverChildERC20Predicate.onMsgReceive(0, rootERC20Predicate, stateSyncData)).to.not.be
-      .reverted;
+    await expect(receiverChildERC20Predicate.onMsgReceive(0, rootERC20Predicate, stateSyncData)).to.not.be.reverted;
     setBalance(eip1559Burn.address, ethers.utils.parseUnits(String(randomAmount)));
     expect(await nativeERC20.balanceOf(eip1559Burn.address)).to.equal(ethers.utils.parseUnits(String(randomAmount)));
   });
