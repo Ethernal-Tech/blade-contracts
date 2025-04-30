@@ -159,12 +159,14 @@ contract RootERC721Predicate is Predicate, Initializable, ERC721Holder, IRootERC
         _beforeTokenDeposit();
         address childToken = _getChildToken(rootToken);
 
+        // slither-disable-start calls-loop
         for (uint256 i = 0; i < tokenIds.length; ) {
             rootToken.safeTransferFrom(msg.sender, address(this), tokenIds[i]);
             unchecked {
                 ++i;
             }
         }
+        // slither-disable-end calls-loop
 
         gateway.sendBridgeMsg(
             childERC721Predicate,
@@ -235,12 +237,14 @@ contract RootERC721Predicate is Predicate, Initializable, ERC721Holder, IRootERC
     ) private {
         address childToken = rootTokenToChildToken[rootToken];
         assert(childToken != address(0)); // invariant because child predicate should have already mapped tokens
+        // slither-disable-start calls-loop
         for (uint256 i = 0; i < tokenIds.length; ) {
             IERC721Metadata(rootToken).safeTransferFrom(address(this), receivers[i], tokenIds[i]);
             unchecked {
                 ++i;
             }
         }
+        // slither-disable-end calls-loop
         // slither-disable-next-line reentrancy-events
         emit ERC721WithdrawBatch(address(rootToken), childToken, withdrawer, receivers, tokenIds);
     }

@@ -166,12 +166,14 @@ contract RootERC1155Predicate is Predicate, Initializable, ERC1155Holder, IRootE
         _beforeTokenDeposit();
         address childToken = _getChildToken(rootToken);
 
+        // slither-disable-start calls-loop
         for (uint256 i = 0; i < tokenIds.length; ) {
             rootToken.safeTransferFrom(msg.sender, address(this), tokenIds[i], amounts[i], "");
             unchecked {
                 ++i;
             }
         }
+        // slither-disable-end calls-loop
 
         gateway.sendBridgeMsg(
             childERC1155Predicate,
@@ -252,12 +254,14 @@ contract RootERC1155Predicate is Predicate, Initializable, ERC1155Holder, IRootE
     ) private {
         address childToken = rootTokenToChildToken[rootToken];
         assert(childToken != address(0)); // invariant because child predicate should have already mapped tokens
+        // slither-disable-start calls-loop
         for (uint256 i = 0; i < tokenIds.length; ) {
             IERC1155MetadataURI(rootToken).safeTransferFrom(address(this), receivers[i], tokenIds[i], amounts[i], "");
             unchecked {
                 ++i;
             }
         }
+        // slither-disable-end calls-loop
         // slither-disable-next-line reentrancy-events
         emit ERC1155WithdrawBatch(address(rootToken), childToken, withdrawer, receivers, tokenIds, amounts);
     }
