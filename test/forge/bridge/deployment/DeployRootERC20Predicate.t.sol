@@ -78,7 +78,7 @@ contract DeployRootERC20PredicateTest is Test {
             bytes32(bytes.concat(hex"000000000000000000000000", abi.encodePacked(newChildTokenTemplate)))
         );
         assertEq(
-            proxyAsRootERC20Predicate.sourceTokenToDestinationToken(nativeTokenRootAddress),
+            proxyAsRootERC20Predicate.rootTokenToChildToken(nativeTokenRootAddress),
             address(0x0000000000000000000000000000000000000106)
         );
     }

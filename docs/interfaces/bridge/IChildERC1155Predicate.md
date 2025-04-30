@@ -29,10 +29,10 @@ function initialize(address newGateway, address newRootERC721Predicate, address 
 | newDestinationTokenTemplate | address | undefined |
 | newDestinationChainId | uint256 | undefined |
 
-### onStateReceive
+### onMsgReceive
 
 ```solidity
-function onStateReceive(uint256 id, address sender, bytes data) external nonpayable
+function onMsgReceive(uint256 id, address sender, bytes data) external nonpayable
 ```
 
 Called by gateway when state is received from source chain
@@ -47,10 +47,10 @@ Called by gateway when state is received from source chain
 | sender | address | Address of the sender on the child chain |
 | data | bytes | Data sent by the sender |
 
-### onStateRollback
+### onMsgRollback
 
 ```solidity
-function onStateRollback(uint256 id, address sender, bytes data) external nonpayable
+function onMsgRollback(uint256 id, address sender, bytes data) external nonpayable
 ```
 
 Called by gateway when state is received from source chain

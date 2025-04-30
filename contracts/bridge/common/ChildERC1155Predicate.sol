@@ -18,7 +18,7 @@ contract ChildERC1155Predicate is IChildERC1155Predicate, Predicate, Initializab
     address public rootERC1155Predicate;
     address public destinationTokenTemplate;
 
-    mapping(address => address) public sourceTokenToDestinationToken;
+    mapping(address => address) public rootTokenToChildToken;
 
     event ERC1155Deposit(
         address indexed rootToken,
@@ -82,7 +82,7 @@ contract ChildERC1155Predicate is IChildERC1155Predicate, Predicate, Initializab
      * @param data Data sent by the sender
      * @dev Can be extended to include other signatures for more functionality
      */
-    function onStateReceive(uint256 /* id */, address sender, bytes calldata data) external {
+    function onMsgReceive(uint256 /* id */, address sender, bytes calldata data) external {
         require(msg.sender == address(gateway), "ChildERC1155Predicate: ONLY_GATEWAY");
         require(sender == rootERC1155Predicate, "ChildERC1155Predicate: ONLY_ROOT_PREDICATE");
 
@@ -107,7 +107,7 @@ contract ChildERC1155Predicate is IChildERC1155Predicate, Predicate, Initializab
      * @param data Data sent by the sender
      * @dev Can be extended to include other signatures for more functionality
      */
-    function onStateRollback(uint256 /* id */, address sender, bytes calldata data) external {
+    function onMsgRollback(uint256 /* id */, address sender, bytes calldata data) external {
         require(msg.sender == address(gateway), "ChildERC1155Predicate: ONLY_GATEWAY");
         require(sender == address(this), "ChildERC1155Predicate: ONLY_CHILD_PREDICATE");
 
@@ -210,10 +210,7 @@ contract ChildERC1155Predicate is IChildERC1155Predicate, Predicate, Initializab
     ) private onlyValidToken(childToken) {
         address rootToken = childToken.rootToken();
 
-        require(
-            sourceTokenToDestinationToken[rootToken] == address(childToken),
-            "ChildERC1155Predicate: UNMAPPED_TOKEN"
-        );
+        require(rootTokenToChildToken[rootToken] == address(childToken), "ChildERC1155Predicate: UNMAPPED_TOKEN");
         // a mapped token should never have root token unset
         assert(rootToken != address(0));
         // a mapped token should never have predicate unset
@@ -237,10 +234,7 @@ contract ChildERC1155Predicate is IChildERC1155Predicate, Predicate, Initializab
     ) private onlyValidToken(childToken) {
         address rootToken = childToken.rootToken();
 
-        require(
-            sourceTokenToDestinationToken[rootToken] == address(childToken),
-            "ChildERC1155Predicate: UNMAPPED_TOKEN"
-        );
+        require(rootTokenToChildToken[rootToken] == address(childToken), "ChildERC1155Predicate: UNMAPPED_TOKEN");
         // a mapped token should never have root token unset
         assert(rootToken != address(0));
         // a mapped token should never have predicate unset
@@ -287,7 +281,7 @@ contract ChildERC1155Predicate is IChildERC1155Predicate, Predicate, Initializab
         uint256 tokenId,
         uint256 amount
     ) private {
-        IChildERC1155 childToken = IChildERC1155(sourceTokenToDestinationToken[depositToken]);
+        IChildERC1155 childToken = IChildERC1155(rootTokenToChildToken[depositToken]);
 
         require(address(childToken) != address(0), "ChildERC1155Predicate: UNMAPPED_TOKEN");
         // a mapped token should always pass specifications
@@ -339,7 +333,7 @@ contract ChildERC1155Predicate is IChildERC1155Predicate, Predicate, Initializab
         uint256[] memory tokenIds,
         uint256[] memory amounts
     ) private {
-        IChildERC1155 childToken = IChildERC1155(sourceTokenToDestinationToken[depositToken]);
+        IChildERC1155 childToken = IChildERC1155(rootTokenToChildToken[depositToken]);
 
         require(address(childToken) != address(0), "ChildERC1155Predicate: UNMAPPED_TOKEN");
         // a mapped token should always pass specifications
@@ -368,11 +362,11 @@ contract ChildERC1155Predicate is IChildERC1155Predicate, Predicate, Initializab
     function _mapToken(bytes calldata data) private {
         (, address rootToken, string memory uri_) = abi.decode(data, (bytes32, address, string));
         assert(rootToken != address(0)); // invariant since root predicate performs the same check
-        assert(sourceTokenToDestinationToken[rootToken] == address(0)); // invariant since root predicate performs the same check
+        assert(rootTokenToChildToken[rootToken] == address(0)); // invariant since root predicate performs the same check
         IChildERC1155 childToken = IChildERC1155(
             Clones.cloneDeterministic(destinationTokenTemplate, keccak256(abi.encodePacked(rootToken)))
         );
-        sourceTokenToDestinationToken[rootToken] = address(childToken);
+        rootTokenToChildToken[rootToken] = address(childToken);
         childToken.initialize(rootToken, uri_);
 
         // slither-disable-next-line reentrancy-events

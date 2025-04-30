@@ -409,10 +409,10 @@ Function that retrieves rootchain token that represents Supernets native token
 |---|---|---|
 | _0 | address | undefined |
 
-### onStateReceive
+### onMsgReceive
 
 ```solidity
-function onStateReceive(uint256, address sender, bytes data) external nonpayable
+function onMsgReceive(uint256, address sender, bytes data) external nonpayable
 ```
 
 Function to be used for token withdrawals
@@ -427,10 +427,10 @@ Function to be used for token withdrawals
 | sender | address | Address of the sender on the child chain |
 | data | bytes | Data sent by the sender |
 
-### onStateRollback
+### onMsgRollback
 
 ```solidity
-function onStateRollback(uint256, address sender, bytes data) external nonpayable
+function onMsgRollback(uint256, address sender, bytes data) external nonpayable
 ```
 
 Function to be used for token withdrawals for rollback
@@ -490,6 +490,28 @@ function renounceOwnership() external nonpayable
 *Leaves the contract without owner. It will not be possible to call `onlyOwner` functions. Can only be called by the current owner. NOTE: Renouncing ownership will leave the contract without an owner, thereby disabling any functionality that is only available to the owner.*
 
 
+### rootTokenToChildToken
+
+```solidity
+function rootTokenToChildToken(address) external view returns (address)
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | address | undefined |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | address | undefined |
+
 ### setAllowList
 
 ```solidity
@@ -521,28 +543,6 @@ function setBlockList(bool newUseBlockList) external nonpayable
 | Name | Type | Description |
 |---|---|---|
 | newUseBlockList | bool | undefined |
-
-### sourceTokenToDestinationToken
-
-```solidity
-function sourceTokenToDestinationToken(address) external view returns (address)
-```
-
-
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | address | undefined |
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | address | undefined |
 
 ### transferOwnership
 

@@ -257,10 +257,10 @@ Function that retrieves rootchain token that represents Supernets native token
 |---|---|---|
 | _0 | address | address Address of rootchain token (mapped to Supernets native token) |
 
-### onStateReceive
+### onMsgReceive
 
 ```solidity
-function onStateReceive(uint256, address sender, bytes data) external nonpayable
+function onMsgReceive(uint256, address sender, bytes data) external nonpayable
 ```
 
 Function to be used for token withdrawals
@@ -275,10 +275,10 @@ Function to be used for token withdrawals
 | sender | address | Address of the sender on the child chain |
 | data | bytes | Data sent by the sender |
 
-### onStateRollback
+### onMsgRollback
 
 ```solidity
-function onStateRollback(uint256, address sender, bytes data) external nonpayable
+function onMsgRollback(uint256, address sender, bytes data) external nonpayable
 ```
 
 Function to be used for token withdrawals for rollback
@@ -293,10 +293,10 @@ Function to be used for token withdrawals for rollback
 | sender | address | Address of the sender on the root chain |
 | data | bytes | Data sent by the sender |
 
-### sourceTokenToDestinationToken
+### rootTokenToChildToken
 
 ```solidity
-function sourceTokenToDestinationToken(address) external view returns (address)
+function rootTokenToChildToken(address) external view returns (address)
 ```
 
 

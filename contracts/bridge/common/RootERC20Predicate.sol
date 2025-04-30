@@ -14,7 +14,7 @@ contract RootERC20Predicate is Predicate, Initializable, IRootERC20Predicate {
 
     address public childERC20Predicate;
     address public destinationTokenTemplate;
-    mapping(address => address) public sourceTokenToDestinationToken;
+    mapping(address => address) public rootTokenToChildToken;
     address public nativeTokenRoot;
 
     /**
@@ -55,11 +55,11 @@ contract RootERC20Predicate is Predicate, Initializable, IRootERC20Predicate {
     // slither-disable-end dead-code
 
     /**
-     * @inheritdoc IStateReceiver
+     * @inheritdoc IReceiver
      * @notice Function to be used for token withdrawals
      * @dev Can be extended to include other signatures for more functionality
      */
-    function onStateReceive(uint256 /* id */, address sender, bytes calldata data) external {
+    function onMsgReceive(uint256 /* id */, address sender, bytes calldata data) external {
         require(msg.sender == address(gateway), "RootERC20Predicate: ONLY_GATEWAY");
         require(sender == childERC20Predicate, "RootERC20Predicate: ONLY_CHILD_PREDICATE");
 
@@ -71,11 +71,11 @@ contract RootERC20Predicate is Predicate, Initializable, IRootERC20Predicate {
     }
 
     /**
-     * @inheritdoc IStateReceiver
+     * @inheritdoc IReceiver
      * @notice Function to be used for token withdrawals for rollback
      * @dev Can be extended to include other signatures for more functionality
      */
-    function onStateRollback(uint256 /*  id */, address sender, bytes calldata data) external {
+    function onMsgRollback(uint256 /*  id */, address sender, bytes calldata data) external {
         require(msg.sender == address(gateway), "RootERC20Predicate: ONLY_GATEWAY");
         require(sender == address(this), "RootERC20Predicate: ONLY_ROOT_PREDICATE");
 
@@ -107,7 +107,7 @@ contract RootERC20Predicate is Predicate, Initializable, IRootERC20Predicate {
      */
     function mapToken(IERC20Metadata rootToken) public returns (address) {
         require(address(rootToken) != address(0), "RootERC20Predicate: INVALID_TOKEN");
-        require(sourceTokenToDestinationToken[address(rootToken)] == address(0), "RootERC20Predicate: ALREADY_MAPPED");
+        require(rootTokenToChildToken[address(rootToken)] == address(0), "RootERC20Predicate: ALREADY_MAPPED");
 
         address childPredicate = childERC20Predicate;
 
@@ -117,7 +117,7 @@ contract RootERC20Predicate is Predicate, Initializable, IRootERC20Predicate {
             childPredicate
         );
 
-        sourceTokenToDestinationToken[address(rootToken)] = childToken;
+        rootTokenToChildToken[address(rootToken)] = childToken;
 
         gateway.sendBridgeMsg(
             childPredicate,
@@ -132,7 +132,7 @@ contract RootERC20Predicate is Predicate, Initializable, IRootERC20Predicate {
 
     function _deposit(IERC20Metadata rootToken, address receiver, uint256 amount) private {
         _beforeTokenDeposit();
-        address childToken = sourceTokenToDestinationToken[address(rootToken)];
+        address childToken = rootTokenToChildToken[address(rootToken)];
 
         if (childToken == address(0)) {
             childToken = mapToken(rootToken);
@@ -172,7 +172,7 @@ contract RootERC20Predicate is Predicate, Initializable, IRootERC20Predicate {
     }
 
     function _withdrawInternal(address rootToken, address withdrawer, address receiver, uint256 amount) private {
-        address childToken = sourceTokenToDestinationToken[rootToken];
+        address childToken = rootTokenToChildToken[rootToken];
         assert(childToken != address(0)); // invariant because child predicate should have already mapped tokens
 
         IERC20Metadata(rootToken).safeTransfer(receiver, amount);
@@ -184,11 +184,11 @@ contract RootERC20Predicate is Predicate, Initializable, IRootERC20Predicate {
         (address rootToken, , , ) = abi.decode(data, (address, address, address, uint256));
         require(address(rootToken) != address(0), "RootERC20Predicate: INVALID_TOKEN");
         require(
-            sourceTokenToDestinationToken[address(rootToken)] != address(0),
+            rootTokenToChildToken[address(rootToken)] != address(0),
             "RootERC20Predicate: TOKEN_IS_ALREADY_UNMAPPED"
         );
 
-        sourceTokenToDestinationToken[rootToken] = address(0);
+        rootTokenToChildToken[rootToken] = address(0);
 
         emit TokenUnMapped(rootToken);
     }
@@ -218,7 +218,7 @@ contract RootERC20Predicate is Predicate, Initializable, IRootERC20Predicate {
         destinationTokenTemplate = newDestinationTokenTemplate;
         if (newNativeTokenRoot != address(0)) {
             nativeTokenRoot = newNativeTokenRoot;
-            sourceTokenToDestinationToken[nativeTokenRoot] = 0x0000000000000000000000000000000000000106;
+            rootTokenToChildToken[nativeTokenRoot] = 0x0000000000000000000000000000000000000106;
             emit TokenMapped(nativeTokenRoot, 0x0000000000000000000000000000000000000106);
         }
     }

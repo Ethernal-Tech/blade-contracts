@@ -16,7 +16,7 @@ import { smock } from "@defi-wonderland/smock";
 describe("ChildERC1155Predicate", () => {
   let childERC1155Predicate: ChildERC1155Predicate,
     systemChildERC1155Predicate: ChildERC1155Predicate,
-    stateReceiverChildERC1155Predicate: ChildERC1155Predicate,
+    receiverChildERC1155Predicate: ChildERC1155Predicate,
     gateway: Gateway,
     rootERC1155Predicate: string,
     childERC1155: ChildERC1155,
@@ -57,7 +57,7 @@ describe("ChildERC1155Predicate", () => {
 
     impersonateAccount(gateway.address);
     setBalance(gateway.address, "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF");
-    stateReceiverChildERC1155Predicate = childERC1155Predicate.connect(await ethers.getSigner(gateway.address));
+    receiverChildERC1155Predicate = childERC1155Predicate.connect(await ethers.getSigner(gateway.address));
   });
 
   it("fail bad initialization", async () => {
@@ -97,7 +97,7 @@ describe("ChildERC1155Predicate", () => {
       ["bytes32", "address", "string", "string", "uint8"],
       [ethers.utils.solidityKeccak256(["string"], ["MAP_TOKEN"]), rootToken, "TEST1", "TEST1", 18]
     );
-    const mapTx = await stateReceiverChildERC1155Predicate.onStateReceive(0, rootERC1155Predicate, stateSyncData);
+    const mapTx = await receiverChildERC1155Predicate.onMsgReceive(0, rootERC1155Predicate, stateSyncData);
     const mapReceipt = await mapTx.wait();
     const mapEvent = mapReceipt?.events?.find((log) => log.event === "TokenMapped");
     expect(mapEvent?.args?.rootToken).to.equal(rootToken);
@@ -118,7 +118,7 @@ describe("ChildERC1155Predicate", () => {
       ]
     );
     await expect(
-      stateReceiverChildERC1155Predicate.onStateReceive(0, rootERC1155Predicate, stateSyncData)
+      receiverChildERC1155Predicate.onMsgReceive(0, rootERC1155Predicate, stateSyncData)
     ).to.be.revertedWithPanic();
   });
 
@@ -128,7 +128,7 @@ describe("ChildERC1155Predicate", () => {
       [ethers.utils.solidityKeccak256(["string"], ["MAP_TOKEN"]), rootToken, "TEST1", "TEST1", 18]
     );
     await expect(
-      stateReceiverChildERC1155Predicate.onStateReceive(0, rootERC1155Predicate, stateSyncData)
+      receiverChildERC1155Predicate.onMsgReceive(0, rootERC1155Predicate, stateSyncData)
     ).to.be.revertedWithPanic();
   });
 
@@ -146,9 +146,9 @@ describe("ChildERC1155Predicate", () => {
         ethers.utils.parseUnits(String(randomAmount)),
       ]
     );
-    const depositTx = await stateReceiverChildERC1155Predicate.onStateReceive(0, rootERC1155Predicate, stateSyncData);
+    const depositTx = await receiverChildERC1155Predicate.onMsgReceive(0, rootERC1155Predicate, stateSyncData);
     const depositReceipt = await depositTx.wait();
-    stopImpersonatingAccount(stateReceiverChildERC1155Predicate.address);
+    stopImpersonatingAccount(receiverChildERC1155Predicate.address);
     const depositEvent = depositReceipt.events?.find((log) => log.event === "ERC1155Deposit");
     expect(depositEvent?.args?.rootToken).to.equal(rootToken);
     expect(depositEvent?.args?.childToken).to.equal(childTokenAddr);
@@ -172,7 +172,7 @@ describe("ChildERC1155Predicate", () => {
         ethers.utils.parseUnits(String(randomAmount)),
       ]
     );
-    const depositTx = await stateReceiverChildERC1155Predicate.onStateReceive(0, rootERC1155Predicate, stateSyncData);
+    const depositTx = await receiverChildERC1155Predicate.onMsgReceive(0, rootERC1155Predicate, stateSyncData);
     const depositReceipt = await depositTx.wait();
     const depositEvent = depositReceipt.events?.find((log) => log.event === "ERC1155Deposit");
     expect(depositEvent?.args?.rootToken).to.equal(rootToken);
@@ -202,9 +202,9 @@ describe("ChildERC1155Predicate", () => {
         batchDepositedTokenIds.map((tokenId) => ethers.utils.parseUnits(String(tokenId))),
       ]
     );
-    const depositTx = await stateReceiverChildERC1155Predicate.onStateReceive(0, rootERC1155Predicate, stateSyncData);
+    const depositTx = await receiverChildERC1155Predicate.onMsgReceive(0, rootERC1155Predicate, stateSyncData);
     const depositReceipt = await depositTx.wait();
-    stopImpersonatingAccount(stateReceiverChildERC1155Predicate.address);
+    stopImpersonatingAccount(receiverChildERC1155Predicate.address);
     const depositEvent = depositReceipt.events?.find((log) => log.event === "ERC1155DepositBatch");
     expect(depositEvent?.args?.rootToken).to.equal(rootToken);
     expect(depositEvent?.args?.childToken).to.equal(childTokenAddr);
@@ -290,7 +290,7 @@ describe("ChildERC1155Predicate", () => {
         0,
       ]
     );
-    await expect(childERC1155Predicate.onStateReceive(0, rootERC1155Predicate, stateSyncData)).to.be.revertedWith(
+    await expect(childERC1155Predicate.onMsgReceive(0, rootERC1155Predicate, stateSyncData)).to.be.revertedWith(
       "ChildERC1155Predicate: ONLY_GATEWAY"
     );
   });
@@ -308,7 +308,7 @@ describe("ChildERC1155Predicate", () => {
       ]
     );
     await expect(
-      stateReceiverChildERC1155Predicate.onStateReceive(0, ethers.Wallet.createRandom().address, stateSyncData)
+      receiverChildERC1155Predicate.onMsgReceive(0, ethers.Wallet.createRandom().address, stateSyncData)
     ).to.be.revertedWith("ChildERC1155Predicate: ONLY_ROOT_PREDICATE");
   });
 
@@ -317,9 +317,9 @@ describe("ChildERC1155Predicate", () => {
       ["bytes32", "address", "address", "address", "uint256", "uint256"],
       [ethers.utils.randomBytes(32), ethers.constants.AddressZero, accounts[0].address, accounts[0].address, 0, 0]
     );
-    await expect(
-      stateReceiverChildERC1155Predicate.onStateReceive(0, rootERC1155Predicate, stateSyncData)
-    ).to.be.revertedWith("ChildERC1155Predicate: INVALID_SIGNATURE");
+    await expect(receiverChildERC1155Predicate.onMsgReceive(0, rootERC1155Predicate, stateSyncData)).to.be.revertedWith(
+      "ChildERC1155Predicate: INVALID_SIGNATURE"
+    );
   });
 
   it("fail deposit tokens of unknown child token: unmapped token", async () => {
@@ -334,9 +334,9 @@ describe("ChildERC1155Predicate", () => {
         0,
       ]
     );
-    await expect(
-      stateReceiverChildERC1155Predicate.onStateReceive(0, rootERC1155Predicate, stateSyncData)
-    ).to.be.revertedWith("ChildERC1155Predicate: UNMAPPED_TOKEN");
+    await expect(receiverChildERC1155Predicate.onMsgReceive(0, rootERC1155Predicate, stateSyncData)).to.be.revertedWith(
+      "ChildERC1155Predicate: UNMAPPED_TOKEN"
+    );
   });
 
   it("fail withdraw tokens of unknown child token: not a contract", async () => {
@@ -366,9 +366,9 @@ describe("ChildERC1155Predicate", () => {
         0,
       ]
     );
-    await expect(
-      stateReceiverChildERC1155Predicate.onStateReceive(0, rootERC1155Predicate, stateSyncData)
-    ).to.be.revertedWith("ChildERC1155Predicate: UNMAPPED_TOKEN");
+    await expect(receiverChildERC1155Predicate.onMsgReceive(0, rootERC1155Predicate, stateSyncData)).to.be.revertedWith(
+      "ChildERC1155Predicate: UNMAPPED_TOKEN"
+    );
   });
 
   it("fail deposit tokens of unknown child token: unmapped token", async () => {
@@ -386,9 +386,9 @@ describe("ChildERC1155Predicate", () => {
         0,
       ]
     );
-    await expect(
-      stateReceiverChildERC1155Predicate.onStateReceive(0, rootERC1155Predicate, stateSyncData)
-    ).to.be.revertedWith("ChildERC1155Predicate: UNMAPPED_TOKEN");
+    await expect(receiverChildERC1155Predicate.onMsgReceive(0, rootERC1155Predicate, stateSyncData)).to.be.revertedWith(
+      "ChildERC1155Predicate: UNMAPPED_TOKEN"
+    );
     stateSyncData = ethers.utils.defaultAbiCoder.encode(
       ["bytes32", "address", "address", "address[]", "uint256[]", "uint256[]"],
       [
@@ -400,20 +400,20 @@ describe("ChildERC1155Predicate", () => {
         [0],
       ]
     );
-    await expect(
-      stateReceiverChildERC1155Predicate.onStateReceive(0, rootERC1155Predicate, stateSyncData)
-    ).to.be.revertedWith("ChildERC1155Predicate: UNMAPPED_TOKEN");
+    await expect(receiverChildERC1155Predicate.onMsgReceive(0, rootERC1155Predicate, stateSyncData)).to.be.revertedWith(
+      "ChildERC1155Predicate: UNMAPPED_TOKEN"
+    );
   });
 
   it("fail withdraw tokens of unknown child token: unmapped token", async () => {
     const rootToken = ethers.Wallet.createRandom().address;
     const childToken = await (await ethers.getContractFactory("ChildERC1155")).deploy();
     await childToken.initialize(rootToken, "TEST");
-    await expect(stateReceiverChildERC1155Predicate.withdraw(childToken.address, 0, 1)).to.be.revertedWith(
+    await expect(receiverChildERC1155Predicate.withdraw(childToken.address, 0, 1)).to.be.revertedWith(
       "ChildERC1155Predicate: UNMAPPED_TOKEN"
     );
     await expect(
-      stateReceiverChildERC1155Predicate.withdrawBatch(childToken.address, [ethers.constants.AddressZero], [0], [1])
+      receiverChildERC1155Predicate.withdrawBatch(childToken.address, [ethers.constants.AddressZero], [0], [1])
     ).to.be.revertedWith("ChildERC1155Predicate: UNMAPPED_TOKEN");
   });
 
@@ -437,9 +437,9 @@ describe("ChildERC1155Predicate", () => {
     fakeERC1155.rootToken.returns(rootToken);
     fakeERC1155.predicate.returns(childERC1155Predicate.address);
     fakeERC1155.mint.returns(false);
-    await expect(
-      stateReceiverChildERC1155Predicate.onStateReceive(0, rootERC1155Predicate, stateSyncData)
-    ).to.be.revertedWith("ChildERC1155Predicate: MINT_FAILED");
+    await expect(receiverChildERC1155Predicate.onMsgReceive(0, rootERC1155Predicate, stateSyncData)).to.be.revertedWith(
+      "ChildERC1155Predicate: MINT_FAILED"
+    );
     stateSyncData = ethers.utils.defaultAbiCoder.encode(
       ["bytes32", "address", "address", "address[]", "uint256[]", "uint256[]"],
       [
@@ -452,9 +452,9 @@ describe("ChildERC1155Predicate", () => {
       ]
     );
     fakeERC1155.mintBatch.returns(false);
-    await expect(
-      stateReceiverChildERC1155Predicate.onStateReceive(0, rootERC1155Predicate, stateSyncData)
-    ).to.be.revertedWith("ChildERC1155Predicate: MINT_FAILED");
+    await expect(receiverChildERC1155Predicate.onMsgReceive(0, rootERC1155Predicate, stateSyncData)).to.be.revertedWith(
+      "ChildERC1155Predicate: MINT_FAILED"
+    );
   });
 
   it("fail withdraw tokens: burn failed", async () => {
@@ -465,12 +465,12 @@ describe("ChildERC1155Predicate", () => {
     fakeERC1155.rootToken.returns(rootToken);
     fakeERC1155.predicate.returns(childERC1155Predicate.address);
     fakeERC1155.burn.returns(false);
-    await expect(stateReceiverChildERC1155Predicate.withdraw(childTokenAddr, 0, 1)).to.be.revertedWith(
+    await expect(receiverChildERC1155Predicate.withdraw(childTokenAddr, 0, 1)).to.be.revertedWith(
       "ChildERC1155Predicate: BURN_FAILED"
     );
     fakeERC1155.burnBatch.returns(false);
     await expect(
-      stateReceiverChildERC1155Predicate.withdrawBatch(childTokenAddr, [ethers.constants.AddressZero], [0], [1])
+      receiverChildERC1155Predicate.withdrawBatch(childTokenAddr, [ethers.constants.AddressZero], [0], [1])
     ).to.be.revertedWith("ChildERC1155Predicate: BURN_FAILED");
   });
 
@@ -479,12 +479,12 @@ describe("ChildERC1155Predicate", () => {
       address: childTokenAddr,
     });
     fakeERC1155.supportsInterface.reverts();
-    await expect(stateReceiverChildERC1155Predicate.withdraw(childTokenAddr, 0, 1)).to.be.revertedWith(
+    await expect(receiverChildERC1155Predicate.withdraw(childTokenAddr, 0, 1)).to.be.revertedWith(
       "ChildERC1155Predicate: NOT_CONTRACT"
     );
   });
 
-  it("OnStateRollback: failed only_gateway", async () => {
+  it("OnMsgRollback: failed only_gateway", async () => {
     const mappedData = ethers.utils.defaultAbiCoder.encode(
       ["bytes32", "address", "address", "address", "uint256"],
       [
@@ -497,11 +497,11 @@ describe("ChildERC1155Predicate", () => {
     );
 
     await expect(
-      systemChildERC1155Predicate.onStateRollback(0, systemChildERC1155Predicate.address, mappedData)
+      systemChildERC1155Predicate.onMsgRollback(0, systemChildERC1155Predicate.address, mappedData)
     ).to.be.revertedWith("ChildERC1155Predicate: ONLY_GATEWAY");
   });
 
-  it("OnStateRollback: failed only_child_predicate", async () => {
+  it("OnMsgRollback: failed only_child_predicate", async () => {
     const mappedData = ethers.utils.defaultAbiCoder.encode(
       ["bytes32", "address", "address", "address", "uint256"],
       [
@@ -514,7 +514,7 @@ describe("ChildERC1155Predicate", () => {
     );
 
     await expect(
-      stateReceiverChildERC1155Predicate.onStateRollback(0, "0x0000000000000000000000000000000000000000", mappedData)
+      receiverChildERC1155Predicate.onMsgRollback(0, "0x0000000000000000000000000000000000000000", mappedData)
     ).to.be.revertedWith("ChildERC1155Predicate: ONLY_CHILD_PREDICATE");
   });
 });

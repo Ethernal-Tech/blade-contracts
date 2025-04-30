@@ -23,7 +23,7 @@ contract ChildERC20Predicate is IChildERC20Predicate, Predicate, Initializable, 
     address public rootERC20Predicate;
     address public destinationTokenTemplate;
 
-    mapping(address => address) public sourceTokenToDestinationToken;
+    mapping(address => address) public rootTokenToChildToken;
 
     event ERC20Deposit(
         address indexed rootToken,
@@ -71,7 +71,7 @@ contract ChildERC20Predicate is IChildERC20Predicate, Predicate, Initializable, 
      * @param data Data sent by the sender
      * @dev Can be extended to include other signatures for more functionality
      */
-    function onStateReceive(uint256 /* id */, address sender, bytes calldata data) external {
+    function onMsgReceive(uint256 /* id */, address sender, bytes calldata data) external {
         require(msg.sender == address(gateway), "ChildERC20Predicate: ONLY_GATEWAY");
         require(sender == rootERC20Predicate, "ChildERC20Predicate: ONLY_ROOT_PREDICATE");
 
@@ -92,7 +92,7 @@ contract ChildERC20Predicate is IChildERC20Predicate, Predicate, Initializable, 
      * @param data Data sent by the sender
      * @dev Can be extended to include other signatures for more functionality
      */
-    function onStateRollback(uint256 /* id */, address sender, bytes calldata data) external {
+    function onMsgRollback(uint256 /* id */, address sender, bytes calldata data) external {
         require(msg.sender == address(gateway), "ChildERC20Predicate: ONLY_GATEWAY");
         require(sender == address(this), "ChildERC20Predicate: ONLY_CHILD_PREDICATE");
 
@@ -152,7 +152,7 @@ contract ChildERC20Predicate is IChildERC20Predicate, Predicate, Initializable, 
         rootERC20Predicate = newRootERC20Predicate;
         destinationTokenTemplate = newDestinationTokenTemplate;
         if (newNativeTokenRootAddress != address(0)) {
-            sourceTokenToDestinationToken[newNativeTokenRootAddress] = NATIVE_TOKEN_CONTRACT;
+            rootTokenToChildToken[newNativeTokenRootAddress] = NATIVE_TOKEN_CONTRACT;
             // slither-disable-next-line reentrancy-events
             emit TokenMapped(newNativeTokenRootAddress, NATIVE_TOKEN_CONTRACT);
         }
@@ -173,7 +173,7 @@ contract ChildERC20Predicate is IChildERC20Predicate, Predicate, Initializable, 
 
         address rootToken = childToken.rootToken();
 
-        require(sourceTokenToDestinationToken[rootToken] == address(childToken), "ChildERC20Predicate: UNMAPPED_TOKEN");
+        require(rootTokenToChildToken[rootToken] == address(childToken), "ChildERC20Predicate: UNMAPPED_TOKEN");
         // a mapped token should never have root token unset
         assert(rootToken != address(0));
         // a mapped token should never have predicate unset
@@ -209,7 +209,7 @@ contract ChildERC20Predicate is IChildERC20Predicate, Predicate, Initializable, 
     }
 
     function _depositInternal(address depositToken, address depositor, address receiver, uint256 amount) private {
-        IChildERC20 childToken = IChildERC20(sourceTokenToDestinationToken[depositToken]);
+        IChildERC20 childToken = IChildERC20(rootTokenToChildToken[depositToken]);
 
         require(address(childToken) != address(0), "ChildERC20Predicate: UNMAPPED_TOKEN");
         assert(address(childToken).code.length != 0);
@@ -239,11 +239,11 @@ contract ChildERC20Predicate is IChildERC20Predicate, Predicate, Initializable, 
             (bytes32, address, string, string, uint8)
         );
         assert(rootToken != address(0)); // invariant since root predicate performs the same check
-        assert(sourceTokenToDestinationToken[rootToken] == address(0)); // invariant since root predicate performs the same check
+        assert(rootTokenToChildToken[rootToken] == address(0)); // invariant since root predicate performs the same check
         IChildERC20 childToken = IChildERC20(
             Clones.cloneDeterministic(destinationTokenTemplate, keccak256(abi.encodePacked(rootToken)))
         );
-        sourceTokenToDestinationToken[rootToken] = address(childToken);
+        rootTokenToChildToken[rootToken] = address(childToken);
         childToken.initialize(rootToken, name, symbol, decimals);
 
         // slither-disable-next-line reentrancy-events

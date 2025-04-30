@@ -319,10 +319,10 @@ Initialization function for ChildERC20Predicate
 | newNativeTokenRootAddress | address | Address of native token on root chain |
 | newDestinationChainId | uint256 | undefined |
 
-### onStateReceive
+### onMsgReceive
 
 ```solidity
-function onStateReceive(uint256, address sender, bytes data) external nonpayable
+function onMsgReceive(uint256, address sender, bytes data) external nonpayable
 ```
 
 Function to be used for token deposits
@@ -337,10 +337,10 @@ Function to be used for token deposits
 | sender | address | Address of the sender on the root chain |
 | data | bytes | Data sent by the sender |
 
-### onStateRollback
+### onMsgRollback
 
 ```solidity
-function onStateRollback(uint256, address sender, bytes data) external nonpayable
+function onMsgRollback(uint256, address sender, bytes data) external nonpayable
 ```
 
 Function to be used for token deposits for rollback
@@ -417,6 +417,28 @@ function rootERC20Predicate() external view returns (address)
 |---|---|---|
 | _0 | address | undefined |
 
+### rootTokenToChildToken
+
+```solidity
+function rootTokenToChildToken(address) external view returns (address)
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | address | undefined |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | address | undefined |
+
 ### setAllowList
 
 ```solidity
@@ -448,28 +470,6 @@ function setBlockList(bool newUseBlockList) external nonpayable
 | Name | Type | Description |
 |---|---|---|
 | newUseBlockList | bool | undefined |
-
-### sourceTokenToDestinationToken
-
-```solidity
-function sourceTokenToDestinationToken(address) external view returns (address)
-```
-
-
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | address | undefined |
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | address | undefined |
 
 ### transferOwnership
 
