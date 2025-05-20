@@ -33,6 +33,23 @@ returns a validator balance for a given epoch
 |---|---|---|
 | _0 | uint256 | undefined |
 
+### getActiveValidators
+
+```solidity
+function getActiveValidators() external view returns (struct ActiveValidator[])
+```
+
+returns active validators with their stakes
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | ActiveValidator[] | undefined |
+
 ### getValidator
 
 ```solidity

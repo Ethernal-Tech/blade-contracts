@@ -325,6 +325,23 @@ function eip712Domain() external view returns (bytes1 fields, string name, strin
 | salt | bytes32 | undefined |
 | extensions | uint256[] | undefined |
 
+### getActiveValidators
+
+```solidity
+function getActiveValidators() external view returns (struct ActiveValidator[])
+```
+
+returns active validators with their stakes
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | ActiveValidator[] | undefined |
+
 ### getPastTotalSupply
 
 ```solidity

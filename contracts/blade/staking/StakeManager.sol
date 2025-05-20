@@ -6,6 +6,7 @@ import "@openzeppelin/contracts-upgradeable/access/Ownable2StepUpgradeable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20VotesUpgradeable.sol";
+import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import "../../interfaces/blade/staking/IStakeManager.sol";
 import "../../interfaces/common/IBLS.sol";
 import "../../interfaces/blade/validator/IEpochManager.sol";
@@ -15,6 +16,7 @@ import "../../blade/NetworkParams.sol";
 contract StakeManager is IStakeManager, Initializable, Ownable2StepUpgradeable, ERC20VotesUpgradeable {
     using SafeERC20 for IERC20;
     using WithdrawalQueueLib for WithdrawalQueue;
+    using EnumerableSet for EnumerableSet.AddressSet;
 
     IBLS private _bls;
     IERC20 private _stakingToken;
@@ -24,6 +26,7 @@ contract StakeManager is IStakeManager, Initializable, Ownable2StepUpgradeable, 
     bytes32 public domain;
 
     mapping(address => Validator) public validators;
+    EnumerableSet.AddressSet private activeValidatorsSet;
 
     // TODO: Figure out the unstake and stake withdrawal workflow (unlock period etc.)
     mapping(address => WithdrawalQueue) private _withdrawals;
@@ -117,6 +120,7 @@ contract StakeManager is IStakeManager, Initializable, Ownable2StepUpgradeable, 
         _removeFromWhitelist(msg.sender);
         if (stakeAmount > 0) {
             _stake(msg.sender, stakeAmount);
+            activeValidatorsSet.add(msg.sender);
         }
         emit ValidatorRegistered(msg.sender, pubkey, stakeAmount);
     }
@@ -162,6 +166,20 @@ contract StakeManager is IStakeManager, Initializable, Ownable2StepUpgradeable, 
 
     function balanceOfAt(address account, uint256 epochNumber) external view returns (uint256) {
         return super.getPastVotes(account, _epochManager.epochEndingBlocks(epochNumber));
+    }
+
+    function getActiveValidators() external view returns (ActiveValidator[] memory) {
+        address[] memory active = activeValidatorsSet.values();
+        uint256 length = active.length;
+
+        ActiveValidator[] memory activeValidators = new ActiveValidator[](length);
+
+        for (uint256 i = 0; i < length; i++) {
+            address validator = active[i];
+            activeValidators[i] = ActiveValidator(validator, validators[validator].blsKey, _stakeOf(validator));
+        }
+
+        return activeValidators;
     }
 
     function _addToWhitelist(address validator) internal {
@@ -217,6 +235,7 @@ contract StakeManager is IStakeManager, Initializable, Ownable2StepUpgradeable, 
     function _removeIfValidatorUnstaked(address validator) internal {
         if (_stakeOf(validator) == 0) {
             validators[validator].isActive = false;
+            activeValidatorsSet.remove(validator);
             emit ValidatorDeactivated(validator);
         }
     }

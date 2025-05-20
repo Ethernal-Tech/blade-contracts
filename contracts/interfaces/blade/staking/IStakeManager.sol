@@ -7,6 +7,11 @@ struct Validator {
     bool isWhitelisted;
     bool isActive;
 }
+struct ActiveValidator {
+    address addr;
+    uint256[4] blsKey;
+    uint256 stake;
+}
 
 struct GenesisValidator {
     address addr;
@@ -72,4 +77,7 @@ interface IStakeManager {
 
     /// @notice returns a validator balance for a given epoch
     function balanceOfAt(address account, uint256 epochNumber) external view returns (uint256);
+
+    /// @notice returns active validators with their stakes
+    function getActiveValidators() external view returns (ActiveValidator[] memory);
 }
