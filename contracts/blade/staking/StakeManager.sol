@@ -65,6 +65,7 @@ contract StakeManager is IStakeManager, Initializable, Ownable2StepUpgradeable, 
             GenesisValidator memory validator = genesisValidators[i];
             validators[validator.addr] = Validator(validator.addr, validator.blsKey, true, true);
             _stake(validator.addr, validator.stake);
+            activeValidatorsSet.add(validator.addr);
         }
         _transferOwnership(owner);
     }
