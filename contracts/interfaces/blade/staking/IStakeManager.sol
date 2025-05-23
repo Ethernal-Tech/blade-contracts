@@ -35,6 +35,7 @@ interface IStakeManager {
 
     error Unauthorized(string message);
     error InvalidSignature(address validator);
+    error SetError(string message);
 
     /// @notice called by a validator to stake for a child chain
     function stake(uint256 amount) external;

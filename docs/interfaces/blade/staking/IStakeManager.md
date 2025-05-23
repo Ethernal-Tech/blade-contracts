@@ -395,6 +395,22 @@ error InvalidSignature(address validator)
 |---|---|---|
 | validator | address | undefined |
 
+### SetError
+
+```solidity
+error SetError(string message)
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| message | string | undefined |
+
 ### Unauthorized
 
 ```solidity

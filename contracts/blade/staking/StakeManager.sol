@@ -65,7 +65,7 @@ contract StakeManager is IStakeManager, Initializable, Ownable2StepUpgradeable, 
             GenesisValidator memory validator = genesisValidators[i];
             validators[validator.addr] = Validator(validator.addr, validator.blsKey, true, true);
             _stake(validator.addr, validator.stake);
-            activeValidatorsSet.add(validator.addr);
+            if (!activeValidatorsSet.add(validator.addr)) revert SetError("COULD_NOT_ADD");
         }
         _transferOwnership(owner);
     }
@@ -121,7 +121,8 @@ contract StakeManager is IStakeManager, Initializable, Ownable2StepUpgradeable, 
         _removeFromWhitelist(msg.sender);
         if (stakeAmount > 0) {
             _stake(msg.sender, stakeAmount);
-            activeValidatorsSet.add(msg.sender);
+
+            if (!activeValidatorsSet.add(msg.sender)) revert SetError("COULD_NOT_ADD");
         }
         emit ValidatorRegistered(msg.sender, pubkey, stakeAmount);
     }
@@ -236,7 +237,7 @@ contract StakeManager is IStakeManager, Initializable, Ownable2StepUpgradeable, 
     function _removeIfValidatorUnstaked(address validator) internal {
         if (_stakeOf(validator) == 0) {
             validators[validator].isActive = false;
-            activeValidatorsSet.remove(validator);
+            if (!activeValidatorsSet.remove(validator)) revert SetError("COULD_NOT_REMOVE");
             emit ValidatorDeactivated(validator);
         }
     }
