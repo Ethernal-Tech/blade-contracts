@@ -121,9 +121,9 @@ contract StakeManager is IStakeManager, Initializable, Ownable2StepUpgradeable, 
         _removeFromWhitelist(msg.sender);
         if (stakeAmount > 0) {
             _stake(msg.sender, stakeAmount);
-
-            if (!activeValidatorsSet.add(msg.sender)) revert SetError("COULD_NOT_ADD");
         }
+
+        if (!activeValidatorsSet.add(msg.sender)) revert SetError("COULD_NOT_ADD");
         emit ValidatorRegistered(msg.sender, pubkey, stakeAmount);
     }
 
