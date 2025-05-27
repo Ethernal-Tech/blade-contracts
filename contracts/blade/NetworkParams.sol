@@ -21,6 +21,22 @@ struct InitParams {
     uint256 newBaseFeeChangeDenom; // in wei
 }
 
+struct Params {
+    uint256 checkpointBlockInterval; // in blocks
+    uint256 epochSize; // in blocks
+    uint256 epochReward; // in wei
+    uint256 sprintSize; // in blocks
+    uint256 minValidatorSetSize;
+    uint256 maxValidatorSetSize;
+    uint256 withdrawalWaitPeriod; // in blocks
+    uint256 blockTime; // in seconds
+    uint256 blockTimeDrift; // in seconds
+    uint256 votingDelay; // in blocks
+    uint256 votingPeriod; // in blocks
+    uint256 proposalThreshold; // in percent
+    uint256 baseFeeChangeDenom; // in wei
+}
+
 /**
     @title NetworkParams
     @author Polygon Technology (@QEDK)
@@ -244,5 +260,24 @@ contract NetworkParams is Ownable2Step, Initializable {
         baseFeeChangeDenom = newBaseFeeChangeDenom;
 
         emit NewBaseFeeChangeDenom(newBaseFeeChangeDenom);
+    }
+
+    function getNetworkParams() external view returns (Params memory) {
+        return
+            Params({
+                checkpointBlockInterval: checkpointBlockInterval,
+                epochSize: epochSize,
+                epochReward: epochReward,
+                sprintSize: sprintSize,
+                minValidatorSetSize: minValidatorSetSize,
+                maxValidatorSetSize: maxValidatorSetSize,
+                withdrawalWaitPeriod: withdrawalWaitPeriod,
+                blockTime: blockTime,
+                blockTimeDrift: blockTimeDrift,
+                votingDelay: votingDelay,
+                votingPeriod: votingPeriod,
+                proposalThreshold: proposalThreshold,
+                baseFeeChangeDenom: baseFeeChangeDenom
+            });
     }
 }

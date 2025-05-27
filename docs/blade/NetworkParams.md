@@ -123,6 +123,23 @@ function epochSize() external view returns (uint256)
 |---|---|---|
 | _0 | uint256 | undefined |
 
+### getNetworkParams
+
+```solidity
+function getNetworkParams() external view returns (struct Params)
+```
+
+
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | Params | undefined |
+
 ### initialize
 
 ```solidity

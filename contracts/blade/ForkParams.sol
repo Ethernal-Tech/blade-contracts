@@ -4,6 +4,11 @@ pragma solidity 0.8.19;
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
+struct FeatureInfo {
+    bytes32 feature;
+    uint256 blockNumber;
+}
+
 /**
     @title ForkParams
     @author Polygon Technology (@QEDK)
@@ -12,6 +17,8 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
  */
 contract ForkParams is Ownable, Initializable {
     mapping(bytes32 => uint256) public featureToBlockNumber; // keccak256("FEATURE_NAME") -> blockNumber
+
+    bytes32[] public features; // list of all features
 
     event NewFeature(bytes32 indexed feature, uint256 indexed block);
     event UpdatedFeature(bytes32 indexed feature, uint256 indexed block);
@@ -35,6 +42,8 @@ contract ForkParams is Ownable, Initializable {
         bytes32 featureHash = keccak256(abi.encode(feature));
         require(featureToBlockNumber[featureHash] == 0, "ForkParams: FEATURE_EXISTS");
         featureToBlockNumber[featureHash] = blockNumber;
+
+        features.push(featureHash);
 
         emit NewFeature(featureHash, blockNumber);
     }
@@ -67,5 +76,15 @@ contract ForkParams is Ownable, Initializable {
             return true;
         }
         return false;
+    }
+
+    function getAllFeatures() external view returns (FeatureInfo[] memory) {
+        uint256 featureCount = features.length;
+        FeatureInfo[] memory featureInfos = new FeatureInfo[](featureCount);
+        for (uint256 i = 0; i < featureCount; i++) {
+            bytes32 feature = features[i];
+            featureInfos[i] = FeatureInfo({feature: feature, blockNumber: featureToBlockNumber[feature]});
+        }
+        return featureInfos;
     }
 }

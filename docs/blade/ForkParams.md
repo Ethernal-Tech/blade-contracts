@@ -49,6 +49,45 @@ function featureToBlockNumber(bytes32) external view returns (uint256)
 |---|---|---|
 | _0 | uint256 | undefined |
 
+### features
+
+```solidity
+function features(uint256) external view returns (bytes32)
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | undefined |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | bytes32 | undefined |
+
+### getAllFeatures
+
+```solidity
+function getAllFeatures() external view returns (struct FeatureInfo[])
+```
+
+
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | FeatureInfo[] | undefined |
+
 ### initialize
 
 ```solidity
